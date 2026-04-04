@@ -25,11 +25,10 @@
 
 	<ItemGroup>
 		<PackageReference Include="ENet-CSharp" Version="2.4.8" />
-		<PackageReference Include="BCrypt.Net-Next" Version="4.1.0" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.3.0" />
+		<PackageReference Include="protobuf-net" Version="3.2.56" />
 		<PackageReference Include="System.Data.SQLite.Core" Version="1.0.119" />
 		<PackageReference Include="Jint" Version="4.7.1" />
-		<PackageReference Include="System.Drawing.Common" Version="9.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -41,9 +40,6 @@
 		</Reference>
 		<Reference Include="OpenTK">
 		  <HintPath>..\Lib\OpenTK.dll</HintPath>
-		</Reference>
-		<Reference Include="protobuf-net">
-		  <HintPath>..\Lib\protobuf-net.dll</HintPath>
 		</Reference>
 		<Reference Include="websocket-sharp">
 			<HintPath>..\Lib\websocket-sharp.dll</HintPath>

@@ -17,7 +17,6 @@
   <ItemGroup>
     <!-- Replace with NuGet packages where possible -->
     <!-- ENet: check for ENet.Managed on NuGet -->
-	<PackageReference Include="ENet-CSharp" Version="2.4.8" />
     <!-- SQLite -->
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.119" />
     <!-- Jint JavaScript engine -->

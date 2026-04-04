@@ -33,7 +33,7 @@ public class GamePlatformNative : GamePlatform
 
     public override float MathSqrt(float value)
     {
-        return (float)System.Math.Sqrt(value);
+        return (float)Math.Sqrt(value);
     }
 
     public override float MathAcos(float p)
@@ -53,12 +53,12 @@ public class GamePlatformNative : GamePlatform
 
     public override int IntParse(string value)
     {
-        return System.Int32.Parse(value);
+        return int.Parse(value);
     }
 
     public override float FloatParse(string value)
     {
-        return System.Single.Parse(value);
+        return float.Parse(value);
     }
 
     public override bool FloatTryParse(string s, FloatRef ret)
@@ -96,7 +96,7 @@ public class GamePlatformNative : GamePlatform
         if (s == null)
         {
             length.value = 0;
-            return new int[0];
+            return [];
         }
         length.value = s.Length;
         int[] charArray = new int[s.Length];
@@ -109,7 +109,7 @@ public class GamePlatformNative : GamePlatform
 
     public override string CharArrayToString(int[] charArray, int length)
     {
-        StringBuilder s = new StringBuilder();
+        StringBuilder s = new();
         for (int i = 0; i < length; i++)
         {
             s.Append((char)charArray[i]);
@@ -119,7 +119,7 @@ public class GamePlatformNative : GamePlatform
 
     public override string[] StringSplit(string value, string separator, IntRef returnLength)
     {
-        string[] ret = value.Split(new char[] { separator[0] });
+        string[] ret = value.Split([separator[0]]);
         returnLength.value = ret.Length;
         return ret;
     }
@@ -198,28 +198,28 @@ public class GamePlatformNative : GamePlatform
 
     public GamePlatformNative()
     {
-        System.Threading.ThreadPool.SetMinThreads(32, 32);
-        System.Threading.ThreadPool.SetMaxThreads(128, 128);
-        datapaths = new[] { Path.Combine(Path.Combine(Path.Combine("..", ".."), ".."), "data"), "data" };
+        ThreadPool.SetMinThreads(32, 32);
+        ThreadPool.SetMaxThreads(128, 128);
+        datapaths = [Path.Combine(Path.Combine(Path.Combine("..", ".."), ".."), "data"), "data"];
         start.Start();
     }
 
     public bool TouchTest = false;
-    string[] datapaths;
+    private string[] datapaths;
 
     public override string Timestamp()
     {
-        string time = string.Format("{0:yyyy-MM-dd_HH-mm-ss}", System.DateTime.Now);
+        string time = string.Format("{0:yyyy-MM-dd_HH-mm-ss}", DateTime.Now);
         return time;
     }
 
     public override void ClipboardSetText(string s)
     {
-        System.Windows.Forms.Clipboard.SetText(s);
+        Clipboard.SetText(s);
     }
 
-    ManicDigger.Renderers.TextRenderer r = new ManicDigger.Renderers.TextRenderer();
-    Dictionary<TextAndSize, SizeF> textsizes = new Dictionary<TextAndSize, SizeF>();
+    private ManicDigger.Renderers.TextRenderer r = new();
+    private Dictionary<TextAndSize, SizeF> textsizes = new();
     public SizeF TextSize(string text, float fontsize)
     {
         SizeF size;
@@ -264,7 +264,7 @@ public class GamePlatformNative : GamePlatform
         if (!Directory.Exists(path))
         {
             length.value = 0;
-            return new string[0];
+            return [];
         }
         string[] files = Directory.GetFiles(path);
         length.value = files.Length;
@@ -280,22 +280,24 @@ public class GamePlatformNative : GamePlatform
 
     public override void WebClientDownloadDataAsync(string url, HttpResponseCi response)
     {
-        DownloadDataArgs args = new DownloadDataArgs();
-        args.url = url;
-        args.response = response;
+        DownloadDataArgs args = new()
+        {
+            url = url,
+            response = response
+        };
         ThreadPool.QueueUserWorkItem(DownloadData, args);
     }
 
-    class DownloadDataArgs
+    private class DownloadDataArgs
     {
         public string url;
         public HttpResponseCi response;
     }
 
-    void DownloadData(object o)
+    private void DownloadData(object o)
     {
         DownloadDataArgs args = (DownloadDataArgs)o;
-        WebClient c = new WebClient();
+        WebClient c = new();
         try
         {
             byte[] data = c.DownloadData(args.url);
@@ -311,18 +313,20 @@ public class GamePlatformNative : GamePlatform
 
     public override void ThumbnailDownloadAsync(string ip, int port, ThumbnailResponseCi response)
     {
-        ThumbnailDownloadArgs args = new ThumbnailDownloadArgs();
-        args.ip = ip;
-        args.port = port;
-        args.response = response;
+        ThumbnailDownloadArgs args = new()
+        {
+            ip = ip,
+            port = port,
+            response = response
+        };
         ThreadPool.QueueUserWorkItem(DownloadServerThumbnail, args);
     }
 
-    void DownloadServerThumbnail(object o)
+    private void DownloadServerThumbnail(object o)
     {
         ThumbnailDownloadArgs args = (ThumbnailDownloadArgs)o;
         //Fetch server info from given adress
-        QueryClient qClient = new QueryClient();
+        QueryClient qClient = new();
         qClient.SetPlatform(this);
         qClient.PerformQuery(args.ip, args.port);
         if (qClient.querySuccess)
@@ -341,7 +345,7 @@ public class GamePlatformNative : GamePlatform
         }
     }
 
-    class ThumbnailDownloadArgs
+    private class ThumbnailDownloadArgs
     {
         public string ip;
         public int port;
@@ -350,7 +354,7 @@ public class GamePlatformNative : GamePlatform
 
     public override string FileName(string fullpath)
     {
-        FileInfo info = new FileInfo(fullpath);
+        FileInfo info = new(fullpath);
         return info.Name.Replace(info.Extension, "");
     }
 
@@ -359,7 +363,7 @@ public class GamePlatformNative : GamePlatform
         return CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
     }
 
-    Stopwatch start = new Stopwatch();
+    private Stopwatch start = new();
 
     public override int TimeMillisecondsFromStart()
     {
@@ -373,8 +377,10 @@ public class GamePlatformNative : GamePlatform
 
     public override BitmapCi BitmapCreate(int width, int height)
     {
-        BitmapCiCs bmp = new BitmapCiCs();
-        bmp.bmp = new Bitmap(width, height);
+        BitmapCiCs bmp = new()
+        {
+            bmp = new Bitmap(width, height)
+        };
         return bmp;
     }
 
@@ -396,8 +402,10 @@ public class GamePlatformNative : GamePlatform
         }
         else
         {
-            FastBitmap fastbmp = new FastBitmap();
-            fastbmp.bmp = bmp_.bmp;
+            FastBitmap fastbmp = new()
+            {
+                bmp = bmp_.bmp
+            };
             fastbmp.Lock();
             for (int x = 0; x < width; x++)
             {
@@ -412,7 +420,7 @@ public class GamePlatformNative : GamePlatform
 
     public override BitmapCi BitmapCreateFromPng(byte[] data, int dataLength)
     {
-        BitmapCiCs bmp = new BitmapCiCs();
+        BitmapCiCs bmp = new();
         try
         {
             bmp.bmp = new Bitmap(new MemoryStream(data, 0, dataLength));
@@ -444,8 +452,10 @@ public class GamePlatformNative : GamePlatform
         }
         else
         {
-            FastBitmap fastbmp = new FastBitmap();
-            fastbmp.bmp = bmp.bmp;
+            FastBitmap fastbmp = new()
+            {
+                bmp = bmp.bmp
+            };
             fastbmp.Lock();
             for (int x = 0; x < width; x++)
             {
@@ -464,7 +474,7 @@ public class GamePlatformNative : GamePlatform
         return LoadTexture(bmp_.bmp, false);
     }
 
-    ManicDigger.Renderers.TextRenderer textrenderer = new ManicDigger.Renderers.TextRenderer();
+    private ManicDigger.Renderers.TextRenderer textrenderer = new();
 
     public override BitmapCi CreateTextTexture(Text_ t)
     {
@@ -507,29 +517,31 @@ public class GamePlatformNative : GamePlatform
 
     public override void MonitorEnter(MonitorObject monitorObject)
     {
-        System.Threading.Monitor.Enter(monitorObject);
+        Monitor.Enter(monitorObject);
     }
 
     public override void MonitorExit(MonitorObject monitorObject)
     {
-        System.Threading.Monitor.Exit(monitorObject);
+        Monitor.Exit(monitorObject);
     }
 
     public override AviWriterCi AviWriterCreate()
     {
-        AviWriterCiCs avi = new AviWriterCiCs();
+        AviWriterCiCs avi = new();
         return avi;
     }
 
     public override UriCi ParseUri(string uri)
     {
-        MyUri myuri = new MyUri(uri);
+        MyUri myuri = new(uri);
 
-        UriCi ret = new UriCi();
-        ret.url = myuri.Url;
-        ret.ip = myuri.Ip;
-        ret.port = myuri.Port;
-        ret.get = new DictionaryStringString();
+        UriCi ret = new()
+        {
+            url = myuri.Url,
+            ip = myuri.Ip,
+            port = myuri.Port,
+            get = new DictionaryStringString()
+        };
         foreach (var k in myuri.Get)
         {
             ret.get.Set(k.Key, k.Value);
@@ -552,7 +564,7 @@ public class GamePlatformNative : GamePlatform
         return GameVersion.Version;
     }
 
-    ICompression compression = new CompressionGzip();
+    private ICompression compression = new CompressionGzip();
     public override void GzipDecompress(byte[] compressed, int compressedLength, byte[] ret)
     {
         byte[] data = new byte[compressedLength];
@@ -617,7 +629,7 @@ public class GamePlatformNative : GamePlatform
 
     public override void MessageBoxShowError(string text, string caption)
     {
-        System.Windows.Forms.MessageBox.Show(text, caption, System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
+        MessageBox.Show(text, caption, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
     }
 
     public override int ByteArrayLength(byte[] arr)
@@ -627,8 +639,8 @@ public class GamePlatformNative : GamePlatform
 
     public override string[] ReadAllLines(string p, IntRef retCount)
     {
-        List<string> lines = new List<string>();
-        StringReader reader = new StringReader(p);
+        List<string> lines = new();
+        StringReader reader = new(p);
         string line;
         while ((line = reader.ReadLine()) != null)
         {
@@ -653,7 +665,7 @@ public class GamePlatformNative : GamePlatform
         gameexit = exit;
     }
 
-    class UploadData
+    private class UploadData
     {
         public string url;
         public byte[] data;
@@ -663,15 +675,17 @@ public class GamePlatformNative : GamePlatform
 
     public override void WebClientUploadDataAsync(string url, byte[] data, int dataLength, HttpResponseCi response)
     {
-        UploadData d = new UploadData();
-        d.url = url;
-        d.data = data;
-        d.dataLength = dataLength;
-        d.response = response;
-        System.Threading.ThreadPool.QueueUserWorkItem(DoUploadData, d);
+        UploadData d = new()
+        {
+            url = url,
+            data = data,
+            dataLength = dataLength,
+            response = response
+        };
+        ThreadPool.QueueUserWorkItem(DoUploadData, d);
     }
 
-    void DoUploadData(object o)
+    private void DoUploadData(object o)
     {
         UploadData d = (UploadData)o;
         try
@@ -684,7 +698,7 @@ public class GamePlatformNative : GamePlatform
 
             request.ContentLength = d.dataLength;
 
-            System.Net.ServicePointManager.Expect100Continue = false; // fixes lighthttpd 417 error
+            ServicePointManager.Expect100Continue = false; // fixes lighthttpd 417 error
 
             using (Stream requestStream = request.GetRequestStream())
             {
@@ -693,7 +707,7 @@ public class GamePlatformNative : GamePlatform
             }
             WebResponse response_ = request.GetResponse();
 
-            MemoryStream m = new MemoryStream();
+            MemoryStream m = new();
             using (Stream s = response_.GetResponseStream())
             {
                 CopyTo(s, m);
@@ -724,15 +738,17 @@ public class GamePlatformNative : GamePlatform
 
     public override string FileOpenDialog(string extension, string extensionName, string initialDirectory)
     {
-        OpenFileDialog d = new OpenFileDialog();
-        d.InitialDirectory = initialDirectory;
-        d.FileName = "Default." + extension;
-        d.Filter = string.Format("{1}|*.{0}|All files|*.*", extension, extensionName);
-        d.CheckFileExists = false;
-        d.CheckPathExists = true;
-        string dir = System.Environment.CurrentDirectory;
+        OpenFileDialog d = new()
+        {
+            InitialDirectory = initialDirectory,
+            FileName = "Default." + extension,
+            Filter = string.Format("{1}|*.{0}|All files|*.*", extension, extensionName),
+            CheckFileExists = false,
+            CheckPathExists = true
+        };
+        string dir = Environment.CurrentDirectory;
         DialogResult result = d.ShowDialog();
-        System.Environment.CurrentDirectory = dir;
+        Environment.CurrentDirectory = dir;
         if (result == DialogResult.OK)
         {
             return d.FileName;
@@ -763,7 +779,7 @@ public class GamePlatformNative : GamePlatform
         return true;
     }
 
-    static string GetPreferencesFilePath()
+    private static string GetPreferencesFilePath()
     {
         string path = GameStorePath.GetStorePath();
         if (!Directory.Exists(path))
@@ -779,14 +795,16 @@ public class GamePlatformNative : GamePlatform
         {
             try
             {
-                Preferences p = new Preferences();
-                p.platform = this;
+                Preferences p = new()
+                {
+                    platform = this
+                };
                 string[] lines = File.ReadAllLines(GetPreferencesFilePath());
                 foreach (string l in lines)
                 {
                     int a = l.IndexOf("=", StringComparison.InvariantCultureIgnoreCase);
-                    string name = l.Substring(0, a);
-                    string value = l.Substring(a + 1);
+                    string name = l[..a];
+                    string value = l[(a + 1)..];
                     p.SetString(name, value);
                 }
                 return p;
@@ -799,8 +817,10 @@ public class GamePlatformNative : GamePlatform
         }
         else
         {
-            Preferences p = new Preferences();
-            p.platform = this;
+            Preferences p = new()
+            {
+                platform = this
+            };
             return p;
         }
     }
@@ -808,7 +828,7 @@ public class GamePlatformNative : GamePlatform
     public override void SetPreferences(Preferences preferences)
     {
         DictionaryStringString items = preferences.items;
-        List<string> lines = new List<string>();
+        List<string> lines = [];
         for (int i = 0; i < items.count; i++)
         {
             if (items.items[i] == null)
@@ -817,11 +837,11 @@ public class GamePlatformNative : GamePlatform
             }
             string key = items.items[i].key;
             string value = items.items[i].value;
-            lines.Add(key + "=" + value);
+            lines.Add($"{key}={value}");
         }
         try
         {
-            File.WriteAllLines(GetPreferencesFilePath(), lines.ToArray());
+            File.WriteAllLines(GetPreferencesFilePath(), [.. lines]);
         }
         catch
         {
@@ -840,13 +860,10 @@ public class GamePlatformNative : GamePlatform
         ThreadPool.QueueUserWorkItem((a) => { action.Run(); });
     }
 
-    AssetLoader assetloader;
+    private AssetLoader assetloader;
     public override void LoadAssetsAsyc(AssetList list, FloatRef progress)
     {
-        if (assetloader == null)
-        {
-            assetloader = new AssetLoader(datapaths);
-        }
+        assetloader ??= new AssetLoader(datapaths);
         assetloader.LoadAssetsAsync(list, progress);
     }
 
@@ -865,20 +882,20 @@ public class GamePlatformNative : GamePlatform
         Process.Start(url);
     }
 
-    public string cachepath() { return Path.Combine(PathStorage(), "Cache"); }
-    public void checkcachedir()
+    public string Cachepath() { return Path.Combine(PathStorage(), "Cache"); }
+    public void Checkcachedir()
     {
-        if (!Directory.Exists(cachepath()))
+        if (!Directory.Exists(Cachepath()))
         {
-            Directory.CreateDirectory(cachepath());
+            Directory.CreateDirectory(Cachepath());
         }
     }
 
     public override void SaveAssetToCache(Asset tosave)
     {
         //Check if cache directory exists
-        checkcachedir();
-        BinaryWriter bw = new BinaryWriter(File.Create(Path.Combine(cachepath(), tosave.md5)));
+        Checkcachedir();
+        BinaryWriter bw = new(File.Create(Path.Combine(Cachepath(), tosave.md5)));
         bw.Write(tosave.name);
         bw.Write(tosave.dataLength);
         bw.Write(tosave.data);
@@ -888,25 +905,27 @@ public class GamePlatformNative : GamePlatform
     public override Asset LoadAssetFromCache(string md5)
     {
         //Check if cache directory exists
-        checkcachedir();
-        BinaryReader br = new BinaryReader(File.OpenRead(Path.Combine(cachepath(), md5)));
+        Checkcachedir();
+        BinaryReader br = new(File.OpenRead(Path.Combine(Cachepath(), md5)));
         string contentName = br.ReadString();
         int contentLength = br.ReadInt32();
         byte[] content = br.ReadBytes(contentLength);
         br.Close();
-        Asset a = new Asset();
-        a.data = content;
-        a.dataLength = contentLength;
-        a.md5 = md5;
-        a.name = contentName;
+        Asset a = new()
+        {
+            data = content,
+            dataLength = contentLength,
+            md5 = md5,
+            name = contentName
+        };
         return a;
     }
 
     public override bool IsCached(string md5)
     {
-        if (!Directory.Exists(cachepath()))
+        if (!Directory.Exists(Cachepath()))
             return false;
-        return File.Exists(Path.Combine(cachepath(), md5));
+        return File.Exists(Path.Combine(Cachepath(), md5));
     }
 
     public override bool IsChecksum(string checksum)
@@ -938,7 +957,7 @@ public class GamePlatformNative : GamePlatform
 
     public override bool IsDebuggerAttached()
     {
-        return System.Diagnostics.Debugger.IsAttached;
+        return Debugger.IsAttached;
     }
 
     public override string QueryStringValue(string key)
@@ -950,15 +969,14 @@ public class GamePlatformNative : GamePlatform
 
     #region Audio
 
-    AudioOpenAl audio;
+    private AudioOpenAl audio;
     public GameExit gameexit;
-    void StartAudio()
+    private void StartAudio()
     {
-        if (audio == null)
-        {
-            audio = new AudioOpenAl();
-            audio.d_GameExit = gameexit;
-        }
+        audio ??= new AudioOpenAl
+            {
+                d_GameExit = gameexit
+            };
     }
 
     public override AudioData AudioDataCreate(byte[] data, int dataLength)
@@ -1020,14 +1038,16 @@ public class GamePlatformNative : GamePlatform
     public override void TcpConnect(string ip, int port, BoolRef connected)
     {
         this.connected = connected;
-        sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        sock.NoDelay = true;
+        sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+        {
+            NoDelay = true
+        };
         sock.BeginConnect(ip, port, OnConnect, sock);
     }
-    Socket sock;
-    BoolRef connected;
-    Connection c;
-    void OnConnect(IAsyncResult result)
+    private Socket sock;
+    private BoolRef connected;
+    private Connection c;
+    private void OnConnect(IAsyncResult result)
     {
         Socket sock = (Socket)result.AsyncState;
         c = new Connection(sock);
@@ -1040,7 +1060,7 @@ public class GamePlatformNative : GamePlatform
         connected.value = true;
     }
 
-    void c_ReceivedData(object sender, MessageEventArgs e)
+    private void c_ReceivedData(object sender, MessageEventArgs e)
     {
         lock (received)
         {
@@ -1050,7 +1070,7 @@ public class GamePlatformNative : GamePlatform
             }
         }
     }
-    Queue<byte> tosend = new Queue<byte>();
+    private Queue<byte> tosend = new();
     public override void TcpSend(byte[] data, int length)
     {
         if (c == null)
@@ -1070,7 +1090,7 @@ public class GamePlatformNative : GamePlatform
             c.Send(data1);
         }
     }
-    Queue<byte> received = new Queue<byte>();
+    private Queue<byte> received = new();
     public override int TcpReceive(byte[] data, int dataLength)
     {
         if (c == null)
@@ -1098,7 +1118,7 @@ public class GamePlatformNative : GamePlatform
         public Socket sock;
         public string address;
 
-        Encoding encoding = Encoding.UTF8;
+        private Encoding encoding = Encoding.UTF8;
 
         public Connection(Socket s)
         {
@@ -1106,7 +1126,7 @@ public class GamePlatformNative : GamePlatform
             address = s.RemoteEndPoint.ToString();
             this.BeginReceive();
         }
-        Stopwatch st = new Stopwatch();
+        private Stopwatch st = new();
         private void BeginReceive()
         {
             this.sock.BeginReceive(
@@ -1116,8 +1136,7 @@ public class GamePlatformNative : GamePlatform
                     new AsyncCallback(this.OnBytesReceived),
                     this);
         }
-        byte[] dataRcvBuf = new byte[1024 * 8];
-        static int i = 0;
+        private byte[] dataRcvBuf = new byte[1024 * 8];
         protected void OnBytesReceived(IAsyncResult result)
         {
             int nBytesRec;
@@ -1134,10 +1153,7 @@ public class GamePlatformNative : GamePlatform
                 catch
                 {
                 }
-                if (Disconnected != null)
-                {
-                    Disconnected(null, new ConnectionEventArgs() { });
-                }
+                Disconnected?.Invoke(null, new ConnectionEventArgs() { });
                 return;
             }
             if (nBytesRec <= 0)
@@ -1149,10 +1165,7 @@ public class GamePlatformNative : GamePlatform
                 catch
                 {
                 }
-                if (Disconnected != null)
-                {
-                    Disconnected(null, new ConnectionEventArgs() { });
-                }
+                Disconnected?.Invoke(null, new ConnectionEventArgs() { });
                 return;
             }
 
@@ -1187,7 +1200,7 @@ public class GamePlatformNative : GamePlatform
             {
             }
         }
-        void OnSend(IAsyncResult result)
+        private void OnSend(IAsyncResult result)
         {
             sock.EndSend(result);
         }
@@ -1213,7 +1226,7 @@ public class GamePlatformNative : GamePlatform
 
     public override EnetHost EnetCreateHost()
     {
-        return new EnetHostNative() { host = new ENet.Host() };
+        return new EnetHostNative() { host = new Host() };
     }
 
     public override void EnetHostInitializeServer(EnetHost host, int port, int peerLimit)
@@ -1225,10 +1238,11 @@ public class GamePlatformNative : GamePlatform
     public override bool EnetHostService(EnetHost host, int timeout, EnetEventRef enetEvent)
     {
         EnetHostNative host_ = (EnetHostNative)host;
-        ENet.Event e;
-        int ret = host_.host.Service(timeout, out e);
-        EnetEventNative ee = new EnetEventNative();
-        ee.e = e;
+        int ret = host_.host.Service(timeout, out Event e);
+        EnetEventNative ee = new()
+        {
+            e = e
+        };
         enetEvent.e = ee;
         return ret > 0;
     }
@@ -1236,10 +1250,11 @@ public class GamePlatformNative : GamePlatform
     public override bool EnetHostCheckEvents(EnetHost host, EnetEventRef event_)
     {
         EnetHostNative host_ = (EnetHostNative)host;
-        ENet.Event e;
-        int ret = host_.host.CheckEvents(out e);
-        EnetEventNative ee = new EnetEventNative();
-        ee.e = e;
+        int ret = host_.host.CheckEvents(out Event e);
+        EnetEventNative ee = new()
+        {
+            e = e
+        };
         event_.e = ee;
         return ret > 0;
     }
@@ -1248,13 +1263,17 @@ public class GamePlatformNative : GamePlatform
     {
         EnetHostNative host_ = (EnetHostNative)host;
 
-        Address address = new Address();
+        Address address = new()
+        {
+            Port = (ushort)port
+        };
         address.SetHost(hostName);
-        address.Port = (ushort)port;
 
-        ENet.Peer peer = host_.host.Connect(address, channelLimit, (uint)data);
-        EnetPeerNative peer_ = new EnetPeerNative();
-        peer_.peer = peer;
+        Peer peer = host_.host.Connect(address, channelLimit, (uint)data);
+        EnetPeerNative peer_ = new()
+        {
+            peer = peer
+        };
         return peer_;
     }
 
@@ -1264,7 +1283,7 @@ public class GamePlatformNative : GamePlatform
         {
             EnetPeerNative peer_ = (EnetPeerNative)peer;
 
-            Packet packet = default(Packet);
+            Packet packet = default;
             packet.Create(data, dataLength, (PacketFlags)flags);
 
             peer_.peer.Send(channelID, ref packet);
@@ -1323,21 +1342,20 @@ public class GamePlatformNative : GamePlatform
 
     public void Start()
     {
-        window.Keyboard.KeyRepeat = true;
-        window.KeyDown += new EventHandler<KeyboardKeyEventArgs>(game_KeyDown);
-        window.KeyUp += new EventHandler<KeyboardKeyEventArgs>(game_KeyUp);
-        window.KeyPress += new EventHandler<OpenTK.KeyPressEventArgs>(game_KeyPress);
+        window.KeyDown += new EventHandler<KeyboardKeyEventArgs>(GameKeyDown);
+        window.KeyUp += new EventHandler<KeyboardKeyEventArgs>(GameKeyUp);
+        window.KeyPress += new EventHandler<OpenTK.KeyPressEventArgs>(GameKeyPress);
         window.MouseDown += new EventHandler<MouseButtonEventArgs>(Mouse_ButtonDown);
         window.MouseUp += new EventHandler<MouseButtonEventArgs>(Mouse_ButtonUp);
         window.MouseMove += new EventHandler<MouseMoveEventArgs>(Mouse_Move);
         window.MouseWheel += new EventHandler<OpenTK.Input.MouseWheelEventArgs>(Mouse_WheelChanged);
-        window.RenderFrame += new EventHandler<OpenTK.FrameEventArgs>(window_RenderFrame);
-        window.Closed += new EventHandler<EventArgs>(window_Closed);
+        window.RenderFrame += new EventHandler<FrameEventArgs>(WindowRenderFrame);
+        window.Closed += new EventHandler<EventArgs>(WindowClosed);
         window.TargetRenderFrequency = 0;
         window.Title = "Manic Digger";
     }
 
-    void window_Closed(object sender, EventArgs e)
+    private void WindowClosed(object? sender, EventArgs e)
     {
         gameexit.exit = true;
     }
@@ -1347,7 +1365,7 @@ public class GamePlatformNative : GamePlatform
         window.VSync = enabled ? VSyncMode.On : VSyncMode.Off;
     }
 
-    Screenshot screenshot = new Screenshot();
+    private Screenshot screenshot = new();
 
     public override void SaveScreenshot()
     {
@@ -1359,8 +1377,10 @@ public class GamePlatformNative : GamePlatform
     {
         screenshot.d_GameWindow = window;
         Bitmap bmp = screenshot.GrabScreenshot();
-        BitmapCiCs bmp_ = new BitmapCiCs();
-        bmp_.bmp = bmp;
+        BitmapCiCs bmp_ = new()
+        {
+            bmp = bmp
+        };
         return bmp_;
     }
 
@@ -1388,8 +1408,8 @@ public class GamePlatformNative : GamePlatform
         return key.ToString();
     }
 
-    DisplayResolutionCi[] resolutions;
-    int resolutionsCount;
+    private DisplayResolutionCi[] resolutions;
+    private int resolutionsCount;
     public override DisplayResolutionCi[] GetDisplayResolutions(IntRef retResolutionsCount)
     {
         if (resolutions == null)
@@ -1397,11 +1417,13 @@ public class GamePlatformNative : GamePlatform
             resolutions = new DisplayResolutionCi[1024];
             foreach (var screen in System.Windows.Forms.Screen.AllScreens)
             {
-                var r2 = new DisplayResolutionCi();
-                r2.Width = screen.Bounds.Width;
-                r2.Height = screen.Bounds.Height;
-                r2.BitsPerPixel = screen.BitsPerPixel;
-                r2.RefreshRate = 60; // Screen doesn't expose refresh rate
+                var r2 = new DisplayResolutionCi
+                {
+                    Width = screen.Bounds.Width,
+                    Height = screen.Bounds.Height,
+                    BitsPerPixel = screen.BitsPerPixel,
+                    RefreshRate = 60 // Screen doesn't expose refresh rate
+                };
                 if (r2.Width < 800 || r2.Height < 600 || r2.BitsPerPixel < 16)
                     continue;
                 resolutions[resolutionsCount++] = r2;
@@ -1429,11 +1451,13 @@ public class GamePlatformNative : GamePlatform
     public override DisplayResolutionCi GetDisplayResolutionDefault()
     {
         var screen = System.Windows.Forms.Screen.PrimaryScreen!;
-        var r = new DisplayResolutionCi();
-        r.Width = screen.Bounds.Width;
-        r.Height = screen.Bounds.Height;
-        r.BitsPerPixel = screen.BitsPerPixel;
-        r.RefreshRate = 60;
+        var r = new DisplayResolutionCi
+        {
+            Width = screen.Bounds.Width,
+            Height = screen.Bounds.Height,
+            BitsPerPixel = screen.BitsPerPixel,
+            RefreshRate = 60
+        };
         return r;
     }
 
@@ -1460,10 +1484,10 @@ public class GamePlatformNative : GamePlatform
         GL.BindTexture(TextureTarget.Texture2D, texture);
     }
 
-    float[] xyz = new float[65536 * 3];
-    float[] uv = new float[65536 * 2];
-    byte[] rgba = new byte[65536 * 4];
-    ushort[] indices = new ushort[65536];
+    private float[] xyz = new float[65536 * 3];
+    private float[] uv = new float[65536 * 2];
+    private byte[] rgba = new byte[65536 * 4];
+    private ushort[] indices = new ushort[65536];
 
     public override Model CreateModel(ModelData data)
     {
@@ -1474,8 +1498,10 @@ public class GamePlatformNative : GamePlatform
         DrawModelData(data);
 
         GL.EndList();
-        DisplayListModel m = new DisplayListModel();
-        m.listId = id;
+        DisplayListModel m = new()
+        {
+            listId = id
+        };
         return m;
     }
 
@@ -1545,7 +1571,7 @@ public class GamePlatformNative : GamePlatform
         GL.Disable(EnableCap.Texture2D);
     }
 
-    class DisplayListModel : Model
+    private class DisplayListModel : Model
     {
         public int listId;
     }
@@ -1555,7 +1581,7 @@ public class GamePlatformNative : GamePlatform
         GL.CallList(((DisplayListModel)model).listId);
     }
 
-    int[] lists = new int[1024];
+    private int[] lists = new int[1024];
 
     public override void DrawModels(Model[] model, int count)
     {
@@ -1608,7 +1634,7 @@ public class GamePlatformNative : GamePlatform
         if ((!ALLOW_NON_POWER_OF_TWO) &&
             (!(BitTools.IsPowerOfTwo(bmp.Width) && BitTools.IsPowerOfTwo(bmp.Height))))
         {
-            Bitmap bmp2 = new Bitmap(BitTools.NextPowerOfTwo(bmp.Width),
+            Bitmap bmp2 = new(BitTools.NextPowerOfTwo(bmp.Width),
                 BitTools.NextPowerOfTwo(bmp.Height));
             using (Graphics g = Graphics.FromImage(bmp2))
             {
@@ -1723,7 +1749,7 @@ public class GamePlatformNative : GamePlatform
     public override void GlLightModelAmbient(int r, int g, int b)
     {
         float mult = 1f;
-        float[] global_ambient = new float[] { (float)r / 255f * mult, (float)g / 255f * mult, (float)b / 255f * mult, 1f };
+        float[] global_ambient = [r / 255f * mult, g / 255f * mult, b / 255f * mult, 1f];
         GL.LightModel(LightModelParameter.LightModelAmbient, global_ambient);
     }
 
@@ -1744,7 +1770,7 @@ public class GamePlatformNative : GamePlatform
 
     public override void GlFogFogColor(int r, int g, int b, int a)
     {
-        float[] fogColor = new[] { (float)r / 255, (float)g / 255, (float)b / 255, (float)a / 255 };
+        float[] fogColor = [(float)r / 255, (float)g / 255, (float)b / 255, (float)a / 255];
         GL.Fog(FogParameter.FogColor, fogColor);
     }
 
@@ -1805,7 +1831,7 @@ public class GamePlatformNative : GamePlatform
 
     #region Game
 
-    bool singlePlayerServerAvailable = true;
+    private bool singlePlayerServerAvailable = true;
     public override bool SinglePlayerServerAvailable()
     {
         return singlePlayerServerAvailable;
@@ -1855,32 +1881,32 @@ public class GamePlatformNative : GamePlatform
 
     #region Event handlers
 
-    public List<NewFrameHandler> newFrameHandlers = new List<NewFrameHandler>();
+    public List<NewFrameHandler> newFrameHandlers = new();
     public override void AddOnNewFrame(NewFrameHandler handler)
     {
         newFrameHandlers.Add(handler);
     }
 
-    public List<KeyEventHandler> keyEventHandlers = new List<KeyEventHandler>();
+    public List<KeyEventHandler> keyEventHandlers = new();
     public override void AddOnKeyEvent(KeyEventHandler handler)
     {
         keyEventHandlers.Add(handler);
     }
 
-    public List<MouseEventHandler> mouseEventHandlers = new List<MouseEventHandler>();
+    public List<MouseEventHandler> mouseEventHandlers = new();
     public override void AddOnMouseEvent(MouseEventHandler handler)
     {
         mouseEventHandlers.Add(handler);
     }
 
-    public List<TouchEventHandler> touchEventHandlers = new List<TouchEventHandler>();
+    public List<TouchEventHandler> touchEventHandlers = new();
     public override void AddOnTouchEvent(TouchEventHandler handler)
     {
         touchEventHandlers.Add(handler);
     }
 
     public CrashReporter crashreporter;
-    OnCrashHandler onCrashHandler;
+    private OnCrashHandler onCrashHandler;
     public override void AddOnCrash(OnCrashHandler handler)
     {
 #if !DEBUG
@@ -1888,7 +1914,7 @@ public class GamePlatformNative : GamePlatform
         onCrashHandler = handler;
 #endif
     }
-    void OnCrash()
+    private void OnCrash()
     {
         if (onCrashHandler != null)
         {
@@ -1900,10 +1926,10 @@ public class GamePlatformNative : GamePlatform
 
     #region Input
 
-    bool mousePointerLocked;
-    bool mouseCursorVisible = true;
-    MouseState current, previous;
-    int lastX, lastY;
+    private bool mousePointerLocked;
+    private bool mouseCursorVisible = true;
+    private MouseState current, previous;
+    private int lastX, lastY;
 
     public override bool IsMousePointerLocked()
     {
@@ -1919,7 +1945,7 @@ public class GamePlatformNative : GamePlatform
     {
         try
         {
-            Bitmap bmp = new Bitmap(new MemoryStream(imgdata, 0, imgdataLength)); //new Bitmap("data/local/gui/mousecursor.png");
+            Bitmap bmp = new(new MemoryStream(imgdata, 0, imgdataLength)); //new Bitmap("data/local/gui/mousecursor.png");
             if (bmp.Width > 32 || bmp.Height > 32)
             {
                 // Limit cursor size to 32x32
@@ -2009,19 +2035,19 @@ public class GamePlatformNative : GamePlatform
         File.AppendAllText("debug.log", $"{DateTime.Now}: {msg}\n");
     }
 
-    void window_RenderFrame(object sender, OpenTK.FrameEventArgs e)
+    private void WindowRenderFrame(object? sender, FrameEventArgs e)
     {
         UpdateMousePosition();
         foreach (NewFrameHandler h in newFrameHandlers)
         {
-            NewFrameEventArgs args = new NewFrameEventArgs();
+            NewFrameEventArgs args = new();
             args.SetDt((float)e.Time);
             h.OnNewFrame(args);
         }
         window.SwapBuffers();
     }
 
-    void UpdateMousePosition()
+    private void UpdateMousePosition()
     {
         current = Mouse.GetState();
         if (!window.Focused)
@@ -2035,7 +2061,7 @@ public class GamePlatformNative : GamePlatform
             int ydelta = current.Y - previous.Y;
             foreach (MouseEventHandler h in mouseEventHandlers)
             {
-                MouseEventArgs args = new MouseEventArgs();
+                MouseEventArgs args = new();
                 args.SetX(lastX);
                 args.SetY(lastY);
                 args.SetMovementX(xdelta);
@@ -2072,24 +2098,24 @@ public class GamePlatformNative : GamePlatform
         }
     }
 
-    void Mouse_WheelChanged(object sender, OpenTK.Input.MouseWheelEventArgs e)
+    private void Mouse_WheelChanged(object? sender, OpenTK.Input.MouseWheelEventArgs e)
     {
         foreach (MouseEventHandler h in mouseEventHandlers)
         {
-            MouseWheelEventArgs args = new MouseWheelEventArgs();
+            MouseWheelEventArgs args = new();
             args.SetDelta(e.Delta);
             args.SetDeltaPrecise(e.DeltaPrecise);
             h.OnMouseWheel(args);
         }
     }
 
-    void Mouse_ButtonDown(object sender, MouseButtonEventArgs e)
+    private void Mouse_ButtonDown(object? sender, MouseButtonEventArgs e)
     {
         if (TouchTest)
         {
             foreach (TouchEventHandler h in touchEventHandlers)
             {
-                TouchEventArgs args = new TouchEventArgs();
+                TouchEventArgs args = new();
                 args.SetX(e.X);
                 args.SetY(e.Y);
                 args.SetId(0);
@@ -2100,7 +2126,7 @@ public class GamePlatformNative : GamePlatform
         {
             foreach (MouseEventHandler h in mouseEventHandlers)
             {
-                MouseEventArgs args = new MouseEventArgs();
+                MouseEventArgs args = new();
                 args.SetX(e.X);
                 args.SetY(e.Y);
                 args.SetButton((int)e.Button);
@@ -2109,13 +2135,13 @@ public class GamePlatformNative : GamePlatform
         }
     }
 
-    void Mouse_ButtonUp(object sender, MouseButtonEventArgs e)
+    private void Mouse_ButtonUp(object? sender, MouseButtonEventArgs e)
     {
         if (TouchTest)
         {
             foreach (TouchEventHandler h in touchEventHandlers)
             {
-                TouchEventArgs args = new TouchEventArgs();
+                TouchEventArgs args = new();
                 args.SetX(e.X);
                 args.SetY(e.Y);
                 args.SetId(0);
@@ -2126,7 +2152,7 @@ public class GamePlatformNative : GamePlatform
         {
             foreach (MouseEventHandler h in mouseEventHandlers)
             {
-                MouseEventArgs args = new MouseEventArgs();
+                MouseEventArgs args = new();
                 args.SetX(e.X);
                 args.SetY(e.Y);
                 args.SetButton((int)e.Button);
@@ -2135,7 +2161,7 @@ public class GamePlatformNative : GamePlatform
         }
     }
 
-    void Mouse_Move(object sender, MouseMoveEventArgs e)
+    private void Mouse_Move(object? sender, MouseMoveEventArgs e)
     {
         Console.WriteLine($"[Mouse] X:{e.X} Y:{e.Y} DeltaX:{e.XDelta} DeltaY:{e.YDelta}");
         lastX = e.X;
@@ -2144,7 +2170,7 @@ public class GamePlatformNative : GamePlatform
         {
             foreach (TouchEventHandler h in touchEventHandlers)
             {
-                TouchEventArgs args = new TouchEventArgs();
+                TouchEventArgs args = new();
                 args.SetX(e.X);
                 args.SetY(e.Y);
                 args.SetId(0);
@@ -2155,7 +2181,7 @@ public class GamePlatformNative : GamePlatform
         {
             foreach (MouseEventHandler h in mouseEventHandlers)
             {
-                MouseEventArgs args = new MouseEventArgs();
+                MouseEventArgs args = new();
                 args.SetX(e.X);
                 args.SetY(e.Y);
                 args.SetMovementX(e.XDelta);
@@ -2166,22 +2192,21 @@ public class GamePlatformNative : GamePlatform
         }
     }
 
-    void game_KeyPress(object sender, OpenTK.KeyPressEventArgs e)
+    private void GameKeyPress(object? sender, OpenTK.KeyPressEventArgs e)
     {
         foreach (KeyEventHandler h in keyEventHandlers)
         {
-            KeyPressEventArgs args = new KeyPressEventArgs();
-            args.SetKeyChar((int)e.KeyChar);
+            KeyPressEventArgs args = new();
+            args.SetKeyChar(e.KeyChar);
             h.OnKeyPress(args);
         }
     }
 
-    void game_KeyDown(object sender, KeyboardKeyEventArgs e)
+    private void GameKeyDown(object? sender, KeyboardKeyEventArgs e)
     {
-        var ss = ToGlKey(e.Key).ToString();
         foreach (KeyEventHandler h in keyEventHandlers)
         {
-            KeyEventArgs args = new KeyEventArgs();
+            KeyEventArgs args = new();
             args.SetKeyCode(ToGlKey(e.Key));
             args.SetCtrlPressed(e.Modifiers == KeyModifiers.Control);
             args.SetShiftPressed(e.Modifiers == KeyModifiers.Shift);
@@ -2190,11 +2215,11 @@ public class GamePlatformNative : GamePlatform
         }
     }
 
-    void game_KeyUp(object sender, KeyboardKeyEventArgs e)
+    private void GameKeyUp(object? sender, KeyboardKeyEventArgs e)
     {
         foreach (KeyEventHandler h in keyEventHandlers)
         {
-            KeyEventArgs args = new KeyEventArgs();
+            KeyEventArgs args = new();
             args.SetKeyCode(ToGlKey(e.Key));
             h.OnKeyUp(args);
         }
@@ -2209,10 +2234,10 @@ public class AssetLoader
     {
         this.datapaths = datapaths_;
     }
-    string[] datapaths;
+    private string[] datapaths;
     public void LoadAssetsAsync(AssetList list, FloatRef progress)
     {
-        List<Asset> assets = new List<Asset>();
+        List<Asset> assets = new();
         foreach (string path in datapaths)
         {
             try
@@ -2225,13 +2250,15 @@ public class AssetLoader
                 {
                     try
                     {
-                        FileInfo f = new FileInfo(s);
+                        FileInfo f = new(s);
                         if (f.Name.Equals("thumbs.db", StringComparison.InvariantCultureIgnoreCase))
                         {
                             continue;
                         }
-                        Asset a = new Asset();
-                        a.data = File.ReadAllBytes(s);
+                        Asset a = new()
+                        {
+                            data = File.ReadAllBytes(s)
+                        };
                         a.dataLength = a.data.Length;
                         a.name = f.Name.ToLowerInvariant();
                         a.md5 = Md5(a.data);
@@ -2255,8 +2282,8 @@ public class AssetLoader
         }
     }
 
-    MD5CryptoServiceProvider sha1 = new MD5CryptoServiceProvider();
-    string Md5(byte[] data)
+    private MD5CryptoServiceProvider sha1 = new();
+    private string Md5(byte[] data)
     {
         string hash = ToHex(sha1.ComputeHash(data), false);
         return hash;
@@ -2264,7 +2291,7 @@ public class AssetLoader
 
     public static string ToHex(byte[] bytes, bool upperCase)
     {
-        StringBuilder result = new StringBuilder(bytes.Length * 2);
+        StringBuilder result = new(bytes.Length * 2);
 
         for (int i = 0; i < bytes.Length; i++)
         {
@@ -2277,7 +2304,7 @@ public class AssetLoader
 
 public class RandomNative : RandomCi
 {
-    public Random rnd = new Random();
+    public Random rnd = new();
     public override float NextFloat()
     {
         return (float)rnd.NextDouble();
@@ -2317,10 +2344,10 @@ public class MyUri
             if (url.Contains("?"))
             {
                 string url2 = url.Substring(url.IndexOf("?") + 1);
-                var ss = url2.Split(new char[] { '&' });
+                var ss = url2.Split(['&']);
                 for (int i = 0; i < ss.Length; i++)
                 {
-                    var ss2 = ss[i].Split(new char[] { '=' });
+                    var ss2 = ss[i].Split(['=']);
                     d[ss2[0]] = ss2[1];
                 }
             }
@@ -2370,12 +2397,12 @@ public class AviWriterCiCs : AviWriterCi
 
 public class EnetHostNative : EnetHost
 {
-    public ENet.Host host;
+    public Host host;
 }
 
 public class EnetEventNative : EnetEvent
 {
-    public ENet.Event e;
+    public Event e;
     public override EnetEventType Type()
     {
         return (EnetEventType)e.Type;
@@ -2383,22 +2410,26 @@ public class EnetEventNative : EnetEvent
 
     public override EnetPeer Peer()
     {
-        EnetPeerNative peer = new EnetPeerNative();
-        peer.peer = e.Peer;
+        EnetPeerNative peer = new()
+        {
+            peer = e.Peer
+        };
         return peer;
     }
 
     public override EnetPacket Packet()
     {
-        EnetPacketNative packet = new EnetPacketNative();
-        packet.packet = e.Packet;
+        EnetPacketNative packet = new()
+        {
+            packet = e.Packet
+        };
         return packet;
     }
 }
 
 public class EnetPacketNative : EnetPacket
 {
-    internal ENet.Packet packet;
+    internal Packet packet;
     public override int GetBytesCount()
     {
         return packet.Length;
@@ -2420,7 +2451,7 @@ public class EnetPacketNative : EnetPacket
 
 public class EnetPeerNative : EnetPeer
 {
-    public ENet.Peer peer;
+    public Peer peer;
     public override int UserData()
     {
         return peer.Data.ToInt32();
@@ -2448,13 +2479,13 @@ public class TextureNative : Texture
     public int value;
 }
 
-public class GameWindowNative : OpenTK.GameWindow
+public class GameWindowNative : GameWindow
 {
     public GamePlatformNative platform;
     public GameWindowNative(OpenTK.Graphics.GraphicsMode mode)
         : base(1280, 720, mode)
     {
-        VSync = OpenTK.VSyncMode.Off;
+        VSync = VSyncMode.Off;
         WindowState = OpenTK.WindowState.Normal;
     }
 }
