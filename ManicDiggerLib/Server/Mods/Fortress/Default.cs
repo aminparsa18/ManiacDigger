@@ -7,12 +7,12 @@ namespace ManicDigger.Mods
 	/// </summary>
 	public class Default : IMod
 	{
-		public void PreStart(ModManager m)
+		public void PreStart(IModManager m)
 		{
 			m.RequireMod("Core");
 			m.RequireMod("CoreBlocks");
 			m.RequireMod("CoreCrafting");
 		}
-		public void Start(ModManager manager){ }
+		public void Start(IModManager manager){ }
 	}
 }

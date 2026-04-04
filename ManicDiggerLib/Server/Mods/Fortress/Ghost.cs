@@ -6,9 +6,9 @@ namespace ManicDigger.Mods
 	//for debugging
 	public class Ghost : IMod
 	{
-		public void PreStart(ModManager m) { }
+		public void PreStart(IModManager m) { }
 
-		public void Start(ModManager manager)
+		public void Start(IModManager manager)
 		{
 			m = manager;
 			if (enabled)
@@ -25,7 +25,7 @@ namespace ManicDigger.Mods
 
 		bool enabled = false;
 
-		ModManager m;
+		IModManager m;
 		int ghost;
 
 		class Pos

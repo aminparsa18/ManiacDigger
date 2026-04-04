@@ -2,7 +2,7 @@
 
 namespace ManicDigger
 {
-	public class ModManager1 : ModManager
+	public class ModManager1 : IModManager
 	{
 		public int GetMaxBlockTypes()
 		{

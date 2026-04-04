@@ -6,9 +6,9 @@ namespace ManicDigger.Mods.Fortress
 {
 	public class PlayerList : IMod
 	{
-		public void PreStart(ModManager m) { }
+		public void PreStart(IModManager m) { }
 		
-		public void Start(ModManager manager)
+		public void Start(IModManager manager)
 		{
 			m = manager;
 			m.RegisterOnSpecialKey(OnTabKey);
@@ -16,7 +16,7 @@ namespace ManicDigger.Mods.Fortress
 			m.RegisterTimer(UpdateTab, 1);
 		}
 		
-		ModManager m;
+		IModManager m;
 		
 		public string getPrefix(int playerID)
 		{

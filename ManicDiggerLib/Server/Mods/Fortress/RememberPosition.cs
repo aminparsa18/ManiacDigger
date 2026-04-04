@@ -7,9 +7,9 @@ namespace ManicDigger.Mods
 {
 	public class RememberPosition : IMod
 	{
-		public void PreStart(ModManager m) { }
+		public void PreStart(IModManager m) { }
 		
-		public void Start(ModManager manager)
+		public void Start(IModManager manager)
 		{
 			m = manager;
 			LoadData();
@@ -18,7 +18,7 @@ namespace ManicDigger.Mods
 			m.RegisterOnPlayerLeave(OnLeave);
 		}
 		
-		ModManager m;
+		IModManager m;
 		string filename = "UserData" + Path.DirectorySeparatorChar + "StoredPositions.txt";
 		public PositionStorage positions;
 		

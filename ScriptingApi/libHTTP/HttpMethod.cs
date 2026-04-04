@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace FragLabs.HTTP;
 
-namespace FragLabs.HTTP
+public enum HttpMethod
 {
-    public enum HttpMethod
-    {
-        GET,
-        POST,
-        PUT,
-        DELETE,
-        HEAD,
-        TRACE,
-        OPTIONS,
-        CONNECT,
-        PATCH
-    }
+    GET,
+    POST,
+    PUT,
+    DELETE,
+    HEAD,
+    TRACE,
+    OPTIONS,
+    CONNECT,
+    PATCH
 }

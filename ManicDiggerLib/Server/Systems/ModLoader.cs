@@ -264,7 +264,7 @@ namespace ManicDigger
         Dictionary<string, string[]> modRequirements = new Dictionary<string, string[]>();
         Dictionary<string, bool> loaded = new Dictionary<string, bool>();
 
-        public void Start(ModManager m, List<string> currentRequires)
+        public void Start(IModManager m, List<string> currentRequires)
         {
             /*
             foreach (var mod in mods)
@@ -290,7 +290,7 @@ namespace ManicDigger
             StartJsMods(m);
         }
 
-        void StartJsMods(ModManager m)
+        void StartJsMods(IModManager m)
         {
             jintEngine.SetValue("m", m);
             // todo: javascript mod requirements
@@ -308,7 +308,7 @@ namespace ManicDigger
             }
         }
 
-        void StartMod(string name, IMod mod, ModManager m)
+        void StartMod(string name, IMod mod, IModManager m)
         {
             if (loaded.ContainsKey(name))
             {

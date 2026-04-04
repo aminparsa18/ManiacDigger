@@ -6,9 +6,9 @@ namespace ManicDigger.Mods.Fortress
 {
 	public class HttpStats : IMod
 	{
-		public void PreStart(ModManager m) { }
+		public void PreStart(IModManager m) { }
 		
-		public void Start(ModManager m)
+		public void Start(IModManager m)
 		{
 			var module = new HttpInfoModule();
 			module.m = m;
@@ -25,7 +25,7 @@ namespace ManicDigger.Mods.Fortress
 		}
 
 		Stopwatch stopwatch;
-		public ModManager m;
+		public IModManager m;
 		int pageViews;
 
 		public void Uninstalled(HttpServer server)

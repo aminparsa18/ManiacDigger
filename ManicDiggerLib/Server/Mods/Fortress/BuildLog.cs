@@ -6,11 +6,11 @@ namespace ManicDigger.Mods
 {
 	public class BuildLog : IMod
 	{
-		public void PreStart(ModManager m)
+		public void PreStart(IModManager m)
 		{
 			m.RequireMod("CoreBlocks");
 		}
-		public void Start(ModManager manager)
+		public void Start(IModManager manager)
 		{
 			m = manager;
 			m.RegisterOnBlockBuild(OnBuild);
@@ -19,7 +19,7 @@ namespace ManicDigger.Mods
 			m.RegisterOnSave(OnSave);
 			m.SetGlobalDataNotSaved("LogLines", lines);
 		}
-		ModManager m;
+		IModManager m;
 		public int MaxEntries = 50 * 1000;
 
 		//can't pass LogLine object between mods. Store object as an array of fields instead.

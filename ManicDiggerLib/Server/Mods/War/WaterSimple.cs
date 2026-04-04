@@ -5,12 +5,12 @@ namespace ManicDigger.Mods.War
 {
 	public class WaterSimple : IMod
 	{
-		public void PreStart(ModManager m)
+		public void PreStart(IModManager m)
 		{
 			m.RequireMod("CoreBlocks");
 		}
 		
-		public void Start(ModManager manager)
+		public void Start(IModManager manager)
 		{
 			m = manager;
 			m.RegisterTimer(Update, 1);
@@ -22,7 +22,7 @@ namespace ManicDigger.Mods.War
 		int Water;
 		int Sponge;
 		
-		ModManager m;
+		IModManager m;
 		
 		void BlockBuild(int player, int x, int y, int z)
 		{

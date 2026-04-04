@@ -5,11 +5,11 @@ namespace ManicDigger.Mods
 {
 	public class DefaultWorldGenerator : IMod
 	{
-		public void PreStart(ModManager m)
+		public void PreStart(IModManager m)
 		{
 			m.RequireMod("CoreBlocks");
 		}
-		public void Start(ModManager manager)
+		public void Start(IModManager manager)
 		{
 			m = manager;
 			m.RegisterWorldGenerator(GetChunk);
@@ -33,7 +33,7 @@ namespace ManicDigger.Mods
 			BLOCK_LAVA = m.GetBlockId ("Lava");
 		}
 
-		ModManager m;
+		IModManager m;
 
 		bool started = false;
 		public void GetChunk(int x, int y, int z, ushort[] chunk)

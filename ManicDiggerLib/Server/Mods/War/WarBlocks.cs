@@ -7,11 +7,11 @@ namespace ManicDigger.Mods.War
 	/// </summary>
 	public class WarBlocks : IMod
 	{
-		public void PreStart(ModManager m)
+		public void PreStart(IModManager m)
 		{
 			m.RequireMod("CoreBlocks");
 		}
-		public void Start(ModManager m)
+		public void Start(IModManager m)
 		{
 			SoundSet solidSounds = new SoundSet()
 			{

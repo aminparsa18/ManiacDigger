@@ -5,12 +5,12 @@ namespace ManicDigger.Mods
 {
 	public class VandalFinder : IMod
 	{
-		public void PreStart(ModManager m)
+		public void PreStart(IModManager m)
 		{
 			m.RequireMod("CoreBlocks");
 			m.RequireMod("BuildLog");
 		}
-		public void Start(ModManager manager)
+		public void Start(IModManager manager)
 		{
 			m = manager;
 			m.SetBlockType("VandalFinder", new BlockType()
@@ -26,7 +26,7 @@ namespace ManicDigger.Mods
 			lines = (List<object[]>)m.GetGlobalDataNotSaved("LogLines");
 		}
 		
-		ModManager m;
+		IModManager m;
 		List<object[]> lines = new List<object[]>();
 		
 		void OnUseWithTool(int player, int x, int y, int z, int tool)

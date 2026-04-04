@@ -5,11 +5,11 @@ namespace ManicDigger.Mods
 {
 	public class Revert : IMod
 	{
-		public void PreStart(ModManager m)
+		public void PreStart(IModManager m)
 		{
 			m.RequireMod("BuildLog");
 		}
-		public void Start(ModManager manager)
+		public void Start(IModManager manager)
 		{
 			m = manager;
 			m.RegisterPrivilege("revert");
@@ -17,7 +17,7 @@ namespace ManicDigger.Mods
 			lines = (List<object[]>)m.GetGlobalDataNotSaved("LogLines");
 			m.RegisterOnCommand(OnCommand);
 		}
-		ModManager m;
+		IModManager m;
 		public int MaxRevert = 2000;
 		List<object[]> lines = new List<object[]>();
 		bool OnCommand(int player, string command, string argument)

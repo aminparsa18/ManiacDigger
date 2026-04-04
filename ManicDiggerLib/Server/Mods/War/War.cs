@@ -6,11 +6,11 @@ namespace ManicDigger.Mods.War
 {
 	public class War : IMod
 	{
-		public void PreStart(ModManager m)
+		public void PreStart(IModManager m)
 		{
 			m.RequireMod("CoreBlocks");
 		}
-		public void Start(ModManager manager)
+		public void Start(IModManager manager)
 		{
 			m = manager;
 			CurrentRespawnTime = DateTime.UtcNow;
@@ -84,7 +84,7 @@ namespace ManicDigger.Mods.War
 			public Dictionary<int, int> totalAmmo = new Dictionary<int, int>();
 		}
 		
-		ModManager m;
+		IModManager m;
 		
 		void PlayerJoin(int playerid)
 		{

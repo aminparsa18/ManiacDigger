@@ -7,16 +7,16 @@ namespace ManicDigger.Mods
 	/// </summary>
 	public class CoreBlocks : IMod
 	{
-		ModManager m;
+		IModManager m;
 		SoundSet solidSounds;
 		SoundSet snowSounds;
 		SoundSet noSound;
 
-		public void PreStart(ModManager m)
+		public void PreStart(IModManager m)
 		{
 			m.RequireMod("Core");
 		}
-		public void Start(ModManager manager)
+		public void Start(IModManager manager)
 		{
 			m = manager;
 

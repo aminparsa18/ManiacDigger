@@ -5,11 +5,11 @@ namespace ManicDigger.Mods
 {
 	public class TreeGenerator : IMod
 	{
-		public void PreStart(ModManager m)
+		public void PreStart(IModManager m)
 		{
 			m.RequireMod("CoreBlocks");
 		}
-		public void Start(ModManager manager)
+		public void Start(IModManager manager)
 		{
 			m = manager;
 			BLOCK_GRASS = m.GetBlockId("Grass");
@@ -22,7 +22,7 @@ namespace ManicDigger.Mods
 			BLOCK_BIRCHLEAVES = m.GetBlockId("BirchLeaves");
 			m.RegisterPopulateChunk(PopulateChunk);
 		}
-		ModManager m;
+		IModManager m;
 
 		int treeCount = 20;
 

@@ -4,7 +4,7 @@ namespace ManicDigger.Mods.War
 {
 	public class Noise2DWorldGeneratorWar : IMod
 	{
-		private ModManager m;
+		private IModManager m;
 		private byte[,] _heightcache;
 		private int chunksize;
 		private Random _rnd;
@@ -21,12 +21,12 @@ namespace ManicDigger.Mods.War
 		private int waterlevel = 10;
 		private int seed;
 		
-		public void PreStart (ModManager m)
+		public void PreStart (IModManager m)
 		{
 			m.RequireMod ("CoreBlocks");
 		}
 		
-		public void Start (ModManager manager)
+		public void Start (IModManager manager)
 		{
 			m = manager;
 			m.RegisterWorldGenerator (GetChunk);

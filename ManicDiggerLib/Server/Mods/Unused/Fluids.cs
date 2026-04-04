@@ -45,12 +45,12 @@ namespace ManicDigger.Mods
         int[] dx = {-1,0,1,1, 1, 0,-1,-1};
         int[] dy = { 1,1,1,0,-1,-1,-1, 0};
 
-        public void PreStart(ModManager m)
+        public void PreStart(IModManager m)
         {
             m.RequireMod("Default");
         }
 
-        public void Start(ModManager m)
+        public void Start(IModManager m)
         {
             this.m = m;
             m.RegisterOnBlockUpdate(CheckNeighbors);
@@ -61,7 +61,7 @@ namespace ManicDigger.Mods
             Lava = m.GetBlockId("Lava");
         }
 
-        ModManager m;
+        IModManager m;
 
         int positionHash(int x, int y, int z)
         {

@@ -7,8 +7,8 @@ namespace ManicDigger.Mods
 	/// </summary>
 	public class Core : IMod
 	{
-		public void PreStart(ModManager m) { }
-		public void Start(ModManager m)
+		public void PreStart(IModManager m) { }
+		public void Start(IModManager m)
 		{
 			//Render hint to send to clients
 			m.RenderHint(RenderHint.Fast);

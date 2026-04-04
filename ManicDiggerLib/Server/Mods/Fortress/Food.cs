@@ -4,11 +4,11 @@ namespace ManicDigger.Mods
 {
 	public class Food : IMod
 	{
-		public void PreStart(ModManager m)
+		public void PreStart(IModManager m)
 		{
 			m.RequireMod("CoreBlocks");
 		}
-		public void Start(ModManager manager)
+		public void Start(IModManager manager)
 		{
 			m = manager;
 			
@@ -17,7 +17,7 @@ namespace ManicDigger.Mods
 			Cake = m.GetBlockId("Cake");
 			Apples = m.GetBlockId("Apples");
 		}
-		ModManager m;
+		IModManager m;
 		int Cake;
 		int Apples;
 

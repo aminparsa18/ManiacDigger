@@ -1,10 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Xml.Serialization;
 
-namespace ManicDigger
-{
+namespace ManicDigger;
+
 	[XmlRoot(ElementName = "ManicDiggerServerClient")]
 	public class ServerClient
 	{
@@ -30,8 +27,8 @@ namespace ManicDigger
 			this.Format = 1;
 			this.DefaultGroupGuests = "Guest";
 			this.DefaultGroupRegistered = "Guest";
-			this.Groups = new List<Group>();
-			this.Clients = new List<Client>();
+			this.Groups = [];
+			this.Clients = [];
 		}
 	}
 
@@ -56,7 +53,7 @@ namespace ManicDigger
 		{
 			this.Name = "";
 			this.Level = 0;
-			this.GroupPrivileges = new List<string>();
+			this.GroupPrivileges = [];
 			this.GroupColor = ServerClientMisc.ClientColor.White;
 		}
 
@@ -87,7 +84,7 @@ namespace ManicDigger
 			{
 				passwordString = "X";
 			}
-			return string.Format("{0}:{1}:{2}:{3}:{4}", this.Name, this.Level, ServerClientMisc.PrivilegesString(this.GroupPrivileges), this.GroupColor.ToString(), passwordString);
+			return $"{this.Name}:{this.Level}:{ServerClientMisc.PrivilegesString(this.GroupPrivileges)}:{this.GroupColor.ToString()}:{passwordString}";
 		}
 
 	}
@@ -109,7 +106,7 @@ namespace ManicDigger
 
 		public override string ToString()
 		{
-			return string.Format("{0}:{1}", this.Name, this.Group);
+			return $"{this.Name}:{this.Group}";
 		}
 
 		// Clients are sorted by groups.
@@ -121,12 +118,12 @@ namespace ManicDigger
 
 	public class Spawn
 	{
-		[XmlIgnoreAttribute]
+		[XmlIgnore]
 		public int x;
-		[XmlIgnoreAttribute]
+		[XmlIgnore]
 		public int y;
 		// z is optional
-		[XmlIgnoreAttribute]
+		[XmlIgnore]
 		public int? z;
 
 		public string Coords
@@ -136,14 +133,14 @@ namespace ManicDigger
 				string zString = "";
 				if (this.z != null)
 				{
-					zString = "," + this.z.ToString();
+					zString = $",{this.z}";
 				}
-				return this.x.ToString() + "," + this.y.ToString() + zString;
+				return $"{this.x},{this.y}{zString}";
 			}
 			set
 			{
 				string coords = value;
-				string[] ss = coords.Split(new char[] { ',' });
+				string[] ss = coords.Split([',']);
 
 				try
 				{
@@ -220,9 +217,9 @@ namespace ManicDigger
 		{
 			public static string[] All()
 			{
-				return new string[]
-				{
-					build,
+				return
+                [
+                    build,
 					use,
 					freemove,
 					chat,
@@ -270,7 +267,7 @@ namespace ManicDigger
 					mode,
 					load,
 					time,
-				};
+				];
 			}
 			public static string build = "build";
 			public static string use = "use";
@@ -323,112 +320,128 @@ namespace ManicDigger
 
 		public static List<Group> getDefaultGroups()
 		{
-			List<Group > defaultGroups = new List<Group>();
-			// default guest group
-			ManicDigger.Group guest = new ManicDigger.Group();
-			guest.Name = "Guest";
-			guest.Level = 0;
-			guest.GroupPrivileges = new List<string>();
-			guest.GroupPrivileges.Add(Privilege.chat);
-			guest.GroupPrivileges.Add(Privilege.pm);
-			guest.GroupPrivileges.Add(Privilege.build);
-			guest.GroupPrivileges.Add(Privilege.use);
-			guest.GroupPrivileges.Add(Privilege.login);
-			guest.GroupPrivileges.Add(Privilege.tp);
-			guest.GroupPrivileges.Add(Privilege.tp_pos);
-			guest.GroupPrivileges.Add(Privilege.freemove);
-			guest.GroupColor = ClientColor.Grey;
-			defaultGroups.Add(guest);
-			// default builder group
-			ManicDigger.Group builder = new ManicDigger.Group();
-			builder.Name = "Builder";
-			builder.Level = 1;
-			builder.GroupPrivileges = new List<string>();
-			builder.GroupPrivileges.Add(Privilege.chat);
-			builder.GroupPrivileges.Add(Privilege.pm);
-			builder.GroupPrivileges.Add(Privilege.build);
-			builder.GroupPrivileges.Add(Privilege.use);
-			builder.GroupPrivileges.Add(Privilege.login);
-			builder.GroupPrivileges.Add(Privilege.tp);
-			builder.GroupPrivileges.Add(Privilege.tp_pos);
-			builder.GroupPrivileges.Add(Privilege.set_home);
-			builder.GroupPrivileges.Add(Privilege.freemove);
-			builder.GroupColor = ClientColor.Green;
-			defaultGroups.Add(builder);
-			// default moderator group
-			ManicDigger.Group moderator = new ManicDigger.Group();
-			moderator.Name = "Moderator";
-			moderator.Level = 2;
-			moderator.GroupPrivileges = new List<string>();
-			moderator.GroupPrivileges.Add(Privilege.chat);
-			moderator.GroupPrivileges.Add(Privilege.pm);
-			moderator.GroupPrivileges.Add(Privilege.build);
-			moderator.GroupPrivileges.Add(Privilege.use);
-			moderator.GroupPrivileges.Add(Privilege.freemove);
-			moderator.GroupPrivileges.Add(Privilege.kick);
-			moderator.GroupPrivileges.Add(Privilege.ban);
-			moderator.GroupPrivileges.Add(Privilege.banip);
-			moderator.GroupPrivileges.Add(Privilege.ban_offline);
-			moderator.GroupPrivileges.Add(Privilege.unban);
-			moderator.GroupPrivileges.Add(Privilege.list_clients);
-			moderator.GroupPrivileges.Add(Privilege.list_saved_clients);
-			moderator.GroupPrivileges.Add(Privilege.list_groups);
-			moderator.GroupPrivileges.Add(Privilege.list_banned_users);
-			moderator.GroupPrivileges.Add(Privilege.list_areas);
-			moderator.GroupPrivileges.Add(Privilege.chgrp);
-			moderator.GroupPrivileges.Add(Privilege.chgrp_offline);
-			moderator.GroupPrivileges.Add(Privilege.remove_client);
-			moderator.GroupPrivileges.Add(Privilege.use_tnt);
-			moderator.GroupPrivileges.Add(Privilege.restart);
-			moderator.GroupPrivileges.Add(Privilege.login);
-			moderator.GroupPrivileges.Add(Privilege.tp);
-			moderator.GroupPrivileges.Add(Privilege.tp_pos);
-			moderator.GroupPrivileges.Add(Privilege.set_home);
-			moderator.GroupPrivileges.Add(Privilege.mode);
-			moderator.GroupColor = ClientColor.Cyan;
-			defaultGroups.Add(moderator);
-			// default admin group
-			ManicDigger.Group admin = new ManicDigger.Group();
-			admin.Name = "Admin";
-			admin.Level = 3;
-			admin.GroupPrivileges = new List<string>();
-			admin.GroupPrivileges.Add(Privilege.chat);
-			admin.GroupPrivileges.Add(Privilege.pm);
-			admin.GroupPrivileges.Add(Privilege.build);
-			admin.GroupPrivileges.Add(Privilege.use);
-			admin.GroupPrivileges.Add(Privilege.freemove);
-			admin.GroupPrivileges.Add(Privilege.kick);
-			admin.GroupPrivileges.Add(Privilege.ban);
-			admin.GroupPrivileges.Add(Privilege.banip);
-			admin.GroupPrivileges.Add(Privilege.ban_offline);
-			admin.GroupPrivileges.Add(Privilege.unban);
-			admin.GroupPrivileges.Add(Privilege.announcement);
-			admin.GroupPrivileges.Add(Privilege.welcome);
-			admin.GroupPrivileges.Add(Privilege.list_clients);
-			admin.GroupPrivileges.Add(Privilege.list_saved_clients);
-			admin.GroupPrivileges.Add(Privilege.list_groups);
-			admin.GroupPrivileges.Add(Privilege.list_banned_users);
-			admin.GroupPrivileges.Add(Privilege.list_areas);
-			admin.GroupPrivileges.Add(Privilege.chgrp);
-			admin.GroupPrivileges.Add(Privilege.chgrp_offline);
-			admin.GroupPrivileges.Add(Privilege.remove_client);
-			admin.GroupPrivileges.Add(Privilege.monsters);
-			admin.GroupPrivileges.Add(Privilege.give);
-			admin.GroupPrivileges.Add(Privilege.giveall);
-			admin.GroupPrivileges.Add(Privilege.use_tnt);
-			admin.GroupPrivileges.Add(Privilege.area_add);
-			admin.GroupPrivileges.Add(Privilege.area_delete);
-			admin.GroupPrivileges.Add(Privilege.restart);
-			admin.GroupPrivileges.Add(Privilege.login);
-			admin.GroupPrivileges.Add(Privilege.tp);
-			admin.GroupPrivileges.Add(Privilege.tp_pos);
-			admin.GroupPrivileges.Add(Privilege.set_home);
-			admin.GroupPrivileges.Add(Privilege.mode);
-			admin.GroupPrivileges.Add(Privilege.load);
-			admin.GroupPrivileges.Add(Privilege.time);
-			admin.GroupPrivileges.Add("revert");
-			admin.GroupColor = ClientColor.Yellow;
-			defaultGroups.Add(admin);
+			List<Group > defaultGroups = [];
+        // default guest group
+        Group guest = new()
+        {
+            Name = "Guest",
+            Level = 0,
+            GroupPrivileges =
+            [
+                Privilege.chat,
+                    Privilege.pm,
+                    Privilege.build,
+                    Privilege.use,
+                    Privilege.login,
+                    Privilege.tp,
+                    Privilege.tp_pos,
+                    Privilege.freemove,
+                ],
+            GroupColor = ClientColor.Grey
+        };
+        defaultGroups.Add(guest);
+        // default builder group
+        Group builder = new()
+        {
+            Name = "Builder",
+            Level = 1,
+            GroupPrivileges =
+            [
+                Privilege.chat,
+                    Privilege.pm,
+                    Privilege.build,
+                    Privilege.use,
+                    Privilege.login,
+                    Privilege.tp,
+                    Privilege.tp_pos,
+                    Privilege.set_home,
+                    Privilege.freemove,
+                ],
+            GroupColor = ClientColor.Green
+        };
+        defaultGroups.Add(builder);
+        // default moderator group
+        Group moderator = new()
+        {
+            Name = "Moderator",
+            Level = 2,
+            GroupPrivileges =
+            [
+                Privilege.chat,
+                    Privilege.pm,
+                    Privilege.build,
+                    Privilege.use,
+                    Privilege.freemove,
+                    Privilege.kick,
+                    Privilege.ban,
+                    Privilege.banip,
+                    Privilege.ban_offline,
+                    Privilege.unban,
+                    Privilege.list_clients,
+                    Privilege.list_saved_clients,
+                    Privilege.list_groups,
+                    Privilege.list_banned_users,
+                    Privilege.list_areas,
+                    Privilege.chgrp,
+                    Privilege.chgrp_offline,
+                    Privilege.remove_client,
+                    Privilege.use_tnt,
+                    Privilege.restart,
+                    Privilege.login,
+                    Privilege.tp,
+                    Privilege.tp_pos,
+                    Privilege.set_home,
+                    Privilege.mode,
+                ],
+            GroupColor = ClientColor.Cyan
+        };
+        defaultGroups.Add(moderator);
+        // default admin group
+        Group admin = new()
+        {
+            Name = "Admin",
+            Level = 3,
+            GroupPrivileges =
+            [
+                Privilege.chat,
+                    Privilege.pm,
+                    Privilege.build,
+                    Privilege.use,
+                    Privilege.freemove,
+                    Privilege.kick,
+                    Privilege.ban,
+                    Privilege.banip,
+                    Privilege.ban_offline,
+                    Privilege.unban,
+                    Privilege.announcement,
+                    Privilege.welcome,
+                    Privilege.list_clients,
+                    Privilege.list_saved_clients,
+                    Privilege.list_groups,
+                    Privilege.list_banned_users,
+                    Privilege.list_areas,
+                    Privilege.chgrp,
+                    Privilege.chgrp_offline,
+                    Privilege.remove_client,
+                    Privilege.monsters,
+                    Privilege.give,
+                    Privilege.giveall,
+                    Privilege.use_tnt,
+                    Privilege.area_add,
+                    Privilege.area_delete,
+                    Privilege.restart,
+                    Privilege.login,
+                    Privilege.tp,
+                    Privilege.tp_pos,
+                    Privilege.set_home,
+                    Privilege.mode,
+                    Privilege.load,
+                    Privilege.time,
+                    "revert",
+                ],
+            GroupColor = ClientColor.Yellow
+        };
+        defaultGroups.Add(admin);
 
 			defaultGroups.Sort();
 			return defaultGroups;
@@ -436,11 +449,13 @@ namespace ManicDigger
 
 		public static List<Client> getDefaultClients()
 		{
-			List<Client > defaultClients = new List<Client>();
-			Client defaultClient = new Client();
-			defaultClient.Name = DefaultPlayerName;
-			defaultClient.Group = getDefaultGroups()[0].Name;
-			defaultClients.Add(defaultClient);
+			List<Client > defaultClients = [];
+        Client defaultClient = new()
+        {
+            Name = DefaultPlayerName,
+            Group = getDefaultGroups()[0].Name
+        };
+        defaultClients.Add(defaultClient);
 
 			return defaultClients;
 		}
@@ -461,43 +476,25 @@ namespace ManicDigger
 
 		public static string ClientColorToString(ClientColor color)
 		{
-			switch (color)
-			{
-				case ClientColor.Black:
-					return "&0";
-				case ClientColor.Blue:
-					return "&1";
-				case ClientColor.Green:
-					return "&2";
-				case ClientColor.Cyan:
-					return "&3";
-				case ClientColor.Red:
-					return "&4";
-				case ClientColor.Purple:
-					return "&5";
-				case ClientColor.Yellow:
-					return "&6";
-				case ClientColor.Grey:
-					return "&7";
-				case ClientColor.DarkGrey:
-					return "&8";
-				case ClientColor.LightBlue:
-					return "&9";
-				case ClientColor.LightGreen:
-					return "&a";
-				case ClientColor.LightCyan:
-					return "&b";
-				case ClientColor.LightRed:
-					return "&c";
-				case ClientColor.LightPink:
-					return "&d";
-				case ClientColor.LightYellow:
-					return "&e";
-				case ClientColor.White:
-					return "&f";
-				default:
-					return "&f"; // white
-			}
-		}
+        return color switch
+        {
+            ClientColor.Black => "&0",
+            ClientColor.Blue => "&1",
+            ClientColor.Green => "&2",
+            ClientColor.Cyan => "&3",
+            ClientColor.Red => "&4",
+            ClientColor.Purple => "&5",
+            ClientColor.Yellow => "&6",
+            ClientColor.Grey => "&7",
+            ClientColor.DarkGrey => "&8",
+            ClientColor.LightBlue => "&9",
+            ClientColor.LightGreen => "&a",
+            ClientColor.LightCyan => "&b",
+            ClientColor.LightRed => "&c",
+            ClientColor.LightPink => "&d",
+            ClientColor.LightYellow => "&e",
+            ClientColor.White => "&f",
+            _ => "&f",// white
+        };
+    }
 	}
-}

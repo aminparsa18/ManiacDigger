@@ -7,10 +7,10 @@ namespace ManicDigger.Mods
 {
 	public class BlockId : IMod
 	{
-		private ModManager m;
+		private IModManager m;
 		public static bool DEBUG = true;
 		
-		public void PreStart(ModManager m)
+		public void PreStart(IModManager m)
 		{
 			// Add all modfiles here which contain block definitions.
 			m.RequireMod("CoreBlocks");
@@ -20,7 +20,7 @@ namespace ManicDigger.Mods
 			m.RequireMod("VandalFinder");
 			
 		}
-		public void Start(ModManager manager)
+		public void Start(IModManager manager)
 		{
 			m = manager;
 			m.RegisterOnLoad(OnLoad);

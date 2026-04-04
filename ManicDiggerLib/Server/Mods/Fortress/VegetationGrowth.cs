@@ -4,11 +4,11 @@ namespace ManicDigger.Mods
 {
 	public class VegetationGrowth : IMod
 	{
-		public void PreStart(ModManager m)
+		public void PreStart(IModManager m)
 		{
 			m.RequireMod("CoreBlocks");
 		}
-		public void Start(ModManager manager)
+		public void Start(IModManager manager)
 		{
 			m = manager;
 			DirtForFarming = m.GetBlockId("DirtForFarming");
@@ -41,7 +41,7 @@ namespace ManicDigger.Mods
 			m.RegisterOnBlockUpdate(BlockTickGrassDeathInDarkness);
 		}
 
-		ModManager m;
+		IModManager m;
 		Random rnd = new Random();
 		int DirtForFarming;
 		int OakSapling;

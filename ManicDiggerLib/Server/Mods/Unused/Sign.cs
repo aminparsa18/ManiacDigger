@@ -5,11 +5,11 @@ namespace ManicDigger.Mods
 {
 	public class Sign : IMod
 	{
-		public void PreStart(ModManager m)
+		public void PreStart(IModManager m)
 		{
 			m.RequireMod("CoreBlocks");
 		}
-		public void Start(ModManager manager)
+		public void Start(IModManager manager)
 		{
 			m = manager;
 			m.SetBlockType(154, "Sign", new BlockType()
@@ -32,6 +32,6 @@ namespace ManicDigger.Mods
 			m.AddToCreativeInventory("PermissionSign");
 		}
 
-		ModManager m;
+		IModManager m;
 	}
 }

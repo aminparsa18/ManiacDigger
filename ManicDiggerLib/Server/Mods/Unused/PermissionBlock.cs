@@ -4,7 +4,7 @@ namespace ManicDigger.Mods
 {
 	public class PermissionBlock : IMod
 	{
-		public void PreStart(ModManager m)
+		public void PreStart(IModManager m)
 		{
 			m.RequireMod("CoreBlocks");
 		}
@@ -12,7 +12,7 @@ namespace ManicDigger.Mods
 		public int PermissionLevelsCount = 4;
 		public int AreaSize = 64;
 		
-		public void Start(ModManager manager)
+		public void Start(IModManager manager)
 		{
 			m = manager;
 			
@@ -31,7 +31,7 @@ namespace ManicDigger.Mods
 			m.RegisterOnBlockBuild(OnBuild);
 			m.RegisterOnBlockDelete(OnDelete);
 		}
-		ModManager m;
+		IModManager m;
 		
 		void OnBuild(int playerid, int x, int y, int z)
 		{

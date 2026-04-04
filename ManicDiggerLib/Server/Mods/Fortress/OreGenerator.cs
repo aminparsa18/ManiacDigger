@@ -4,11 +4,11 @@ namespace ManicDigger.Mods
 {
 	public class OreGenerator : IMod
 	{
-		public void PreStart(ModManager m)
+		public void PreStart(IModManager m)
 		{
 			m.RequireMod("CoreBlocks");
 		}
-		public void Start(ModManager manager)
+		public void Start(IModManager manager)
 		{
 			m = manager;
 			TileIdStone = m.GetBlockId("Stone");
@@ -22,7 +22,7 @@ namespace ManicDigger.Mods
 			TileIdCoalOre = m.GetBlockId("CoalOre");
 			m.RegisterPopulateChunk(PopulateChunk);
 		}
-		ModManager m;
+		IModManager m;
 		Random _rnd = new Random();
 		
 		int TileIdStone;

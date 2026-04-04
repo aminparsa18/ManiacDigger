@@ -5,11 +5,11 @@ namespace ManicDigger.Mods
 {
 	public class Tnt : IMod
 	{
-		public void PreStart(ModManager m)
+		public void PreStart(IModManager m)
 		{
 			m.RequireMod("CoreBlocks");
 		}
-		public void Start(ModManager manager)
+		public void Start(IModManager manager)
 		{
 			m = manager;
 			SoundSet solidSounds = new SoundSet()
@@ -41,7 +41,7 @@ namespace ManicDigger.Mods
 			m.RegisterPrivilege("use_tnt");
 			m.RegisterTimer(UpdateTnt, 5);
 		}
-		ModManager m;
+		IModManager m;
 		int tnt;
 		int adminium;
 		Random rnd = new Random();

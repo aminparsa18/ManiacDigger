@@ -8,13 +8,13 @@ namespace ManicDigger.Mods
 	/// </summary>
 	public class CoreEvents : IMod
 	{
-		ModManager m;
+		IModManager m;
 
-		public void PreStart(ModManager m)
+		public void PreStart(IModManager m)
 		{
 			m.RequireMod("CoreBlocks");
 		}
-		public void Start(ModManager manager)
+		public void Start(IModManager manager)
 		{
 			m = manager;
 			
