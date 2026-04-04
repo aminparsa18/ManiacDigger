@@ -26,6 +26,7 @@
 	<ItemGroup>
 		<PackageReference Include="ENet-CSharp" Version="2.4.8" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.3.0" />
+		<PackageReference Include="NVorbis" Version="0.10.5" />
 		<PackageReference Include="protobuf-net" Version="3.2.56" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
@@ -41,12 +42,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Reference Include="csogg">
-		  <HintPath>..\Lib\csogg.dll</HintPath>
-		</Reference>
-		<Reference Include="csvorbis">
-		  <HintPath>..\Lib\csvorbis.dll</HintPath>
-		</Reference>
 		<Reference Include="OpenTK">
 		  <HintPath>..\Lib\OpenTK.dll</HintPath>
 		</Reference>
