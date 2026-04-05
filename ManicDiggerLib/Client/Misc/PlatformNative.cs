@@ -1605,25 +1605,27 @@ public class GamePlatformNative : GamePlatform
     public override void SetMatrixUniformProjection(Matrix4x4 pMatrix)
     {
         GL.MatrixMode(MatrixMode.Projection);
-        var converted = ToOpenTK(pMatrix);
-        GL.LoadMatrix(ref converted);
+        float[] m =
+   [
+        pMatrix.M11, pMatrix.M12, pMatrix.M13, pMatrix.M14,
+        pMatrix.M21, pMatrix.M22, pMatrix.M23, pMatrix.M24,
+        pMatrix.M31, pMatrix.M32, pMatrix.M33, pMatrix.M34,
+        pMatrix.M41, pMatrix.M42, pMatrix.M43, pMatrix.M44
+   ];
+        GL.LoadMatrix(m);
     }
 
     public override void SetMatrixUniformModelView(Matrix4x4 mvMatrix)
     {
         GL.MatrixMode(MatrixMode.Modelview);
-        var converted = ToOpenTK(mvMatrix);
-        GL.LoadMatrix(ref converted);
-    }
-
-    private static Matrix4 ToOpenTK(Matrix4x4 m)
-    {
-        return new Matrix4(
-            m.M11, m.M21, m.M31, m.M41,
-            m.M12, m.M22, m.M32, m.M42,
-            m.M13, m.M23, m.M33, m.M43,
-            m.M14, m.M24, m.M34, m.M44
-        );
+        float[] m = new float[]
+        {
+        mvMatrix.M11, mvMatrix.M12, mvMatrix.M13, mvMatrix.M14,
+        mvMatrix.M21, mvMatrix.M22, mvMatrix.M23, mvMatrix.M24,
+        mvMatrix.M31, mvMatrix.M32, mvMatrix.M33, mvMatrix.M34,
+        mvMatrix.M41, mvMatrix.M42, mvMatrix.M43, mvMatrix.M44
+        };
+        GL.LoadMatrix(m);
     }
 
     public override void GlClearColorRgbaf(float r, float g, float b, float a)

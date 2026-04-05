@@ -114,9 +114,6 @@ public class Game
         enable_move = true;
         handTexture = -1;
         modelViewInverted = new float[16];
-        GLScaleTempVec3 = Vector3.Zero;
-        GLRotateTempVec3 = Vector3.Zero;
-        GLTranslateTempVec3 = Vector3.Zero;
         identityMatrix = Matrix4x4.Identity;
         Set3dProjectionTempMat4 = Matrix4x4.Identity;
         getAsset = new string[1024 * 2];
@@ -773,54 +770,42 @@ public class Game
         }
     }
 
-    private Vector3 GLScaleTempVec3;
     public void GLScale(float x, float y, float z)
     {
-        Matrix4x4 m;
         if (currentMatrixModeProjection)
         {
-            m = pMatrix.Peek();
+            pMatrix.Replace(pMatrix.Peek() * Matrix4x4.CreateScale(x, y, z));
         }
         else
         {
-            m = mvMatrix.Peek();
+            mvMatrix.Replace(mvMatrix.Peek() * Matrix4x4.CreateScale(x, y, z));
         }
-        GLScaleTempVec3 = new Vector3(x, y, z);
-        m *= Matrix4x4.CreateScale(GLScaleTempVec3);
     }
 
-    private Vector3 GLRotateTempVec3;
     public void GLRotate(float angle, float x, float y, float z)
     {
         angle /= 360;
         angle *= 2 * GetPi();
-        Matrix4x4 m;
         if (currentMatrixModeProjection)
         {
-            m = pMatrix.Peek();
+            pMatrix.Replace(pMatrix.Peek() * Matrix4x4.CreateFromAxisAngle(new Vector3(x, y, z), angle));
         }
         else
         {
-            m = mvMatrix.Peek();
+            mvMatrix.Replace(mvMatrix.Peek() * Matrix4x4.CreateFromAxisAngle(new Vector3(x, y, z), angle));
         }
-        GLRotateTempVec3 =  new Vector3(x, y, z);
-        m *= Matrix4x4.CreateFromAxisAngle(GLRotateTempVec3, angle);
     }
 
-    private Vector3 GLTranslateTempVec3;
     public void GLTranslate(float x, float y, float z)
     {
-        Matrix4x4 m;
         if (currentMatrixModeProjection)
         {
-            m = pMatrix.Peek();
+            pMatrix.Replace(pMatrix.Peek() * Matrix4x4.CreateTranslation(x, y, z));
         }
         else
         {
-            m = mvMatrix.Peek();
+            mvMatrix.Replace(mvMatrix.Peek() * Matrix4x4.CreateTranslation(x, y, z));
         }
-        GLTranslateTempVec3 = new Vector3(x, y, z);
-        m *= Matrix4x4.CreateTranslation(GLTranslateTempVec3);
     }
 
     public void GLPushMatrix()
@@ -860,13 +845,25 @@ public class Game
     {
         if (currentMatrixModeProjection)
         {
-            Matrix4x4 m = pMatrix.Peek();
-            Matrix4x4 output = Matrix4x4.CreateOrthographicOffCenter(left, right, bottom, top, zNear, zFar);
+            pMatrix.Replace(Ortho(left, right, bottom, top, zNear, zFar));
         }
         else
         {
             platform.ThrowException("GLOrtho");
         }
+    }
+
+    private Matrix4x4 Ortho(float left, float right, float bottom, float top, float near, float far)
+    {
+        float lr = 1 / (left - right);
+        float bt = 1 / (bottom - top);
+        float nf = 1 / (near - far);
+        return new Matrix4x4(
+            -2 * lr, 0, 0, 0,
+            0, -2 * bt, 0, 0,
+            0, 0, 2 * nf, 0,
+            (left + right) * lr, (top + bottom) * bt, (far + near) * nf, 1
+        );
     }
 
     public void OrthoMode(int width, int height)
@@ -1341,11 +1338,12 @@ public class Game
     {
         float aspect_ratio = one * Width() / Height();
         Matrix4x4 output = Matrix4x4.CreatePerspectiveFieldOfView(fov, aspect_ratio, znear, zfar);
-        CameraMatrix.lastpmatrix = Set3dProjectionTempMat4;
+        CameraMatrix.lastpmatrix = output;
         GLMatrixModeProjection();
-        GLLoadMatrix(Set3dProjectionTempMat4);
+        GLLoadMatrix(output);
         SetMatrixUniformProjection();
     }
+
     internal bool ENABLE_ZFAR;
 
     internal float zfar()

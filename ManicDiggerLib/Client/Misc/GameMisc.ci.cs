@@ -1788,6 +1788,11 @@ public class StackMatrix4
         count_--;
         return ret;
     }
+
+    internal void Replace(Matrix4x4 m)
+    {
+        values[count_ - 1] = m;
+    }
 }
 
 public class CachedTexture

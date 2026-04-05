@@ -115,16 +115,23 @@ public class MainMenu
         p.GlClearColorBufferAndDepthBuffer();
         p.GlDisableDepthTest();
         p.GlDisableCullFace();
-        {
-            //Mat4.Perspective(pMatrix, 45, one * viewportWidth / viewportHeight, one / 100, one * 1000);
-            //Mat4.Identity_(mvMatrix);
-            //Mat4.Translate(mvMatrix, mvMatrix, Vec3.FromValues(0, 0, z));
-        }
-        {
-            Matrix4x4 pMatrix = Matrix4x4.CreateOrthographicOffCenter(0, p.GetCanvasWidth(), p.GetCanvasHeight(), 0, 0, 10);
-        }
+
+        pMatrix = Ortho(0, p.GetCanvasWidth(), p.GetCanvasHeight(), 0, 0, 10);
 
         screen.Render(dt);
+    }
+
+    private static Matrix4x4 Ortho(float left, float right, float bottom, float top, float near, float far)
+    {
+        float lr = 1 / (left - right);
+        float bt = 1 / (bottom - top);
+        float nf = 1 / (near - far);
+        return new Matrix4x4(
+            -2 * lr, 0, 0, 0,
+            0, -2 * bt, 0, 0,
+            0, 0, 2 * nf, 0,
+            (left + right) * lr, (top + bottom) * bt, (far + near) * nf, 1
+        );
     }
 
     private Screen screen;
@@ -264,12 +271,10 @@ public class MainMenu
     private Model cubeModel;
     public void Draw2dQuad(int textureid, float dx, float dy, float dw, float dh)
     {
-        mvMatrix = Matrix4x4.Identity;
-        mvMatrix = mvMatrix
-            * Matrix4x4.CreateTranslation(dx, dy, 0)
-            * Matrix4x4.CreateScale(dw, dh, 0)
-            * Matrix4x4.CreateScale(one / 2, one / 2, 0)
-            * Matrix4x4.CreateTranslation(one, one, 0);
+        mvMatrix = Matrix4x4.CreateTranslation(one, one, 0)
+            * Matrix4x4.CreateScale(one / 2, one / 2, 1)
+            * Matrix4x4.CreateScale(dw, dh, 1)
+            * Matrix4x4.CreateTranslation(dx, dy, 0);
         SetMatrixUniforms();
         cubeModel ??= p.CreateModel(QuadModelData.GetQuadModelData());
         p.BindTexture2d(textureid);
