@@ -7,8 +7,6 @@ public class ScriptConsole
         m_client = client_id;
     }
 
-
-
     public void InjectConsoleCommands(IScriptInterpreter interpreter)
     {
         interpreter.SetFunction("out", new ManicDigger.Action<object>(Print));
@@ -34,8 +32,8 @@ public class ScriptConsole
         interpreter.SetFunction("clear", new ManicDigger.Action(Clear));
     }
 
-    private Server m_server;
-    private int m_client;
+    private readonly Server m_server;
+    private readonly int m_client;
 
     public void Print(object obj)
     {
@@ -78,7 +76,7 @@ public class ScriptConsole
     public Vector3i GetPosition()
     {
         var client = m_server.GetClient(m_client);
-        return m_server.PlayerBlockPosition(client);
+        return Server.PlayerBlockPosition(client);
     }
 
     public void SetBlock(double x, double y, double z, double material)
@@ -94,7 +92,7 @@ public class ScriptConsole
 
     public double GetHeight(double x, double y)
     {
-        return (double)m_server.GetHeight((int)x, (int)y);
+        return m_server.GetHeight((int)x, (int)y);
     }
 
     public void DeleteChunk(double x, double y, double z)
@@ -104,13 +102,13 @@ public class ScriptConsole
 
     public void DeleteChunkRange(double x1, double y1, double z1, double x2, double y2, double z2)
     {
-        List<Vector3i> chunkPositions = new List<Vector3i>();
+        List<Vector3i> chunkPositions = [];
         int chunksize = Server.chunksize;
-        for (int x = (int)x1; x < (int)x2; x = x + chunksize)
+        for (int x = (int)x1; x < (int)x2; x += chunksize)
         {
-            for (int y = (int)y1; y < (int)y2; y = y + chunksize)
+            for (int y = (int)y1; y < (int)y2; y += chunksize)
             {
-                for (int z = (int)z1; z < (int)z2; z = z + chunksize)
+                for (int z = (int)z1; z < (int)z2; z += chunksize)
                 {
                     chunkPositions.Add(new Vector3i() { x = x, y = y, z = z });
                 }
@@ -134,7 +132,6 @@ public class ScriptConsole
         m_server.SetChunks((int)offsetX, (int)offsetY, (int)offsetZ, chunks);
     }
 
-
     public ushort[] GetChunk(double x, double y, double z)
     {
         return m_server.GetChunk((int)x, (int)y, (int)z);
@@ -147,13 +144,13 @@ public class ScriptConsole
 
     public Dictionary<Xyz, ushort[]> GetChunksFromDatabase(double x1, double y1, double z1, double x2, double y2, double z2, string file)
     {
-        List<Xyz> chunkPositions = new List<Xyz>();
+        List<Xyz> chunkPositions = [];
         int chunksize = Server.chunksize;
-        for (int x = (int)x1; x < (int)x2; x = x + chunksize)
+        for (int x = (int)x1; x < (int)x2; x += chunksize)
         {
-            for (int y = (int)y1; y < (int)y2; y = y + chunksize)
+            for (int y = (int)y1; y < (int)y2; y += chunksize)
             {
-                for (int z = (int)z1; z < (int)z2; z = z + chunksize)
+                for (int z = (int)z1; z < (int)z2; z += chunksize)
                 {
                     chunkPositions.Add(new Xyz() { X = x / chunksize, Y = y / chunksize, Z = z / chunksize });
                 }
@@ -167,13 +164,13 @@ public class ScriptConsole
 
     public void CopyChunksToDatabase(double x1, double y1, double z1, double x2, double y2, double z2, string file)
     {
-        List<Vector3i> chunkPositions = new List<Vector3i>();
+        List<Vector3i> chunkPositions = [];
         int chunksize = Server.chunksize;
-        for (int x = (int)x1; x < (int)x2; x = x + chunksize)
+        for (int x = (int)x1; x < (int)x2; x += chunksize)
         {
-            for (int y = (int)y1; y < (int)y2; y = y + chunksize)
+            for (int y = (int)y1; y < (int)y2; y += chunksize)
             {
-                for (int z = (int)z1; z < (int)z2; z = z + chunksize)
+                for (int z = (int)z1; z < (int)z2; z += chunksize)
                 {
                     chunkPositions.Add(new Vector3i() { x = x, y = y, z = z });
                 }
@@ -181,7 +178,6 @@ public class ScriptConsole
         }
         m_server.SaveChunksToDatabase(chunkPositions, file);
     }
-
 
     public void BackupDatabase(string backupFilename)
     {
@@ -198,7 +194,7 @@ public class ScriptConsole
         m_server.ClearInterpreter(m_client);
     }
 
-    Turtle m_turtle;
+    private Turtle m_turtle;
 
     public Turtle Turtle
     {
@@ -222,7 +218,7 @@ public class Turtle
     //   Down, DownNorth, DownNorthEast, DownEast, DownSouthEast, DownSouth, DownSouthWest, DownWest, DownNorthWest,
     //}
 
-    public Vector3i position = new Vector3i(0, 0, 0);
+    public Vector3i position = new(0, 0, 0);
 
     public double x { get { return position.x; } }
 
@@ -239,14 +235,14 @@ public class Turtle
 
     public double material = 0;
 
-    public void put()
+    public void Put()
     {
         Console.SetBlock(x, y, z, material);
     }
 
-    public Vector3i direction = new Vector3i(0, -1, 0); // turtle looks north by default
+    public Vector3i direction = new(0, -1, 0); // turtle looks north by default
 
-    public void look_north()
+    public void Look_north()
     {
         direction = new Vector3i(0, -1, 0);
     }
@@ -300,7 +296,7 @@ public class Turtle
         direction = array[1];
     }
 
-    private FastStack<Vector3i[]> m_stack = new FastStack<Vector3i[]>();
+    private readonly Stack<Vector3i[]> m_stack = new();
 
     public void status()
     {
@@ -349,32 +345,4 @@ public class Turtle
 
     //}
 
-}
-
-public class FastStack<T>
-{
-    public void Initialize(int maxCount)
-    {
-        values = new T[maxCount];
-    }
-    T[] values;
-    public int Count;
-    public void Push(T value)
-    {
-        while (Count >= values.Length)
-        {
-            Array.Resize(ref values, values.Length * 2);
-        }
-        values[Count] = value;
-        Count++;
-    }
-    public T Pop()
-    {
-        Count--;
-        return values[Count];
-    }
-    public void Clear()
-    {
-        Count = 0;
-    }
 }

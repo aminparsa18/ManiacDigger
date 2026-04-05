@@ -22,7 +22,7 @@
     public override void OnMouseMove(Game game_, MouseEventArgs args) { MouseMove(args); }
     public virtual void OnBackPressed() { }
 
-    void KeyPress(KeyPressEventArgs e)
+    private void KeyPress(KeyPressEventArgs e)
     {
         for (int i = 0; i < WidgetCount; i++)
         {
@@ -64,7 +64,7 @@
         }
     }
 
-    bool MouseDown(int x, int y)
+    private bool MouseDown(int x, int y)
     {
         bool handled = false;
         bool editingChange = false;
@@ -99,7 +99,7 @@
         return handled;
     }
 
-    void MouseUp(int x, int y)
+    private void MouseUp(int x, int y)
     {
         for (int i = 0; i < WidgetCount; i++)
         {
@@ -127,7 +127,7 @@
 
     public virtual void OnButton(MenuWidget w) { }
 
-    void MouseMove(MouseEventArgs e)
+    private void MouseMove(MouseEventArgs e)
     {
         if (e.GetEmulated() && !e.GetForceUsage())
         {
@@ -143,7 +143,7 @@
         }
     }
 
-    bool pointInRect(float x, float y, float rx, float ry, float rw, float rh)
+    private static bool pointInRect(float x, float y, float rx, float ry, float rw, float rh)
     {
         return x >= rx && y >= ry && x < rx + rw && y < ry + rh;
     }
@@ -262,16 +262,16 @@ public class LoginClientCi
         LoginPublicServerKey = publicServerKey;
         shouldLogin = true;
     }
-    string LoginUser;
-    string LoginPassword;
-    string LoginToken;
-    string LoginPublicServerKey;
+    private string LoginUser;
+    private string LoginPassword;
+    private string LoginToken;
+    private string LoginPublicServerKey;
 
-    bool shouldLogin;
-    string loginUrl;
-    HttpResponseCi loginUrlResponse;
-    HttpResponseCi loginResponse;
-    LoginData resultLoginData;
+    private bool shouldLogin;
+    private string loginUrl;
+    private HttpResponseCi loginUrlResponse;
+    private HttpResponseCi loginResponse;
+    private LoginData resultLoginData;
     public void Update(GamePlatform platform)
     {
         if (loginResult == null)
@@ -297,7 +297,7 @@ public class LoginClientCi
                 shouldLogin = false;
                 string requestString = platform.StringFormat4("username={0}&password={1}&server={2}&token={3}"
                     , LoginUser, LoginPassword, LoginPublicServerKey, LoginToken);
-                IntRef byteArrayLength = new IntRef();
+                IntRef byteArrayLength = new();
                 byte[] byteArray = platform.StringToUtf8ByteArray(requestString, byteArrayLength);
                 loginResponse = new HttpResponseCi();
                 platform.WebClientUploadDataAsync(loginUrl, byteArray, byteArrayLength.value, loginResponse);
@@ -315,7 +315,7 @@ public class LoginClientCi
                 {
                     loginResult.value = LoginResult.Failed;
                 }
-                IntRef linesCount = new IntRef();
+                IntRef linesCount = new();
                 string[] lines = platform.ReadAllLines(responseString, linesCount);
                 if (linesCount.value >= 3)
                 {
@@ -371,7 +371,7 @@ public class UpDown
     public const int Down = 2;
 }
 
-class StringByteArray
+internal class StringByteArray
 {
     internal string name;
     internal byte[] data;
@@ -426,9 +426,11 @@ public class TimerCi
 
     internal static TimerCi Create(int interval_, int maxDeltaTime_)
     {
-        TimerCi timer = new TimerCi();
-        timer.interval = interval_;
-        timer.maxDeltaTime = maxDeltaTime_;
+        TimerCi timer = new()
+        {
+            interval = interval_,
+            maxDeltaTime = maxDeltaTime_
+        };
         return timer;
     }
 }
@@ -437,8 +439,10 @@ public class GetBlockHeight_ : DelegateGetBlockHeight
 {
     public static GetBlockHeight_ Create(Game w_)
     {
-        GetBlockHeight_ g = new GetBlockHeight_();
-        g.w = w_;
+        GetBlockHeight_ g = new()
+        {
+            w = w_
+        };
         return g;
     }
     internal Game w;
@@ -452,11 +456,13 @@ public class IsBlockEmpty_ : DelegateIsBlockEmpty
 {
     public static IsBlockEmpty_ Create(Game w_)
     {
-        IsBlockEmpty_ g = new IsBlockEmpty_();
-        g.w = w_;
+        IsBlockEmpty_ g = new()
+        {
+            w = w_
+        };
         return g;
     }
-    Game w;
+    private Game w;
     public override bool IsBlockEmpty(int x, int y, int z)
     {
         return w.IsTileEmptyForPhysics(x, y, z);
@@ -509,15 +515,17 @@ public class PlayerInterpolate : IInterpolation
     {
         PlayerInterpolationState aa = platform.CastToPlayerInterpolationState(a);
         PlayerInterpolationState bb = platform.CastToPlayerInterpolationState(b);
-        PlayerInterpolationState cc = new PlayerInterpolationState();
-        cc.positionX = aa.positionX + (bb.positionX - aa.positionX) * progress;
-        cc.positionY = aa.positionY + (bb.positionY - aa.positionY) * progress;
-        cc.positionZ = aa.positionZ + (bb.positionZ - aa.positionZ) * progress;
-        //cc.heading = Game.IntToByte(AngleInterpolation.InterpolateAngle256(platform, aa.heading, bb.heading, progress));
-        //cc.pitch = Game.IntToByte(AngleInterpolation.InterpolateAngle256(platform, aa.pitch, bb.pitch, progress));
-        cc.rotx = DegToRad(AngleInterpolation.InterpolateAngle360(platform, RadToDeg(aa.rotx), RadToDeg(bb.rotx), progress));
-        cc.roty = DegToRad(AngleInterpolation.InterpolateAngle360(platform, RadToDeg(aa.roty), RadToDeg(bb.roty), progress));
-        cc.rotz = DegToRad(AngleInterpolation.InterpolateAngle360(platform, RadToDeg(aa.rotz), RadToDeg(bb.rotz), progress));
+        PlayerInterpolationState cc = new()
+        {
+            positionX = aa.positionX + (bb.positionX - aa.positionX) * progress,
+            positionY = aa.positionY + (bb.positionY - aa.positionY) * progress,
+            positionZ = aa.positionZ + (bb.positionZ - aa.positionZ) * progress,
+            //cc.heading = Game.IntToByte(AngleInterpolation.InterpolateAngle256(platform, aa.heading, bb.heading, progress));
+            //cc.pitch = Game.IntToByte(AngleInterpolation.InterpolateAngle256(platform, aa.pitch, bb.pitch, progress));
+            rotx = DegToRad(AngleInterpolation.InterpolateAngle360(platform, RadToDeg(aa.rotx), RadToDeg(bb.rotx), progress)),
+            roty = DegToRad(AngleInterpolation.InterpolateAngle360(platform, RadToDeg(aa.roty), RadToDeg(bb.roty), progress)),
+            rotz = DegToRad(AngleInterpolation.InterpolateAngle360(platform, RadToDeg(aa.rotz), RadToDeg(bb.rotz), progress))
+        };
         return cc;
     }
     public static float RadToDeg(float rad)
@@ -558,9 +566,11 @@ public class Expires
 {
     internal static Expires Create(float p)
     {
-        Expires expires = new Expires();
-        expires.totalTime = p;
-        expires.timeLeft = p;
+        Expires expires = new()
+        {
+            totalTime = p,
+            timeLeft = p
+        };
         return expires;
     }
 
@@ -1002,12 +1012,12 @@ public class DirectionUtils
     public static int RailDirectionFlagsCount(int railDirectionFlags)
     {
         int count = 0;
-        if ((railDirectionFlags & DirectionUtils.ToRailDirectionFlags(RailDirection.DownLeft)) != 0) { count++; }
-        if ((railDirectionFlags & DirectionUtils.ToRailDirectionFlags(RailDirection.DownRight)) != 0) { count++; }
-        if ((railDirectionFlags & DirectionUtils.ToRailDirectionFlags(RailDirection.Horizontal)) != 0) { count++; }
-        if ((railDirectionFlags & DirectionUtils.ToRailDirectionFlags(RailDirection.UpLeft)) != 0) { count++; }
-        if ((railDirectionFlags & DirectionUtils.ToRailDirectionFlags(RailDirection.UpRight)) != 0) { count++; }
-        if ((railDirectionFlags & DirectionUtils.ToRailDirectionFlags(RailDirection.Vertical)) != 0) { count++; }
+        if ((railDirectionFlags & ToRailDirectionFlags(RailDirection.DownLeft)) != 0) { count++; }
+        if ((railDirectionFlags & ToRailDirectionFlags(RailDirection.DownRight)) != 0) { count++; }
+        if ((railDirectionFlags & ToRailDirectionFlags(RailDirection.Horizontal)) != 0) { count++; }
+        if ((railDirectionFlags & ToRailDirectionFlags(RailDirection.UpLeft)) != 0) { count++; }
+        if ((railDirectionFlags & ToRailDirectionFlags(RailDirection.UpRight)) != 0) { count++; }
+        if ((railDirectionFlags & ToRailDirectionFlags(RailDirection.Vertical)) != 0) { count++; }
         return count;
     }
 
@@ -1017,7 +1027,7 @@ public class DirectionUtils
         for (int i = 0; i < directionsCount; i++)
         {
             VehicleDirection12 d = directions[i];
-            flags = flags | DirectionUtils.ToVehicleDirection12Flags(d);
+            flags = flags | ToVehicleDirection12Flags(d);
         }
         return flags;
     }
@@ -1065,12 +1075,14 @@ public class ClientInventoryController : IInventoryController
 {
     public static ClientInventoryController Create(Game game)
     {
-        ClientInventoryController c = new ClientInventoryController();
-        c.g = game;
+        ClientInventoryController c = new()
+        {
+            g = game
+        };
         return c;
     }
 
-    Game g;
+    private Game g;
 
     public override void InventoryClick(Packet_InventoryPosition pos)
     {
@@ -1138,13 +1150,13 @@ public class Player
     internal int CurrentTexture;
     internal HttpResponseCi SkinDownloadResponse;
 
-    public float DefaultEyeHeight()
+    public static float DefaultEyeHeight()
     {
         float one = 1;
         return one * 15 / 10;
     }
 
-    public float DefaultModelHeight()
+    public static float DefaultModelHeight()
     {
         float one = 1;
         return one * 17 / 10;
@@ -1291,7 +1303,7 @@ public class ITerrainTextures
 {
     internal Game game;
 
-    public int texturesPacked() { return game.texturesPacked(); }
+    public int texturesPacked() { return Game.texturesPacked(); }
     public int terrainTexture() { return game.terrainTexture; }
     public int[] terrainTextures1d() { return game.terrainTextures1d; }
     public int terrainTexturesPerAtlas() { return game.terrainTexturesPerAtlas; }
@@ -1620,9 +1632,11 @@ public class ClientModManager1 : ClientModManager
 
     public override void Draw2dText(string text, float x, float y, float fontsize)
     {
-        FontCi font = new FontCi();
-        font.family = "Arial";
-        font.size = fontsize;
+        FontCi font = new()
+        {
+            family = "Arial",
+            size = fontsize
+        };
         game.Draw2dText(text, font, x, y, null, false);
     }
 
@@ -1746,9 +1760,9 @@ public class StackMatrix4
             values[i] = Mat4.Create();
         }
     }
-    float[][] values;
-    const int max = 1024;
-    int count_;
+    private readonly float[][] values;
+    private const int max = 1024;
+    private int count_;
 
     internal void Push(float[] p)
     {
@@ -1820,10 +1834,12 @@ public class FontCi
 
     internal static FontCi Create(string family_, float size_, int style_)
     {
-        FontCi f = new FontCi();
-        f.family = family_;
-        f.size = size_;
-        f.style = style_;
+        FontCi f = new()
+        {
+            family = family_,
+            size = size_,
+            style = style_
+        };
         return f;
     }
 }
@@ -1840,7 +1856,7 @@ public class TextColorRenderer
 
     internal BitmapCi CreateTextTexture(Text_ t)
     {
-        IntRef partsCount = new IntRef();
+        IntRef partsCount = new();
         TextPart[] parts = DecodeColors(t.text, t.color, partsCount);
 
         float totalwidth = 0;
@@ -1850,8 +1866,8 @@ public class TextColorRenderer
 
         for (int i = 0; i < partsCount.value; i++)
         {
-            IntRef outWidth = new IntRef();
-            IntRef outHeight = new IntRef();
+            IntRef outWidth = new();
+            IntRef outHeight = new();
             platform.TextSize(parts[i].text, t.fontsize, outWidth, outHeight);
 
             sizesX[i] = outWidth.value;
@@ -1875,12 +1891,14 @@ public class TextColorRenderer
             {
                 continue;
             }
-            Text_ partText = new Text_();
-            partText.text = parts[i].text;
-            partText.color = parts[i].color;
-            partText.fontsize = t.fontsize;
-            partText.fontstyle = t.fontstyle;
-            partText.fontfamily = t.fontfamily;
+            Text_ partText = new()
+            {
+                text = parts[i].text,
+                color = parts[i].color,
+                fontsize = t.fontsize,
+                fontstyle = t.fontstyle,
+                fontfamily = t.fontfamily
+            };
             BitmapCi partBmp = platform.CreateTextTexture(partText);
             int partWidth = platform.FloatToInt(platform.BitmapGetWidth(partBmp));
             int partHeight = platform.FloatToInt(platform.BitmapGetHeight(partBmp));
@@ -1912,7 +1930,7 @@ public class TextColorRenderer
         int currentcolor = defaultcolor;
         int[] currenttext = new int[256];
         int currenttextLength = 0;
-        IntRef sLength = new IntRef();
+        IntRef sLength = new();
         int[] sChars = platform.StringToCharArray(s, sLength);
         for (int i = 0; i < sLength.value; i++)
         {
@@ -1930,9 +1948,11 @@ public class TextColorRenderer
                         if (currenttextLength != 0)
                         {
                             //Add content so far to return value
-                            TextPart part = new TextPart();
-                            part.text = platform.CharArrayToString(currenttext, currenttextLength);
-                            part.color = currentcolor;
+                            TextPart part = new()
+                            {
+                                text = platform.CharArrayToString(currenttext, currenttextLength),
+                                color = currentcolor
+                            };
                             parts[partsCount++] = part;
                         }
                         //Update current color and reset stored text
@@ -1966,16 +1986,18 @@ public class TextColorRenderer
         //Add any leftover text parts in current color
         if (currenttextLength != 0)
         {
-            TextPart part = new TextPart();
-            part.text = platform.CharArrayToString(currenttext, currenttextLength);
-            part.color = currentcolor;
+            TextPart part = new()
+            {
+                text = platform.CharArrayToString(currenttext, currenttextLength),
+                color = currentcolor
+            };
             parts[partsCount++] = part;
         }
         retLength.value = partsCount;
         return parts;
     }
 
-    int NextPowerOfTwo(int x)
+    private static int NextPowerOfTwo(int x)
     {
         x--;
         x |= x >> 1;  // handle  2 bit numbers
@@ -1987,7 +2009,7 @@ public class TextColorRenderer
         return x;
     }
 
-    int GetColor(int currentcolor)
+    private static int GetColor(int currentcolor)
     {
         switch (currentcolor)
         {
@@ -2011,7 +2033,7 @@ public class TextColorRenderer
         }
     }
 
-    int HexToInt(int c)
+    private static int HexToInt(int c)
     {
         if (c == '0') { return 0; }
         if (c == '1') { return 1; }
@@ -2059,7 +2081,7 @@ public class Kamera
         MinimumAngle = 0;
         Center = new Vector3Ref();
     }
-    float one;
+    private readonly float one;
     public void GetPosition(GamePlatform platform, Vector3Ref ret)
     {
         float cx = platform.MathCos(tt * one / 2) * GetFlatDistance(platform) + Center.X;
@@ -2068,7 +2090,7 @@ public class Kamera
         ret.Y = Center.Y + GetCameraHeightFromCenter(platform);
         ret.Z = cy;
     }
-    float distance;
+    private float distance;
     public float GetDistance() { return distance; }
     public void SetDistance(float value)
     {
@@ -2080,11 +2102,11 @@ public class Kamera
     }
     internal float Angle;
     internal float MinimumDistance;
-    float GetCameraHeightFromCenter(GamePlatform platform)
+    private float GetCameraHeightFromCenter(GamePlatform platform)
     {
         return platform.MathSin(Angle * Game.GetPi() / 180) * distance;
     }
-    float GetFlatDistance(GamePlatform platform)
+    private float GetFlatDistance(GamePlatform platform)
     {
         return platform.MathCos(Angle * Game.GetPi() / 180) * distance;
     }
@@ -2139,7 +2161,7 @@ public class Kamera
         SetValidAngle();
     }
 
-    void SetValidAngle()
+    private void SetValidAngle()
     {
         if (Angle > MaximumAngle) { Angle = MaximumAngle; }
         if (Angle < MinimumAngle) { Angle = MinimumAngle; }
@@ -2185,11 +2207,13 @@ public class MapStorage2 : IMapStorage2
 {
     public static MapStorage2 Create(Game game)
     {
-        MapStorage2 s = new MapStorage2();
-        s.game = game;
+        MapStorage2 s = new()
+        {
+            game = game
+        };
         return s;
     }
-    Game game;
+    private Game game;
     public override int GetMapSizeX()
     {
         return game.map.MapSizeX;
@@ -2301,10 +2325,10 @@ public class GameData
     {
         Initialize(GlobalVar.MAX_BLOCKTYPES);
     }
-    public void Update()
+    public static void Update()
     {
     }
-    void Initialize(int count)
+    private void Initialize(int count)
     {
         mWhenPlayerPlacesGetsConvertedTo = new int[count];
         mIsFlower = new bool[count];
@@ -2361,41 +2385,41 @@ public class GameData
 
     public int[] DefaultMaterialSlots() { return mDefaultMaterialSlots; }
 
-    int[] mWhenPlayerPlacesGetsConvertedTo;
-    bool[] mIsFlower;
-    int[] mRail;
-    float[] mWalkSpeed;
-    bool[] mIsSlipperyWalk;
-    string[][] mWalkSound;
-    string[][] mBreakSound;
-    string[][] mBuildSound;
-    string[][] mCloneSound;
-    int[] mLightRadius;
-    int[] mStartInventoryAmount;
-    float[] mStrength;
-    int[] mDamageToPlayer;
-    int[] mWalkableType;
+    private int[] mWhenPlayerPlacesGetsConvertedTo;
+    private bool[] mIsFlower;
+    private int[] mRail;
+    private float[] mWalkSpeed;
+    private bool[] mIsSlipperyWalk;
+    private string[][] mWalkSound;
+    private string[][] mBreakSound;
+    private string[][] mBuildSound;
+    private string[][] mCloneSound;
+    private int[] mLightRadius;
+    private int[] mStartInventoryAmount;
+    private float[] mStrength;
+    private int[] mDamageToPlayer;
+    private int[] mWalkableType;
 
-    int[] mDefaultMaterialSlots;
+    private int[] mDefaultMaterialSlots;
 
     // TODO: hardcoded IDs
     // few code sections still expect some hardcoded IDs
-    int mBlockIdEmpty;
-    int mBlockIdDirt;
-    int mBlockIdSponge;
-    int mBlockIdTrampoline;
-    int mBlockIdAdminium;
-    int mBlockIdCompass;
-    int mBlockIdLadder;
-    int mBlockIdEmptyHand;
-    int mBlockIdCraftingTable;
-    int mBlockIdLava;
-    int mBlockIdStationaryLava;
-    int mBlockIdFillStart;
-    int mBlockIdCuboid;
-    int mBlockIdFillArea;
-    int mBlockIdMinecart;
-    int mBlockIdRailstart; // 64 rail tiles
+    private int mBlockIdEmpty;
+    private int mBlockIdDirt;
+    private int mBlockIdSponge;
+    private int mBlockIdTrampoline;
+    private int mBlockIdAdminium;
+    private int mBlockIdCompass;
+    private int mBlockIdLadder;
+    private int mBlockIdEmptyHand;
+    private int mBlockIdCraftingTable;
+    private int mBlockIdLava;
+    private int mBlockIdStationaryLava;
+    private int mBlockIdFillStart;
+    private int mBlockIdCuboid;
+    private int mBlockIdFillArea;
+    private int mBlockIdMinecart;
+    private int mBlockIdRailstart; // 64 rail tiles
 
     public int BlockIdEmpty() { return mBlockIdEmpty; }
     public int BlockIdDirt() { return mBlockIdDirt; }
@@ -2543,7 +2567,7 @@ public class GameData
 
     public const int SoundCount = 8;
 
-    float DeserializeFloat(int p)
+    private static float DeserializeFloat(int p)
     {
         float one = 1;
         return (one * p) / 32;
@@ -2554,11 +2578,13 @@ public class OnCrashHandlerLeave : OnCrashHandler
 {
     public static OnCrashHandlerLeave Create(Game game)
     {
-        OnCrashHandlerLeave oncrash = new OnCrashHandlerLeave();
-        oncrash.g = game;
+        OnCrashHandlerLeave oncrash = new()
+        {
+            g = game
+        };
         return oncrash;
     }
-    Game g;
+    private Game g;
     public override void OnCrash()
     {
         g.SendLeave(Packet_LeaveReasonEnum.Crash);
@@ -2606,11 +2632,13 @@ public class TextureAtlas
     public static RectFRef TextureCoords2d(int textureId, int texturesPacked)
     {
         float one = 1;
-        RectFRef r = new RectFRef();
-        r.y = (one / texturesPacked * (textureId / texturesPacked));
-        r.x = (one / texturesPacked * (textureId % texturesPacked));
-        r.w = one / texturesPacked;
-        r.h = one / texturesPacked;
+        RectFRef r = new()
+        {
+            y = (one / texturesPacked * (textureId / texturesPacked)),
+            x = (one / texturesPacked * (textureId % texturesPacked)),
+            w = one / texturesPacked,
+            h = one / texturesPacked
+        };
         return r;
     }
 }
@@ -2636,7 +2664,7 @@ public class Map
 #if CITO
     macro Index3d(x, y, h, sizex, sizey) ((((((h) * (sizey)) + (y))) * (sizex)) + (x))
 #else
-    static int Index3d(int x, int y, int h, int sizex, int sizey)
+    private static int Index3d(int x, int y, int h, int sizex, int sizey)
     {
         return (h * sizey + y) * sizex + x;
     }
@@ -2674,9 +2702,11 @@ public class Map
         Chunk chunk = chunks[Index3d(cx, cy, cz, mapsizexchunks, mapsizeychunks)];
         if (chunk == null)
         {
-            Chunk c = new Chunk();
-            c.data = new byte[Game.chunksize * Game.chunksize * Game.chunksize];
-            c.baseLight = new byte[Game.chunksize * Game.chunksize * Game.chunksize];
+            Chunk c = new()
+            {
+                data = new byte[Game.chunksize * Game.chunksize * Game.chunksize],
+                baseLight = new byte[Game.chunksize * Game.chunksize * Game.chunksize]
+            };
             chunks[Index3d(cx, cy, cz, mapsizexchunks, mapsizeychunks)] = c;
             return chunks[Index3d(cx, cy, cz, mapsizexchunks, mapsizeychunks)];
         }
@@ -2690,7 +2720,7 @@ public class Map
         chunk.SetBlockInChunk(pos, tileType);
     }
 
-    public void CopyChunk(Chunk chunk, int[] output)
+    public static void CopyChunk(Chunk chunk, int[] output)
     {
         int n = Game.chunksize * Game.chunksize * Game.chunksize;
         if (chunk.dataInt != null)
@@ -2876,7 +2906,7 @@ public class Map
         }
     }
 
-    public void FillChunk(Chunk destination, int destinationchunksize, int sourcex, int sourcey, int sourcez, int[] source, int sourcechunksizeX, int sourcechunksizeY, int sourcechunksizeZ)
+    public static void FillChunk(Chunk destination, int destinationchunksize, int sourcex, int sourcey, int sourcez, int[] source, int sourcechunksizeX, int sourcechunksizeY, int sourcechunksizeZ)
     {
         for (int x = 0; x < destinationchunksize; x++)
         {

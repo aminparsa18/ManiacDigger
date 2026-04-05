@@ -6,8 +6,10 @@
         textures = new DictionaryStringInt1024();
         textTextures = new TextTexture[256];
         textTexturesCount = 0;
-        screen = new ScreenMain();
-        screen.menu = this;
+        screen = new ScreenMain
+        {
+            menu = this
+        };
         loginClient = new LoginClientCi();
         assets = new AssetList();
         assetsLoadProgress = new FloatRef();
@@ -27,13 +29,17 @@
         this.p = p_;
 
         //Initialize translations
-        lang = new Language();
-        lang.platform = p;
+        lang = new Language
+        {
+            platform = p
+        };
         lang.LoadTranslations();
         p.SetTitle(lang.GameName());
 
-        textColorRenderer = new TextColorRenderer();
-        textColorRenderer.platform = p_;
+        textColorRenderer = new TextColorRenderer
+        {
+            platform = p_
+        };
         p_.LoadAssetsAsyc(assets, assetsLoadProgress);
 
         overlap = 200;
@@ -62,13 +68,13 @@
         p.AddOnTouchEvent(MainMenuTouchEventHandler.Create(this));
     }
 
-    int viewportWidth;
-    int viewportHeight;
+    private int viewportWidth;
+    private int viewportHeight;
 
-    float[] mvMatrix;
-    float[] pMatrix;
+    private float[] mvMatrix;
+    private float[] pMatrix;
 
-    bool[] currentlyPressedKeys;
+    private bool[] currentlyPressedKeys;
 
     public void HandleKeyDown(KeyEventArgs e)
     {
@@ -99,7 +105,7 @@
         screen.OnKeyPress(e);
     }
 
-    void DrawScene(float dt)
+    private void DrawScene(float dt)
     {
         p.GlViewport(0, 0, viewportWidth, viewportHeight);
         p.GlClearColorBufferAndDepthBuffer();
@@ -118,7 +124,7 @@
         screen.Render(dt);
     }
 
-    Screen screen;
+    private Screen screen;
 
     internal void DrawButton(string text, float fontSize, float dx, float dy, float dw, float dh, bool pressed)
     {
@@ -167,7 +173,7 @@
         DrawText(motd,          12,     x + 70,                 y + height - 5,         TextAlign.Left,     TextBaseline.Bottom);
     }
 
-    TextTexture GetTextTexture(string text, float fontSize)
+    private TextTexture GetTextTexture(string text, float fontSize)
     {
         for (int i = 0; i < textTexturesCount; i++)
         {
@@ -181,19 +187,21 @@
                 return t;
             }
         }
-        TextTexture textTexture = new TextTexture();
+        TextTexture textTexture = new();
 
-        Text_ text_ = new Text_();
-        text_.text = text;
-        text_.fontsize = fontSize;
-        text_.fontfamily = "Arial";
-        text_.color = Game.ColorFromArgb(255, 255, 255, 255);
+        Text_ text_ = new()
+        {
+            text = text,
+            fontsize = fontSize,
+            fontfamily = "Arial",
+            color = Game.ColorFromArgb(255, 255, 255, 255)
+        };
         BitmapCi textBitmap = textColorRenderer.CreateTextTexture(text_);
 
         int texture = p.LoadTextureFromBitmap(textBitmap);
         
-        IntRef textWidth = new IntRef();
-        IntRef textHeight = new IntRef();
+        IntRef textWidth = new();
+        IntRef textHeight = new();
         p.TextSize(text, fontSize, textWidth, textHeight);
 
         textTexture.texture = texture;
@@ -215,7 +223,7 @@
     {
         if (!textures.Contains(name))
         {
-            BoolRef found = new BoolRef();
+            BoolRef found = new();
             BitmapCi bmp = p.BitmapCreateFromPng(GetFile(name), GetFileLength(name));
             int texture = p.LoadTextureFromBitmap(bmp);
             textures.Set(name, texture);
@@ -250,7 +258,7 @@
         return 0;
     }
 
-    Model cubeModel;
+    private Model cubeModel;
     public void Draw2dQuad(int textureid, float dx, float dy, float dw, float dh)
     {
         Mat4.Identity_(mvMatrix);
@@ -267,36 +275,36 @@
         p.DrawModel(cubeModel);
     }
 
-    void SetMatrixUniforms()
+    private void SetMatrixUniforms()
     {
         p.SetMatrixUniformProjection(pMatrix);
         p.SetMatrixUniformModelView(mvMatrix);
     }
 
-    float degToRad(float degrees)
+    private static float degToRad(float degrees)
     {
         return degrees * GlMatrixMath.PI() / 180;
     }
 
-    float xRot;
-    bool xInv;
-    float xSpeed;
+    private float xRot;
+    private bool xInv;
+    private float xSpeed;
 
-    float yRot;
-    bool yInv;
-    float ySpeed;
+    private float yRot;
+    private bool yInv;
+    private float ySpeed;
 
-    int overlap;
-    int minspeed;
-    RandomCi rnd;
+    private int overlap;
+    private int minspeed;
+    private RandomCi rnd;
 
-    float z;
+    private float z;
 
-    int filter;
+    private int filter;
 
-    bool initialized;
+    private bool initialized;
 
-    void Animate(float dt)
+    private void Animate(float dt)
     {
         float maxDt = 1;
         if (dt > maxDt)
@@ -372,10 +380,10 @@
         screen.OnMouseUp(e);
     }
 
-    bool mousePressed;
+    private bool mousePressed;
 
-    int previousMouseX;
-    int previousMouseY;
+    private int previousMouseX;
+    private int previousMouseY;
 
     public void HandleMouseMove(MouseEventArgs e)
     {
@@ -405,9 +413,9 @@
         screen.OnTouchStart(e);
     }
 
-    int touchId;
-    int previousTouchX;
-    int previousTouchY;
+    private int touchId;
+    private int previousTouchX;
+    private int previousTouchY;
 
     public void HandleTouchMove(TouchEventArgs e)
     {
@@ -430,22 +438,26 @@
         screen.OnTouchEnd(e);
     }
 
-    TextTexture[] textTextures;
-    int textTexturesCount;
+    private readonly TextTexture[] textTextures;
+    private int textTexturesCount;
 
     internal void StartSingleplayer()
     {
-        screen = new ScreenSingleplayer();
-        screen.menu = this;
+        screen = new ScreenSingleplayer
+        {
+            menu = this
+        };
         screen.LoadTranslations();
     }
 
     internal void StartLogin(string serverHash, string ip, int port)
     {
-        ScreenLogin screenLogin = new ScreenLogin();
-        screenLogin.serverHash = serverHash;
-        screenLogin.serverIp = ip;
-        screenLogin.serverPort = port;
+        ScreenLogin screenLogin = new()
+        {
+            serverHash = serverHash,
+            serverIp = ip,
+            serverPort = port
+        };
         screen = screenLogin;
         screen.menu = this;
         screen.LoadTranslations();
@@ -453,7 +465,7 @@
 
     internal void StartConnectToIp()
     {
-        ScreenConnectToIp screenConnectToIp = new ScreenConnectToIp();
+        ScreenConnectToIp screenConnectToIp = new();
         screen = screenConnectToIp;
         screen.menu = this;
         screen.LoadTranslations();
@@ -466,8 +478,10 @@
 
     internal void StartMainMenu()
     {
-        screen = new ScreenMain();
-        screen.menu = this;
+        screen = new ScreenMain
+        {
+            menu = this
+        };
         p.ExitMousePointerLock();
     }
 
@@ -495,8 +509,10 @@
 
     internal void StartMultiplayer()
     {
-        screen = new ScreenMultiplayer();
-        screen.menu = this;
+        screen = new ScreenMultiplayer
+        {
+            menu = this
+        };
         screen.LoadTranslations();
     }
 
@@ -511,9 +527,9 @@
             loginClient.Login(p, user, password, serverHash, token, loginResult, loginResultData);
         }
     }
-    LoginClientCi loginClient;
+    private readonly LoginClientCi loginClient;
 
-    internal void CreateAccount(string user, string password, LoginResultRef loginResult)
+    internal static void CreateAccount(string user, string password, LoginResultRef loginResult)
     {
         if (user == "" || password == "")
         {
@@ -548,7 +564,7 @@
 
     public int StringLength(string a)
     {
-        IntRef length = new IntRef();
+        IntRef length = new();
         p.StringToCharArray(a, length);
         return length.value;
     }
@@ -570,29 +586,33 @@
         return p.CharArrayToString(charArray, length);
     }
     
-    internal void StartNewWorld()
+    internal static void StartNewWorld()
     {
     }
 
-    internal void StartModifyWorld()
+    internal static void StartModifyWorld()
     {
     }
 
     public void StartGame(bool singleplayer, string singleplayerSavePath, ConnectData connectData)
     {
-        ScreenGame screenGame = new ScreenGame();
-        screenGame.menu = this;
+        ScreenGame screenGame = new()
+        {
+            menu = this
+        };
         screenGame.Start(p, singleplayer, singleplayerSavePath, connectData);
         screen = screenGame;
     }
 
     internal void ConnectToGame(LoginData loginResultData, string username)
     {
-        ConnectData connectData = new ConnectData();
-        connectData.Ip = loginResultData.ServerAddress;
-        connectData.Port = loginResultData.Port;
-        connectData.Auth = loginResultData.AuthCode;
-        connectData.Username = username;
+        ConnectData connectData = new()
+        {
+            Ip = loginResultData.ServerAddress,
+            Port = loginResultData.Port,
+            Auth = loginResultData.AuthCode,
+            Username = username
+        };
 
         StartGame(false, null, connectData);
     }
@@ -649,7 +669,7 @@ public class Screen
     public virtual void OnBackPressed() { }
     public virtual void LoadTranslations() { }
 
-    void KeyDown(KeyEventArgs e)
+    private void KeyDown(KeyEventArgs e)
     {
         for (int i = 0; i < WidgetCount; i++)
         {
@@ -705,7 +725,7 @@ public class Screen
         }
     }
 
-    void KeyPress(KeyPressEventArgs e)
+    private void KeyPress(KeyPressEventArgs e)
     {
         for (int i = 0; i < WidgetCount; i++)
         {
@@ -726,7 +746,7 @@ public class Screen
         }
     }
 
-    void MouseDown(int x, int y)
+    private void MouseDown(int x, int y)
     {
         bool editingChange = false;
         for (int i = 0; i < WidgetCount; i++)
@@ -762,8 +782,8 @@ public class Screen
             }
         }
     }
-    
-    void AllLoseFocus()
+
+    private void AllLoseFocus()
     {
         for (int i = 0; i < WidgetCount; i++)
         {
@@ -774,8 +794,8 @@ public class Screen
             }
         }
     }
-    
-    void MouseUp(int x, int y)
+
+    private void MouseUp(int x, int y)
     {
         for (int i = 0; i < WidgetCount; i++)
         {
@@ -803,7 +823,7 @@ public class Screen
 
     public virtual void OnButton(MenuWidget w) { }
 
-    void MouseMove(MouseEventArgs e)
+    private void MouseMove(MouseEventArgs e)
     {
         if (e.GetEmulated() && !e.GetForceUsage())
         {
@@ -819,7 +839,7 @@ public class Screen
         }
     }
 
-    bool pointInRect(float x, float y, float rx, float ry, float rw, float rh)
+    private static bool pointInRect(float x, float y, float rx, float ry, float rw, float rh)
     {
         return x >= rx && y >= ry && x < rx + rw && y < ry + rh;
     }
@@ -1145,11 +1165,13 @@ public class MainMenuNewFrameHandler : NewFrameHandler
 {
     public static MainMenuNewFrameHandler Create(MainMenu l)
     {
-        MainMenuNewFrameHandler h = new MainMenuNewFrameHandler();
-        h.l = l;
+        MainMenuNewFrameHandler h = new()
+        {
+            l = l
+        };
         return h;
     }
-    MainMenu l;
+    private MainMenu l;
     public override void OnNewFrame(NewFrameEventArgs args)
     {
         l.OnNewFrame(args);
@@ -1160,11 +1182,13 @@ public class MainMenuKeyEventHandler : KeyEventHandler
 {
     public static MainMenuKeyEventHandler Create(MainMenu l)
     {
-        MainMenuKeyEventHandler h = new MainMenuKeyEventHandler();
-        h.l = l;
+        MainMenuKeyEventHandler h = new()
+        {
+            l = l
+        };
         return h;
     }
-    MainMenu l;
+    private MainMenu l;
     public override void OnKeyDown(KeyEventArgs e)
     {
         l.HandleKeyDown(e);
@@ -1184,11 +1208,13 @@ public class MainMenuMouseEventHandler : MouseEventHandler
 {
     public static MainMenuMouseEventHandler Create(MainMenu l)
     {
-        MainMenuMouseEventHandler h = new MainMenuMouseEventHandler();
-        h.l = l;
+        MainMenuMouseEventHandler h = new()
+        {
+            l = l
+        };
         return h;
     }
-    MainMenu l;
+    private MainMenu l;
 
     public override void OnMouseDown(MouseEventArgs e)
     {
@@ -1215,11 +1241,13 @@ public class MainMenuTouchEventHandler : TouchEventHandler
 {
     public static MainMenuTouchEventHandler Create(MainMenu l)
     {
-        MainMenuTouchEventHandler h = new MainMenuTouchEventHandler();
-        h.l = l;
+        MainMenuTouchEventHandler h = new()
+        {
+            l = l
+        };
         return h;
     }
-    MainMenu l;
+    private MainMenu l;
 
     public override void OnTouchStart(TouchEventArgs e)
     {

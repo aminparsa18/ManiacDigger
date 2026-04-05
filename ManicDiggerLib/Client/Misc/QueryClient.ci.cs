@@ -20,45 +20,45 @@
         if (p.EnetAvailable())
         {
             //Create enet client
-            EnetNetClient c = new EnetNetClient();
+            EnetNetClient c = new();
             c.SetPlatform(p);
             client = c;
         }
         else
         {
             //Create TCP client
-            TcpNetClient c = new TcpNetClient();
+            TcpNetClient c = new();
             c.SetPlatform(p);
             client = c;
         }
         //Initialize client
         client.Start();
         client.Connect(ip, port);
-        
+
         //Do network stuff
         SendRequest(client);
         ReadPacket(client);
         
         queryPerformed = true;
     }
-    
-    void SendRequest(NetClient client)
+
+    private static void SendRequest(NetClient client)
     {
         //Create request packet
         Packet_Client pp = ClientPackets.ServerQuery();
         
         //Serialize packet
-        CitoMemoryStream ms = new CitoMemoryStream();
+        CitoMemoryStream ms = new();
         Packet_ClientSerializer.Serialize(ms, pp);
         byte[] data = ms.ToArray();
         
         //Send packet to server
-        INetOutgoingMessage msg = new INetOutgoingMessage();
+        INetOutgoingMessage msg = new();
         msg.Write(data, ms.Length());
         client.SendMessage(msg, MyNetDeliveryMethod.ReliableOrdered);
     }
-    
-    void ReadPacket(NetClient client)
+
+    private void ReadPacket(NetClient client)
     {
         bool success = false;
         int started = p.TimeMillisecondsFromStart();
@@ -79,7 +79,7 @@
                 continue;
             }
             
-            Packet_Server packet = new Packet_Server();
+            Packet_Server packet = new();
             Packet_ServerSerializer.DeserializeBuffer(msg.message, msg.messageLength, packet);
             
             switch (packet.Id)

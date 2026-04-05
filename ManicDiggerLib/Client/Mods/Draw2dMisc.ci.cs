@@ -40,7 +40,7 @@
         DrawEnemyHealthBlock(game);
     }
 
-    internal void DrawMouseCursor(Game game)
+    internal static void DrawMouseCursor(Game game)
     {
         if (!game.GetFreeMouse())
         {
@@ -102,30 +102,34 @@
         DrawEnemyHealthUseInfo(game, name, 1, false);
     }
 
-    internal void DrawEnemyHealthUseInfo(Game game, string name, float progress, bool useInfo)
+    internal static void DrawEnemyHealthUseInfo(Game game, string name, float progress, bool useInfo)
     {
         int y = useInfo ? 55 : 35;
         game.Draw2dTexture(game.WhiteTexture(), game.xcenter(300), 40, 300, y, null, 0, Game.ColorFromArgb(255, 0, 0, 0), false);
         game.Draw2dTexture(game.WhiteTexture(), game.xcenter(300), 40, 300 * progress, y, null, 0, Game.ColorFromArgb(255, 255, 0, 0), false);
-        FontCi font = new FontCi();
-        font.family = "Arial";
-        font.size = 14;
-        IntRef w = new IntRef();
-        IntRef h = new IntRef();
+        FontCi font = new()
+        {
+            family = "Arial",
+            size = 14
+        };
+        IntRef w = new();
+        IntRef h = new();
         game.platform.TextSize(name, 14, w, h);
         game.Draw2dText(name, font, game.xcenter(w.value), 40, null, false);
         if (useInfo)
         {
             name = game.platform.StringFormat(game.language.PressToUse(), "E");
             game.platform.TextSize(name, 10, w, h);
-            FontCi font2 = new FontCi();
-            font2.family = "Arial";
-            font2.size = 10;
+            FontCi font2 = new()
+            {
+                family = "Arial",
+                size = 10
+            };
             game.Draw2dText(name, font2, game.xcenter(w.value), 70, null, false);
         }
     }
 
-    internal void DrawAim(Game game)
+    internal static void DrawAim(Game game)
     {
         if (game.cameratype == CameraType.Overhead)
         {
@@ -142,7 +146,7 @@
         game.Draw2dBitmapFile("target.png", game.Width() / 2 - aimwidth / 2, game.Height() / 2 - aimheight / 2, aimwidth, aimheight);
     }
 
-    internal void DrawAmmo(Game game)
+    internal static void DrawAmmo(Game game)
     {
         Packet_Item item = game.d_Inventory.RightHand[game.ActiveMaterial];
         if (item != null && item.ItemClass == Packet_ItemClassEnum.Block)
@@ -152,9 +156,11 @@
                 int loaded = game.LoadedAmmo[item.BlockId];
                 int total = game.TotalAmmo[item.BlockId];
                 string s = game.platform.StringFormat2("{0}/{1}", game.platform.IntToString(loaded), game.platform.IntToString(total - loaded));
-                FontCi font = new FontCi();
-                font.family = "Arial";
-                font.size = 18;
+                FontCi font = new()
+                {
+                    family = "Arial",
+                    size = 18
+                };
                 game.Draw2dText(s, font, game.Width() - game.TextSizeWidth(s, 18) - 50,
                     game.Height() - game.TextSizeHeight(s, 18) - 50, loaded == 0 ? IntRef.Create(Game.ColorFromArgb(255, 255, 0, 0)) : IntRef.Create(Game.ColorFromArgb(255, 255, 255, 255)), false);
                 if (loaded == 0)
@@ -168,7 +174,7 @@
         }
     }
 
-    void DrawLocalPosition(Game game)
+    private static void DrawLocalPosition(Game game)
     {
         float one = 1;
         if (game.ENABLE_DRAWPOSITION)
@@ -184,14 +190,16 @@
             postext = StringTools.StringAppend(game.platform, postext, game.platform.IntToString(game.MathFloor(heading)));
             postext = StringTools.StringAppend(game.platform, postext, "\nPitch: ");
             postext = StringTools.StringAppend(game.platform, postext, game.platform.IntToString(game.MathFloor(pitch)));
-            FontCi font = new FontCi();
-            font.family = "Arial";
-            font.size = Game.ChatFontSize;
+            FontCi font = new()
+            {
+                family = "Arial",
+                size = Game.ChatFontSize
+            };
             game.Draw2dText(postext, font, 100, 460, null, false);
         }
     }
 
-    void DrawDisconnected(Game game)
+    private static void DrawDisconnected(Game game)
     {
         float one = 1;
         float lagSeconds = one * (game.platform.TimeMillisecondsFromStart() - game.LastReceivedMilliseconds) / 1000;
@@ -199,9 +207,11 @@
             && game.invalidVersionDrawMessage == null && !(game.issingleplayer && (!game.platform.SinglePlayerServerLoaded())))
         {
             game.Draw2dBitmapFile("disconnected.png", game.Width() - 100, 50, 50, 50);
-            FontCi font = new FontCi();
-            font.family = "Arial";
-            font.size = 12;
+            FontCi font = new()
+            {
+                family = "Arial",
+                size = 12
+            };
             game.Draw2dText(game.platform.IntToString(game.platform.FloatToInt(lagSeconds)), font, game.Width() - 100, 50 + 50 + 10, null, false);
             game.Draw2dText("Press F6 to reconnect", font, game.Width() / 2 - 200 / 2, 50, null, false);
         }

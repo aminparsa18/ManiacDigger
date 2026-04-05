@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-public class ServerSystemNotifyEntities : ServerSystem
+﻿public class ServerSystemNotifyEntities : ServerSystem
 {
+    private readonly int PlayerPositionUpdatesPerSecond = 10;
+    private readonly int EntityPositionUpdatesPerSecond = 10;
+    private readonly int SpawnMaxEntities = 32;
+
     public override void Update(Server server, float dt)
     {
         foreach (var k in server.clients)
@@ -29,7 +29,7 @@ public class ServerSystemNotifyEntities : ServerSystem
         }
     }
 
-    void NotifyPlayers(Server server, int clientid)
+    private static void NotifyPlayers(Server server, int clientid)
     {
         ClientOnServer c = server.clients[clientid];
         // EntitySpawn
@@ -48,10 +48,8 @@ public class ServerSystemNotifyEntities : ServerSystem
         }
     }
 
-    int PlayerPositionUpdatesPerSecond = 10;
-
     // EntityPositionAndOrientation
-    void NotifyPlayerPositions(Server server, int clientid, float dt)
+    private void NotifyPlayerPositions(Server server, int clientid, float dt)
     {
         ClientOnServer c = server.clients[clientid];
         c.notifyPlayerPositionsAccum += dt;
@@ -85,7 +83,7 @@ public class ServerSystemNotifyEntities : ServerSystem
             }
             else
             {
-                if (server.DistanceSquared(server.PlayerBlockPosition(server.clients[k.Key]), server.PlayerBlockPosition(server.clients[clientid])) > server.config.PlayerDrawDistance * server.config.PlayerDrawDistance)
+                if (Server.DistanceSquared(Server.PlayerBlockPosition(server.clients[k.Key]), Server.PlayerBlockPosition(server.clients[clientid])) > server.config.PlayerDrawDistance * server.config.PlayerDrawDistance)
                 {
                     continue;
                 }
@@ -95,10 +93,7 @@ public class ServerSystemNotifyEntities : ServerSystem
         }
     }
 
-    int EntityPositionUpdatesPerSecond = 10;
-    int SpawnMaxEntities = 32;
-
-    void NotifyEntities(Server server, int clientid, float dt)
+    private void NotifyEntities(Server server, int clientid, float dt)
     {
         ClientOnServer c = server.clients[clientid];
         c.notifyEntitiesAccum += dt;
@@ -167,7 +162,7 @@ public class ServerSystemNotifyEntities : ServerSystem
         }
     }
 
-    int IndexOfNull(ServerEntityId[] list, int listCount)
+    private static int IndexOfNull(ServerEntityId[] list, int listCount)
     {
         for (int i = 0; i < listCount; i++)
         {
@@ -180,7 +175,7 @@ public class ServerSystemNotifyEntities : ServerSystem
         return -1;
     }
 
-    bool Contains(ServerEntityId[] list, int listCount, ServerEntityId value)
+    private static bool Contains(ServerEntityId[] list, int listCount, ServerEntityId value)
     {
         for (int i = 0; i < listCount; i++)
         {
@@ -200,9 +195,9 @@ public class ServerSystemNotifyEntities : ServerSystem
         return false;
     }
 
-    void FindNearEntities(Server server, ClientOnServer c, int maxCount, ServerEntityId[] ret)
+    private static void FindNearEntities(Server server, ClientOnServer c, int maxCount, ServerEntityId[] ret)
     {
-        List<ServerEntityId> list = new List<ServerEntityId>();
+        List<ServerEntityId> list = [];
         int playerx = c.PositionMul32GlX / 32;
         int playery = c.PositionMul32GlZ / 32;
         int playerz = c.PositionMul32GlY / 32;
@@ -239,11 +234,13 @@ public class ServerSystemNotifyEntities : ServerSystem
                         {
                             continue;
                         }
-                        ServerEntityId id = new ServerEntityId();
-                        id.chunkx = chunkx;
-                        id.chunky = chunky;
-                        id.chunkz = chunkz;
-                        id.id = i;
+                        ServerEntityId id = new()
+                        {
+                            chunkx = chunkx,
+                            chunky = chunky,
+                            chunkz = chunkz,
+                            id = i
+                        };
                         list.Add(id);
                     }
                 }
@@ -256,10 +253,10 @@ public class ServerSystemNotifyEntities : ServerSystem
             var entityA = server.d_Map.GetChunk(a.chunkx * Server.chunksize, a.chunky * Server.chunksize, a.chunkz * Server.chunksize).Entities[a.id];
             var entityB = server.d_Map.GetChunk(b.chunkx * Server.chunksize, b.chunky * Server.chunksize, b.chunkz * Server.chunksize).Entities[b.id];
 
-            Vector3i posA = new Vector3i((int)entityA.position.x, (int)entityA.position.y, (int)entityA.position.z);
-            Vector3i posB = new Vector3i((int)entityB.position.x, (int)entityB.position.y, (int)entityB.position.z);
-            Vector3i posPlayer = new Vector3i(c.PositionMul32GlX / 32, c.PositionMul32GlY / 32, c.PositionMul32GlZ / 32);
-            return server.DistanceSquared(posA, posPlayer).CompareTo(server.DistanceSquared(posB, posPlayer));
+            Vector3i posA = new((int)entityA.position.x, (int)entityA.position.y, (int)entityA.position.z);
+            Vector3i posB = new((int)entityB.position.x, (int)entityB.position.y, (int)entityB.position.z);
+            Vector3i posPlayer = new(c.PositionMul32GlX / 32, c.PositionMul32GlY / 32, c.PositionMul32GlZ / 32);
+            return Server.DistanceSquared(posA, posPlayer).CompareTo(Server.DistanceSquared(posB, posPlayer));
         }
         );
 
@@ -274,69 +271,81 @@ public class ServerSystemNotifyEntities : ServerSystem
         }
     }
 
-    Packet_PositionAndOrientation ToNetworkEntityPosition(ServerPlatform platform, ServerEntityPositionAndOrientation position)
+    private static Packet_PositionAndOrientation ToNetworkEntityPosition(ServerPlatform platform, ServerEntityPositionAndOrientation position)
     {
-        Packet_PositionAndOrientation p = new Packet_PositionAndOrientation();
-        p.X = platform.FloatToInt(position.x * 32);
-        p.Y = platform.FloatToInt(position.y * 32);
-        p.Z = platform.FloatToInt(position.z * 32);
-        p.Heading = position.heading;
-        p.Pitch = position.pitch;
-        p.Stance = position.stance;
+        Packet_PositionAndOrientation p = new()
+        {
+            X = platform.FloatToInt(position.x * 32),
+            Y = platform.FloatToInt(position.y * 32),
+            Z = platform.FloatToInt(position.z * 32),
+            Heading = position.heading,
+            Pitch = position.pitch,
+            Stance = position.stance
+        };
         return p;
     }
 
-    Packet_ServerEntity ToNetworkEntity(ServerPlatform platform, ServerEntity entity)
+    private static Packet_ServerEntity ToNetworkEntity(ServerPlatform platform, ServerEntity entity)
     {
-        Packet_ServerEntity p = new Packet_ServerEntity();
+        Packet_ServerEntity p = new();
         if (entity.position != null)
         {
             p.Position = ToNetworkEntityPosition(platform, entity.position);
         }
         if (entity.drawModel != null)
         {
-            p.DrawModel = new Packet_ServerEntityAnimatedModel();
-            p.DrawModel.EyeHeight = platform.FloatToInt(entity.drawModel.eyeHeight * 32);
-            p.DrawModel.Model_ = entity.drawModel.model;
-            p.DrawModel.ModelHeight = platform.FloatToInt(entity.drawModel.modelHeight * 32);
-            p.DrawModel.Texture_ = entity.drawModel.texture;
-            p.DrawModel.DownloadSkin = entity.drawModel.downloadSkin ? 1 : 0;
+            p.DrawModel = new Packet_ServerEntityAnimatedModel
+            {
+                EyeHeight = platform.FloatToInt(entity.drawModel.eyeHeight * 32),
+                Model_ = entity.drawModel.model,
+                ModelHeight = platform.FloatToInt(entity.drawModel.modelHeight * 32),
+                Texture_ = entity.drawModel.texture,
+                DownloadSkin = entity.drawModel.downloadSkin ? 1 : 0
+            };
         }
         if (entity.drawName != null)
         {
-            p.DrawName_ = new Packet_ServerEntityDrawName();
-            p.DrawName_.Name = entity.drawName.name;
-            p.DrawName_.Color = entity.drawName.color;
-            p.DrawName_.OnlyWhenSelected = entity.drawName.onlyWhenSelected;
-            p.DrawName_.ClientAutoComplete = entity.drawName.clientAutoComplete;
+            p.DrawName_ = new Packet_ServerEntityDrawName
+            {
+                Name = entity.drawName.name,
+                Color = entity.drawName.color,
+                OnlyWhenSelected = entity.drawName.onlyWhenSelected,
+                ClientAutoComplete = entity.drawName.clientAutoComplete
+            };
         }
         if (entity.drawText != null)
         {
-            p.DrawText = new Packet_ServerEntityDrawText();
-            p.DrawText.Dx = platform.FloatToInt(entity.drawText.dx * 32);
-            p.DrawText.Dy = platform.FloatToInt(entity.drawText.dy * 32);
-            p.DrawText.Dz = platform.FloatToInt(entity.drawText.dz * 32);
-            p.DrawText.Rotx = platform.FloatToInt(entity.drawText.rotx);
-            p.DrawText.Roty = platform.FloatToInt(entity.drawText.roty);
-            p.DrawText.Rotz = platform.FloatToInt(entity.drawText.rotz);
-            p.DrawText.Text = entity.drawText.text;
+            p.DrawText = new Packet_ServerEntityDrawText
+            {
+                Dx = platform.FloatToInt(entity.drawText.dx * 32),
+                Dy = platform.FloatToInt(entity.drawText.dy * 32),
+                Dz = platform.FloatToInt(entity.drawText.dz * 32),
+                Rotx = platform.FloatToInt(entity.drawText.rotx),
+                Roty = platform.FloatToInt(entity.drawText.roty),
+                Rotz = platform.FloatToInt(entity.drawText.rotz),
+                Text = entity.drawText.text
+            };
         }
         if (entity.push != null)
         {
-            p.Push = new Packet_ServerEntityPush();
-            p.Push.RangeFloat = platform.FloatToInt(entity.push.range * 32);
+            p.Push = new Packet_ServerEntityPush
+            {
+                RangeFloat = platform.FloatToInt(entity.push.range * 32)
+            };
         }
         p.Usable = entity.usable;
         if (entity.drawArea != null)
         {
-            p.DrawArea = new Packet_ServerEntityDrawArea();
-            p.DrawArea.X = entity.drawArea.x;
-            p.DrawArea.Y = entity.drawArea.y;
-            p.DrawArea.Z = entity.drawArea.z;
-            p.DrawArea.Sizex = entity.drawArea.sizex;
-            p.DrawArea.Sizey = entity.drawArea.sizey;
-            p.DrawArea.Sizez = entity.drawArea.sizez;
-            p.DrawArea.VisibleToClientId = entity.drawArea.visibleToClientId;
+            p.DrawArea = new Packet_ServerEntityDrawArea
+            {
+                X = entity.drawArea.x,
+                Y = entity.drawArea.y,
+                Z = entity.drawArea.z,
+                Sizex = entity.drawArea.sizex,
+                Sizey = entity.drawArea.sizey,
+                Sizez = entity.drawArea.sizez,
+                VisibleToClientId = entity.drawArea.visibleToClientId
+            };
         }
 
         return p;

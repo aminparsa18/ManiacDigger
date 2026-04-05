@@ -13,7 +13,7 @@
 		<UseWindowsForms>true</UseWindowsForms>
 	</PropertyGroup>
 
-	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+	<!--<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
 		<PropertyGroup>
 			<_SolutionDir Condition="'$(SolutionDir)' == '' Or '$(SolutionDir)' == '*Undefined*'">$(MSBuildProjectDirectory)\..</_SolutionDir>
 			<_SolutionDir Condition="'$(SolutionDir)' != '' And '$(SolutionDir)' != '*Undefined*'">$(SolutionDir)</_SolutionDir>
@@ -21,7 +21,7 @@
 		<Exec Condition="'$(OS)' == 'Windows_NT' AND '$(Configuration)' != 'FastBuild'" Command="cd &quot;$(_SolutionDir)&quot; &amp;&amp; call BuildCito.bat" />
 		<Exec Condition="'$(OS)' == 'Windows_NT' AND '$(Configuration)' == 'FastBuild'" Command="cd &quot;$(_SolutionDir)&quot; &amp;&amp; call BuildCito.bat fast" />
 		<Exec Condition="'$(OS)' != 'Windows_NT'" Command="cd &quot;$(_SolutionDir)&quot; &amp;&amp; sh ./BuildCito.sh" />
-	</Target>
+	</Target>-->
 
 	<ItemGroup>
 		<PackageReference Include="ENet-CSharp" Version="2.4.8" />
@@ -53,17 +53,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\LibNoise\LibNoise.csproj" />
 		<ProjectReference Include="..\ScriptingApi\ScriptingApi.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Include="..\Lib\ENetX64.dll">
-			<Link>ENetX64.dll</Link>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="..\Lib\ENetX86.dll">
-			<Link>ENetX86.dll</Link>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
 	</ItemGroup>
 
 	<ItemGroup>

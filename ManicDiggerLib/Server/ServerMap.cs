@@ -2,7 +2,6 @@
 using ProtoBuf;
 #endregion
 
-
 [ProtoContract()]
 public class Monster
 {
@@ -35,7 +34,7 @@ public class ServerChunk
     public int LastChange;
     public bool DirtyForSaving;
     [ProtoMember(5, IsRequired = false)]
-    public List<Monster> Monsters = new List<Monster>();
+    public List<Monster> Monsters = new();
     [ProtoMember(7, IsRequired = false)]
     public int EntitiesCount;
     [ProtoMember(8, IsRequired = false)]
@@ -62,22 +61,24 @@ public class ServerMap : IMapStorage2
         //return chunk.data[MapUtilCi.Index3d(x % chunksize, y % chunksize, z % chunksize, chunksize, chunksize)];
         unchecked
         {
-            return chunk.data[MapUtilCi.Index3d(moduloChunk(x), moduloChunk(y), moduloChunk(z), chunksize, chunksize)];
+            return chunk.data[MapUtilCi.Index3d(ModuloChunk(x), ModuloChunk(y), ModuloChunk(z), chunksize, chunksize)];
         }
     }
+
     public override void SetBlock(int x, int y, int z, int tileType)
     {
         ServerChunk chunk = GetChunk(x, y, z);
         unchecked
         {
-            chunk.data[MapUtilCi.Index3d(moduloChunk(x), moduloChunk(y),moduloChunk( z), chunksize, chunksize)] = (ushort)tileType;
+            chunk.data[MapUtilCi.Index3d(ModuloChunk(x), ModuloChunk(y),ModuloChunk( z), chunksize, chunksize)] = (ushort)tileType;
         }
         //chunk.data[MapUtilCi.Index3d(x % chunksize, y % chunksize, z % chunksize, chunksize, chunksize)] = (ushort)tileType;
         chunk.LastChange = d_CurrentTime.GetSimulationCurrentFrame();
         chunk.DirtyForSaving = true;
         UpdateColumnHeight(x, y);
     }
-    void UpdateColumnHeight(int x, int y)
+
+    private void UpdateColumnHeight(int x, int y)
     {
         //todo faster
         int height = MapSizeZ - 1;
@@ -91,12 +92,13 @@ public class ServerMap : IMapStorage2
         }
         d_Heightmap.SetBlock(x, y, height);
     }
+
     public void SetBlockNotMakingDirty(int x, int y, int z, int tileType)
     {
         ServerChunk chunk = GetChunk(x, y, z);
         unchecked
         {
-            chunk.data[MapUtilCi.Index3d(moduloChunk(x), moduloChunk(y), moduloChunk( z), chunksize, chunksize)] = (ushort)tileType;
+            chunk.data[MapUtilCi.Index3d(ModuloChunk(x), ModuloChunk(y), ModuloChunk( z), chunksize, chunksize)] = (ushort)tileType;
         }
         //chunk.data[MapUtilCi.Index3d(x % chunksize, y % chunksize, z % chunksize, chunksize, chunksize)] = (ushort)tileType;
         chunk.DirtyForSaving = true;
@@ -119,9 +121,9 @@ public class ServerMap : IMapStorage2
 
     public ServerChunk GetChunk(int x, int y, int z)
     {
-        x = invertChunk(x);// / chunksize;
-        y = invertChunk(y); // / chunksize;
-        z = invertChunk(z); // / chunksize;
+        x = InvertChunk(x);// / chunksize;
+        y = InvertChunk(y); // / chunksize;
+        z = InvertChunk(z); // / chunksize;
         ServerChunk chunk = GetChunkValid(x, y, z);
         if (chunk == null)
         {
@@ -152,7 +154,7 @@ public class ServerMap : IMapStorage2
         return chunk;
     }
 
-    void UpdateChunkHeight(int x, int y, int z)
+    private void UpdateChunkHeight(int x, int y, int z)
     {
         unchecked
         {
@@ -173,7 +175,7 @@ public class ServerMap : IMapStorage2
         }
     }
 
-    int GetColumnHeightInChunk(ushort[] chunk, int xx, int yy)
+    private int GetColumnHeightInChunk(ushort[] chunk, int xx, int yy)
     {
         int height = chunksize - 1;
         unchecked
@@ -190,7 +192,7 @@ public class ServerMap : IMapStorage2
         }
     }
 
-    ServerChunk DeserializeChunk(byte[] serializedChunk)
+    private ServerChunk DeserializeChunk(byte[] serializedChunk)
     {
         ServerChunk c = Serializer.Deserialize<ServerChunk>(new MemoryStream(serializedChunk));
         unchecked
@@ -212,6 +214,7 @@ public class ServerMap : IMapStorage2
             return c;
         }
     }
+
     private int chunksize = 16;
     private double invertedChunkSize = 1.0 / 16;
     private bool isPower2Chunk = true;
@@ -225,14 +228,16 @@ public class ServerMap : IMapStorage2
             isPower2Chunk = (chunksize & (chunksize - 1)) == 0 && chunksize != 0;
         }
     }
-    public int moduloChunk(int num)
+
+    public int ModuloChunk(int num)
     {
         if (isPower2Chunk)
             return num & (chunksize-1);
         else
             return num % chunksize;
     }
-    public int invertChunk(int num)
+
+    public int InvertChunk(int num)
     {
         return (int)(num * invertedChunkSize);
     }
@@ -242,13 +247,13 @@ public class ServerMap : IMapStorage2
         MapSizeX = sizex;
         MapSizeY = sizey;
         MapSizeZ = sizez;
-        chunks = new ServerChunk[invertChunk(sizex) * invertChunk(sizey)][];
+        chunks = new ServerChunk[InvertChunk(sizex) * InvertChunk(sizey)][];
         //chunks = new ServerChunk[(sizex / chunksize) * (sizey / chunksize)][];
         d_Heightmap.Restart();
     }
 
     public InfiniteMapChunked2dServer d_Heightmap;
-    public unsafe ushort[] GetHeightmapChunk(int x, int y)
+    public ushort[] GetHeightmapChunk(int x, int y)
     {
         //todo don't copy
         unchecked
@@ -271,7 +276,7 @@ public class ServerMap : IMapStorage2
     {
         unchecked
         {
-            ServerChunk[] column = chunks[MapUtilCi.Index2d(cx, cy,invertChunk( MapSizeX))];
+            ServerChunk[] column = chunks[MapUtilCi.Index2d(cx, cy,InvertChunk( MapSizeX))];
             //ServerChunk[] column = chunks[MapUtilCi.Index2d(cx, cy, MapSizeX / chunksize)];
             if (column == null)
             {
@@ -285,11 +290,11 @@ public class ServerMap : IMapStorage2
     {
         unchecked
         {
-            ServerChunk[] column = chunks[MapUtilCi.Index2d(cx, cy, invertChunk(MapSizeX))];
+            ServerChunk[] column = chunks[MapUtilCi.Index2d(cx, cy, InvertChunk(MapSizeX))];
             if (column == null)
             {
-                column = new ServerChunk[invertChunk(MapSizeZ)];
-                chunks[MapUtilCi.Index2d(cx, cy, invertChunk( MapSizeX))] = column;
+                column = new ServerChunk[InvertChunk(MapSizeZ)];
+                chunks[MapUtilCi.Index2d(cx, cy, InvertChunk( MapSizeX))] = column;
             }
             column[cz] = chunk;
         }

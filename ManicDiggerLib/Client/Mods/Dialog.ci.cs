@@ -4,7 +4,7 @@
     {
         packetHandler = new ClientPacketHandlerDialog();
     }
-    ClientPacketHandler packetHandler;
+    private readonly ClientPacketHandler packetHandler;
 
     public override void OnNewFrameDraw2d(Game game, float deltaTime)
     {
@@ -12,7 +12,7 @@
         DrawDialogs(game);
     }
 
-    internal void DrawDialogs(Game game)
+    internal static void DrawDialogs(Game game)
     {
         for (int i = 0; i < game.dialogsCount; i++)
         {
@@ -179,9 +179,11 @@ public class ClientPacketHandlerDialog : ClientPacketHandler
         }
         else
         {
-            VisibleDialog d2 = new VisibleDialog();
-            d2.key = d.DialogId;
-            d2.value = d.Dialog;
+            VisibleDialog d2 = new()
+            {
+                key = d.DialogId,
+                value = d.Dialog
+            };
             d2.screen = ConvertDialog(game, d2.value);
             d2.screen.game = game;
             if (game.GetDialogId(d.DialogId) == -1)
@@ -207,15 +209,17 @@ public class ClientPacketHandlerDialog : ClientPacketHandler
         }
     }
 
-    GameScreen ConvertDialog(Game game, Packet_Dialog p)
+    private static GameScreen ConvertDialog(Game game, Packet_Dialog p)
     {
-        DialogScreen s = new DialogScreen();
-        s.widgets = new MenuWidget[p.WidgetsCount];
-        s.WidgetCount = p.WidgetsCount;
+        DialogScreen s = new()
+        {
+            widgets = new MenuWidget[p.WidgetsCount],
+            WidgetCount = p.WidgetsCount
+        };
         for (int i = 0; i < p.WidgetsCount; i++)
         {
             Packet_Widget a = p.Widgets[i];
-            MenuWidget b = new MenuWidget();
+            MenuWidget b = new();
             if (a.Type == Packet_WidgetTypeEnum.Text)
             {
                 b.type = WidgetType.Label;
@@ -244,10 +248,12 @@ public class ClientPacketHandlerDialog : ClientPacketHandler
             b.color = a.Color;
             if (a.Font != null)
             {
-                b.font = new FontCi();
-                b.font.family = game.ValidFont(a.Font.FamilyName);
-                b.font.size = game.DeserializeFloat(a.Font.SizeFloat);
-                b.font.style = a.Font.FontStyle;
+                b.font = new FontCi
+                {
+                    family = game.ValidFont(a.Font.FamilyName),
+                    size = game.DeserializeFloat(a.Font.SizeFloat),
+                    style = a.Font.FontStyle
+                };
             }
             b.id = a.Id;
             b.isbutton = a.ClickKey != 0;

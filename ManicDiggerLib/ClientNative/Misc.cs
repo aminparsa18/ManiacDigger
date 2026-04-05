@@ -254,7 +254,7 @@ public static class GameStorePath
 
 public static class GameVersion
 {
-    static string gameversion;
+    private static string gameversion;
     public static string Version
     {
         get
@@ -344,7 +344,7 @@ public class CompressionGzip : ICompression
     }
 }
 
-struct TextAndSize
+internal struct TextAndSize
 {
     public string text;
     public float size;
@@ -370,7 +370,7 @@ struct TextAndSize
 public class FastBitmap
 {
     public Bitmap bmp { get; set; }
-    BitmapData bmd;
+    private BitmapData bmd;
 
     public void Lock()
     {

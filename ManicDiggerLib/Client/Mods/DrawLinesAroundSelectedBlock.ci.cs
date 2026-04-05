@@ -5,8 +5,8 @@
         one = 1;
         lines = new DrawWireframeCube();
     }
-    float one;
-    DrawWireframeCube lines;
+    private readonly float one;
+    private readonly DrawWireframeCube lines;
     public override void OnNewFrameDraw3d(Game game, float deltaTime)
     {
         if (game.ENABLE_DRAW2D)
@@ -49,9 +49,9 @@ public class DrawWireframeCube
     {
         one = 1;
     }
-    float one;
+    private readonly float one;
 
-    Model wireframeCube;
+    private Model wireframeCube;
     public void DrawWireframeCube_(Game game, float posx, float posy, float posz, float scalex, float scaley, float scalez)
     {
         game.platform.GLLineWidth(2);

@@ -181,7 +181,8 @@ public interface IModManager
     /// <returns>true if the player has the given privilege, false otherwise</returns>
     bool PlayerHasPrivilege(int player, string p);
 
-    bool IsCreative();
+    bool IsCreative { get; }
+
     bool IsBlockFluid(int block);
 
     /// <summary>
@@ -194,7 +195,7 @@ public interface IModManager
     /// Returns the server's color string for errors
     /// </summary>
     /// <returns>Color code for errors (by default "&4")</returns>
-    string colorError();
+    string ColorError { get; }
 
     /// <summary>
     /// Sends a message to the given player. No formatting is done. Message is sent as given
@@ -220,7 +221,7 @@ public interface IModManager
     /// Get the seed used to generate the current world
     /// </summary>
     /// <returns>The map seed</returns>
-    int GetSeed();
+    int Seed { get; }
 
     int Index3d(int x, int y, int h, int sizex, int sizey);
     void RegisterPopulateChunk(ModDelegates.PopulateChunk f);
@@ -447,11 +448,15 @@ public interface IModManager
     /// <param name="z">Z coordinate of new spawnpoint</param>
     void SetDefaultSpawnPosition(int x, int y, int z);
 
-    string GetServerName();
-    string GetServerMotd();
+    string ServerName { get; }
+
+    string ServerMotd { get; }
+
     float[] MeasureTextSize(string text, DialogFont font);
-    string GetServerIp();
-    string GetServerPort();
+    string ServerIp { get; }
+
+    string ServerPort { get; }
+
     float GetPlayerPing(int player);
 
     /// <summary>
@@ -540,9 +545,10 @@ public interface IModManager
 
     void RegisterOnLoadWorld(ModDelegates.LoadWorld a);
     void SetWorldDatabaseReadOnly(bool readOnly);
-    string CurrentWorld();
+    string CurrentWorld { get; }
+
     void LoadWorld(string filename);
-    string[] GetModPaths();
+    string[] ModPaths { get; }
 
     /// <summary>
     /// Sends an explosion to the player. This does not inflict damage. It just pushes the player.
@@ -591,10 +597,12 @@ public interface IModManager
     /// <param name="module">The actual module</param>
     void InstallHttpModule(string name, Func<string> description, FragLabs.HTTP.IHttpModule module);
 
-    int GetMaxPlayers();
+    int MaxPlayers { get; }
+
     ServerClient GetServerClient();
-    long TotalReceivedBytes();
-    long TotalSentBytes();
+    long TotalReceivedBytes { get; }
+
+    long TotalSentBytes { get; }
 
     /// <summary>
     /// Changes the color of the player name.
@@ -607,13 +615,13 @@ public interface IModManager
     /// Returns the restart interval of the server.
     /// </summary>
     /// <returns>Value of AutoRestartCycle</returns>
-    int GetAutoRestartInterval();
+    int AutoRestartInterval { get; }
 
     /// <summary>
     /// Returns the number of seconds the server has been running
     /// </summary>
     /// <returns>Server uptime in seconds</returns>
-    int GetServerUptimeSeconds();
+    int ServerUptimeSeconds { get; }
 
     /// <summary>
     /// Sends a redirection request to the specified client. The target server has to be public!
@@ -628,7 +636,7 @@ public interface IModManager
     /// Use this when you need to save data in a method registered using RegisterOnSave() before server quits.
     /// </summary>
     /// <returns><i>true</i> if server is about to shutdown</returns>
-    bool IsShuttingDown();
+    bool IsShuttingDown { get; }
 
     /// <summary>
     /// Registers a method to be called every time a player places a block

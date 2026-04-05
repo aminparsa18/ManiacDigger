@@ -177,7 +177,7 @@
         AddEnglish();
     }
 
-    void AddEnglish()
+    private void AddEnglish()
     {
         Add("en", "MainMenu_AssetsLoadProgress", "Loading... {0}%");
         Add("en", "MainMenu_Singleplayer", "Singleplayer");
@@ -408,7 +408,7 @@
         Add("en", "Server_CommandInvalidType", "Invalid type.");
     }
 
-    void Add(string language, string id, string translated)
+    private void Add(string language, string id, string translated)
     {
         if (IsNewLanguage(language))
         {
@@ -426,10 +426,12 @@
         {
         	return;
         }
-        TranslatedString s = new TranslatedString();
-        s.language = language;
-        s.id = id;
-        s.translated = translated;
+        TranslatedString s = new()
+        {
+            language = language,
+            id = id,
+            translated = translated
+        };
         strings[stringsCount++] = s;
     }
     
@@ -469,20 +471,22 @@
             }
             if (replaceIndex != -1)
             {
-                TranslatedString s = new TranslatedString();
-                s.language = language;
-                s.id = id;
-                s.translated = translated;
+                TranslatedString s = new()
+                {
+                    language = language,
+                    id = id,
+                    translated = translated
+                };
                 strings[replaceIndex] = s;
             }
         }
     }
 
-    TranslatedString[] strings;
-    int stringsMax;
-    int stringsCount;
+    private readonly TranslatedString[] strings;
+    private readonly int stringsMax;
+    private int stringsCount;
 
-    bool ContainsTranslation(string language, string id)
+    private bool ContainsTranslation(string language, string id)
     {
     	for (int i = 0; i < stringsCount; i++)
     	{

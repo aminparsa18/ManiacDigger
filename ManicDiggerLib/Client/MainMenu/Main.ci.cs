@@ -12,13 +12,13 @@
         cursorLoaded = false;
     }
 
-    MenuWidget singleplayer;
-    MenuWidget multiplayer;
-    MenuWidget exit;
+    private readonly MenuWidget singleplayer;
+    private readonly MenuWidget multiplayer;
+    private readonly MenuWidget exit;
     internal float windowX;
     internal float windowY;
-    bool queryStringChecked;
-    bool cursorLoaded;
+    private bool queryStringChecked;
+    private bool cursorLoaded;
 
     public override void Render(float dt)
     {
@@ -72,7 +72,7 @@
         DrawWidgets();
     }
 
-    void UseQueryStringIpAndPort(MainMenu menu)
+    private void UseQueryStringIpAndPort(MainMenu menu)
     {
         if (queryStringChecked)
         {

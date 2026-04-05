@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
 
 [XmlRoot(ElementName = "ManicDiggerServerBanlist")]
@@ -38,8 +36,8 @@ public class ServerBanlist
     public int ClearTimeBans()
     {
         int counter = 0;
-        List<string> unbanUsers = new List<string>();
-        List<string> unbanIPs = new List<string>();
+        List<string> unbanUsers = [];
+        List<string> unbanIPs = [];
         //Check banned usernames
         foreach (UserEntry banneduser in BannedUsers)
         {
@@ -89,9 +87,11 @@ public class ServerBanlist
         {
             return false;
         }
-        UserEntry newBan = new UserEntry();
-        newBan.UserName = username;
-        newBan.BannedBy = bannedby;
+        UserEntry newBan = new()
+        {
+            UserName = username,
+            BannedBy = bannedby
+        };
         if (intervalMinutes > 0)
         {
             newBan.BannedUntil = DateTime.UtcNow + TimeSpan.FromMinutes(intervalMinutes);
@@ -115,9 +115,11 @@ public class ServerBanlist
         {
             return false;
         }
-        IPEntry newBan = new IPEntry();
-        newBan.IPAdress = ipadress;
-        newBan.BannedBy = bannedby;
+        IPEntry newBan = new()
+        {
+            IPAdress = ipadress,
+            BannedBy = bannedby
+        };
         if (intervalMinutes > 0)
         {
             newBan.BannedUntil = DateTime.UtcNow + TimeSpan.FromMinutes(intervalMinutes);
@@ -185,8 +187,8 @@ public class ServerBanlist
     public ServerBanlist()
     {
         //Set Defaults
-        this.BannedIPs = new List<IPEntry>();
-        this.BannedUsers = new List<UserEntry>();
+        this.BannedIPs = [];
+        this.BannedUsers = [];
     }
 }
 

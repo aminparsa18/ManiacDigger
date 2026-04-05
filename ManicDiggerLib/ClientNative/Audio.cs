@@ -87,8 +87,8 @@ public class AudioOpenAl
 
     public class AudioTask(GameExit gameexit, AudioDataCs sample, AudioOpenAl audio) : AudioCi
     {
-        private GameExit gameexit = gameexit;
-        private AudioDataCs sample = sample;
+        private readonly GameExit gameexit = gameexit;
+        private readonly AudioDataCs sample = sample;
         public Vector3 position;
 
         public void Play()
@@ -212,7 +212,7 @@ public class AudioOpenAl
         else
         {
             stream.Position = 0;
-            AudioDataCs sample = new OggDecoder().OggToWav(stream);
+            AudioDataCs sample = OggDecoder.OggToWav(stream);
             return sample;
         }
     }
@@ -222,7 +222,7 @@ public class AudioOpenAl
         return new AudioTask(d_GameExit, sample, this);
     }
 
-    public void UpdateListener(Vector3 position, Vector3 orientation)
+    public static void UpdateListener(Vector3 position, Vector3 orientation)
     {
         AL.Listener(ALListener3f.Position, position.X, position.Y, position.Z);
         Vector3 up = Vector3.UnitY;

@@ -3,14 +3,22 @@
     public ModGuiTouchButtons()
     {
         touchButtonsEnabled = false;
-        buttonMenu = new MenuWidget();
-        buttonMenu.image = "TouchMenu.png";
-        buttonInventory = new MenuWidget();
-        buttonInventory.image = "TouchInventory.png";
-        buttonTalk = new MenuWidget();
-        buttonTalk.image = "TouchTalk.png";
-        buttonCamera = new MenuWidget();
-        buttonCamera.image = "TouchCamera.png";
+        buttonMenu = new MenuWidget
+        {
+            image = "TouchMenu.png"
+        };
+        buttonInventory = new MenuWidget
+        {
+            image = "TouchInventory.png"
+        };
+        buttonTalk = new MenuWidget
+        {
+            image = "TouchTalk.png"
+        };
+        buttonCamera = new MenuWidget
+        {
+            image = "TouchCamera.png"
+        };
         widgets[0] = buttonMenu;
         widgets[1] = buttonInventory;
         widgets[2] = buttonTalk;
@@ -19,11 +27,11 @@
         touchIdRotate = -1;
     }
 
-    bool touchButtonsEnabled;
-    MenuWidget buttonMenu;
-    MenuWidget buttonInventory;
-    MenuWidget buttonTalk;
-    MenuWidget buttonCamera;
+    private bool touchButtonsEnabled;
+    private readonly MenuWidget buttonMenu;
+    private readonly MenuWidget buttonInventory;
+    private readonly MenuWidget buttonTalk;
+    private readonly MenuWidget buttonCamera;
 
     public override void OnNewFrameDraw2d(Game game_, float deltaTime)
     {
@@ -73,7 +81,7 @@
         }
     }
 
-    float Scale()
+    private float Scale()
     {
         return game.Scale();
     }
@@ -107,12 +115,12 @@
         }
     }
 
-    int touchIdMove;
-    int touchMoveStartX;
-    int touchMoveStartY;
-    int touchIdRotate;
-    int touchRotateStartX;
-    int touchRotateStartY;
+    private int touchIdMove;
+    private int touchMoveStartX;
+    private int touchMoveStartY;
+    private int touchIdRotate;
+    private int touchRotateStartX;
+    private int touchRotateStartY;
 
     public override void OnTouchStart(Game game_, TouchEventArgs e)
     {

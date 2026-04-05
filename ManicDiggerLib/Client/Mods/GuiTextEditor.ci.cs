@@ -10,17 +10,19 @@
         startX = 100;
         startY = 100;
         charSize = 12;
-        font = new FontCi();
-        font.family = "Courier New";
-        font.size = 12;
+        font = new FontCi
+        {
+            family = "Courier New",
+            size = 12
+        };
     }
-    bool visible;
-    const int maxLines = 128;
-    const int maxColumns = 80;
-    FontCi font;
-    int startX;
-    int startY;
-    int charSize;
+    private bool visible;
+    private const int maxLines = 128;
+    private const int maxColumns = 80;
+    private readonly FontCi font;
+    private readonly int startX;
+    private readonly int startY;
+    private readonly int charSize;
     public override void OnNewFrameDraw2d(Game game, float deltaTime)
     {
         float dt = deltaTime;
@@ -42,9 +44,9 @@
         string spacesString = game.platform.CharArrayToString(spaces, cursorColumn + 1);
         game.Draw2dText(spacesString, font, startX, startY + cursorLine * charSize, null, false);
     }
-    int[][] buffer;
-    int cursorColumn;
-    int cursorLine;
+    private readonly int[][] buffer;
+    private int cursorColumn;
+    private int cursorLine;
     public override void OnKeyDown(Game game_, KeyEventArgs e)
     {
         if (e.GetKeyCode() == game.GetKey(GlKeys.F9))
@@ -112,7 +114,7 @@
         cursorColumn++;
         e.SetHandled(true);
     }
-    string BufferToString()
+    private string BufferToString()
     {
         string s = "";
         for (int i = 0; i < maxLines; i++)
@@ -122,7 +124,7 @@
         }
         return s;
     }
-    string LineToString(int[] line)
+    private string LineToString(int[] line)
     {
         if (line == null)
         {
@@ -130,7 +132,7 @@
         }
         return game.platform.CharArrayToString(line, LineLength(line));
     }
-    int LineLength(int[] line)
+    private static int LineLength(int[] line)
     {
         for (int i = 0; i < maxColumns; i++)
         {

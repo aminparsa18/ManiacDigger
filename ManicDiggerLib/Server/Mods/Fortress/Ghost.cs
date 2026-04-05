@@ -1,69 +1,66 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace ManicDigger.Mods;
 
-namespace ManicDigger.Mods
+//for debugging
+public class Ghost : IMod
 {
-	//for debugging
-	public class Ghost : IMod
-	{
-		public void PreStart(IModManager m) { }
+    private readonly bool enabled = false;
+    private readonly List<Pos> history = [];
+    private IModManager m;
+    private int ghost;
 
-		public void Start(IModManager manager)
-		{
-			m = manager;
-			if (enabled)
-			{
-				m.RegisterOnLoadWorld(OnLoad);
-			}
-		}
+    public void PreStart(IModManager m) { }
 
-		void OnLoad()
-		{
-			m.RegisterTimer(f, 0.1);
-			ghost = m.AddBot("Ghost");
-		}
+    public void Start(IModManager manager)
+    {
+        m = manager;
+        if (enabled)
+        {
+            m.RegisterOnLoadWorld(OnLoad);
+        }
+    }
 
-		bool enabled = false;
+    private void OnLoad()
+    {
+        m.RegisterTimer(F, 0.1);
+        ghost = m.AddBot("Ghost");
+    }
 
-		IModManager m;
-		int ghost;
+    private class Pos
+    {
+        public float x;
+        public float y;
+        public float z;
+        public int heading;
+        public int pitch;
+    }
 
-		class Pos
-		{
-			public float x;
-			public float y;
-			public float z;
-			public int heading;
-			public int pitch;
-		}
+    private void F()
+    {
+        int[] clients = m.AllPlayers();
+        foreach (int p in clients)
+        {
+            if (p == ghost)
+            {
+                continue;
+            }
+            Pos pos = new()
+            {
+                x = m.GetPlayerPositionX(p),
+                y = m.GetPlayerPositionY(p),
+                z = m.GetPlayerPositionZ(p),
 
-		List<Pos> history = new List<Pos>();
-		void f()
-		{
-			int[] clients = m.AllPlayers();
-			foreach (int p in clients)
-			{
-				if (p == ghost)
-				{
-					continue;
-				}
-				Pos pos = new Pos();
-				pos.x = m.GetPlayerPositionX(p);
-				pos.y = m.GetPlayerPositionY(p);
-				pos.z = m.GetPlayerPositionZ(p);
-				
-				pos.heading = m.GetPlayerHeading(p);
-				pos.pitch = m.GetPlayerPitch(p);
-				history.Add(pos);
-			}
-			if (history.Count < 20)
-			{
-				return;
-			}
-			Pos p1 = history[0];
-			history.RemoveAt(0);
-			m.SetPlayerPosition(ghost, p1.x, p1.y, p1.z);
-			m.SetPlayerOrientation(ghost, p1.heading, p1.pitch, 0);
-		}
-	}
+                heading = m.GetPlayerHeading(p),
+                pitch = m.GetPlayerPitch(p)
+            };
+            history.Add(pos);
+        }
+        if (history.Count < 20)
+        {
+            return;
+        }
+        Pos p1 = history[0];
+        history.RemoveAt(0);
+        m.SetPlayerPosition(ghost, p1.x, p1.y, p1.z);
+        m.SetPlayerOrientation(ghost, p1.heading, p1.pitch, 0);
+    }
 }

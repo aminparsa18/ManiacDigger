@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-
-public interface IGetFileStream
+﻿public interface IGetFileStream
 {
     Stream GetFile(string p);
 }
+
 public class GetFileStreamDummy : IGetFileStream
 {
     #region IGetFilePath Members
@@ -21,17 +17,19 @@ public class GetFileStream : IGetFileStream
 {
     public GetFileStream(IEnumerable<string> datapaths)
     {
-        this.DataPaths = new List<string>(datapaths).ToArray();
+        this.DataPaths = [.. datapaths];
     }
+
     public string[] DataPaths;
-    Dictionary<string, byte[]> cache = new Dictionary<string, byte[]>();
-    Dictionary<string, string> remap = new Dictionary<string, string>();
+    private readonly Dictionary<string, byte[]> cache = [];
+    private readonly Dictionary<string, string> remap = [];
+
     public Stream GetFile(string filename)
     {
     retry:
-        if (remap.ContainsKey(filename))
+        if (remap.TryGetValue(filename, out string? value))
         {
-            filename = remap[filename];
+            filename = value;
         }
         if (!cache.ContainsKey(filename))
         {
@@ -47,7 +45,7 @@ public class GetFileStream : IGetFileStream
                     {
                         try
                         {
-                            FileInfo f = new FileInfo(s);
+                            FileInfo f = new(s);
                             cache[f.Name] = File.ReadAllBytes(s);
                         }
                         catch
@@ -63,7 +61,7 @@ public class GetFileStream : IGetFileStream
         string origfilename = filename;
         for (int i = 0; i < 2; i++)
         {
-            if (cache.ContainsKey(filename)) { return new MemoryStream(cache[filename]); }
+            if (cache.TryGetValue(filename, out byte[]? value1)) { return new MemoryStream(value1); }
 
             string f1 = filename.Replace(".png", ".jpg");
             if (cache.ContainsKey(f1)) { remap[origfilename] = f1; goto retry; }
@@ -82,6 +80,7 @@ public class GetFileStream : IGetFileStream
 
         throw new FileNotFoundException(filename);
     }
+
     public void SetFile(string name, byte[] data)
     {
         cache[name] = data;

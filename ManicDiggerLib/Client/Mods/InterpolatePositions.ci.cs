@@ -4,7 +4,7 @@
     {
         InterpolatePositions(game, args.GetDt());
     }
-    internal void InterpolatePositions(Game game, float dt)
+    internal static void InterpolatePositions(Game game, float dt)
     {
         for (int i = 0; i < game.entitiesCount; i++)
         {
@@ -20,9 +20,11 @@
             }
             if(e.playerDrawInfo.interpolation==null)
             {
-                NetworkInterpolation n = new NetworkInterpolation();
-                PlayerInterpolate playerInterpolate = new PlayerInterpolate();
-                playerInterpolate.platform = game.platform;
+                NetworkInterpolation n = new();
+                PlayerInterpolate playerInterpolate = new()
+                {
+                    platform = game.platform
+                };
                 n.req = playerInterpolate;
                 n.DELAYMILLISECONDS = 500;
                 n.EXTRAPOLATE = false;
@@ -36,19 +38,21 @@
             float networkposX = p.networkPosition.x;
             float networkposY = p.networkPosition.y;
             float networkposZ = p.networkPosition.z;
-            if ((!game.Vec3Equal(networkposX, networkposY, networkposZ,
+            if ((!Game.Vec3Equal(networkposX, networkposY, networkposZ,
                             info.lastnetworkposX, info.lastnetworkposY, info.lastnetworkposZ))
                 || p.networkPosition.rotx != info.lastnetworkrotx
                 || p.networkPosition.roty != info.lastnetworkroty
                 || p.networkPosition.rotz != info.lastnetworkrotz)
             {
-                PlayerInterpolationState state = new PlayerInterpolationState();
-                state.positionX = networkposX;
-                state.positionY = networkposY;
-                state.positionZ = networkposZ;
-                state.rotx = p.networkPosition.rotx;
-                state.roty = p.networkPosition.roty;
-                state.rotz = p.networkPosition.rotz;
+                PlayerInterpolationState state = new()
+                {
+                    positionX = networkposX,
+                    positionY = networkposY,
+                    positionZ = networkposZ,
+                    rotx = p.networkPosition.rotx,
+                    roty = p.networkPosition.roty,
+                    rotz = p.networkPosition.rotz
+                };
                 info.interpolation.AddNetworkPacket(state, game.totaltimeMilliseconds);
             }
             PlayerInterpolationState curstate = game.platform.CastToPlayerInterpolationState(info.interpolation.InterpolatedState(game.totaltimeMilliseconds));
@@ -57,7 +61,7 @@
                 curstate = new PlayerInterpolationState();
             }
             //do not interpolate player position if player is controlled by game world
-            if (game.EnablePlayerUpdatePositionContainsKey(i) && !game.EnablePlayerUpdatePosition(i))
+            if (Game.EnablePlayerUpdatePositionContainsKey(i) && !Game.EnablePlayerUpdatePosition(i))
             {
                 curstate.positionX = p.networkPosition.x;
                 curstate.positionY = p.networkPosition.y;
@@ -69,7 +73,7 @@
             info.velocityX = curposX - info.lastcurposX;
             info.velocityY = curposY - info.lastcurposY;
             info.velocityZ = curposZ - info.lastcurposZ;
-            info.moves = (!game.Vec3Equal(curposX, curposY, curposZ, info.lastcurposX, info.lastcurposY, info.lastcurposZ));
+            info.moves = (!Game.Vec3Equal(curposX, curposY, curposZ, info.lastcurposX, info.lastcurposY, info.lastcurposZ));
             info.lastcurposX = curposX;
             info.lastcurposY = curposY;
             info.lastcurposZ = curposZ;

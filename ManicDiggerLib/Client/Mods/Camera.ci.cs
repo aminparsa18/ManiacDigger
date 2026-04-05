@@ -35,14 +35,14 @@
         game.CameraEyeZ = cameraEye.Z;
         return ret;
     }
-    float[] upVec3;
+    private readonly float[] upVec3;
 
     internal float[] FppCamera(Game game)
     {
-        Vector3Ref forward = new Vector3Ref();
+        Vector3Ref forward = new();
         VectorTool.ToVectorInFixedSystem(0, 0, 1, game.player.position.rotx, game.player.position.roty, forward);
-        Vector3Ref cameraEye = new Vector3Ref();
-        Vector3Ref cameraTarget = new Vector3Ref();
+        Vector3Ref cameraEye = new();
+        Vector3Ref cameraTarget = new();
         float playerEyeX = game.player.position.x;
         float playerEyeY = game.player.position.y + game.GetCharacterEyesHeight();
         float playerEyeZ = game.player.position.z;
@@ -76,13 +76,13 @@
         return ret;
     }
 
-    internal void LimitThirdPersonCameraToWalls(Game game, Vector3Ref eye, Vector3Ref target, FloatRef curtppcameradistance)
+    internal static void LimitThirdPersonCameraToWalls(Game game, Vector3Ref eye, Vector3Ref target, FloatRef curtppcameradistance)
     {
         float one = 1;
         Vector3Ref ray_start_point = target;
         Vector3Ref raytarget = eye;
 
-        Line3D pick = new Line3D();
+        Line3D pick = new();
         float raydirX = (raytarget.X - ray_start_point.X);
         float raydirY = (raytarget.Y - ray_start_point.Y);
         float raydirZ = (raytarget.Z - ray_start_point.Z);
@@ -101,7 +101,7 @@
         pick.End[2] = ray_start_point.Z + raydirZ;
 
         //pick terrain
-        IntRef pick2Count = new IntRef();
+        IntRef pick2Count = new();
         BlockPosSide[] pick2 = game.Pick(game.s, pick, pick2Count);
 
         if (pick2Count.value > 0)

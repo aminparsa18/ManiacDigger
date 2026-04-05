@@ -19,11 +19,11 @@
     internal Game game;
     internal FrustumCulling d_FrustumCulling;
     internal bool BindTexture;
-    ListInfo[] models;
-    int modelsCount;
+    private readonly ListInfo[] models;
+    private int modelsCount;
 
-    int[] empty;
-    int emptyCount;
+    private readonly int[] empty;
+    private int emptyCount;
 
 
     public int Add(ModelData modelData, bool transparent, int texture, float centerX, float centerY, float centerZ, float radius)
@@ -98,7 +98,7 @@
     }
 
     // Finds an index in glTextures array.
-    int GetTextureId(int glTexture)
+    private int GetTextureId(int glTexture)
     {
         int id = ArrayIndexOf(glTextures, glTexturesLength, glTexture);
         if (id != -1)
@@ -125,7 +125,7 @@
         return glTexturesLength - increase;
     }
 
-    int ArrayIndexOf(int[] glTextures, int length, int glTexture)
+    private static int ArrayIndexOf(int[] glTextures, int length, int glTexture)
     {
         for (int i = 0; i < length; i++)
         {
@@ -137,7 +137,7 @@
         return -1;
     }
 
-    void SortListsByTexture()
+    private void SortListsByTexture()
     {
         if (tocallSolid == null)
         {
@@ -198,16 +198,16 @@
     }
 
     // Maps from inner texture id to real opengl texture id.
-    int[] glTextures;
-    int glTexturesLength;
-    ToCall[] tocallSolid;
-    ToCall[] tocallTransparent;
+    private int[] glTextures;
+    private int glTexturesLength;
+    private ToCall[] tocallSolid;
+    private ToCall[] tocallTransparent;
     // todo dynamic
     public const int texturesCount = 10;
 
     // Not really needed because display lists perform (at least on some computers)
     // their own frustum culling automatically.
-    void UpdateCulling()
+    private void UpdateCulling()
     {
         int licount = modelsCount;
         for (int i = 0; i < licount; i++)

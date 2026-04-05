@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using ManicDigger;
 
 public partial class Server
@@ -13,7 +11,7 @@ public partial class Server
         {
             case "msg":
             case "pm":
-                ss = argument.Split(new[] { ' ' });
+                ss = argument.Split([' ']);
                 if (ss.Length >= 2)
                 {
                     this.PrivateMessage(sourceClientId, ss[0], string.Join(" ", ss, 1, ss.Length - 1));
@@ -32,7 +30,7 @@ public partial class Server
             case "op":
             case "chgrp":
             case "cg":
-                ss = argument.Split(new[] { ' ' });
+                ss = argument.Split([' ']);
                 if (ss.Length == 2)
                 {
                     this.ChangeGroup(sourceClientId, ss[0], ss[1]);
@@ -43,7 +41,7 @@ public partial class Server
             case "op_offline":
             case "chgrp_offline":
             case "cg_offline":
-                ss = argument.Split(new[] { ' ' });
+                ss = argument.Split([' ']);
                 if (ss.Length == 2)
                 {
                     this.ChangeGroupOffline(sourceClientId, ss[0], ss[1]);
@@ -52,7 +50,7 @@ public partial class Server
                 SendMessage(sourceClientId, colorError + language.Get("Server_CommandInvalidArgs"));
                 return;
             case "remove_client":
-                ss = argument.Split(new[] { ' ' });
+                ss = argument.Split([' ']);
                 if (ss.Length == 1)
                 {
                     this.RemoveClientFromConfig(sourceClientId, ss[0]);
@@ -62,7 +60,7 @@ public partial class Server
                 return;
             case "login":
                 // enables to change temporary group with a group's password (only if group allows it)
-                ss = argument.Split(new[] { ' ' });
+                ss = argument.Split([' ']);
                 if (ss.Length == 2)
                 {
                     this.Login(sourceClientId, ss[0], ss[1]);
@@ -77,7 +75,7 @@ public partial class Server
                 this.Announcement(sourceClientId, argument);
                 return;
             case "logging":
-                ss = argument.Split(new[] { ' ' });
+                ss = argument.Split([' ']);
                 if (ss.Length == 1)
                 {
                     this.SetLogging(sourceClientId, ss[0], "");
@@ -91,8 +89,8 @@ public partial class Server
                 SendMessage(sourceClientId, colorError + language.Get("Server_CommandInvalidArgs"));
                 return;
             case "kick_id":
-                ss = argument.Split(new[] { ' ' });
-                if (!Int32.TryParse(ss[0], out id))
+                ss = argument.Split([' ']);
+                if (!int.TryParse(ss[0], out id))
                 {
                     SendMessage(sourceClientId, colorError + language.Get("Server_CommandInvalidArgs"));
                     return;
@@ -105,7 +103,7 @@ public partial class Server
                 this.Kick(sourceClientId, id);
                 return;
             case "kick":
-                ss = argument.Split(new[] { ' ' });
+                ss = argument.Split([' ']);
                 if (ss.Length >= 2)
                 {
                     this.Kick(sourceClientId, ss[0], string.Join(" ", ss, 1, ss.Length - 1));
@@ -120,11 +118,10 @@ public partial class Server
                 this.GiveAll(sourceClientId, argument);
                 return;
             case "give":
-                ss = argument.Split(new[] { ' ' });
+                ss = argument.Split([' ']);
                 if (ss.Length == 3)
                 {
-                    int amount;
-                    if (!Int32.TryParse(ss[2], out amount))
+                    if (!int.TryParse(ss[2], out int amount))
                     {
                         SendMessage(sourceClientId, colorError + language.Get("Server_CommandInvalidArgs"));
                         return;
@@ -147,7 +144,7 @@ public partial class Server
                 return;
             case "area_add":
                 int areaId;
-                ss = argument.Split(new[] { ' ' });
+                ss = argument.Split([' ']);
 
                 if (ss.Length < 4 || ss.Length > 5)
                 {
@@ -155,14 +152,14 @@ public partial class Server
                     return;
                 }
 
-                if (!Int32.TryParse(ss[0], out areaId))
+                if (!int.TryParse(ss[0], out areaId))
                 {
                     SendMessage(sourceClientId, colorError + language.Get("Server_CommandInvalidArgs"));
                     return;
                 }
                 string coords = ss[1];
-                string[] permittedGroups = ss[2].ToString().Split(new[] { ',' });
-                string[] permittedUsers = ss[3].ToString().Split(new[] { ',' });
+                string[] permittedGroups = ss[2].ToString().Split([',']);
+                string[] permittedUsers = ss[3].ToString().Split([',']);
 
                 int? areaLevel;
                 try
@@ -187,7 +184,7 @@ public partial class Server
                 this.AreaAdd(sourceClientId, areaId, coords, permittedGroups, permittedUsers, areaLevel);
                 return;
             case "area_delete":
-                if (!Int32.TryParse(argument, out areaId))
+                if (!int.TryParse(argument, out areaId))
                 {
                     SendMessage(sourceClientId, colorError + language.Get("Server_CommandInvalidArgs"));
                     return;
@@ -210,7 +207,7 @@ public partial class Server
             case "set_spawn":
                 //           0    1      2 3 4
                 // argument: type target x y z
-                ss = argument.Split(new[] { ' ' });
+                ss = argument.Split([' ']);
 
                 if (ss.Length < 3 || ss.Length > 5)
                 {
@@ -277,14 +274,14 @@ public partial class Server
                 if (string.IsNullOrEmpty(argument))
                 {
                     this.SetSpawnPosition(sourceClientId,
-                                      (int)GetClient(sourceClientId).PositionMul32GlX / 32,
-                                      (int)GetClient(sourceClientId).PositionMul32GlZ / 32,
-                                      (int)GetClient(sourceClientId).PositionMul32GlY / 32);
+                                      GetClient(sourceClientId).PositionMul32GlX / 32,
+                                      GetClient(sourceClientId).PositionMul32GlZ / 32,
+                                      GetClient(sourceClientId).PositionMul32GlY / 32);
                     return;
                 }
                 //            0 1 2
                 // agrument:  x y z
-                ss = argument.Split(new[] { ' ' });
+                ss = argument.Split([' ']);
 
                 if (ss.Length < 2 || ss.Length > 3)
                 {
@@ -333,7 +330,7 @@ public partial class Server
                 this.SetSpawnPosition(sourceClientId, x, y, z);
                 return;
             case "privilege_add":
-                ss = argument.Split(new[] { ' ' });
+                ss = argument.Split([' ']);
                 if (ss.Length != 2)
                 {
                     SendMessage(sourceClientId, colorError + language.Get("Server_CommandInvalidArgs"));
@@ -342,7 +339,7 @@ public partial class Server
                 this.PrivilegeAdd(sourceClientId, ss[0], ss[1]);
                 return;
             case "privilege_remove":
-                ss = argument.Split(new[] { ' ' });
+                ss = argument.Split([' ']);
                 if (ss.Length != 2)
                 {
                     SendMessage(sourceClientId, colorError + language.Get("Server_CommandInvalidArgs"));
@@ -363,7 +360,7 @@ public partial class Server
                 SendMessage(sourceClientId, "Total KBytes/s:" + decimal.Round((decimal)(StatTotalPacketsLength / seconds / 1024), 2, MidpointRounding.AwayFromZero));
                 break;
             case "tp":
-                ss = argument.Split(new[] { ' ' });
+                ss = argument.Split([' ']);
                 if (ss.Length != 1)
                 {
                     SendMessage(sourceClientId, colorError + language.Get("Server_CommandInvalidArgs"));
@@ -388,7 +385,7 @@ public partial class Server
                 SendMessage(sourceClientId, string.Format(language.Get("Server_CommandNonexistantPlayer"), colorError, ss[0]));
                 break;
             case "tp_pos":
-                ss = argument.Split(new[] { ' ' });
+                ss = argument.Split([' ']);
                 if (ss.Length < 2 || ss.Length > 3)
                 {
                     SendMessage(sourceClientId, colorError + language.Get("Server_CommandInvalidArgs"));
@@ -437,7 +434,7 @@ public partial class Server
                 this.TeleportToPosition(sourceClientId, x, y, z);
                 break;
             case "teleport_player":
-                ss = argument.Split(new[] { ' ' });
+                ss = argument.Split([' ']);
 
                 if (ss.Length < 3 || ss.Length > 4)
                 {
@@ -499,7 +496,7 @@ public partial class Server
                 else
                 {
                     SendMessage(sourceClientId, string.Format(language.Get("Server_CommandBackupCreated"), colorSuccess));
-                    ServerEventLog(String.Format("{0} backups database: {1}.", GetClient(sourceClientId).playername, argument));
+                    ServerEventLog(string.Format("{0} backups database: {1}.", GetClient(sourceClientId).playername, argument));
                 }
                 break;
             /*
@@ -531,7 +528,7 @@ public partial class Server
             case "fill_limit":
                 //           0    1      2
                 // agrument: type target maxFill
-                ss = argument.Split(new[] { ' ' });
+                ss = argument.Split([' ']);
                 if (ss.Length < 2 || ss.Length > 3)
                 {
                     SendMessage(sourceClientId, colorError + language.Get("Server_CommandInvalidArgs"));
@@ -546,8 +543,7 @@ public partial class Server
                     Array.Copy(ss, 1, ssTemp, 2, ss.Length - 1);
                     ss = ssTemp;
                 }
-                int maxFill;
-                if (!Int32.TryParse(ss[2], out maxFill))
+                if (!int.TryParse(ss[2], out int maxFill))
                 {
                     SendMessage(sourceClientId, colorError + language.Get("Server_CommandInvalidArgs"));
                     return;
@@ -701,8 +697,9 @@ public partial class Server
                 return "No description available.";
         }
     }
-    public Dictionary<string, string> commandhelps = new Dictionary<string, string>();
-    public Dictionary<string, string> lastSender = new Dictionary<string, string>();
+
+    public Dictionary<string, string> commandhelps = new();
+    public Dictionary<string, string> lastSender = new();
 
     public bool PrivateMessage(int sourceClientId, string recipient, string message)
     {
@@ -771,8 +768,8 @@ public partial class Server
         }
 
         // Get related group from config file.
-        ManicDigger.Group newGroup = serverClient.Groups.Find(
-            delegate(ManicDigger.Group grp)
+        Group? newGroup = serverClient.Groups.Find(
+            delegate(Group grp)
             {
                 return grp.Name.Equals(newGroupName, StringComparison.InvariantCultureIgnoreCase);
             }
@@ -791,8 +788,8 @@ public partial class Server
         }
 
         // Get related client from config file
-        ManicDigger.Client clientConfig = serverClient.Clients.Find(
-            delegate(ManicDigger.Client client)
+        Client? clientConfig = serverClient.Clients.Find(
+            delegate(Client client)
             {
                 return client.Name.Equals(target, StringComparison.InvariantCultureIgnoreCase);
             }
@@ -813,9 +810,11 @@ public partial class Server
             // Client is not yet in config file. Create a new entry.
             if (clientConfig == null)
             {
-                clientConfig = new ManicDigger.Client();
-                clientConfig.Name = targetClient.playername;
-                clientConfig.Group = newGroup.Name;
+                clientConfig = new Client
+                {
+                    Name = targetClient.playername,
+                    Group = newGroup.Name
+                };
                 serverClient.Clients.Add(clientConfig);
             }
             else
@@ -824,7 +823,7 @@ public partial class Server
             }
             serverClientNeedsSaving = true;
             SendMessageToAll(string.Format(language.Get("Server_CommandSetGroupTo"), colorSuccess, GetClient(sourceClientId).ColoredPlayername(colorSuccess), targetClient.ColoredPlayername(colorSuccess), newGroup.GroupColorString() + newGroupName));
-            ServerEventLog(String.Format("{0} sets group of {1} to {2}.", GetClient(sourceClientId).playername, targetClient.playername, newGroupName));
+            ServerEventLog(string.Format("{0} sets group of {1} to {2}.", GetClient(sourceClientId).playername, targetClient.playername, newGroupName));
             targetClient.AssignGroup(newGroup);
             SendFreemoveState(targetClient.Id, targetClient.privileges.Contains(ServerClientMisc.Privilege.freemove));
             SetFillAreaLimit(targetClient.Id);
@@ -845,8 +844,8 @@ public partial class Server
         }
 
         // Get related group from config file.
-        ManicDigger.Group newGroup = serverClient.Groups.Find(
-            delegate(ManicDigger.Group grp)
+        Group? newGroup = serverClient.Groups.Find(
+            delegate(Group grp)
             {
                 return grp.Name.Equals(newGroupName, StringComparison.InvariantCultureIgnoreCase);
             }
@@ -865,8 +864,8 @@ public partial class Server
         }
 
         // Get related client from config file.
-        ManicDigger.Client clientConfig = serverClient.Clients.Find(
-            delegate(ManicDigger.Client client)
+        Client? clientConfig = serverClient.Clients.Find(
+            delegate(Client client)
             {
                 return client.Name.Equals(target, StringComparison.InvariantCultureIgnoreCase);
             }
@@ -884,16 +883,18 @@ public partial class Server
         // Target is at the moment not online. Create or change a entry in ServerClient.
         if (clientConfig == null)
         {
-            clientConfig = new ManicDigger.Client();
-            clientConfig.Name = target;
-            clientConfig.Group = newGroup.Name;
+            clientConfig = new Client
+            {
+                Name = target,
+                Group = newGroup.Name
+            };
             serverClient.Clients.Add(clientConfig);
         }
         else
         {
             // Check if target's current group is superior.
-            ManicDigger.Group oldGroup = serverClient.Groups.Find(
-                delegate(ManicDigger.Group grp)
+            Group? oldGroup = serverClient.Groups.Find(
+                delegate(Group grp)
                 {
                     return grp.Name.Equals(clientConfig.Group);
                 }
@@ -913,7 +914,7 @@ public partial class Server
 
         serverClientNeedsSaving = true;
         SendMessageToAll(string.Format(language.Get("Server_CommandSetOfflineGroupTo"), colorSuccess, GetClient(sourceClientId).ColoredPlayername(colorSuccess), target, newGroup.GroupColorString() + newGroupName));
-        ServerEventLog(String.Format("{0} sets group of {1} to {2} (offline).", GetClient(sourceClientId).playername, target, newGroupName));
+        ServerEventLog(string.Format("{0} sets group of {1} to {2} (offline).", GetClient(sourceClientId).playername, target, newGroupName));
         return true;
     }
 
@@ -926,8 +927,8 @@ public partial class Server
         }
 
         // Get related client from config file
-        ManicDigger.Client targetClient = serverClient.Clients.Find(
-            delegate(ManicDigger.Client client)
+        Client? targetClient = serverClient.Clients.Find(
+            delegate(Client client)
             {
                 return client.Name.Equals(target, StringComparison.InvariantCultureIgnoreCase);
             }
@@ -936,8 +937,8 @@ public partial class Server
         if (targetClient != null)
         {
             // Get target's group.
-            ManicDigger.Group targetGroup = serverClient.Groups.Find(
-                delegate(ManicDigger.Group grp)
+            Group? targetGroup = serverClient.Groups.Find(
+                delegate(Group grp)
                 {
                     return grp.Name.Equals(targetClient.Group);
                 }
@@ -977,8 +978,8 @@ public partial class Server
             SendMessage(sourceClientId, string.Format(language.Get("Server_CommandInsufficientPrivileges"), colorError));
             return false;
         }
-        ManicDigger.Group targetGroup = serverClient.Groups.Find(
-            delegate(ManicDigger.Group grp)
+        Group? targetGroup = serverClient.Groups.Find(
+            delegate(Group grp)
             {
                 return grp.Name.Equals(targetGroupString, StringComparison.InvariantCultureIgnoreCase);
             }
@@ -1032,9 +1033,9 @@ public partial class Server
         {
             // all logging state
             case "-s":
-                SendMessage(sourceClientId, "Build: " + config.BuildLogging);
-                SendMessage(sourceClientId, "Server events: " + config.ServerEventLogging);
-                SendMessage(sourceClientId, "Chat: " + config.ChatLogging);
+                SendMessage(sourceClientId, $"Build: {config.BuildLogging}");
+                SendMessage(sourceClientId, $"Server events: {config.ServerEventLogging}");
+                SendMessage(sourceClientId, $"Chat: {config.ChatLogging}");
                 return true;
             case "-b":
                 if (option.Equals("on"))
@@ -1192,7 +1193,7 @@ public partial class Server
                     SendMessage(sourceClientId, string.Format(language.Get("Server_CommandInsufficientPrivileges"), colorError));
                     return false;
                 }
-                SendMessage(sourceClientId, colorImportant + "List of Areas:");
+                SendMessage(sourceClientId, $"{colorImportant}List of Areas:");
                 foreach (AreaConfig area in config.Areas)
                 {
                     SendMessage(sourceClientId, area.ToString());
@@ -1205,7 +1206,7 @@ public partial class Server
                     SendMessage(sourceClientId, string.Format(language.Get("Server_CommandInsufficientPrivileges"), colorError));
                     return false;
                 }
-                SendMessage(sourceClientId, colorImportant + "List of Banned Users:");
+                SendMessage(sourceClientId, $"{colorImportant}List of Banned Users:");
                 foreach (UserEntry currentUser in banlist.BannedUsers)
                 {
                     //Format:	Name: Reason
@@ -1222,7 +1223,7 @@ public partial class Server
                     SendMessage(sourceClientId, string.Format(language.Get("Server_CommandInsufficientPrivileges"), colorError));
                     return false;
                 }
-                SendMessage(sourceClientId, colorImportant + "List of Banned IPs:");
+                SendMessage(sourceClientId, $"{colorImportant}List of Banned IPs:");
                 foreach (IPEntry currentIP in banlist.BannedIPs)
                 {
                     //Format:	IP: Reason
@@ -1239,8 +1240,8 @@ public partial class Server
                     SendMessage(sourceClientId, string.Format(language.Get("Server_CommandInsufficientPrivileges"), colorError));
                     return false;
                 }
-                SendMessage(sourceClientId, colorImportant + "List of groups:");
-                foreach (ManicDigger.Group currenGroup in serverClient.Groups)
+                SendMessage(sourceClientId, $"{colorImportant}List of groups:");
+                foreach (Group currenGroup in serverClient.Groups)
                 {
                     SendMessage(sourceClientId, currenGroup.ToString());
                 }
@@ -1253,7 +1254,7 @@ public partial class Server
                     return false;
                 }
                 SendMessage(sourceClientId, colorImportant + "List of saved clients:");
-                foreach (ManicDigger.Client currenClient in serverClient.Clients)
+                foreach (Client currenClient in serverClient.Clients)
                 {
 
                     SendMessage(sourceClientId, currenClient.ToString());
@@ -1309,10 +1310,12 @@ public partial class Server
                 {
                     for (int xx = 0; xx < util.CellCountX; xx++)
                     {
-                        Item newItem = new Item();
-                        newItem.ItemClass = ItemClass.Block;
-                        newItem.BlockId = i;
-                        newItem.BlockCount = maxStack;
+                        Item newItem = new()
+                        {
+                            ItemClass = ItemClass.Block,
+                            BlockId = i,
+                            BlockCount = maxStack
+                        };
 
                         if (util.ItemAtCell(PointRef.Create(xx, yy)) == null)
                         {
@@ -1409,10 +1412,12 @@ public partial class Server
                     {
                         if (util.ItemAtCell(PointRef.Create(xx, yy)) == null)
                         {
-                            Item newItem = new Item();
-                            newItem.ItemClass = ItemClass.Block;
-                            newItem.BlockId = i;
-                            newItem.BlockCount = amount;
+                            Item newItem = new()
+                            {
+                                ItemClass = ItemClass.Block,
+                                BlockId = i,
+                                BlockCount = amount
+                            };
 
                             inventory.Items[new ProtoPoint(xx, yy)] = newItem;
                             goto nextblock;
@@ -1495,7 +1500,7 @@ public partial class Server
             return false;
         }
 
-        AreaConfig newArea = new AreaConfig() { Id = id, Coords = coords };
+        AreaConfig newArea = new() { Id = id, Coords = coords };
         if (permittedGroups != null)
         {
             for (int i = 0; i < permittedGroups.Length; i++)
@@ -1549,7 +1554,7 @@ public partial class Server
             SendMessage(sourceClientId, string.Format(language.Get("Server_CommandInsufficientPrivileges"), colorError));
             return false;
         }
-        ServerEventLog(String.Format("{0} announced: {1}.", GetClient(sourceClientId).playername, message));
+        ServerEventLog(string.Format("{0} announced: {1}.", GetClient(sourceClientId).playername, message));
         SendMessageToAll(string.Format(language.Get("Server_CommandAnnouncementMessage"), colorError, message));
         return true;
     }
@@ -1599,7 +1604,7 @@ public partial class Server
         {
             case "-default":
             case "-d":
-                serverClient.DefaultSpawn = new ManicDigger.Spawn() { x = x, y = y, z = z };
+                serverClient.DefaultSpawn = new Spawn() { x = x, y = y, z = z };
                 serverClientNeedsSaving = true;
                 // Inform related players.
                 bool hasEntry = false;
@@ -1612,7 +1617,7 @@ public partial class Server
                     }
                     else
                     {
-                        foreach (ManicDigger.Client client in serverClient.Clients)
+                        foreach (Client client in serverClient.Clients)
                         {
                             if (client.Name.Equals(k.Value.playername, StringComparison.InvariantCultureIgnoreCase))
                             {
@@ -1630,13 +1635,13 @@ public partial class Server
                     }
                 }
                 SendMessage(sourceClientId, string.Format(language.Get("Server_CommandSetSpawnDefaultSuccess"), colorSuccess, x, y, rZ));
-                ServerEventLog(String.Format("{0} sets default spawn to {1},{2}{3}.", GetClient(sourceClientId).playername, x, y, z == null ? "" : "," + z.Value));
+                ServerEventLog(string.Format("{0} sets default spawn to {1},{2}{3}.", GetClient(sourceClientId).playername, x, y, z == null ? "" : "," + z.Value));
                 return true;
             case "-group":
             case "-g":
                 // Check if group even exists.
-                ManicDigger.Group targetGroup = serverClient.Groups.Find(
-                    delegate(ManicDigger.Group grp)
+                Group? targetGroup = serverClient.Groups.Find(
+                    delegate(Group grp)
                     {
                         return grp.Name.Equals(target, StringComparison.InvariantCultureIgnoreCase);
                     }
@@ -1646,7 +1651,7 @@ public partial class Server
                     SendMessage(sourceClientId, string.Format(language.Get("Server_CommandGroupNotFound"), colorError, target));
                     return false;
                 }
-                targetGroup.Spawn = new ManicDigger.Spawn()
+                targetGroup.Spawn = new Spawn()
                 {
                     x = x,
                     y = y,
@@ -1660,7 +1665,7 @@ public partial class Server
                     if (k.Value.clientGroup.Name.Equals(targetGroup.Name))
                     {
                         // Inform only if there is no spawn set under clients.
-                        foreach (ManicDigger.Client client in serverClient.Clients)
+                        foreach (Client client in serverClient.Clients)
                         {
                             if (client.Name.Equals(k.Value.playername, StringComparison.InvariantCultureIgnoreCase))
                             {
@@ -1678,7 +1683,7 @@ public partial class Server
                     }
                 }
                 SendMessage(sourceClientId, string.Format(language.Get("Server_CommandSetSpawnGroupSuccess"), colorSuccess, targetGroup.Name, x, y, rZ));
-                ServerEventLog(String.Format("{0} sets spawn of group {1} to {2},{3}{4}.", GetClient(sourceClientId).playername, targetGroup.Name, x, y, z == null ? "" : "," + z.Value));
+                ServerEventLog(string.Format("{0} sets spawn of group {1} to {2},{3}{4}.", GetClient(sourceClientId).playername, targetGroup.Name, x, y, z == null ? "" : "," + z.Value));
                 return true;
             case "-player":
             case "-p":
@@ -1691,8 +1696,8 @@ public partial class Server
                 }
                 string targetClientPlayername = targetClient == null ? target : targetClient.playername;
 
-                ManicDigger.Client clientEntry = serverClient.Clients.Find(
-                    delegate(ManicDigger.Client client)
+                Client? clientEntry = serverClient.Clients.Find(
+                    delegate(Client client)
                     {
                         return client.Name.Equals(targetClientPlayername, StringComparison.InvariantCultureIgnoreCase);
                     }
@@ -1703,7 +1708,7 @@ public partial class Server
                     return false;
                 }
                 // Change or add spawn entry of client.
-                clientEntry.Spawn = new ManicDigger.Spawn()
+                clientEntry.Spawn = new Spawn()
                 {
                     x = x,
                     y = y,
@@ -1716,7 +1721,7 @@ public partial class Server
                     this.SendPlayerSpawnPosition(targetClientId.Value, x, y, rZ);
                 }
                 SendMessage(sourceClientId, string.Format(language.Get("Server_CommandSetSpawnPlayerSuccess"), colorSuccess, targetClientPlayername, x, y, rZ));
-                ServerEventLog(String.Format("{0} sets spawn of player {1} to {2},{3}{4}.", GetClient(sourceClientId).playername, targetClientPlayername, x, y, z == null ? "" : "," + z.Value));
+                ServerEventLog(string.Format("{0} sets spawn of player {1} to {2},{3}{4}.", GetClient(sourceClientId).playername, targetClientPlayername, x, y, z == null ? "" : "," + z.Value));
                 return true;
             default:
                 SendMessage(sourceClientId, language.Get("Server_CommandInvalidType"));
@@ -1731,7 +1736,7 @@ public partial class Server
             SendMessage(sourceClientId, string.Format(language.Get("Server_CommandInsufficientPrivileges"), colorError));
             return false;
         }
-        Console.WriteLine(x + " " + y + " " + z);
+        Console.WriteLine($"{x} {y} {z}");
 
         // Validate spawn position.
         int rZ = 0;
@@ -1755,8 +1760,8 @@ public partial class Server
         }
 
         // Get related client entry.
-        ManicDigger.Client clientEntry = serverClient.Clients.Find(
-            delegate(ManicDigger.Client client)
+        Client? clientEntry = serverClient.Clients.Find(
+            delegate(Client client)
             {
                 return client.Name.Equals(GetClient(sourceClientId).playername, StringComparison.InvariantCultureIgnoreCase);
             }
@@ -1764,13 +1769,15 @@ public partial class Server
         // TODO: When guests have "set_home" privilege, count of client entries can quickly grow.
         if (clientEntry == null)
         {
-            clientEntry = new ManicDigger.Client();
-            clientEntry.Name = GetClient(sourceClientId).playername;
-            clientEntry.Group = GetClient(sourceClientId).clientGroup.Name;
+            clientEntry = new Client
+            {
+                Name = GetClient(sourceClientId).playername,
+                Group = GetClient(sourceClientId).clientGroup.Name
+            };
             serverClient.Clients.Add(clientEntry);
         }
         // Change or add spawn entry of client.
-        clientEntry.Spawn = new ManicDigger.Spawn()
+        clientEntry.Spawn = new Spawn()
         {
             x = x,
             y = y,
@@ -1887,7 +1894,7 @@ public partial class Server
         }
 
         // validate target position
-        int rZ = 0;
+        int rZ;
         if (z == null)
         {
             if (!MapUtil.IsValidPos(d_Map, x, y))
@@ -1926,7 +1933,7 @@ public partial class Server
         }
 
         // validate target position
-        int rZ = 0;
+        int rZ;
         if (z == null)
         {
             if (!MapUtil.IsValidPos(d_Map, x, y))
@@ -1987,7 +1994,7 @@ public partial class Server
                     }
                     else
                     {
-                        foreach (ManicDigger.Client client in serverClient.Clients)
+                        foreach (Client client in serverClient.Clients)
                         {
                             if (client.Name.Equals(k.Value.playername, StringComparison.InvariantCultureIgnoreCase))
                             {
@@ -2005,13 +2012,13 @@ public partial class Server
                     }
                 }
                 SendMessage(sourceClientId, string.Format(language.Get("Server_CommandFillLimitDefaultSuccess"), colorSuccess, maxFill));
-                ServerEventLog(String.Format("{0} sets default fill area limit to {1}.", GetClient(sourceClientId).playername, maxFill));
+                ServerEventLog(string.Format("{0} sets default fill area limit to {1}.", GetClient(sourceClientId).playername, maxFill));
                 return true;
             case "-group":
             case "-g":
                 // Check if group even exists.
-                ManicDigger.Group targetGroup = serverClient.Groups.Find(
-                    delegate(ManicDigger.Group grp)
+                Group? targetGroup = serverClient.Groups.Find(
+                    delegate(Group grp)
                     {
                         return grp.Name.Equals(target, StringComparison.InvariantCultureIgnoreCase);
                     }
@@ -2030,7 +2037,7 @@ public partial class Server
                     if (k.Value.clientGroup.Name.Equals(targetGroup.Name))
                     {
                         // Inform only if there is no spawn set under clients.
-                        foreach (ManicDigger.Client client in serverClient.Clients)
+                        foreach (Client client in serverClient.Clients)
                         {
                             if (client.Name.Equals(k.Value.playername, StringComparison.InvariantCultureIgnoreCase))
                             {
@@ -2048,7 +2055,7 @@ public partial class Server
                     }
                 }
                 SendMessage(sourceClientId, string.Format(language.Get("Server_CommandFillLimitGroupSuccess"), colorSuccess, targetGroup.Name, maxFill));
-                ServerEventLog(String.Format("{0} sets spawn of group {1} to {2}.", GetClient(sourceClientId).playername, targetGroup.Name, maxFill));
+                ServerEventLog(string.Format("{0} sets spawn of group {1} to {2}.", GetClient(sourceClientId).playername, targetGroup.Name, maxFill));
                 return true;
             case "-player":
             case "-p":
@@ -2061,8 +2068,8 @@ public partial class Server
                 }
                 string targetClientPlayername = targetClient == null ? target : targetClient.playername;
 
-                ManicDigger.Client clientEntry = serverClient.Clients.Find(
-                    delegate(ManicDigger.Client client)
+                Client? clientEntry = serverClient.Clients.Find(
+                    delegate(Client client)
                     {
                         return client.Name.Equals(targetClientPlayername, StringComparison.InvariantCultureIgnoreCase);
                     }
@@ -2081,7 +2088,7 @@ public partial class Server
                     this.SetFillAreaLimit(targetClientId.Value);
                 }
                 SendMessage(sourceClientId, string.Format(language.Get("Server_CommandFillLimitPlayerSuccess"), colorSuccess, targetClientPlayername, maxFill));
-                ServerEventLog(String.Format("{0} sets fill area limit of player {1} to {2}.", GetClient(sourceClientId).playername, targetClientPlayername, maxFill));
+                ServerEventLog(string.Format("{0} sets fill area limit of player {1} to {2}.", GetClient(sourceClientId).playername, targetClientPlayername, maxFill));
                 return true;
             default:
                 SendMessage(sourceClientId, language.Get("Server_CommandInvalidType"));
@@ -2109,55 +2116,50 @@ public partial class Server
             {
                 case "set":
                     {
-                        TimeSpan time;
-
-                        if (!strValue.Contains(":"))
+                        if (!strValue.Contains(':'))
                         {
                             //If only a number is present, the days will be set to the given number
                             //since we don't want that, a ":" is enforced
-                            SendMessage(sourceClientId, colorError + language.Get("Server_CommandException") + " unable to convert \"" + strValue + "\" to a time");
+                            SendMessage(sourceClientId, $"{colorError}{language.Get("Server_CommandException")} unable to convert \"{strValue}\" to a time");
                         }
-                        else if (TimeSpan.TryParse(strValue, out time))
+                        else if (TimeSpan.TryParse(strValue, out TimeSpan time))
                         {
                             _time.Set(time);
-                            SendMessage(sourceClientId, "The time is: " + _time.Time.ToString());
+                            SendMessage(sourceClientId, $"The time is: {_time.Time}");
                         }
                         else
                         {
-                            SendMessage(sourceClientId, colorError + language.Get("Server_CommandException") + " unable to convert \"" + strValue + "\" to a time");
+                            SendMessage(sourceClientId, $"{colorError}{language.Get("Server_CommandException")} unable to convert \"{strValue}\" to a time");
                         }
                     }
                     break;
                 case "add":
                     {
-                        TimeSpan time;
 
-                        int nMinuts = 0;
-                        if (int.TryParse(strValue, out nMinuts))
+                        if (int.TryParse(strValue, out int nMinuts))
                         {
                             //only a number
                             //take it as minutes
                             _time.Add(TimeSpan.FromMinutes(nMinuts));
-                            SendMessage(sourceClientId, "The time is: " + _time.Time.ToString());
+                            SendMessage(sourceClientId, $"The time is: {_time.Time}");
                         }
-                        else if (TimeSpan.TryParse(strValue, out time))
+                        else if (TimeSpan.TryParse(strValue, out TimeSpan time))
                         {
                             _time.Add(time);
-                            SendMessage(sourceClientId, "The time is: " + _time.Time.ToString());
+                            SendMessage(sourceClientId, $"The time is: {_time.Time}");
                         }
                         else
                         {
-                            SendMessage(sourceClientId, colorError + language.Get("Server_CommandException") + " unable to convert \"" + strValue + "\" to a time");
+                            SendMessage(sourceClientId, $"{colorError}{language.Get("Server_CommandException")} unable to convert \"{strValue}\" to a time");
                         }
                     }
                     break;
                 case "speed":
                     {
-                        int nSpeed = 0;
 
-                        if (!int.TryParse(strValue, out nSpeed))
+                        if (!int.TryParse(strValue, out int nSpeed))
                         {
-                            SendMessage(sourceClientId, colorError + language.Get("Server_CommandException") + " unable to convert \"" + strValue + "\" to a number");
+                            SendMessage(sourceClientId, $"{colorError}{language.Get("Server_CommandException")} unable to convert \"{strValue}\" to a number");
                         }
                         else
                         {
@@ -2175,4 +2177,3 @@ public partial class Server
         return true;
     }
 }
-

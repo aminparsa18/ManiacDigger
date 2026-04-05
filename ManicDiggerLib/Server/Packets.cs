@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ProtoBuf;
-using ManicDigger;
+﻿using ProtoBuf;
 
 [ProtoContract]
 public class PacketServerInventory
@@ -18,6 +14,7 @@ public class PacketServerInventory
     [ProtoMember(4, IsRequired = false)]
     public ManicDigger.Inventory Inventory;
 }
+
 [ProtoContract]
 public class PacketServerPlayerStats
 {

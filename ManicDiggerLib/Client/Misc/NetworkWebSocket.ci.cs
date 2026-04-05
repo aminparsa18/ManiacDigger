@@ -18,10 +18,10 @@
         return c;
     }
 
-    WebSocketClientConnection c;
+    private WebSocketClientConnection c;
 
-    byte[] incomingData;
-    const int incomingDataMax = 16 * 1024;
+    private readonly byte[] incomingData;
+    private const int incomingDataMax = 16 * 1024;
 
     public override NetIncomingMessage ReadMessage()
     {
@@ -32,10 +32,12 @@
         }
         else
         {
-            NetIncomingMessage msg = new NetIncomingMessage();
-            msg.message = incomingData;
-            msg.messageLength = received;
-            msg.SenderConnection = c;
+            NetIncomingMessage msg = new()
+            {
+                message = incomingData,
+                messageLength = received,
+                SenderConnection = c
+            };
             return msg;
         }
     }
@@ -45,7 +47,7 @@
         c.SendMessage(message, method, 0);
     }
 
-    GamePlatform p;
+    private GamePlatform p;
 
     internal void SetPlatform(GamePlatform platform)
     {

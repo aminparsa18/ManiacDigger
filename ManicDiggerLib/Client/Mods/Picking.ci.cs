@@ -123,8 +123,8 @@
             game.lastironsightschangeMilliseconds = game.platform.TimeMillisecondsFromStart();
         }
 
-        IntRef pick2count = new IntRef();
-        Line3D pick = new Line3D();
+        IntRef pick2count = new();
+        Line3D pick = new();
         GetPickingLine(game, pick, ispistolshoot);
         BlockPosSide[] pick2 = game.Pick(game.s, pick, pick2count);
 
@@ -163,7 +163,7 @@
                   game.platform.FloatToInt(game.player.position.x),
                   game.platform.FloatToInt(game.player.position.z),
                   game.platform.FloatToInt(game.player.position.y + (one / 2)));
-        BlockPosSide pick0 = new BlockPosSide();
+        BlockPosSide pick0 = new();
         if (pick2count.value > 0 &&
             ((pickdistanceok && (playertileempty || (playertileemptyclose)))
             || game.overheadcamera)
@@ -251,14 +251,16 @@
                     toZ = pick2[0].blockPos[2];
                 }
 
-                Packet_ClientShot shot = new Packet_ClientShot();
-                shot.FromX = game.SerializeFloat(pick.Start[0]);
-                shot.FromY = game.SerializeFloat(pick.Start[1]);
-                shot.FromZ = game.SerializeFloat(pick.Start[2]);
-                shot.ToX = game.SerializeFloat(toX);
-                shot.ToY = game.SerializeFloat(toY);
-                shot.ToZ = game.SerializeFloat(toZ);
-                shot.HitPlayer = -1;
+                Packet_ClientShot shot = new()
+                {
+                    FromX = game.SerializeFloat(pick.Start[0]),
+                    FromY = game.SerializeFloat(pick.Start[1]),
+                    FromZ = game.SerializeFloat(pick.Start[2]),
+                    ToX = game.SerializeFloat(toX),
+                    ToY = game.SerializeFloat(toY),
+                    ToZ = game.SerializeFloat(toZ),
+                    HitPlayer = -1
+                };
 
                 for (int i = 0; i < game.entitiesCount; i++)
                 {
@@ -283,7 +285,7 @@
                     float feetposY = p_.position.y;
                     float feetposZ = p_.position.z;
                     //var p = PlayerPositionSpawn;
-                    Box3D bodybox = new Box3D();
+                    Box3D bodybox = new();
                     float headsize = (p_.drawModel.ModelHeight - p_.drawModel.eyeHeight) * 2; //0.4f;
                     float h = p_.drawModel.ModelHeight - headsize;
                     float r = one * 35 / 100;
@@ -298,7 +300,7 @@
                     bodybox.AddPoint(feetposX + r, feetposY + h, feetposZ - r);
                     bodybox.AddPoint(feetposX + r, feetposY + h, feetposZ + r);
 
-                    Box3D headbox = new Box3D();
+                    Box3D headbox = new();
 
                     headbox.AddPoint(feetposX - r, feetposY + h, feetposZ - r);
                     headbox.AddPoint(feetposX - r, feetposY + h, feetposZ + r);
@@ -323,12 +325,14 @@
                         {
                             if (!isgrenade)
                             {
-                                Entity entity = new Entity();
-                                Sprite sprite = new Sprite();
-                                sprite.positionX = p[0];
-                                sprite.positionY = p[1];
-                                sprite.positionZ = p[2];
-                                sprite.image = "blood.png";
+                                Entity entity = new();
+                                Sprite sprite = new()
+                                {
+                                    positionX = p[0],
+                                    positionY = p[1],
+                                    positionZ = p[2],
+                                    image = "blood.png"
+                                };
                                 entity.sprite = sprite;
                                 entity.expires = Expires.Create(one * 2 / 10);
                                 game.EntityAddLocal(entity);
@@ -348,12 +352,14 @@
                             {
                                 if (!isgrenade)
                                 {
-                                    Entity entity = new Entity();
-                                    Sprite sprite = new Sprite();
-                                    sprite.positionX = p[0];
-                                    sprite.positionY = p[1];
-                                    sprite.positionZ = p[2];
-                                    sprite.image = "blood.png";
+                                    Entity entity = new();
+                                    Sprite sprite = new()
+                                    {
+                                        positionX = p[0],
+                                        positionY = p[1],
+                                        positionZ = p[2],
+                                        image = "blood.png"
+                                    };
                                     entity.sprite = sprite;
                                     entity.expires = Expires.Create(one * 2 / 10);
                                     game.EntityAddLocal(entity);
@@ -371,7 +377,7 @@
                 if (projectilespeed == 0)
                 {
                     {
-                        Entity entity = game.CreateBulletEntity(
+                        Entity entity = Game.CreateBulletEntity(
                           pick.Start[0], pick.Start[1], pick.Start[2],
                           toX, toY, toZ, 150);
                         game.EntityAddLocal(entity);
@@ -392,23 +398,27 @@
                     shot.ExplodesAfter = game.SerializeFloat(game.grenadetime - wait);
 
                     {
-                        Entity grenadeEntity = new Entity();
+                        Entity grenadeEntity = new();
 
-                        Sprite sprite = new Sprite();
-                        sprite.image = "ChemicalGreen.png";
-                        sprite.size = 14;
-                        sprite.animationcount = 0;
-                        sprite.positionX = pick.Start[0];
-                        sprite.positionY = pick.Start[1];
-                        sprite.positionZ = pick.Start[2];
+                        Sprite sprite = new()
+                        {
+                            image = "ChemicalGreen.png",
+                            size = 14,
+                            animationcount = 0,
+                            positionX = pick.Start[0],
+                            positionY = pick.Start[1],
+                            positionZ = pick.Start[2]
+                        };
                         grenadeEntity.sprite = sprite;
 
-                        Grenade_ projectile = new Grenade_();
-                        projectile.velocityX = vX;
-                        projectile.velocityY = vY;
-                        projectile.velocityZ = vZ;
-                        projectile.block = item.BlockId;
-                        projectile.sourcePlayer = game.LocalPlayerId;
+                        Grenade_ projectile = new()
+                        {
+                            velocityX = vX,
+                            velocityY = vY,
+                            velocityZ = vZ,
+                            block = item.BlockId,
+                            sourcePlayer = game.LocalPlayerId
+                        };
 
                         grenadeEntity.expires = Expires.Create(game.grenadetime - wait);
 
@@ -416,9 +426,11 @@
                         game.EntityAddLocal(grenadeEntity);
                     }
                 }
-                Packet_Client packet = new Packet_Client();
-                packet.Id = Packet_ClientIdEnum.Shot;
-                packet.Shot = shot;
+                Packet_Client packet = new()
+                {
+                    Id = Packet_ClientIdEnum.Shot,
+                    Shot = shot
+                };
                 game.SendPacketClient(packet);
 
                 if (game.blocktypes[item.BlockId].Sounds.ShootEndCount > 0)
@@ -486,8 +498,8 @@
                                     if (freehand != null)
                                     {
                                         game.WearItem(
-                                            game.InventoryPositionMainArea(k.X, k.Y),
-                                            game.InventoryPositionMaterialSelector(freehand.value));
+                                            Game.InventoryPositionMainArea(k.X, k.Y),
+                                            Game.InventoryPositionMaterialSelector(freehand.value));
                                         break;
                                     }
                                     //try to replace current slot
@@ -495,10 +507,10 @@
                                         && game.d_Inventory.RightHand[game.ActiveMaterial].ItemClass == Packet_ItemClassEnum.Block)
                                     {
                                         game.MoveToInventory(
-                                            game.InventoryPositionMaterialSelector(game.ActiveMaterial));
+                                            Game.InventoryPositionMaterialSelector(game.ActiveMaterial));
                                         game.WearItem(
-                                            game.InventoryPositionMainArea(k.X, k.Y),
-                                            game.InventoryPositionMaterialSelector(game.ActiveMaterial));
+                                            Game.InventoryPositionMainArea(k.X, k.Y),
+                                            Game.InventoryPositionMaterialSelector(game.ActiveMaterial));
                                     }
                                 }
                             }
@@ -580,7 +592,7 @@
                         }
                         if (!right)
                         {
-                            game.particleEffectBlockBreak.StartParticleEffect(newtileX, newtileY, newtileZ);//must be before deletion - gets ground type.
+                            ModDrawParticleEffectBlockBreak.StartParticleEffect(newtileX, newtileY, newtileZ);//must be before deletion - gets ground type.
                         }
                         if (!game.map.IsValidPos(newtileX, newtileZ, newtileY))
                         {
@@ -599,7 +611,7 @@
         PickingEnd(left, right, middle, ispistol);
     }
 
-    internal float BuildDelay(Game game)
+    internal static float BuildDelay(Game game)
     {
         float default_ = (1f * 95 / 100) * (1 / game.basemovespeed);
         Packet_Item item = game.d_Inventory.RightHand[game.ActiveMaterial];
@@ -786,12 +798,12 @@
         }
     }
 
-    internal void OnPickUseWithTool(Game game, int posX, int posY, int posZ)
+    internal static void OnPickUseWithTool(Game game, int posX, int posY, int posZ)
     {
         game.SendSetBlock(posX, posY, posZ, Packet_BlockSetModeEnum.UseWithTool, game.d_Inventory.RightHand[game.ActiveMaterial].BlockId, game.ActiveMaterial);
     }
 
-    internal RailDirection PickHorizontalVertical(float xfract, float yfract)
+    internal static RailDirection PickHorizontalVertical(float xfract, float yfract)
     {
         float x = xfract;
         float y = yfract;
@@ -806,7 +818,7 @@
         return RailDirection.Horizontal;
     }
 
-    internal RailDirection PickCorners(float xfract, float zfract)
+    internal static RailDirection PickCorners(float xfract, float zfract)
     {
         float half = 0.5f;
         if (xfract < half && zfract < half)
@@ -824,7 +836,7 @@
         return RailDirection.DownRight;
     }
 
-    void PickEntity(Game game, Line3D pick, BlockPosSide[] pick2, IntRef pick2count)
+    private static void PickEntity(Game game, Line3D pick, BlockPosSide[] pick2, IntRef pick2count)
     {
         game.SelectedEntityId = -1;
         game.currentlyAttackedEntity = -1;
@@ -867,7 +879,7 @@
             }
 
             //var p = PlayerPositionSpawn;
-            Box3D bodybox = new Box3D();
+            Box3D bodybox = new();
             float h = p_.drawModel.ModelHeight;
             float r = one * 35 / 100;
 
@@ -902,7 +914,7 @@
         }
     }
 
-    void UpdateEntityHit(Game game)
+    private static void UpdateEntityHit(Game game)
     {
         //Only single hit when mouse clicked
         if (game.currentlyAttackedEntity != -1 && game.mouseLeft)
@@ -910,8 +922,10 @@
             for (int i = 0; i < game.clientmodsCount; i++)
             {
                 if (game.clientmods[i] == null) { continue; }
-                OnUseEntityArgs args = new OnUseEntityArgs();
-                args.entityId = game.currentlyAttackedEntity;
+                OnUseEntityArgs args = new()
+                {
+                    entityId = game.currentlyAttackedEntity
+                };
                 game.clientmods[i].OnHitEntity(game, args);
             }
             game.SendPacketClient(ClientPackets.HitEntity(game.currentlyAttackedEntity));
@@ -931,15 +945,15 @@
 
     internal int lastbuildMilliseconds;
 
-    internal void OnPick_(BlockPosSide pick0)
+    internal static void OnPick_(BlockPosSide pick0)
     {
         //playerdestination = pick0.pos;
     }
 
-    Unproject unproject;
-    float[] tempViewport;
-    float[] tempRay;
-    float[] tempRayStartPoint;
+    private readonly Unproject unproject;
+    private readonly float[] tempViewport;
+    private readonly float[] tempRay;
+    private readonly float[] tempRayStartPoint;
     public void GetPickingLine(Game game, Line3D retPick, bool ispistolshoot)
     {
         int mouseX;
@@ -992,7 +1006,7 @@
         retPick.End[2] = tempRayStartPoint[2] + raydirZ * pickDistance1;
     }
 
-    internal PointFloatRef GetAim(Game game)
+    internal static PointFloatRef GetAim(Game game)
     {
         if (game.CurrentAimRadius() <= 1)
         {
@@ -1014,7 +1028,7 @@
         return PointFloatRef.Create(x, y);
     }
 
-    float CurrentPickDistance(Game game)
+    private static float CurrentPickDistance(Game game)
     {
         float pick_distance = game.PICK_DISTANCE;
         IntRef inHand = game.BlockInHand();

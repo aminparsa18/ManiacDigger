@@ -1,21 +1,17 @@
 ﻿using System.Diagnostics;
-using ManicDigger.ClientNative;
 
 //The main function for loading, unloading and sending chunks to players.
 public class ServerSystemNotifyMap : ServerSystem
 {
+    private const int intMaxValue = 2147483647;
+
     public override void Update(Server server, float dt)
     {
-        Stopwatch s = new Stopwatch();
+        Stopwatch s = new();
         s.Start();
-        int areasizechunks = server.playerareasize / Server.chunksize;
-        int areasizeZchunks = server.d_Map.MapSizeZ / Server.chunksize;
-        int mapsizeXchunks = server.d_Map.MapSizeX / Server.chunksize;
-        int mapsizeYchunks = server.d_Map.MapSizeY / Server.chunksize;
-        int mapsizeZchunks = server.d_Map.MapSizeZ / Server.chunksize;
         int[] retNearest = new int[3];
         bool loaded = true;
-        while ((loaded) && (s.ElapsedMilliseconds < 10))
+        while (loaded && (s.ElapsedMilliseconds < 10))
         {
             loaded = false;
             foreach (var k in server.clients)
@@ -24,7 +20,7 @@ public class ServerSystemNotifyMap : ServerSystem
                 {
                     continue;
                 }
-                Vector3i playerpos = server.PlayerBlockPosition(k.Value);
+                Vector3i playerpos = Server.PlayerBlockPosition(k.Value);
 
                 NearestDirty(server, k.Key, playerpos.x, playerpos.y, playerpos.z, retNearest);
 
@@ -37,19 +33,18 @@ public class ServerSystemNotifyMap : ServerSystem
         }
     }
 
-    const int intMaxValue = 2147483647;
-    void NearestDirty(Server server, int clientid, int playerx, int playery, int playerz, int[] retNearest)
+    private static void NearestDirty(Server server, int clientid, int playerx, int playery, int playerz, int[] retNearest)
     {
         int nearestdist = intMaxValue;
         retNearest[0] = -1;
         retNearest[1] = -1;
         retNearest[2] = -1;
-        int px = (int)(playerx) / Server.chunksize;
-        int py = (int)(playery) / Server.chunksize;
-        int pz = (int)(playerz) / Server.chunksize;
+        int px = playerx / Server.chunksize;
+        int py = playery / Server.chunksize;
+        int pz = playerz / Server.chunksize;
 
-        int chunksxy = mapAreaSize(server) / Server.chunksize / 2;
-        int chunksz = mapAreaSizeZ(server) / Server.chunksize / 2;
+        int chunksxy = MapAreaSize(server) / Server.chunksize / 2;
+        int chunksz = MapAreaSizeZ(server) / Server.chunksize / 2;
 
         int startx = px - chunksxy;
         int endx = px + chunksxy;
@@ -93,7 +88,7 @@ public class ServerSystemNotifyMap : ServerSystem
         }
     }
 
-    void LoadAndSendChunk(Server server, int clientid, int vx, int vy, int vz, Stopwatch s)
+    private static void LoadAndSendChunk(Server server, int clientid, int vx, int vy, int vz, Stopwatch s)
     {
         //load
         server.LoadChunk(vx, vy, vz);
@@ -105,11 +100,11 @@ public class ServerSystemNotifyMap : ServerSystem
         }
     }
 
-    public void SendChunk(Server server, int clientid, Vector3i globalpos, Vector3i chunkpos)
+    public static void SendChunk(Server server, int clientid, Vector3i globalpos, Vector3i chunkpos)
     {
         ClientOnServer c = server.clients[clientid];
         ServerChunk chunk = server.d_Map.GetChunk(globalpos.x, globalpos.y, globalpos.z);
-        server.ClientSeenChunkSet(clientid, chunkpos.x, chunkpos.y, chunkpos.z, (int)server.simulationcurrentframe);
+        server.ClientSeenChunkSet(clientid, chunkpos.x, chunkpos.y, chunkpos.z, server.simulationcurrentframe);
         //sent++;
         byte[] compressedchunk;
         if (MapUtil.IsSolidChunk(chunk.data) && chunk.data[0] == 0)
@@ -126,7 +121,7 @@ public class ServerSystemNotifyMap : ServerSystem
             {
                 byte[] heightmapchunk = Misc.UshortArrayToByteArray(server.d_Map.GetHeightmapChunk(globalpos.x, globalpos.y));
                 byte[] compressedHeightmapChunk = server.d_NetworkCompression.Compress(heightmapchunk);
-                Packet_ServerHeightmapChunk p1 = new Packet_ServerHeightmapChunk()
+                Packet_ServerHeightmapChunk p1 = new()
                 {
                     X = globalpos.x,
                     Y = globalpos.y,
@@ -134,22 +129,22 @@ public class ServerSystemNotifyMap : ServerSystem
                     SizeY = Server.chunksize,
                     CompressedHeightmap = compressedHeightmapChunk,
                 };
-                server.SendPacket(clientid, server.Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.HeightmapChunk, HeightmapChunk = p1 }));
-                c.heightmapchunksseen[new Vector2i(globalpos.x, globalpos.y)] = (int)server.simulationcurrentframe;
+                server.SendPacket(clientid, Server.Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.HeightmapChunk, HeightmapChunk = p1 }));
+                c.heightmapchunksseen[new Vector2i(globalpos.x, globalpos.y)] = server.simulationcurrentframe;
             }
         }
         if (compressedchunk != null)
         {
             foreach (byte[] part in Server.Parts(compressedchunk, 1024))
             {
-                Packet_ServerChunkPart p1 = new Packet_ServerChunkPart()
+                Packet_ServerChunkPart p1 = new()
                 {
                     CompressedChunkPart = part,
                 };
-                server.SendPacket(clientid, server.Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.ChunkPart, ChunkPart = p1 }));
+                server.SendPacket(clientid, Server.Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.ChunkPart, ChunkPart = p1 }));
             }
         }
-        Packet_ServerChunk p = new Packet_ServerChunk()
+        Packet_ServerChunk p = new()
         {
             X = globalpos.x,
             Y = globalpos.y,
@@ -158,9 +153,9 @@ public class ServerSystemNotifyMap : ServerSystem
             SizeY = Server.chunksize,
             SizeZ = Server.chunksize,
         };
-        server.SendPacket(clientid, server.Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.Chunk_, Chunk_ = p }));
+        server.SendPacket(clientid, Server.Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.Chunk_, Chunk_ = p }));
     }
 
-    public int mapAreaSize(Server server) { return server.chunkdrawdistance * Server.chunksize * 2; }
-    public int mapAreaSizeZ(Server server) { return mapAreaSize(server); }
+    public static int MapAreaSize(Server server) { return server.chunkdrawdistance * Server.chunksize * 2; }
+    public static int MapAreaSizeZ(Server server) { return MapAreaSize(server); }
 }

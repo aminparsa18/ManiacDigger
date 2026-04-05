@@ -43,14 +43,14 @@ public class Box3D
         MaxEdge[1] = MathCi.MaxFloat(MaxEdge[1], y);
         MaxEdge[2] = MathCi.MaxFloat(MaxEdge[2], z);
     }
-    public float[] Center()
+    public static float[] Center()
     {
         return null;
     }
 
     internal static Box3D Create(int x, int y, int z, int size)
     {
-        Box3D b = new Box3D();
+        Box3D b = new();
         b.Set(x, y, z, size);
         return b;
     }
@@ -83,8 +83,10 @@ public class BlockPosSide
     }
     public static BlockPosSide Create(int x, int y, int z)
     {
-        BlockPosSide p=new BlockPosSide();
-        p.blockPos = Vec3.FromValues(x, y, z);
+        BlockPosSide p = new()
+        {
+            blockPos = Vec3.FromValues(x, y, z)
+        };
         return p;
     }
     internal float[] blockPos;
@@ -130,15 +132,17 @@ public class BlockOctreeSearcher
         listpool = new ListBox3d[50];
         for (int i = 0; i < 50; i++)
         {
-            listpool[i] = new ListBox3d();
-            listpool[i].arr = new Box3D[1000];
+            listpool[i] = new ListBox3d
+            {
+                arr = new Box3D[1000]
+            };
         }
         l = new BlockPosSide[1024];
         lCount = 0;
         currentHit = new float[3];
     }
     internal Box3D StartBox;
-    ListBox3d Search(PredicateBox3D query)
+    private ListBox3d Search(PredicateBox3D query)
     {
         pool_i = 0;
         listpool_i = 0;
@@ -148,7 +152,7 @@ public class BlockOctreeSearcher
         }
         return SearchPrivate(query, StartBox);
     }
-    ListBox3d SearchPrivate(PredicateBox3D query, Box3D box)
+    private ListBox3d SearchPrivate(PredicateBox3D query, Box3D box)
     {
         if (box.LengthX() == 1)
         {
@@ -177,31 +181,31 @@ public class BlockOctreeSearcher
         recycleListBox3d(children);
         return l;
     }
-    Box3D[] pool;
-    int pool_i;
-    ListBox3d[] listpool;
-    int listpool_i;
-    Box3D newBox3d()
+    private readonly Box3D[] pool;
+    private int pool_i;
+    private readonly ListBox3d[] listpool;
+    private int listpool_i;
+    private Box3D newBox3d()
     {
         return pool[pool_i++];
     }
-    void recycleBox3d(Box3D l)
+    private void recycleBox3d(Box3D l)
     {
         pool_i--;
         pool[pool_i] = l;
     }
-    ListBox3d newListBox3d()
+    private ListBox3d newListBox3d()
     {
         ListBox3d l = listpool[listpool_i++];
         l.count = 0;
         return l;
     }
-    void recycleListBox3d(ListBox3d l)
+    private void recycleListBox3d(ListBox3d l)
     {
         listpool_i--;
         listpool[listpool_i] = l;
     }
-    ListBox3d Children(Box3D box)
+    private ListBox3d Children(Box3D box)
     {
         ListBox3d l = newListBox3d();
         l.count = 8;
@@ -232,11 +236,11 @@ public class BlockOctreeSearcher
         currentHit[2] = 0;
         return Intersection.CheckLineBox(box, currentLine, currentHit);
     }
-    Line3D currentLine;
-    float[] currentHit;
-    Intersection intersection;
-    BlockPosSide[] l;
-    int lCount;
+    private Line3D currentLine;
+    private readonly float[] currentHit;
+    private readonly Intersection intersection;
+    private readonly BlockPosSide[] l;
+    private int lCount;
     public BlockPosSide[] LineIntersection(DelegateIsBlockEmpty isEmpty, DelegateGetBlockHeight getBlockHeight, Line3D line, IntRef retCount)
     {
         lCount = 0;
@@ -254,12 +258,14 @@ public class BlockOctreeSearcher
             float z = node.MinEdge[1];
             if (!isEmpty.IsBlockEmpty(platform.FloatToInt(x),platform.FloatToInt(y),platform.FloatToInt( z)))
             {
-                Box3D node2 = new Box3D();
-                node2.MinEdge = Vec3.CloneIt(node.MinEdge);
-                node2.MaxEdge = Vec3.CloneIt(node.MaxEdge);
+                Box3D node2 = new()
+                {
+                    MinEdge = Vec3.CloneIt(node.MinEdge),
+                    MaxEdge = Vec3.CloneIt(node.MaxEdge)
+                };
                 node2.MaxEdge[1] = node2.MinEdge[1] + getBlockHeight.GetBlockHeight(platform.FloatToInt(x),platform.FloatToInt(y),platform.FloatToInt(z));
 
-                BlockPosSide b = new BlockPosSide();
+                BlockPosSide b = new();
                 float[] hit2 = new float[3];
 
                 float[] dir = new float[3];
@@ -290,11 +296,13 @@ public class PredicateBox3DHit : PredicateBox3D
 {
     public static PredicateBox3DHit Create(BlockOctreeSearcher s_)
     {
-        PredicateBox3DHit p = new PredicateBox3DHit();
-        p.s = s_;
+        PredicateBox3DHit p = new()
+        {
+            s = s_
+        };
         return p;
     }
-    BlockOctreeSearcher s;
+    private BlockOctreeSearcher s;
     public override bool Hit(Box3D o)
     {
         return s.BoxHit(o);
@@ -316,9 +324,9 @@ public class Intersection
     // Fast Ray-Box Intersection
     // by Andrew Woo
     // from "Graphics Gems", Academic Press, 1990
-    const int LEFT = 1;
-    const int MIDDLE = 2;
-    const int RIGHT = 0;
+    private const int LEFT = 1;
+    private const int MIDDLE = 2;
+    private const int RIGHT = 0;
     public static bool HitBoundingBox(float[] minB, float[] maxB, float[] origin, float[] dir, float[] coord)
     {
         bool inside = true;
@@ -386,7 +394,7 @@ public class Intersection
     }
 
     //http://www.3dkingdoms.com/weekly/weekly.php?a=3
-    static bool GetIntersection(float fDst1, float fDst2, float[] P1, float[] P2, float[] Hit)
+    private static bool GetIntersection(float fDst1, float fDst2, float[] P1, float[] P2, float[] Hit)
     {
         // Hit = new Vector3();
         if ((fDst1 * fDst2) >= 0) return false;
@@ -397,7 +405,7 @@ public class Intersection
         Hit[2] = P1[2] + (P2[2] - P1[2]) * (-fDst1 / (fDst2 - fDst1));
         return true;
     }
-    static bool InBox(float[] Hit, float[] B1, float[] B2, int Axis)
+    private static bool InBox(float[] Hit, float[] B1, float[] B2, int Axis)
     {
         if (Axis == 1 && Hit[2] > B1[2] && Hit[2] < B2[2] && Hit[1] > B1[1] && Hit[1] < B2[1]) return true;
         if (Axis == 2 && Hit[2] > B1[2] && Hit[2] < B2[2] && Hit[0] > B1[0] && Hit[0] < B2[0]) return true;
@@ -454,7 +462,7 @@ public class Intersection
         dir_[1] = line.End[1] - line.Start[1];
         dir_[2] = line.End[2] - line.Start[2];
         float[] hit = new float[3];
-        if (!Intersection.HitBoundingBox(box.MinEdge, box.MaxEdge, line.Start, dir_, hit))
+        if (!HitBoundingBox(box.MinEdge, box.MaxEdge, line.Start, dir_, hit))
         {
             return null;
         }

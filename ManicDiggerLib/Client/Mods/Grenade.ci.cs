@@ -7,7 +7,7 @@
         bouncespeedmultiply = one * 5 / 10;
         walldistance = one * 3 / 10;
     }
-    float one;
+    private readonly float one;
 
     public override void OnNewFrameFixed(Game game, NewFrameEventArgs args)
     {
@@ -47,9 +47,9 @@
         grenadeSprite.positionY = bouncePosition.Y;
         grenadeSprite.positionZ = bouncePosition.Z;
     }
-    float projectilegravity;
-    float bouncespeedmultiply;
-    float walldistance;
+    private readonly float projectilegravity;
+    private readonly float bouncespeedmultiply;
+    private readonly float walldistance;
     internal Vector3Ref GrenadeBounce(Game game, Vector3Ref oldposition, Vector3Ref newposition, Vector3Ref velocity, float dt)
     {
         bool ismoving = velocity.Length() > 100 * dt;

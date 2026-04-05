@@ -9,19 +9,19 @@
     }
     internal byte[] CurrentChunk;
     internal int CurrentChunkCount;
-    int[] receivedchunk;
-    byte[] decompressedchunk;
+    private readonly int[] receivedchunk;
+    private readonly byte[] decompressedchunk;
 
 #if CITO
     macro Index3d(x, y, h, sizex, sizey) ((((((h) * (sizey)) + (y))) * (sizex)) + (x))
 #else
-    static int Index3d(int x, int y, int h, int sizex, int sizey)
+    private static int Index3d(int x, int y, int h, int sizex, int sizey)
     {
         return (h * sizey + y) * sizex + x;
     }
 #endif
 
-    Game game;
+    private Game game;
     public override void OnReadOnlyBackgroundThread(Game game_, float dt)
     {
         game = game_;
@@ -53,21 +53,23 @@
 
     public void TryReadPacket(byte[] data, int dataLength)
     {
-        Packet_Server packet = new Packet_Server();
+        Packet_Server packet = new();
         Packet_ServerSerializer.DeserializeBuffer(data, dataLength, packet);
 
         ProcessInBackground(packet);
 
-        ProcessPacketTask task = new ProcessPacketTask();
-        task.game = game;
-        task.packet_ = packet;
+        ProcessPacketTask task = new()
+        {
+            game = game,
+            packet_ = packet
+        };
         game.QueueActionCommit(task);
 
         game.LastReceivedMilliseconds = game.currentTimeMilliseconds;
         //return lengthPrefixLength + packetLength;
     }
 
-    void ProcessInBackground(Packet_Server packet)
+    private void ProcessInBackground(Packet_Server packet)
     {
         switch (packet.Id)
         {
@@ -435,7 +437,7 @@ public class ProcessPacketTask : Action_
                 }
                 break;
             case Packet_ServerIdEnum.Bullet:
-                game.EntityAddLocal(game.CreateBulletEntity(
+                game.EntityAddLocal(Game.CreateBulletEntity(
                    game.DeserializeFloat(packet.Bullet.FromXFloat),
                    game.DeserializeFloat(packet.Bullet.FromYFloat),
                    game.DeserializeFloat(packet.Bullet.FromZFloat),
@@ -462,32 +464,40 @@ public class ProcessPacketTask : Action_
                 break;
             case Packet_ServerIdEnum.Explosion:
                 {
-                    Entity entity = new Entity();
-                    entity.expires = new Expires();
-                    entity.expires.timeLeft = game.DeserializeFloat(packet.Explosion.TimeFloat);
-                    entity.push = packet.Explosion;
+                    Entity entity = new()
+                    {
+                        expires = new Expires
+                        {
+                            timeLeft = game.DeserializeFloat(packet.Explosion.TimeFloat)
+                        },
+                        push = packet.Explosion
+                    };
                     game.EntityAddLocal(entity);
                 }
                 break;
             case Packet_ServerIdEnum.Projectile:
                 {
-                    Entity entity = new Entity();
+                    Entity entity = new();
 
-                    Sprite sprite = new Sprite();
-                    sprite.image = "ChemicalGreen.png";
-                    sprite.size = 14;
-                    sprite.animationcount = 0;
-                    sprite.positionX = game.DeserializeFloat(packet.Projectile.FromXFloat);
-                    sprite.positionY = game.DeserializeFloat(packet.Projectile.FromYFloat);
-                    sprite.positionZ = game.DeserializeFloat(packet.Projectile.FromZFloat);
+                    Sprite sprite = new()
+                    {
+                        image = "ChemicalGreen.png",
+                        size = 14,
+                        animationcount = 0,
+                        positionX = game.DeserializeFloat(packet.Projectile.FromXFloat),
+                        positionY = game.DeserializeFloat(packet.Projectile.FromYFloat),
+                        positionZ = game.DeserializeFloat(packet.Projectile.FromZFloat)
+                    };
                     entity.sprite = sprite;
 
-                    Grenade_ grenade = new Grenade_();
-                    grenade.velocityX = game.DeserializeFloat(packet.Projectile.VelocityXFloat);
-                    grenade.velocityY = game.DeserializeFloat(packet.Projectile.VelocityYFloat);
-                    grenade.velocityZ = game.DeserializeFloat(packet.Projectile.VelocityZFloat);
-                    grenade.block = packet.Projectile.BlockId;
-                    grenade.sourcePlayer = packet.Projectile.SourcePlayerID;
+                    Grenade_ grenade = new()
+                    {
+                        velocityX = game.DeserializeFloat(packet.Projectile.VelocityXFloat),
+                        velocityY = game.DeserializeFloat(packet.Projectile.VelocityYFloat),
+                        velocityZ = game.DeserializeFloat(packet.Projectile.VelocityZFloat),
+                        block = packet.Projectile.BlockId,
+                        sourcePlayer = packet.Projectile.SourcePlayerID
+                    };
                     entity.grenade = grenade;
 
                     entity.expires = Expires.Create(game.DeserializeFloat(packet.Projectile.ExplodesAfterFloat));
@@ -560,12 +570,12 @@ public class ProcessPacketTask : Action_
         }
     }
 
-    bool Contains(string[] arr, int arrLength, string value)
+    private bool Contains(string[] arr, int arrLength, string value)
     {
         return IndexOf(arr, arrLength, value) != -1;
     }
 
-    int IndexOf(string[] arr, int arrLength, string value)
+    private static int IndexOf(string[] arr, int arrLength, string value)
     {
         for (int i = 0; i < arrLength; i++)
         {

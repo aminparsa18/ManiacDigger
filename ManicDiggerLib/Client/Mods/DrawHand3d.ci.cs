@@ -19,7 +19,7 @@
         slowdownTimerSpecial = 32 * 1000;
         d_BlockRendererTorch = new BlockRendererTorch();
     }
-    float one;
+    private readonly float one;
     
     public override void OnNewFrameDraw3d(Game game_, float deltaTime)
     {
@@ -48,7 +48,7 @@
     internal BlockRendererTorch d_BlockRendererTorch;
 
     public int terrainTexture() { return game.terrainTexture; }
-    public int texturesPacked() { return game.texturesPacked(); }
+    public int texturesPacked() { return Game.texturesPacked(); }
     public int GetWeaponTextureId(int side)
     {
         Packet_Item item = game.d_Inventory.RightHand[game.ActiveMaterial];
@@ -68,7 +68,7 @@
             return 0;
         }
     }
-    const int maxlight = 15;
+    private const int maxlight = 15;
     public float Light()
     {
         float posx = game.player.position.x;
@@ -112,13 +112,13 @@
             attack = -1;
         }
     }
-    float attack;
-    bool build;
-    ModelData modelData;
-    int oldMaterial;
-    float oldLight;
-    float slowdownTimer;
-    float slowdownTimerSpecial;
+    private float attack;
+    private bool build;
+    private ModelData modelData;
+    private int oldMaterial;
+    private float oldLight;
+    private float slowdownTimer;
+    private readonly float slowdownTimerSpecial;
     public void DrawWeapon(float dt)
     {
         int light;
@@ -148,11 +148,13 @@
         if (curmaterial != oldMaterial || curlight != oldLight || modelData == null || game.handRedraw)
         {
             game.handRedraw = false;
-            modelData = new ModelData();
-            modelData.indices = new int[128];
-            modelData.xyz = new float[128];
-            modelData.uv = new float[128];
-            modelData.rgba = new byte[128];
+            modelData = new ModelData
+            {
+                indices = new int[128],
+                xyz = new float[128],
+                uv = new float[128],
+                rgba = new byte[128]
+            };
             int x = 0;
             int y = 0;
             int z = 0;
@@ -251,25 +253,25 @@
 
         game.GLPopMatrix();
     }
-    float attackt;
-    float buildt;
-    float range;
-    float speed;
-    float animperiod;
-    float oldplayerposX;
-    float oldplayerposY;
-    float oldplayerposZ;
-    float zzzposz;
-    float t_;
-    float rot(float t)
+    private float attackt;
+    private float buildt;
+    private readonly float range;
+    private readonly float speed;
+    private readonly float animperiod;
+    private float oldplayerposX;
+    private float oldplayerposY;
+    private float oldplayerposZ;
+    private float zzzposz;
+    private float t_;
+    private float rot(float t)
     {
         return game.platform.MathSin(t * 2 * speed) * range;
     }
-    float rot2(float t)
+    private float rot2(float t)
     {
         return game.platform.MathSin((t + Game.GetPi()) * speed) * range;
     }
-    void DrawCube(ModelData m, int x, int y, int z, int c)
+    private void DrawCube(ModelData m, int x, int y, int z, int c)
     {
         //top
         //if (drawtop)
@@ -373,7 +375,7 @@
             m.indices[m.indicesCount++] = (lastelement + 2);
         }
     }
-    public void AddVertex(ModelData model, float x, float y, float z, float u, float v, int color)
+    public static void AddVertex(ModelData model, float x, float y, float z, float u, float v, int color)
     {
         model.xyz[model.GetXyzCount() + 0] = x;
         model.xyz[model.GetXyzCount() + 1] = y;
@@ -386,10 +388,10 @@
         model.rgba[model.GetRgbaCount() + 3] = Game.IntToByte(Game.ColorA(color));
         model.verticesCount++;
     }
-    float zzzx;
-    float zzzy;
-    float zzzposx;
-    float zzzposy;
+    private readonly float zzzx;
+    private readonly float zzzy;
+    private float zzzposx;
+    private readonly float zzzposy;
     //float attackprogress = 0;
 }
 
@@ -460,7 +462,7 @@ public class BlockRendererTorch
         //top
         {
             int sidetexture = TopTexture;
-            RectFRef texrec = TextureAtlas.TextureCoords2d(sidetexture, d_TerainRenderer.texturesPacked());
+            RectFRef texrec = TextureAtlas.TextureCoords2d(sidetexture, Game.texturesPacked());
             int lastelement = m.GetVerticesCount();
             AddVertex(m, top00.X, top00.Y, top00.Z, texrec.Left(), texrec.Top(), curcolor);
             AddVertex(m, top01.X, top01.Y, top01.Z, texrec.Left(), texrec.Bottom(), curcolor);
@@ -477,7 +479,7 @@ public class BlockRendererTorch
         //bottom - same as top, but z is 1 less.
         {
             int sidetexture = SideTexture;
-            RectFRef texrec = TextureAtlas.TextureCoords2d(sidetexture, d_TerainRenderer.texturesPacked());
+            RectFRef texrec = TextureAtlas.TextureCoords2d(sidetexture, Game.texturesPacked());
             int lastelement = m.GetVerticesCount();
             AddVertex(m, bottom00.X, bottom00.Y, bottom00.Z, texrec.Left(), texrec.Top(), curcolor);
             AddVertex(m, bottom01.X, bottom01.Y, bottom01.Z, texrec.Left(), texrec.Bottom(), curcolor);
@@ -494,7 +496,7 @@ public class BlockRendererTorch
         //front
         {
             int sidetexture = SideTexture;
-            RectFRef texrec = TextureAtlas.TextureCoords2d(sidetexture, d_TerainRenderer.texturesPacked());
+            RectFRef texrec = TextureAtlas.TextureCoords2d(sidetexture, Game.texturesPacked());
             int lastelement = m.GetVerticesCount();
             AddVertex(m, bottom00.X, bottom00.Y, bottom00.Z, texrec.Left(), texrec.Bottom(), curcolor);
             AddVertex(m, bottom01.X, bottom01.Y, bottom01.Z, texrec.Right(), texrec.Bottom(), curcolor);
@@ -511,7 +513,7 @@ public class BlockRendererTorch
         //back - same as front, but x is 1 greater.
         {
             int sidetexture = SideTexture;
-            RectFRef texrec = TextureAtlas.TextureCoords2d(sidetexture, d_TerainRenderer.texturesPacked());
+            RectFRef texrec = TextureAtlas.TextureCoords2d(sidetexture, Game.texturesPacked());
             int lastelement = m.GetVerticesCount();
             AddVertex(m, bottom10.X, bottom10.Y, bottom10.Z, texrec.Right(), texrec.Bottom(), curcolor);
             AddVertex(m, bottom11.X, bottom11.Y, bottom11.Z, texrec.Left(), texrec.Bottom(), curcolor);
@@ -527,7 +529,7 @@ public class BlockRendererTorch
 
         {
             int sidetexture = SideTexture;
-            RectFRef texrec = TextureAtlas.TextureCoords2d(sidetexture, d_TerainRenderer.texturesPacked());
+            RectFRef texrec = TextureAtlas.TextureCoords2d(sidetexture, Game.texturesPacked());
             int lastelement = m.GetVerticesCount();
             AddVertex(m, bottom00.X, bottom00.Y, bottom00.Z, texrec.Right(), texrec.Bottom(), curcolor);
             AddVertex(m, top00.X, top00.Y, top00.Z, texrec.Right(), texrec.Top(), curcolor);
@@ -544,7 +546,7 @@ public class BlockRendererTorch
         //right - same as left, but y is 1 greater.
         {
             int sidetexture = SideTexture;
-            RectFRef texrec = TextureAtlas.TextureCoords2d(sidetexture, d_TerainRenderer.texturesPacked());
+            RectFRef texrec = TextureAtlas.TextureCoords2d(sidetexture, Game.texturesPacked());
             int lastelement = m.GetVerticesCount();
             AddVertex(m, bottom01.X, bottom01.Y, bottom01.Z, texrec.Left(), texrec.Bottom(), curcolor);
             AddVertex(m, top01.X, top01.Y, top01.Z, texrec.Left(), texrec.Top(), curcolor);
@@ -558,7 +560,7 @@ public class BlockRendererTorch
             m.indices[m.indicesCount++] = (lastelement + 2);
         }
     }
-    public void AddVertex(ModelData model, float x, float y, float z, float u, float v, int color)
+    public static void AddVertex(ModelData model, float x, float y, float z, float u, float v, int color)
     {
         model.xyz[model.GetXyzCount() + 0] = x;
         model.xyz[model.GetXyzCount() + 1] = y;

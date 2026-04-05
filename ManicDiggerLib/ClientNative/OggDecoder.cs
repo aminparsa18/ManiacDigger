@@ -12,7 +12,7 @@ public class OggDecoder
 {
     private const int ReadBufferSamples = 4096; // samples per channel per read
 
-    public AudioDataCs OggToWav(Stream ogg)
+    public static AudioDataCs OggToWav(Stream ogg)
     {
         AudioDataCs sample = new();
 

@@ -104,13 +104,15 @@ public class ServerEntityPositionAndOrientation
 
     internal ServerEntityPositionAndOrientation Clone()
     {
-        ServerEntityPositionAndOrientation ret = new ServerEntityPositionAndOrientation();
-        ret.x = x;
-        ret.y = y;
-        ret.z = z;
-        ret.heading = heading;
-        ret.pitch = pitch;
-        ret.stance = stance;
+        ServerEntityPositionAndOrientation ret = new()
+        {
+            x = x,
+            y = y,
+            z = z,
+            heading = heading,
+            pitch = pitch,
+            stance = stance
+        };
         return ret;
     }
 }

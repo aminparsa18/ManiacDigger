@@ -27,13 +27,15 @@ public class NetworkInterpolation : INetworkInterpolation
     internal bool EXTRAPOLATE;
     internal int DELAYMILLISECONDS;
     internal int EXTRAPOLATION_TIMEMILLISECONDS;
-    Packet_[] received;
-    int receivedCount;
+    private readonly Packet_[] received;
+    private int receivedCount;
     public override void AddNetworkPacket(InterpolatedObject c, int timeMilliseconds)
     {
-        Packet_ p = new Packet_();
-        p.content = c;
-        p.timestampMilliseconds = timeMilliseconds;
+        Packet_ p = new()
+        {
+            content = c,
+            timestampMilliseconds = timeMilliseconds
+        };
 
         int max = 100;
         if (receivedCount >= max)
@@ -117,9 +119,9 @@ public class AngleInterpolation
         }
         return NormalizeAngle256(a);
     }
-    const int CircleHalf256 = 128;
-    const int CircleFull256 = 256;
-    static int NormalizeAngle256(int v)
+    private const int CircleHalf256 = 128;
+    private const int CircleFull256 = 256;
+    private static int NormalizeAngle256(int v)
     {
         return (v + shortMaxValue / 2) % 256;
     }
@@ -136,10 +138,10 @@ public class AngleInterpolation
         }
         return NormalizeAngle360(platform, a);
     }
-    const int CircleHalf360 = 180;
-    const int CircleFull360 = 360;
-    const int shortMaxValue = 32767;
-    static float NormalizeAngle360(GamePlatform platform, float v)
+    private const int CircleHalf360 = 180;
+    private const int CircleFull360 = 360;
+    private const int shortMaxValue = 32767;
+    private static float NormalizeAngle360(GamePlatform platform, float v)
     {
         return platform.FloatModulo(v + ((shortMaxValue / 2) / 360) * 360, 360);
     }

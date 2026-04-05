@@ -2,17 +2,21 @@
 {
     public ModGuiCrafting()
     {
-        handler = new PacketHandlerCraftingRecipes();
-        handler.mod = this;
+        handler = new PacketHandlerCraftingRecipes
+        {
+            mod = this
+        };
     }
-    PacketHandlerCraftingRecipes handler;
+    private readonly PacketHandlerCraftingRecipes handler;
     public override void OnNewFrameDraw2d(Game game, float deltaTime)
     {
         if (d_CraftingTableTool == null)
         {
-            d_CraftingTableTool = new CraftingTableTool();
-            d_CraftingTableTool.d_Map = MapStorage2.Create(game);
-            d_CraftingTableTool.d_Data = game.d_Data;
+            d_CraftingTableTool = new CraftingTableTool
+            {
+                d_Map = MapStorage2.Create(game),
+                d_Data = game.d_Data
+            };
         }
         game.packetHandlers[Packet_ServerIdEnum.CraftingRecipes] = handler;
         if (game.guistate != GuiState.CraftingRecipes)
@@ -92,20 +96,20 @@
             {
                 int xx = menustartx + 20 + ii * 130;
                 int yy = menustarty + i * 80;
-                game.Draw2dTexture(game.d_TerrainTextures.terrainTexture(), xx, yy, 32, 32, IntRef.Create(game.TextureIdForInventory[r.Ingredients[ii].Type]), game.texturesPacked(), Game.ColorFromArgb(255, 255, 255, 255), false);
+                game.Draw2dTexture(game.d_TerrainTextures.terrainTexture(), xx, yy, 32, 32, IntRef.Create(game.TextureIdForInventory[r.Ingredients[ii].Type]), Game.texturesPacked(), Game.ColorFromArgb(255, 255, 255, 255), false);
                 game.Draw2dText1(game.platform.StringFormat2("{0} {1}", game.platform.IntToString(r.Ingredients[ii].Amount), game.blocktypes[r.Ingredients[ii].Type].Name), xx + 50, yy, 12,
                    IntRef.Create(i == craftingselectedrecipe ? Game.ColorFromArgb(255, 255, 0, 0) : Game.ColorFromArgb(255, 255, 255, 255)), false);
             }
             {
                 int xx = menustartx + 20 + 400;
                 int yy = menustarty + i * 80;
-                game.Draw2dTexture(game.d_TerrainTextures.terrainTexture(), xx, yy, 32, 32, IntRef.Create(game.TextureIdForInventory[r.Output.Type]), game.texturesPacked(), Game.ColorFromArgb(255, 255, 255, 255), false);
+                game.Draw2dTexture(game.d_TerrainTextures.terrainTexture(), xx, yy, 32, 32, IntRef.Create(game.TextureIdForInventory[r.Output.Type]), Game.texturesPacked(), Game.ColorFromArgb(255, 255, 255, 255), false);
                 game.Draw2dText1(game.platform.StringFormat2("{0} {1}", game.platform.IntToString(r.Output.Amount), game.blocktypes[r.Output.Type].Name), xx + 50, yy, 12,
                   IntRef.Create(i == craftingselectedrecipe ? Game.ColorFromArgb(255, 255, 0, 0) : Game.ColorFromArgb(255, 255, 255, 255)), false);
             }
         }
     }
-    int craftingblocksFindAllCount(int[] craftingblocks_, int craftingblocksCount_, int p)
+    private static int craftingblocksFindAllCount(int[] craftingblocks_, int craftingblocksCount_, int p)
     {
         int count = 0;
         for (int i = 0; i < craftingblocksCount_; i++)
@@ -158,9 +162,9 @@
                 if (game.map.GetBlock(posx, posy, posz) == game.d_Data.BlockIdCraftingTable())
                 {
                     //draw crafting recipes list.
-                    IntRef tableCount = new IntRef();
+                    IntRef tableCount = new();
                     Vector3IntRef[] table = d_CraftingTableTool.GetTable(posx, posy, posz, tableCount);
-                    IntRef onTableCount = new IntRef();
+                    IntRef onTableCount = new();
                     int[] onTable = d_CraftingTableTool.GetOnTable(table, tableCount.value, onTableCount);
                     CraftingRecipesStart(game, d_CraftingRecipes, d_CraftingRecipesCount, onTable, onTableCount.value, posx, posy, posz);
                     args.SetHandled(true);
@@ -183,7 +187,7 @@
         game.SetFreeMouse(true);
     }
 
-    internal void CraftingRecipeSelected(Game game, int x, int y, int z, IntRef recipe)
+    internal static void CraftingRecipeSelected(Game game, int x, int y, int z, IntRef recipe)
     {
         if (recipe == null)
         {
@@ -220,7 +224,7 @@ public class CraftingTableTool
         retCount.value = ontableCount;
         return ontable;
     }
-    const int maxcraftingtablesize = 2000;
+    private const int maxcraftingtablesize = 2000;
     public Vector3IntRef[] GetTable(int posx, int posy, int posz, IntRef retCount)
     {
         Vector3IntRef[] l = new Vector3IntRef[2048];
@@ -266,7 +270,7 @@ public class CraftingTableTool
         return l;
     }
 
-    bool Vector3IntRefArrayContains(Vector3IntRef[] l, int lCount, Vector3IntRef p)
+    private static bool Vector3IntRefArrayContains(Vector3IntRef[] l, int lCount, Vector3IntRef p)
     {
         for (int i = 0; i < lCount; i++)
         {

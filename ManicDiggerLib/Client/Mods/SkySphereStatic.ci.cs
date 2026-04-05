@@ -7,7 +7,7 @@
         skyspherenighttexture = -1;
     }
     internal int SkyTexture;
-    Model skymodel;
+    private Model skymodel;
 
     public override void OnNewFrameDraw3d(Game game, float deltaTime)
     {

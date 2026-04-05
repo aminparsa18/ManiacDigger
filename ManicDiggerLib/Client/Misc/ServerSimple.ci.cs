@@ -9,7 +9,7 @@
         blockTypesCount = 0;
         mods = new ModSimple[128];
 
-        ModManagerSimple1 m = new ModManagerSimple1();
+        ModManagerSimple1 m = new();
         m.Start(this);
 
         mods[modsCount++] = new ModSimpleDefault();
@@ -44,9 +44,9 @@
     internal int modsCount;
 
 
-    float one;
-    NetServer server;
-    string saveFilename;
+    private readonly float one;
+    private NetServer server;
+    private string saveFilename;
     internal GamePlatform platform;
     public void Start(NetServer server_, string saveFilename_, GamePlatform platform_)
     {
@@ -65,7 +65,7 @@
         ProcessActions();
     }
 
-    void NotifyPing()
+    private void NotifyPing()
     {
         for (int i = 0; i < clientsCount; i++)
         {
@@ -82,7 +82,7 @@
         }
     }
 
-    void NotifyInventory()
+    private void NotifyInventory()
     {
         for (int i = 0; i < clientsCount; i++)
         {
@@ -103,7 +103,7 @@
         }
     }
 
-    void NotifyMap()
+    private void NotifyMap()
     {
         for (int i = 0; i < clientsCount; i++)
         {
@@ -117,9 +117,11 @@
             }
             if (clients[i].notifyMapAction == null)
             {
-                NotifyMapAction notify = new NotifyMapAction();
-                notify.server = this;
-                notify.clientId = i;
+                NotifyMapAction notify = new()
+                {
+                    server = this,
+                    clientId = i
+                };
                 clients[i].notifyMapAction = notify;
                 platform.QueueUserWorkItem(notify);
             }
@@ -128,11 +130,11 @@
 
     internal ClientSimple[] clients;
     internal int clientsCount;
-    int spawnGlX;
-    int spawnGlY;
-    int spawnGlZ;
+    private readonly int spawnGlX;
+    private readonly int spawnGlY;
+    private readonly int spawnGlZ;
 
-    void ProcessPackets()
+    private void ProcessPackets()
     {
         for (; ; )
         {
@@ -144,16 +146,18 @@
             switch (msg.Type)
             {
                 case NetworkMessageType.Connect:
-                    ClientSimple c = new ClientSimple();
-                    c.MainSocket = server;
-                    c.Connection = msg.SenderConnection;
-                    c.chunksseen = new bool[(MapSizeX / ChunkSize) * (MapSizeY / ChunkSize)][];
+                    ClientSimple c = new()
+                    {
+                        MainSocket = server,
+                        Connection = msg.SenderConnection,
+                        chunksseen = new bool[(MapSizeX / ChunkSize) * (MapSizeY / ChunkSize)][]
+                    };
                     clients[0] = c;
                     clientsCount = 1;
                     break;
                 case NetworkMessageType.Data:
                     byte[] data = msg.message;
-                    Packet_Client packet = new Packet_Client();
+                    Packet_Client packet = new();
                     Packet_ClientSerializer.DeserializeBuffer(data, msg.messageLength, packet);
                     ProcessPacket(0, packet);
                     break;
@@ -163,7 +167,7 @@
         }
     }
 
-    void ProcessPacket(int client, Packet_Client packet)
+    private void ProcessPacket(int client, Packet_Client packet)
     {
         switch (packet.GetId())
         {
@@ -200,18 +204,24 @@
                         clients[i].glX = spawnGlX;
                         clients[i].glY = spawnGlY;
                         clients[i].glZ = spawnGlZ;
-                        Packet_PositionAndOrientation pos = new Packet_PositionAndOrientation();
-                        pos.X = platform.FloatToInt(32 * clients[i].glX);
-                        pos.Y = platform.FloatToInt(32 * clients[i].glY);
-                        pos.Z = platform.FloatToInt(32 * clients[i].glZ);
-                        pos.Pitch = 255 / 2;
+                        Packet_PositionAndOrientation pos = new()
+                        {
+                            X = platform.FloatToInt(32 * clients[i].glX),
+                            Y = platform.FloatToInt(32 * clients[i].glY),
+                            Z = platform.FloatToInt(32 * clients[i].glZ),
+                            Pitch = 255 / 2
+                        };
                         //SendPacket(client, ServerPackets.Spawn(i, clients[i].Name, pos));
-                        Packet_ServerEntity e = new Packet_ServerEntity();
-                        e.DrawModel = new Packet_ServerEntityAnimatedModel();
-                        e.DrawModel.Model_ = "player.txt";
-                        e.DrawModel.ModelHeight = platform.FloatToInt((one * 17 / 10) * 32);
-                        e.DrawModel.EyeHeight = platform.FloatToInt((one * 15 / 10) * 32);
-                        e.Position = pos;
+                        Packet_ServerEntity e = new()
+                        {
+                            DrawModel = new Packet_ServerEntityAnimatedModel
+                            {
+                                Model_ = "player.txt",
+                                ModelHeight = platform.FloatToInt((one * 17 / 10) * 32),
+                                EyeHeight = platform.FloatToInt((one * 15 / 10) * 32)
+                            },
+                            Position = pos
+                        };
                         SendPacket(client, ServerPackets.EntitySpawn(0, e));
                         SendPacket(client, ServerPackets.PlayerStats(100, 100, 100, 100));
                     }
@@ -268,7 +278,7 @@
         }
     }
 
-    void SendPacketToAll(Packet_Server packet)
+    private void SendPacketToAll(Packet_Server packet)
     {
         for (int i = 0; i < clientsCount; i++)
         {
@@ -278,9 +288,9 @@
 
     public void SendPacket(int client, Packet_Server packet)
     {
-        IntRef length = new IntRef();
+        IntRef length = new();
         byte[] data = ServerPackets.Serialize(packet, length);
-        INetOutgoingMessage msg = new INetOutgoingMessage();
+        INetOutgoingMessage msg = new();
         msg.Write(data, length.value);
         clients[client].Connection.SendMessage(msg, MyNetDeliveryMethod.ReliableOrdered, 0);
     }
@@ -300,9 +310,9 @@
         mainThreadActions.Enqueue(action);
         platform.MonitorExit(mainThreadActionsLock);
     }
-    MonitorObject mainThreadActionsLock;
-    QueueAction mainThreadActions;
-    void ProcessActions()
+    private MonitorObject mainThreadActionsLock;
+    private readonly QueueAction mainThreadActions;
+    private void ProcessActions()
     {
         Move(mainThreadActions, actions);
         while (actions.Count() > 0)
@@ -311,8 +321,8 @@
             a.Run();
         }
     }
-    QueueAction actions;
-    void Move(QueueAction from, QueueAction to)
+    private readonly QueueAction actions;
+    private void Move(QueueAction from, QueueAction to)
     {
         platform.MonitorEnter(mainThreadActionsLock);
         int count = from.count;
@@ -329,10 +339,12 @@ public class SendPacketAction : Action_
 {
     public static SendPacketAction Create(ServerSimple server_, int client_, Packet_Server packet_)
     {
-        SendPacketAction a = new SendPacketAction();
-        a.server = server_;
-        a.client = client_;
-        a.packet = packet_;
+        SendPacketAction a = new()
+        {
+            server = server_,
+            client = client_,
+            packet = packet_
+        };
         return a;
     }
     internal ServerSimple server;
@@ -344,7 +356,7 @@ public class SendPacketAction : Action_
     }
 }
 
-class NotifyMapAction : Action_
+internal class NotifyMapAction : Action_
 {
     internal ServerSimple server;
     internal int clientId;
@@ -365,7 +377,7 @@ class NotifyMapAction : Action_
         server.clients[clientId].notifyMapAction = null;
     }
 
-    void LoadAndSendChunk(int x, int y, int z)
+    private void LoadAndSendChunk(int x, int y, int z)
     {
         ClientSimple c = server.clients[clientId];
         int pos = MapUtilCi.Index2d(x, y, server.MapSizeX / ServerSimple.ChunkSize);
@@ -383,22 +395,22 @@ class NotifyMapAction : Action_
         }
 
         byte[] chunkBytes = MiscCi.UshortArrayToByteArray(chunk, 32 * 32 * 32);
-        IntRef compressedLength = new IntRef();
+        IntRef compressedLength = new();
         byte[] chunkCompressed = server.platform.GzipCompress(chunkBytes, 32 * 32 * 32 * 2, compressedLength);
         
         server.QueueMainThreadAction(SendPacketAction.Create(server, clientId, ServerPackets.ChunkPart(chunkCompressed)));
         server.QueueMainThreadAction(SendPacketAction.Create(server, clientId, ServerPackets.Chunk_(x * ServerSimple.ChunkSize, y * ServerSimple.ChunkSize, z * ServerSimple.ChunkSize, ServerSimple.ChunkSize)));
     }
 
-    int mapAreaSize() { return server.chunkdrawdistance * ServerSimple.ChunkSize * 2; }
-    int mapAreaSizeZ() { return mapAreaSize(); }
+    private int mapAreaSize() { return server.chunkdrawdistance * ServerSimple.ChunkSize * 2; }
+    private int mapAreaSizeZ() { return mapAreaSize(); }
 
-    int mapsizexchunks() { return server.MapSizeX / ServerSimple.ChunkSize; }
-    int mapsizeychunks() { return server.MapSizeY / ServerSimple.ChunkSize; }
-    int mapsizezchunks() { return server.MapSizeZ / ServerSimple.ChunkSize; }
+    private int mapsizexchunks() { return server.MapSizeX / ServerSimple.ChunkSize; }
+    private int mapsizeychunks() { return server.MapSizeY / ServerSimple.ChunkSize; }
+    private int mapsizezchunks() { return server.MapSizeZ / ServerSimple.ChunkSize; }
 
-    const int intMaxValue = 2147483647;
-    void NearestDirty(int clientid, int playerx, int playery, int playerz, int[] retNearest)
+    private const int intMaxValue = 2147483647;
+    private void NearestDirty(int clientid, int playerx, int playery, int playerz, int[] retNearest)
     {
         int nearestdist = intMaxValue;
         retNearest[0] = -1;
@@ -479,10 +491,10 @@ public abstract class ModManagerSimple
 
 public class ModManagerSimple1 : ModManagerSimple
 {
-    ServerSimple server;
+    private ServerSimple server;
     public override BlockTypeSimple CreateBlockType(string name)
     {
-        BlockTypeSimple b = new BlockTypeSimple();
+        BlockTypeSimple b = new();
         b.SetName(name);
         server.blockTypes[server.blockTypesCount++] = b.block;
         return b;
@@ -621,7 +633,7 @@ public class ModSimpleDefault : ModSimple
         manager.CreateBlockType("Rail0");
     }
 
-    ModManagerSimple m;
+    private ModManagerSimple m;
 
     public override void OnPlayerJoin(int playerId)
     {
@@ -638,12 +650,12 @@ public class ModSimpleWorldGenerator : ModSimple
     {
         m = manager;
     }
-    ModManagerSimple m;
+    private ModManagerSimple m;
 
 #if CITO
     macro Index3d(x, y, h, sizex, sizey) ((((((h) * (sizey)) + (y))) * (sizex)) + (x))
 #else
-    static int Index3d(int x, int y, int h, int sizex, int sizey)
+    private static int Index3d(int x, int y, int h, int sizex, int sizey)
     {
         return (h * sizey + y) * sizex + x;
     }
@@ -708,5 +720,5 @@ public class ClientSimple
 
 public class ChunkSimple
 {
-    int[] data;
+    private readonly int[] data;
 }

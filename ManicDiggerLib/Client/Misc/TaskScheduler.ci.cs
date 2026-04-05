@@ -5,7 +5,7 @@
         actions = null;
     }
 
-    BackgroundAction[] actions;
+    private BackgroundAction[] actions;
 
     public void Update(Game game, float dt)
     {

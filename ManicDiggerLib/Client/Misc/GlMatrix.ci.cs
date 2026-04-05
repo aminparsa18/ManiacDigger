@@ -233,7 +233,7 @@ public class Mat2
     //if(typeof(exports) !== 'undefined') {
     //    exports.mat2 = mat2;
     //}
-    void f()
+    private static void f()
     {
     }
 }
@@ -473,7 +473,7 @@ public class Mat2d
     //    exports.mat2d = mat2d;
     //}
 
-    void f()
+    private static void f()
     {
     }
 }
@@ -963,7 +963,7 @@ public class Mat3
     //if(typeof(exports) !== 'undefined') {
     //    exports.mat3 = mat3;
     //}
-    void f()
+    private static void f()
     {
     }
 }
@@ -1807,7 +1807,7 @@ public class Mat4
             GlMatrixMath.Abs(eyey - centery) < GlMatrixMath.GLMAT_EPSILON() &&
             GlMatrixMath.Abs(eyez - centerz) < GlMatrixMath.GLMAT_EPSILON())
         {
-            return Mat4.Identity_(output);
+            return Identity_(output);
         }
 
         z0 = eyex - centerx;
@@ -1893,7 +1893,7 @@ public class Mat4
     //    exports.mat4 = mat4;
     //}
 
-    void f()
+    private static void f()
     {
     }
 }
@@ -1953,7 +1953,7 @@ public class Quat
             if (Vec3.Length_(tmpvec3) < epsilon)
                 Vec3.Cross(tmpvec3, yUnitVec3, a);
             Vec3.Normalize(tmpvec3, tmpvec3);
-            Quat.SetAxisAngle(output, tmpvec3, GlMatrixMath.PI());
+            SetAxisAngle(output, tmpvec3, GlMatrixMath.PI());
             return output;
         }
         else if (dot > nines)
@@ -1971,7 +1971,7 @@ public class Quat
             output[1] = tmpvec3[1];
             output[2] = tmpvec3[2];
             output[3] = 1 + dot;
-            return Quat.Normalize(output, output);
+            return Normalize(output, output);
         }
         //    };
     }
@@ -2003,7 +2003,7 @@ public class Quat
         matr[5] = view[1];
         matr[8] = view[2];
 
-        return Quat.Normalize(output, Quat.FromMat3(output, matr));
+        return Normalize(output, FromMat3(output, matr));
         //    };
     }
 
@@ -2337,7 +2337,7 @@ public class Quat
     // * @param {quat} a quat to calculate inverse of
     // * @returns {quat} output
     // */
-    public float[] Invert(float[] output, float[] a)
+    public static float[] Invert(float[] output, float[] a)
     {
         float a0 = a[0]; float a1 = a[1]; float a2 = a[2]; float a3 = a[3];
         float dot = a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3;
@@ -2361,7 +2361,7 @@ public class Quat
     // * @param {quat} a quat to calculate conjugate of
     // * @returns {quat} output
     // */
-    public float[] Conjugate(float[] output, float[] a)
+    public static float[] Conjugate(float[] output, float[] a)
     {
         output[0] = -a[0];
         output[1] = -a[1];
@@ -2492,7 +2492,7 @@ public class Quat
     //if(typeof(exports) !== 'undefined') {
     //    exports.quat = quat;
     //}
-    void f()
+    private static void f()
     {
     }
 }
@@ -3039,7 +3039,7 @@ public class Vec2
     //if(typeof(exports) !== 'undefined') {
     //    exports.vec2 = vec2;
     //}
-    void f()
+    private static void f()
     {
     }
 }
@@ -4145,7 +4145,7 @@ public class Vec4
     //    exports.vec4 = vec4;
     //}
 
-    void f()
+    private static void f()
     {
     }
 }
@@ -4209,7 +4209,7 @@ public class Platform
 #if CITO
         return 0;
 #else
-        return (float)System.Math.Sqrt(a);
+        return (float)Math.Sqrt(a);
 #endif
 #endif
     }
@@ -4271,7 +4271,7 @@ public class Platform
 #if CITO
         return 0;
 #else
-        return (float)System.Math.Cos(a);
+        return (float)Math.Cos(a);
 #endif
 #endif
     }
@@ -4333,7 +4333,7 @@ public class Platform
 #if CITO
         return 0;
 #else
-        return (float)System.Math.Sin(a);
+        return (float)Math.Sin(a);
 #endif
 #endif
     }
@@ -4400,7 +4400,7 @@ public class Platform
 #if CITO
         return 0;
 #else
-        return (float)System.Math.Tan(a);
+        return (float)Math.Tan(a);
 #endif
 #endif
     }
@@ -4462,7 +4462,7 @@ public class Platform
 #if CITO
         return 0;
 #else
-        return (float)System.Math.Acos(a);
+        return (float)Math.Acos(a);
 #endif
 #endif
     }
@@ -4512,7 +4512,7 @@ public class Platform
 #else
 #if CITO
 #else
-        System.Console.Write(a);
+        Console.Write(a);
 #endif
 #endif
     }
@@ -4562,7 +4562,7 @@ public class Platform
 #else
 #if CITO
 #else
-        System.Console.Write(a);
+        Console.Write(a);
 #endif
 #endif
     }

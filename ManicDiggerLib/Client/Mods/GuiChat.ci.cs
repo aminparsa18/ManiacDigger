@@ -6,9 +6,11 @@
         ChatFontSize = 11;
         ChatScreenExpireTimeSeconds = 20;
         ChatLinesMaxToDraw = 10;
-        font = new FontCi();
-        font.family = "Arial";
-        font.size = ChatFontSize;
+        font = new FontCi
+        {
+            family = "Arial",
+            size = ChatFontSize
+        };
         chatlines2 = new Chatline[1024];
     }
 
@@ -60,8 +62,8 @@
         }
     }
 
-    Chatline[] chatlines2;
-    int chatlines2Count;
+    private readonly Chatline[] chatlines2;
+    private int chatlines2Count;
     public void DrawChatLines(bool all)
     {
         chatlines2Count = 0;
@@ -121,7 +123,7 @@
             game.Draw2dText(game.platform.StringFormat("&7Page: {0}", game.platform.IntToString(ChatPageScroll)), font, dx * game.Scale(), (90 + (-1) * 25) * game.Scale(), null, false);
         }
     }
-    FontCi font;
+    private readonly FontCi font;
     public void DrawTypingBuffer()
     {
         font.size = ChatFontSize * game.Scale();
@@ -244,7 +246,7 @@
             //Handles player name autocomplete in chat
             if (eKey == game.GetKey(GlKeys.Tab) && game.platform.StringTrim(game.GuiTypingBuffer) != "")
             {
-                IntRef partsLength = new IntRef();
+                IntRef partsLength = new();
                 string[] parts = game.platform.StringSplit(game.GuiTypingBuffer, " ", partsLength);
                 string completed = DoAutocomplete(parts[partsLength.value - 1]);
                 if (completed == "")
@@ -339,20 +341,24 @@ public class Chatline
 
     internal static Chatline Create(string text_, int timeMilliseconds_)
     {
-        Chatline c = new Chatline();
-        c.text = text_;
-        c.timeMilliseconds = timeMilliseconds_;
-        c.clickable = false;
+        Chatline c = new()
+        {
+            text = text_,
+            timeMilliseconds = timeMilliseconds_,
+            clickable = false
+        };
         return c;
     }
 
     internal static Chatline CreateClickable(string text_, int timeMilliseconds_, string linkTarget_)
     {
-        Chatline c = new Chatline();
-        c.text = text_;
-        c.timeMilliseconds = timeMilliseconds_;
-        c.clickable = true;
-        c.linkTarget = linkTarget_;
+        Chatline c = new()
+        {
+            text = text_,
+            timeMilliseconds = timeMilliseconds_,
+            clickable = true,
+            linkTarget = linkTarget_
+        };
         return c;
     }
 }

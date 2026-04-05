@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using ManicDigger.ClientNative;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 using ManicDigger;
 using System.Xml;
 
 //Load server groups and spawnpoints
 public class ServerSystemLoadServerClient : ServerSystem
 {
-    bool loaded;
+    private bool loaded;
+   
     public override void Update(Server server, float dt)
     {
         if (!loaded)
@@ -25,7 +21,7 @@ public class ServerSystemLoadServerClient : ServerSystem
         }
     }
 
-    public void LoadServerClient(Server server)
+    public static void LoadServerClient(Server server)
     {
         string filename = "ServerClient.txt";
         if (!File.Exists(Path.Combine(GameStorePath.gamepathconfig, filename)))
@@ -37,22 +33,20 @@ public class ServerSystemLoadServerClient : ServerSystem
         {
             try
             {
-                using (TextReader textReader = new StreamReader(Path.Combine(GameStorePath.gamepathconfig, filename)))
-                {
-                    XmlSerializer deserializer = new XmlSerializer(typeof(ServerClient));
-                    server.serverClient = (ServerClient)deserializer.Deserialize(textReader);
-                    textReader.Close();
-                    server.serverClient.Groups.Sort();
-                    SaveServerClient(server);
-                }
+                using TextReader textReader = new StreamReader(Path.Combine(GameStorePath.gamepathconfig, filename));
+                XmlSerializer deserializer = new(typeof(ServerClient));
+                server.serverClient = (ServerClient)deserializer.Deserialize(textReader);
+                textReader.Close();
+                server.serverClient.Groups.Sort();
+                SaveServerClient(server);
             }
             catch //This if for the original format
             {
                 using (Stream s = new MemoryStream(File.ReadAllBytes(Path.Combine(GameStorePath.gamepathconfig, filename))))
                 {
                     server.serverClient = new ServerClient();
-                    StreamReader sr = new StreamReader(s);
-                    XmlDocument d = new XmlDocument();
+                    StreamReader sr = new(s);
+                    XmlDocument d = new();
                     d.Load(sr);
                     server.serverClient.Format = int.Parse(XmlTool.XmlVal(d, "/ManicDiggerServerClient/Format"));
                     server.serverClient.DefaultGroupGuests = XmlTool.XmlVal(d, "/ManicDiggerServerClient/DefaultGroupGuests");
@@ -84,29 +78,21 @@ public class ServerSystemLoadServerClient : ServerSystem
         }
 
         server.defaultGroupGuest = server.serverClient.Groups.Find(
-            delegate(ManicDigger.Group grp)
+            delegate (Group grp)
             {
                 return grp.Name.Equals(server.serverClient.DefaultGroupGuests);
             }
-        );
-        if (server.defaultGroupGuest == null)
-        {
-            throw new Exception(server.language.ServerClientConfigGuestGroupNotFound());
-        }
+        ) ?? throw new Exception(server.language.ServerClientConfigGuestGroupNotFound());
         server.defaultGroupRegistered = server.serverClient.Groups.Find(
-            delegate(ManicDigger.Group grp)
+            delegate (Group grp)
             {
                 return grp.Name.Equals(server.serverClient.DefaultGroupRegistered);
             }
-        );
-        if (server.defaultGroupRegistered == null)
-        {
-            throw new Exception(server.language.ServerClientConfigRegisteredGroupNotFound());
-        }
+        ) ?? throw new Exception(server.language.ServerClientConfigRegisteredGroupNotFound());
         Console.WriteLine(server.language.ServerClientConfigLoaded());
     }
 
-    public void SaveServerClient(Server server)
+    public static void SaveServerClient(Server server)
     {
         //Verify that we have a directory to place the file into.
         if (!Directory.Exists(GameStorePath.gamepathconfig))
@@ -114,14 +100,11 @@ public class ServerSystemLoadServerClient : ServerSystem
             Directory.CreateDirectory(GameStorePath.gamepathconfig);
         }
 
-        XmlSerializer serializer = new XmlSerializer(typeof(ServerClient));
+        XmlSerializer serializer = new(typeof(ServerClient));
         TextWriter textWriter = new StreamWriter(Path.Combine(GameStorePath.gamepathconfig, "ServerClient.txt"));
 
         //Check to see if config has been initialized
-        if (server.serverClient == null)
-        {
-            server.serverClient = new ServerClient();
-        }
+        server.serverClient ??= new ServerClient();
         if (server.serverClient.Groups.Count == 0)
         {
             server.serverClient.Groups = ServerClientMisc.getDefaultGroups();

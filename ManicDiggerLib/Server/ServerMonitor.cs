@@ -1,26 +1,19 @@
-using System;
-using System.IO;
-using System.Collections;
-using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Serialization;
-using ManicDigger;
-using System.Threading;
-using ManicDigger.ClientNative;
 
 public class ServerMonitor
 {
     private ServerMonitorConfig config;
     public GameExit Exit;
-    private Server server;
-    private Dictionary<int, MonitorClient> monitorClients;
+    private readonly Server server;
+    private readonly Dictionary<int, MonitorClient> monitorClients;
 
     public ServerMonitor(Server server, GameExit exit)
     {
         this.server = server;
         this.LoadConfig();
         this.Exit = exit;
-        this.monitorClients = new Dictionary<int, MonitorClient>();
+        this.monitorClients = [];
     }
 
     public bool RemoveMonitorClient(int clientid)
@@ -30,7 +23,7 @@ public class ServerMonitor
 
     public void Start()
     {
-        Thread serverMonitorThread = new Thread(new ThreadStart(this.Process));
+        Thread serverMonitorThread = new(new ThreadStart(this.Process));
         serverMonitorThread.Start();
     }
 
@@ -50,13 +43,14 @@ public class ServerMonitor
 
     public bool CheckPacket(int clientId, Packet_Client packet)
     {
-        if (!monitorClients.ContainsKey(clientId))
+        if (!monitorClients.TryGetValue(clientId, out MonitorClient? value))
         {
-            monitorClients.Add(clientId, new MonitorClient() { Id = clientId });
+            value = new MonitorClient() { Id = clientId };
+            monitorClients.Add(clientId, value);
         }
 
-        monitorClients[clientId].PacketsReceived++;
-        if (monitorClients[clientId].PacketsReceived > config.MaxPackets)
+        value.PacketsReceived++;
+        if (value.PacketsReceived > config.MaxPackets)
         {
             server.Kick(server.ServerConsoleId, clientId, "Packet Overflow");
             return false;
@@ -94,8 +88,6 @@ public class ServerMonitor
             default:
                 return true;
         }
-
-
     }
 
     // Actions which will be taken when client exceeds a limit.
@@ -105,6 +97,7 @@ public class ServerMonitor
         this.server.ServerMessageToAll(string.Format(server.language.ServerMonitorBuildingDisabled(), server.GetClient(clientId).playername), Server.MessageType.Important);
         return false;
     }
+
     private bool ActionMessage(int clientId)
     {
         this.monitorClients[clientId].MessagePunishment = new Punishment(new TimeSpan(0, 0, config.MessageBanTime));
@@ -119,7 +112,7 @@ public class ServerMonitor
         public int BlocksSet = 0;
         public int MessagesSent = 0;
 
-        public Punishment SetBlockPunishment;
+        public Punishment? SetBlockPunishment;
         public bool SetBlockPunished()
         {
             if (this.SetBlockPunishment == null)
@@ -129,7 +122,7 @@ public class ServerMonitor
             return this.SetBlockPunishment.Active();
         }
 
-        public Punishment MessagePunishment;
+        public Punishment? MessagePunishment;
         public bool MessagePunished()
         {
             if (this.MessagePunishment == null)
@@ -142,9 +135,9 @@ public class ServerMonitor
 
     private class Punishment
     {
-        private DateTime punishmentStartDate;
-        private bool permanent;
-        private TimeSpan duration;
+        private readonly DateTime punishmentStartDate;
+        private readonly bool permanent;
+        private readonly TimeSpan duration;
 
         public Punishment(TimeSpan duration)
         {
@@ -152,12 +145,14 @@ public class ServerMonitor
             this.duration = duration;
             this.permanent = false;
         }
+
         public Punishment()
         {
             this.punishmentStartDate = DateTime.UtcNow;
             this.duration = TimeSpan.MinValue;
             this.permanent = true;
         }
+
         public bool Active()
         {
             if (this.permanent)
@@ -171,7 +166,6 @@ public class ServerMonitor
             return false;
         }
     }
-
 
     public class ServerMonitorConfig
     {
@@ -191,7 +185,8 @@ public class ServerMonitor
             this.TimeIntervall = 3;
         }
     }
-    string filename = "ServerMonitor.txt";
+
+    private readonly string filename = "ServerMonitor.txt";
     private void LoadConfig()
     {
         if (!File.Exists(Path.Combine(GameStorePath.gamepathconfig, filename)))
@@ -203,21 +198,19 @@ public class ServerMonitor
         {
             try
             {
-                using (TextReader textReader = new StreamReader(Path.Combine(GameStorePath.gamepathconfig, filename)))
-                {
-                    XmlSerializer deserializer = new XmlSerializer(typeof(ServerMonitorConfig));
-                    this.config = (ServerMonitorConfig)deserializer.Deserialize(textReader);
-                    textReader.Close();
-                    SaveConfig();
-                }
+                using TextReader textReader = new StreamReader(Path.Combine(GameStorePath.gamepathconfig, filename));
+                XmlSerializer deserializer = new(typeof(ServerMonitorConfig));
+                this.config = (ServerMonitorConfig)deserializer.Deserialize(textReader);
+                textReader.Close();
+                SaveConfig();
             }
             catch //This if for the original format
             {
                 using (Stream s = new MemoryStream(File.ReadAllBytes(Path.Combine(GameStorePath.gamepathconfig, filename))))
                 {
                     this.config = new ServerMonitorConfig();
-                    StreamReader sr = new StreamReader(s);
-                    XmlDocument d = new XmlDocument();
+                    StreamReader sr = new(s);
+                    XmlDocument d = new();
                     d.Load(sr);
                 }
                 //Save with new version.
@@ -226,6 +219,7 @@ public class ServerMonitor
         }
         Console.WriteLine(server.language.ServerMonitorConfigLoaded());
     }
+
     public void SaveConfig()
     {
         //Verify that we have a directory to place the file into.
@@ -234,14 +228,11 @@ public class ServerMonitor
             Directory.CreateDirectory(GameStorePath.gamepathconfig);
         }
 
-        XmlSerializer serializer = new XmlSerializer(typeof(ServerMonitorConfig));
+        XmlSerializer serializer = new(typeof(ServerMonitorConfig));
         TextWriter textWriter = new StreamWriter(Path.Combine(GameStorePath.gamepathconfig, filename));
 
         //Check to see if config has been initialized.
-        if (this.config == null)
-        {
-            this.config = new ServerMonitorConfig();
-        }
+        this.config ??= new ServerMonitorConfig();
         //Serialize the config class to XML.
         serializer.Serialize(textWriter, this.config);
         textWriter.Close();

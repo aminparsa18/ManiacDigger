@@ -1,7 +1,6 @@
 ﻿// Copyright (c) 2011 by Henon <meinrad.recheis@gmail.com>
 using Jint;
 
-
 public interface IScriptInterpreter
 {
     TimeSpan ExecutionTimeout { get; set; }
@@ -14,7 +13,7 @@ public interface IScriptInterpreter
 
 public class JavaScriptInterpreter : IScriptInterpreter
 {
-    private Engine m_engine;
+    private readonly Engine m_engine;
 
     public JavaScriptInterpreter()
     {

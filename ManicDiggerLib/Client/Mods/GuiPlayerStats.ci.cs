@@ -15,14 +15,14 @@
     }
 
     //Sizes of Health/Oxygen bar
-    const int baseSizeX = 220;
-    const int baseSizeY = 32;
-    const int centerOffset = 20;
+    private const int baseSizeX = 220;
+    private const int baseSizeY = 32;
+    private const int centerOffset = 20;
 
-    int healthPosX;
-    int healthPosY;
-    int oxygenPosX;
-    int oxygenPosY;
+    private int healthPosX;
+    private int healthPosY;
+    private int oxygenPosX;
+    private int oxygenPosY;
 
     public void DrawPlayerHealth(Game game)
     {

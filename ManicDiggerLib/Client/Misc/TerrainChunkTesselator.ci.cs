@@ -29,7 +29,7 @@ public class TerrainChunkTesselatorCi
 
     internal Game game;
 
-    const int chunksize = 16;
+    private const int chunksize = 16;
 
     internal int[] currentChunk18;
     internal byte[] currentChunkShadows18;
@@ -58,10 +58,10 @@ public class TerrainChunkTesselatorCi
     internal bool option_DoNotDrawEdges;
     internal float AtiArtifactFix;
 
-    VecCito3i[][] c_OcclusionNeighbors;
+    private readonly VecCito3i[][] c_OcclusionNeighbors;
 
-    float[] ref_blockCornerHeight;
-    int[] tmpnPos;
+    private readonly float[] ref_blockCornerHeight;
+    private readonly int[] tmpnPos;
 
     public TerrainChunkTesselatorCi()
     {
@@ -185,7 +185,7 @@ public class TerrainChunkTesselatorCi
 #if CITO
     macro Index3d(x, y, h, sizex, sizey) ((((((h) * (sizey)) + (y))) * (sizex)) + (x))
 #else
-    static int Index3d(int x, int y, int h, int sizex, int sizey)
+    private static int Index3d(int x, int y, int h, int sizex, int sizey)
     {
         return (h * sizey + y) * sizex + x;
     }
@@ -250,18 +250,20 @@ public class TerrainChunkTesselatorCi
             toreturnatlas1d[i].verticesMax = max;
             toreturnatlas1d[i].indicesMax = max;
 
-            toreturnatlas1dtransparent[i] = new ModelData();
-            toreturnatlas1dtransparent[i].xyz = new float[max * 3];
-            toreturnatlas1dtransparent[i].uv = new float[max * 2];
-            toreturnatlas1dtransparent[i].rgba = new byte[max * 4];
-            toreturnatlas1dtransparent[i].indices = new int[max];
-            toreturnatlas1dtransparent[i].verticesMax = max;
-            toreturnatlas1dtransparent[i].indicesMax = max;
+            toreturnatlas1dtransparent[i] = new ModelData
+            {
+                xyz = new float[max * 3],
+                uv = new float[max * 2],
+                rgba = new byte[max * 4],
+                indices = new int[max],
+                verticesMax = max,
+                indicesMax = max
+            };
         }
     }
-    int toreturnatlas1dLength;
+    private int toreturnatlas1dLength;
 
-    int Max(int a, int b)
+    private static int Max(int a, int b)
     {
         if (a > b)
         {
@@ -355,7 +357,7 @@ public class TerrainChunkTesselatorCi
     // <summary>
     // Check if a face should be drawn
     // </summary>
-    int GetFaceVisibility(int nSide, int[] currentChunk, int[] nPos, bool blnIsFluid, bool blnIsLowered)
+    private int GetFaceVisibility(int nSide, int[] currentChunk, int[] nPos, bool blnIsFluid, bool blnIsLowered)
     {
         int nReturn = TileSideFlagsEnum.None;
 
@@ -615,7 +617,7 @@ public class TerrainChunkTesselatorCi
         }
     }
 
-    int ColorMultiply(int color, float fValue)
+    private int ColorMultiply(int color, float fValue)
     {
         return Game.ColorFromArgb(Game.ColorA(color),
             game.platform.FloatToInt(Game.ColorR(color) * fValue),
@@ -626,10 +628,10 @@ public class TerrainChunkTesselatorCi
     internal float occ;
     internal float halfocc;
 
-    bool[] tmpoccupied;
-    int[] tmpshadowration;
-    float[] tmpfShadowRation;
-    void BuildBlockFace(int x, int y, int z, int tileType, float vOffsetX, float vOffsetY, float vOffsetZ,
+    private readonly bool[] tmpoccupied;
+    private readonly int[] tmpshadowration;
+    private readonly float[] tmpfShadowRation;
+    private void BuildBlockFace(int x, int y, int z, int tileType, float vOffsetX, float vOffsetY, float vOffsetZ,
         float vScaleX, float vScaleY, float vScaleZ, int[] currentChunk, int tileSide)
     {
         int xx = x % chunksize + 1;
@@ -687,7 +689,7 @@ public class TerrainChunkTesselatorCi
         DrawBlockFace(x, y, z, tileType, tileSide, vOffsetX, vOffsetY, vOffsetZ, vScaleX, vScaleY, vScaleZ, vNeighbors, fShadowRation);
     }
 
-    void CalcShadowRation(int nDir1, int nDir2, int nDirBetween, int nCorner, float[] fShadowRation, bool[] occupied, int[] shadowRationInt)
+    private void CalcShadowRation(int nDir1, int nDir2, int nDirBetween, int nCorner, float[] fShadowRation, bool[] occupied, int[] shadowRationInt)
     {
         if (occupied[nDir1] && occupied[nDir2]) 
         {
@@ -708,8 +710,8 @@ public class TerrainChunkTesselatorCi
         }
     }
 
-    VecCito3i tmpv;
-    void DrawBlockFace(int x, int y, int z, int tileType, int tileSide, float vOffsetX, float vOffsetY, float vOffsetZ, float vScaleX, float vScaleY, float vScaleZ, VecCito3i[] vNeighbors, float[] fShadowRation)
+    private readonly VecCito3i tmpv;
+    private void DrawBlockFace(int x, int y, int z, int tileType, int tileSide, float vOffsetX, float vOffsetY, float vOffsetZ, float vScaleX, float vScaleY, float vScaleZ, VecCito3i[] vNeighbors, float[] fShadowRation)
     {
         int color = _colorWhite;
 
@@ -777,7 +779,7 @@ public class TerrainChunkTesselatorCi
     // <summary>
     // Returns the sides to draw for this block
     // </summary>
-    int GetToDrawFlags(int xx, int yy, int zz)
+    private int GetToDrawFlags(int xx, int yy, int zz)
     {
         int nToDraw = TileSideFlagsEnum.None;
 
@@ -796,7 +798,7 @@ public class TerrainChunkTesselatorCi
     // <summary>
     // Sets the visible flag in the nCurrentFlags if this side needs to be drawn
     // </summary>
-    int SetVisibleFlag(byte[] drawFlags, int tileSideIndex, int nCurrentFlags, int nFlagToSet)
+    private static int SetVisibleFlag(byte[] drawFlags, int tileSideIndex, int nCurrentFlags, int nFlagToSet)
     {
         if (drawFlags[tileSideIndex] > 0)
         {
@@ -1104,7 +1106,7 @@ public class TerrainChunkTesselatorCi
             && game.blocktypes[blocktype].DrawType != Packet_DrawTypeEnum.Torch;
     }
 
-    public void AddVertex(ModelData model, float x, float y, float z, float u, float v, int color)
+    public static void AddVertex(ModelData model, float x, float y, float z, float u, float v, int color)
     {
         model.xyz[model.GetXyzCount() + 0] = x;
         model.xyz[model.GetXyzCount() + 1] = y;
@@ -1118,7 +1120,7 @@ public class TerrainChunkTesselatorCi
         model.verticesCount++;
     }
 
-    float Min(float a, float b)
+    private static float Min(float a, float b)
     {
         if (a < b)
         {
@@ -1193,7 +1195,7 @@ public class TerrainChunkTesselatorCi
         return game.blocktypes[tt].Name != null;
     }
 
-    public int getBestLadderWall(int x, int y, int z, int[] currentChunk)
+    public static int getBestLadderWall(int x, int y, int z, int[] currentChunk)
     {
         bool front = false;
         bool back = false;
@@ -1440,15 +1442,17 @@ public class TerrainChunkTesselatorCi
         }
     }
 
-    public VerticesIndicesToLoad GetVerticesIndices(ModelData m, int x, int y, int z, int texture, bool transparent)
+    public static VerticesIndicesToLoad GetVerticesIndices(ModelData m, int x, int y, int z, int texture, bool transparent)
     {
-        VerticesIndicesToLoad v = new VerticesIndicesToLoad();
-        v.modelData = m;
-        v.positionX = x * chunksize;
-        v.positionY = y * chunksize;
-        v.positionZ = z * chunksize;
-        v.texture = texture;
-        v.transparent = transparent;
+        VerticesIndicesToLoad v = new()
+        {
+            modelData = m,
+            positionX = x * chunksize,
+            positionY = y * chunksize,
+            positionZ = z * chunksize,
+            texture = texture,
+            transparent = transparent
+        };
         return v;
     }
 
@@ -1521,7 +1525,7 @@ public class TerrainChunkTesselatorCi
     // <summary>
     // Gets the CornerHeightModifier for a side corner out of the ref_blockCornerHeight
     // </summary>
-    float GetCornerHeightModifier(int side, int corner)
+    private float GetCornerHeightModifier(int side, int corner)
     {
         int nIndex = CornerEnum.None;
         switch (side)

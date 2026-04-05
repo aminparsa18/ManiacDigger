@@ -20,20 +20,20 @@
     }
 
     internal Game game;
-    int chunkupdates;
+    private int chunkupdates;
     public int ChunkUpdates() { return chunkupdates; }
-    public int maxlight() { return 15; }
+    public static int maxlight() { return 15; }
 
-    bool terrainRendererStarted;
+    private bool terrainRendererStarted;
 
-    bool started;
-    int lastPerformanceInfoupdateMilliseconds;
-    int lastchunkupdates;
+    private bool started;
+    private int lastPerformanceInfoupdateMilliseconds;
+    private int lastchunkupdates;
 
 #if CITO
     macro Index3d(x, y, h, sizex, sizey) ((((((h) * (sizey)) + (y))) * (sizex)) + (x))
 #else
-    static int Index3d(int x, int y, int h, int sizex, int sizey)
+    private static int Index3d(int x, int y, int h, int sizex, int sizey)
     {
         return (h * sizey + y) * sizex + x;
     }
@@ -96,13 +96,13 @@
         return game.platform.FloatToInt(num * invertedChunkSize);
     }
 #endif
-    int mapAreaSize() { return game.platform.FloatToInt(game.d_Config3d.viewdistance) * 2; }
-    int centerAreaSize() { return game.platform.FloatToInt(game.d_Config3d.viewdistance*0.5f); }
-    int mapAreaSizeZ() { return mapAreaSize(); }
+    private int mapAreaSize() { return game.platform.FloatToInt(game.d_Config3d.viewdistance) * 2; }
+    private int centerAreaSize() { return game.platform.FloatToInt(game.d_Config3d.viewdistance*0.5f); }
+    private int mapAreaSizeZ() { return mapAreaSize(); }
 
-    int mapsizexchunks() { return game.map.mapsizexchunks(); }
-    int mapsizeychunks() { return game.map.mapsizeychunks(); }
-    int mapsizezchunks() { return game.map.mapsizezchunks(); }
+    private int mapsizexchunks() { return game.map.mapsizexchunks(); }
+    private int mapsizeychunks() { return game.map.mapsizeychunks(); }
+    private int mapsizezchunks() { return game.map.mapsizezchunks(); }
 
     public override void OnReadOnlyBackgroundThread(Game game_, float dt)
     {
@@ -156,7 +156,7 @@
 
         if (!(game.lastplacedblockX == -1 && game.lastplacedblockY == -1 && game.lastplacedblockZ == -1))
         {
-            HashSetVector3IntRef ChunksToRedraw = new HashSetVector3IntRef();
+            HashSetVector3IntRef ChunksToRedraw = new();
             Vector3IntRef[] around = BlocksAround7(Vector3IntRef.Create(game.lastplacedblockX, game.lastplacedblockY, game.lastplacedblockZ));
             for (int i = 0; i < 7; i++)
             {
@@ -235,9 +235,9 @@
         return arr;
     }
 
-    const int intMaxValue = 2147483647;
-    int[] tempnearestpos;
-    void NearestDirty(int[] nearestpos)
+    private const int intMaxValue = 2147483647;
+    private readonly int[] tempnearestpos;
+    private void NearestDirty(int[] nearestpos)
     {
 #if !CITO
         unchecked
@@ -353,9 +353,9 @@
 #endif
     }
 
-    int[] ids;
-    int idsCount;
-    void DoRedraw(TerrainRendererRedraw r)
+    private readonly int[] ids;
+    private int idsCount;
+    private void DoRedraw(TerrainRendererRedraw r)
     {
 #if !CITO
         unchecked
@@ -395,7 +395,7 @@
 #endif
     }
 
-    void RedrawChunk(int x, int y, int z)
+    private void RedrawChunk(int x, int y, int z)
     {
 #if !CITO
         unchecked
@@ -415,11 +415,13 @@
 
         GetExtendedChunk(x, y, z);
 
-        TerrainRendererRedraw r = new TerrainRendererRedraw();
-        r.c = c;
+            TerrainRendererRedraw r = new()
+            {
+                c = c
+            };
 
-        VerticesIndicesToLoad[] a = null;
-        IntRef retCount = new IntRef();
+            VerticesIndicesToLoad[] a = null;
+        IntRef retCount = new();
         if (!IsSolidChunk(currentChunk, (bufferedChunkSize) * (bufferedChunkSize) * (bufferedChunkSize)))
         {
             CalculateShadows(x, y, z);
@@ -438,21 +440,23 @@
 #endif
     }
 
-    VerticesIndicesToLoad VerticesIndicesToLoadClone(VerticesIndicesToLoad source)
+    private VerticesIndicesToLoad VerticesIndicesToLoadClone(VerticesIndicesToLoad source)
     {
-        VerticesIndicesToLoad dest = new VerticesIndicesToLoad();
-        dest.modelData = ModelDataClone(source.modelData);
-        dest.positionX = source.positionX;
-        dest.positionY = source.positionY;
-        dest.positionZ = source.positionZ;
-        dest.texture = source.texture;
-        dest.transparent = source.transparent;
+        VerticesIndicesToLoad dest = new()
+        {
+            modelData = ModelDataClone(source.modelData),
+            positionX = source.positionX,
+            positionY = source.positionY,
+            positionZ = source.positionZ,
+            texture = source.texture,
+            transparent = source.transparent
+        };
         return dest;
     }
 
-    ModelData ModelDataClone(ModelData source)
+    private static ModelData ModelDataClone(ModelData source)
     {
-        ModelData dest = new ModelData();
+        ModelData dest = new();
 #if !CITO
         unchecked
         {
@@ -485,12 +489,12 @@
         return dest;
     }
 
-    TerrainRendererRedraw[] redraw;
-    int redrawCount;
+    private readonly TerrainRendererRedraw[] redraw;
+    private int redrawCount;
 
-    float sqrt3half;
+    private float sqrt3half;
 
-    bool IsSolidChunk(int[] currentChunk, int length)
+    private static bool IsSolidChunk(int[] currentChunk, int length)
     {
         int block = currentChunk[0];
 #if !CITO
@@ -510,26 +514,26 @@
         return true;
     }
 
-    int[] currentChunk;
-    byte[] currentChunkShadows;
+    private readonly int[] currentChunk;
+    private readonly byte[] currentChunkShadows;
 
     //For performance, make a local copy of chunk and its surrounding.
     //To render one chunk, we need to know all blocks that touch chunk boundaries.
     //(because to render a single block we need to know all 6 blocks around it).
     //So it's needed to copy 16x16x16 chunk and its Borders to make a 18x18x18 "extended" chunk.
-    void GetExtendedChunk(int x, int y, int z)
+    private void GetExtendedChunk(int x, int y, int z)
     {
         game.map.GetMapPortion(currentChunk, x * chunksize - 1, y * chunksize - 1, z * chunksize - 1,
             bufferedChunkSize, bufferedChunkSize, bufferedChunkSize);
     }
 
-    int[] CalculateShadowslightRadius;
-    bool[] CalculateShadowsisTransparentForLight;
-    int[][] chunks3x3x3;
-    int[][] heightchunks3x3;
-    LightBase lightBase;
-    LightBetweenChunks lightBetweenChunks;
-    void CalculateShadows(int cx, int cy, int cz)
+    private readonly int[] CalculateShadowslightRadius;
+    private readonly bool[] CalculateShadowsisTransparentForLight;
+    private readonly int[][] chunks3x3x3;
+    private readonly int[][] heightchunks3x3;
+    private readonly LightBase lightBase;
+    private readonly LightBetweenChunks lightBetweenChunks;
+    private void CalculateShadows(int cx, int cy, int cz)
     {
 #if !CITO
         unchecked
@@ -613,11 +617,13 @@ public class TerrainRendererCommit : Action_
 {
     public static TerrainRendererCommit Create(ModDrawTerrain renderer)
     {
-        TerrainRendererCommit c = new TerrainRendererCommit();
-        c.renderer = renderer;
+        TerrainRendererCommit c = new()
+        {
+            renderer = renderer
+        };
         return c;
     }
-    ModDrawTerrain renderer;
+    private ModDrawTerrain renderer;
     public override void Run()
     {
         renderer.MainThreadCommit();
@@ -638,7 +644,7 @@ public class ModUnloadRendererChunks : ClientMod
         unloadxyztemp = new Vector3IntRef();
     }
 
-    Game game;
+    private Game game;
     public override void OnReadOnlyBackgroundThread(Game game_, float dt)
     {
         game = game_;
@@ -710,9 +716,11 @@ public class ModUnloadRendererChunks : ClientMod
             {
                 int unloadChunkPos = pos;
 
-                UnloadRendererChunksCommit commit = new UnloadRendererChunksCommit();
-                commit.game = game;
-                commit.unloadChunkPos = unloadChunkPos;
+                UnloadRendererChunksCommit commit = new()
+                {
+                    game = game,
+                    unloadChunkPos = unloadChunkPos
+                };
                 game.QueueActionCommit(commit);
             }
             unloaded = true;
@@ -723,20 +731,20 @@ public class ModUnloadRendererChunks : ClientMod
         }
     }
 
-    int mapAreaSize() { return game.platform.FloatToInt(game.d_Config3d.viewdistance) * 2; }
-    int centerAreaSize() { return game.platform.FloatToInt(game.d_Config3d.viewdistance *0.5f) ; }
-    int mapAreaSizeZ() { return mapAreaSize(); }
+    private int mapAreaSize() { return game.platform.FloatToInt(game.d_Config3d.viewdistance) * 2; }
+    private int centerAreaSize() { return game.platform.FloatToInt(game.d_Config3d.viewdistance *0.5f) ; }
+    private int mapAreaSizeZ() { return mapAreaSize(); }
 
-    int mapsizexchunks;
-    int mapsizeychunks;
-    int mapsizezchunks;
+    private int mapsizexchunks;
+    private int mapsizeychunks;
+    private int mapsizezchunks;
 
-    int chunksize;
-    float invertedChunk;
+    private int chunksize;
+    private float invertedChunk;
 
 
-    int unloadIterationXy;
-    Vector3IntRef unloadxyztemp;
+    private int unloadIterationXy;
+    private readonly Vector3IntRef unloadxyztemp;
 }
 
 public class UnloadRendererChunksCommit : Action_

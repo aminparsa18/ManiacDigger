@@ -12,7 +12,7 @@
         tosend = new QueueINetOutgoingMessage();
     }
 
-    BoolRef connected;
+    private readonly BoolRef connected;
 
     public override NetConnection Connect(string ip, int port)
     {
@@ -20,11 +20,11 @@
         return null;
     }
 
-    QueueByte incoming;
+    private readonly QueueByte incoming;
     public const int MaxPacketLength = 1024 * 4;
 
-    byte[] data;
-    const int dataLength = 1024;
+    private readonly byte[] data;
+    private const int dataLength = 1024;
     public override NetIncomingMessage ReadMessage()
     {
         if (connected.value)
@@ -63,7 +63,7 @@
         return null;
     }
 
-    NetIncomingMessage GetMessage()
+    private NetIncomingMessage GetMessage()
     {
         if (incoming.count >= 4)
         {
@@ -73,9 +73,11 @@
             if (incoming.count >= 4 + messageLength)
             {
                 incoming.DequeueRange(new byte[4], 4);
-                NetIncomingMessage msg = new NetIncomingMessage();
-                msg.message = new byte[messageLength];
-                msg.messageLength = messageLength;
+                NetIncomingMessage msg = new()
+                {
+                    message = new byte[messageLength],
+                    messageLength = messageLength
+                };
                 incoming.DequeueRange(msg.message, msg.messageLength);
                 return msg;
             }
@@ -83,7 +85,7 @@
         return null;
     }
 
-    void WriteInt(byte[] writeBuf, int writePos, int n)
+    private static void WriteInt(byte[] writeBuf, int writePos, int n)
     {
         int a = (n >> 24) & 0xFF;
         int b = (n >> 16) & 0xFF;
@@ -95,7 +97,7 @@
         writeBuf[writePos + 3] = Game.IntToByte(d);
     }
 
-    int ReadInt(byte[] readBuf, int readPos)
+    private static int ReadInt(byte[] readBuf, int readPos)
     {
         int n = readBuf[readPos] << 24;
         n |= readBuf[readPos + 1] << 16;
@@ -104,7 +106,7 @@
         return n;
     }
 
-    void DoSendPacket(INetOutgoingMessage msg)
+    private void DoSendPacket(INetOutgoingMessage msg)
     {
         byte[] packet = new byte[msg.messageLength + 4];
         WriteInt(packet, 0, msg.messageLength);
@@ -115,7 +117,7 @@
         platform.TcpSend(packet, msg.messageLength + 4);
     }
 
-    QueueINetOutgoingMessage tosend;
+    private QueueINetOutgoingMessage tosend;
     public override void SendMessage(INetOutgoingMessage message, MyNetDeliveryMethod method)
     {
         INetOutgoingMessage msg = message;

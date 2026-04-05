@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Drawing;
-using ManicDigger.Renderers;
-using System.Runtime.InteropServices;
-
-public class InfiniteMapChunked2dServer
+﻿public class InfiniteMapChunked2dServer
 {
-    public IMapStorage2 d_Map;
+    public IMapStorage2? d_Map;
     public int chunksize = 16;
-    public ushort[][] chunks;
+    public ushort[][]? chunks;
+
     public unsafe int GetBlock(int x, int y)
     {
         ushort[] chunk = GetChunk(x, y);
         return chunk[MapUtil.Index2d(x % chunksize, y % chunksize, chunksize)];
     }
+
     public ushort[] GetChunk(int x, int y)
     {
         ushort[] chunk = null;
@@ -32,11 +27,13 @@ public class InfiniteMapChunked2dServer
         chunk = chunks[MapUtil.Index2d(kx, ky, d_Map.GetMapSizeX() / chunksize)];
         return chunk;
     }
-    public unsafe void SetBlock(int x, int y, int blocktype)
+
+    public void SetBlock(int x, int y, int blocktype)
     {
         GetChunk(x, y)[MapUtil.Index2d(x % chunksize, y % chunksize, chunksize)] = (byte)blocktype;
     }
-    public unsafe void Restart()
+
+    public void Restart()
     {
         //chunks = new byte[d_Map.MapSizeX / chunksize, d_Map.MapSizeY / chunksize][,];
         int n = (d_Map.GetMapSizeX() / chunksize) * (d_Map.GetMapSizeY() / chunksize);
@@ -46,7 +43,8 @@ public class InfiniteMapChunked2dServer
             chunks[i] = null;
         }
     }
-    public unsafe void ClearChunk(int x, int y)
+
+    public void ClearChunk(int x, int y)
     {
         int px = x / chunksize;
         int py = y / chunksize;

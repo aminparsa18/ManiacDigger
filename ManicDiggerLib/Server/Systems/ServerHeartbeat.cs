@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using System.Net;
+﻿using System.Net.Http.Headers;
 
 public class ServerSystemHeartbeat : ServerSystem
 {
+    private float elapsed;
+    private readonly ServerHeartbeat d_Heartbeat;
+    private bool writtenServerKey = false;
+    public string hashPrefix = "server=";
+
     public ServerSystemHeartbeat()
     {
         d_Heartbeat = new ServerHeartbeat();
         elapsed = 60;
     }
-    float elapsed;
+
     public override void Update(Server server, float dt)
     {
         elapsed += dt;
@@ -25,9 +26,8 @@ public class ServerSystemHeartbeat : ServerSystem
             }
         }
     }
-    ServerHeartbeat d_Heartbeat;
 
-    public void SendHeartbeat(Server server)
+    public async Task SendHeartbeat(Server server)
     {
         if (server.config == null)
         {
@@ -45,7 +45,7 @@ public class ServerSystemHeartbeat : ServerSystem
         d_Heartbeat.Version = GameVersion.Version;
         d_Heartbeat.Key = server.config.Key;
         d_Heartbeat.Motd = server.config.Motd;
-        List<string> playernames = new List<string>();
+        List<string> playernames = [];
         lock (server.clients)
         {
             foreach (var k in server.clients)
@@ -62,11 +62,11 @@ public class ServerSystemHeartbeat : ServerSystem
         d_Heartbeat.UsersCount = playernames.Count;
         try
         {
-            d_Heartbeat.SendHeartbeat();
+            await d_Heartbeat.SendHeartbeatAsync();
             server.ReceivedKey = d_Heartbeat.ReceivedKey;
             if (!writtenServerKey)
             {
-                Console.WriteLine("hash: " + GetHash(d_Heartbeat.ReceivedKey));
+                Console.WriteLine($"hash: {GetHash(d_Heartbeat.ReceivedKey)}");
                 writtenServerKey = true;
             }
             Console.WriteLine(server.language.ServerHeartbeatSent());
@@ -81,9 +81,8 @@ public class ServerSystemHeartbeat : ServerSystem
             Console.WriteLine("{0} ({1})", server.language.ServerHeartbeatError(), e.Message);
         }
     }
-    bool writtenServerKey = false;
-    public string hashPrefix = "server=";
-    string GetHash(string hash)
+
+    private string GetHash(string hash)
     {
         try
         {
@@ -104,16 +103,19 @@ public class ActionSendHeartbeat : Action_
 {
     public static ActionSendHeartbeat Create(ServerSystemHeartbeat s_, Server server_)
     {
-        ActionSendHeartbeat a = new ActionSendHeartbeat();
-        a.s = s_;
-        a.server = server_;
+        ActionSendHeartbeat a = new()
+        {
+            s = s_,
+            server = server_
+        };
         return a;
     }
-    ServerSystemHeartbeat s;
-    Server server;
-    public override void Run()
+    private ServerSystemHeartbeat s;
+    private Server server;
+
+    public override async void Run()
     {
-        s.SendHeartbeat(server);
+        await s.SendHeartbeat(server);
     }
 }
 
@@ -132,11 +134,11 @@ public class ServerHeartbeat
         this.UsersCount = 0;
         this.Motd = "";
     }
-    public string fListUrl = null;
+
+    private string fListUrl = null;
 
     public string Name { get; set; }
     public string Key { get; set; }
-
     public int MaxClients { get; set; }
     public bool Public { get; set; }
     public bool PasswordProtected { get; set; }
@@ -147,50 +149,37 @@ public class ServerHeartbeat
     public int UsersCount { get; set; }
     public string Motd { get; set; }
     public string GameMode { get; set; }
-
     public string ReceivedKey { get; set; }
-    public void SendHeartbeat()
+
+    private static readonly HttpClient _httpClient = new()
     {
-        if (fListUrl == null)
+        Timeout = TimeSpan.FromSeconds(15),
+        DefaultRequestHeaders = { CacheControl = new CacheControlHeaderValue { NoCache = true, NoStore = true } }
+    };
+
+    public async Task SendHeartbeatAsync()
+    {
+        fListUrl ??= await _httpClient.GetStringAsync("http://manicdigger.sourceforge.net/heartbeat.txt");
+
+        var formData = new Dictionary<string, string>
         {
-            WebClient c = new WebClient();
-            fListUrl = c.DownloadString("http://manicdigger.sourceforge.net/heartbeat.txt");
-        }
-        StringWriter sw = new StringWriter();//&salt={4}
-        string staticData = String.Format("name={0}&max={1}&public={2}&passwordProtected={3}&allowGuests={4}&port={5}&version={6}&fingerprint={7}"
-            , System.Web.HttpUtility.UrlEncode(Name),
-            MaxClients, Public, PasswordProtected, AllowGuests, Port, Version, Key.Replace("-", ""));
+            ["name"] = Name,
+            ["max"] = MaxClients.ToString(),
+            ["public"] = Public.ToString(),
+            ["passwordProtected"] = PasswordProtected.ToString(),
+            ["allowGuests"] = AllowGuests.ToString(),
+            ["port"] = Port.ToString(),
+            ["version"] = Version.ToString(),
+            ["fingerprint"] = Key.Replace("-", ""),
+            ["users"] = UsersCount.ToString(),
+            ["motd"] = Motd,
+            ["gamemode"] = GameMode,
+            ["players"] = string.Join(",", Players),
+        };
 
-        string requestString = staticData +
-                                "&users=" + UsersCount +
-                                "&motd=" + System.Web.HttpUtility.UrlEncode(Motd) +
-                                "&gamemode=" + System.Web.HttpUtility.UrlEncode(GameMode)  +
-                                "&players=" + string.Join(",", Players.ToArray());
-
-        var request = (HttpWebRequest)WebRequest.Create(fListUrl);
-        request.Method = "POST";
-        request.Timeout = 15000; // 15s timeout
-        request.ContentType = "application/x-www-form-urlencoded";
-        request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
-
-        byte[] formData = Encoding.ASCII.GetBytes(requestString);
-        request.ContentLength = formData.Length;
-
-        System.Net.ServicePointManager.Expect100Continue = false; // fixes lighthttpd 417 error
-
-        using (Stream requestStream = request.GetRequestStream())
-        {
-            requestStream.Write(formData, 0, formData.Length);
-            requestStream.Flush();
-        }
-
-        WebResponse response = request.GetResponse();
-        ReceivedKey = null;
-        using (StreamReader sr = new StreamReader(response.GetResponseStream()))
-        {
-            ReceivedKey = sr.ReadToEnd();
-        }
-
-        request.Abort();
+        using var content = new FormUrlEncodedContent(formData);
+        using var response = await _httpClient.PostAsync(fListUrl, content);
+        response.EnsureSuccessStatusCode();
+        ReceivedKey = await response.Content.ReadAsStringAsync();
     }
 }

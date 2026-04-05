@@ -57,8 +57,10 @@ public class IPEndPointCiDefault : IPEndPointCi
 {
     public static IPEndPointCiDefault Create(string address_)
     {
-        IPEndPointCiDefault e = new IPEndPointCiDefault();
-        e.address = address_;
+        IPEndPointCiDefault e = new()
+        {
+            address = address_
+        };
         return e;
     }
     internal string address;

@@ -1,11 +1,14 @@
 ﻿//Unload chunks currently not seen by players
 public class ServerSystemUnloadUnusedChunks : ServerSystem
 {
+    private readonly Vector3IntRef chunkpos;
+    private int CompressUnusedIteration = 0;
+
     public ServerSystemUnloadUnusedChunks()
     {
         chunkpos = new Vector3IntRef();
     }
-    Vector3IntRef chunkpos;
+
     public override void Update(Server server, float dt)
     {
         int sizexchunks = server.mapsizexchunks();
@@ -30,7 +33,7 @@ public class ServerSystemUnloadUnusedChunks : ServerSystem
                     }
                     // unload distance = view distance + 60% (prevents chunks from being unloaded too early (square loading vs. circular unloading))
                     int viewdist = (int)(server.chunkdrawdistance * Server.chunksize * 1.8f);
-                    if (server.DistanceSquared(server.PlayerBlockPosition(k.Value), globalpos) <= viewdist * viewdist)
+                    if (Server.DistanceSquared(Server.PlayerBlockPosition(k.Value), globalpos) <= viewdist * viewdist)
                     {
                         //System.Console.WriteLine("No Unload:   {0},{1},{2}", chunkpos.X, chunkpos.Y, chunkpos.Z);
                         unload = false;
@@ -65,5 +68,4 @@ public class ServerSystemUnloadUnusedChunks : ServerSystem
             }
         }
     }
-    int CompressUnusedIteration = 0;
 }

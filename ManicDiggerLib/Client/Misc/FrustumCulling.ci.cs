@@ -8,35 +8,35 @@ public class FrustumCulling
 {
     internal GamePlatform platform;
     internal IGetCameraMatrix d_GetCameraMatrix;
-    float frustum00;
-    float frustum01;
-    float frustum02;
-    float frustum03;
+    private float frustum00;
+    private float frustum01;
+    private float frustum02;
+    private float frustum03;
 
-    float frustum10;
-    float frustum11;
-    float frustum12;
-    float frustum13;
+    private float frustum10;
+    private float frustum11;
+    private float frustum12;
+    private float frustum13;
 
-    float frustum20;
-    float frustum21;
-    float frustum22;
-    float frustum23;
+    private float frustum20;
+    private float frustum21;
+    private float frustum22;
+    private float frustum23;
 
-    float frustum30;
-    float frustum31;
-    float frustum32;
-    float frustum33;
+    private float frustum30;
+    private float frustum31;
+    private float frustum32;
+    private float frustum33;
 
-    float frustum40;
-    float frustum41;
-    float frustum42;
-    float frustum43;
+    private float frustum40;
+    private float frustum41;
+    private float frustum42;
+    private float frustum43;
 
-    float frustum50;
-    float frustum51;
-    float frustum52;
-    float frustum53;
+    private float frustum50;
+    private float frustum51;
+    private float frustum52;
+    private float frustum53;
     public bool SphereInFrustum(float x, float y, float z, float radius)
     {
         float d = 0;

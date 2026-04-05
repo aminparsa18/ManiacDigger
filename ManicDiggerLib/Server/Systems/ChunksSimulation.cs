@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
-
-public class ServerSystemChunksSimulation : ServerSystem
+﻿public class ServerSystemChunksSimulation : ServerSystem
 {
+    private readonly int ChunksSimulated = 1;
+    private int every = -1;
+
     public override void Update(Server server, float dt)
     {
         //Update all loaded chunks
@@ -14,36 +15,36 @@ public class ServerSystemChunksSimulation : ServerSystem
         }
     }
 
-    int ChunksSimulated = 1;
-    int every = -1;
-    int chunksimulation_every(Server server) {
-    if (every ==-1)
-           every = (int)(1 / server.SIMULATION_STEP_LENGTH) * 60 * 10;
-           return every; }//10 minutes
+    private int Chunksimulation_every(Server server)
+    {
+        if (every == -1)
+            every = (int)(1 / server.SIMULATION_STEP_LENGTH) * 60 * 10;
+        return every;
+    }//10 minutes
 
-    void ChunkSimulation(Server server)
+    private void ChunkSimulation(Server server)
     {
         unchecked
         {
             foreach (var k in server.clients)
             {
-                var pos = server.PlayerBlockPosition(k.Value);
+                var pos = Server.PlayerBlockPosition(k.Value);
 
                 long oldesttime = long.MaxValue;
-                Vector3i oldestpos = new Vector3i();
+                Vector3i oldestpos = new();
 
                 foreach (var p in ChunksAroundPlayer(server, pos))
                 {
                     if (!MapUtil.IsValidPos(server.d_Map, p.x, p.y, p.z)) { continue; }
-                    ServerChunk c = server.d_Map.GetChunkValid(server.invertChunk(p.x) , server.invertChunk( p.y), server.invertChunk( p.z));
+                    ServerChunk c = server.d_Map.GetChunkValid(Server.invertChunk(p.x), Server.invertChunk(p.y), Server.invertChunk(p.z));
                     //ServerChunk c = server.d_Map.GetChunkValid(p.x / Server.chunksize, p.y / Server.chunksize, p.z / Server.chunksize);
                     if (c == null)
                     {
-                     continue;
-                     }
+                        continue;
+                    }
                     if (c.data == null)
-                     {
-                    continue;
+                    {
+                        continue;
                     }
                     if (c.LastUpdate > server.simulationcurrentframe) { c.LastUpdate = server.simulationcurrentframe; }
                     if (c.LastUpdate < oldesttime)
@@ -57,10 +58,10 @@ public class ServerSystemChunksSimulation : ServerSystem
                         c.IsPopulated = true;
                     }
                 }
-                if (server.simulationcurrentframe - oldesttime > chunksimulation_every(server))
+                if (server.simulationcurrentframe - oldesttime > Chunksimulation_every(server))
                 {
                     ChunkUpdate(server, oldestpos, oldesttime);
-                    ServerChunk c = server.d_Map.GetChunkValid(server.invertChunk( oldestpos.x),server.invertChunk( oldestpos.y), server.invertChunk( oldestpos.z));
+                    ServerChunk c = server.d_Map.GetChunkValid(Server.invertChunk(oldestpos.x), Server.invertChunk(oldestpos.y), Server.invertChunk(oldestpos.z));
                     //ServerChunk c = server.d_Map.GetChunkValid(oldestpos.x / Server.chunksize, oldestpos.y / Server.chunksize, oldestpos.z / Server.chunksize);
                     c.LastUpdate = (int)server.simulationcurrentframe;
                     return;
@@ -69,23 +70,23 @@ public class ServerSystemChunksSimulation : ServerSystem
         }
     }
 
-    void PopulateChunk(Server server, Vector3i p)
+    private static void PopulateChunk(Server server, Vector3i p)
     {
         unchecked
         {
             var lst = server.modEventHandlers.populatechunk;
-            int x =(int) (p.x*Server.invertedChunkSize);
-            int y = (int) (  p.y * Server.invertedChunkSize);
-            int z = (int) (p.z * Server.invertedChunkSize);
+            int x = (int)(p.x * Server.invertedChunkSize);
+            int y = (int)(p.y * Server.invertedChunkSize);
+            int z = (int)(p.z * Server.invertedChunkSize);
             for (int i = 0; i < lst.Count; i++)
             {
-                lst[i](x,y,z);
+                lst[i](x, y, z);
             }
         }
         //d_Generator.PopulateChunk(d_Map, p.x / chunksize, p.y / chunksize, p.z / chunksize);
     }
 
-    void ChunkUpdate(Server server, Vector3i p, long lastupdate)
+    private void ChunkUpdate(Server server, Vector3i p, long lastupdate)
     {
         unchecked
         {
@@ -98,18 +99,18 @@ public class ServerSystemChunksSimulation : ServerSystem
             ServerChunk chunk = server.d_Map.GetChunk(p.x, p.y, p.z);
             for (int xx = 0; xx < Server.chunksize; xx++)
             {
-                           int px = xx + p.x;
+                int px = xx + p.x;
                 for (int yy = 0; yy < Server.chunksize; yy++)
                 {
-                int py = yy + p.y;
+                    int py = yy + p.y;
                     for (int zz = 0; zz < Server.chunksize; zz++)
                     {
-                    int pz = zz + p.z;
+                        int pz = zz + p.z;
                         //int block = chunk.data[MapUtilCi.Index3d(xx, yy, zz, Server.chunksize, Server.chunksize)];
 
                         for (int i = 0; i < btCount; i++)
                         {
-                            bt[i](px, py , pz);
+                            bt[i](px, py, pz);
                         }
                     }
                 }
@@ -117,12 +118,12 @@ public class ServerSystemChunksSimulation : ServerSystem
         }
     }
 
-    IEnumerable<Vector3i> ChunksAroundPlayer(Server server, Vector3i playerpos)
+    private static IEnumerable<Vector3i> ChunksAroundPlayer(Server server, Vector3i playerpos)
     {
         //SEAN: Commented these out -- seem to not do anything
         //playerpos.x =  (playerpos.x / Server.chunksize) * Server.chunksize;
         // playerpos.y = (playerpos.y / Server.chunksize) * Server.chunksize;
-        int zDrawDistance = server.invertChunk(server.d_Map.MapSizeZ);
+        int zDrawDistance = Server.invertChunk(server.d_Map.MapSizeZ);
         unchecked
         {
             for (int x = -server.chunkdrawdistance; x <= server.chunkdrawdistance; x++)
@@ -142,8 +143,8 @@ public class ServerSystemChunksSimulation : ServerSystem
         }
     }
 
-    public int[] MonsterTypesUnderground = new int[] { 1, 2 };
-    public int[] MonsterTypesOnGround = new int[] { 0, 3, 4 };
+    public int[] MonsterTypesUnderground = [1, 2];
+    public int[] MonsterTypesOnGround = [0, 3, 4];
 
     public void AddMonsters(Server server, Vector3i p)
     {
@@ -186,7 +187,8 @@ public class ServerSystemChunksSimulation : ServerSystem
             }
         }
     }
-    public int NewMonsterId(Server server)
+
+    public static int NewMonsterId(Server server)
     {
         return server.LastMonsterId++;
     }

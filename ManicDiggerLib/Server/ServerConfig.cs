@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
 
 [XmlRoot(ElementName = "ManicDiggerServerConfig")]
@@ -89,7 +86,7 @@ public class ServerConfig
         this.MapSizeX = 9984;
         this.MapSizeY = 9984;
         this.MapSizeZ = 128;
-        this.Areas = new List<AreaConfig>();
+        this.Areas = [];
         this.AutoRestartCycle = 6;
         this.Seed = 0;
         this.RandomSeed = true;
@@ -123,16 +120,17 @@ public class AreaConfig
     {
         this.Id = -1;
         this.Coords = "0,0,0,0,0,0";
-        this.PermittedGroups = new List<string>();
-        this.PermittedUsers = new List<string>();
+        this.PermittedGroups = [];
+        this.PermittedUsers = [];
     }
+
     public string Coords
     {
         get { return this.coords; }
         set
         {
             this.coords = value;
-            string[] myCoords = this.Coords.Split(new char[] { ',' });
+            string[] myCoords = this.Coords.Split([',']);
             x1 = Convert.ToInt32(myCoords[0]);
             x2 = Convert.ToInt32(myCoords[3]);
             y1 = Convert.ToInt32(myCoords[1]);
@@ -152,6 +150,7 @@ public class AreaConfig
             return false;
         }
     }
+
     public bool CanUserBuild(ClientOnServer client)
     {
         if (this.Level != null)
@@ -187,7 +186,7 @@ public class AreaConfig
             permittedGroupsString = this.PermittedGroups[0].ToString();
             for (int i = 1; i < this.PermittedGroups.Count; i++)
             {
-                permittedGroupsString += "," + this.PermittedGroups[i].ToString();
+                permittedGroupsString += $",{this.PermittedGroups[i]}";
             }
         }
 
@@ -197,7 +196,7 @@ public class AreaConfig
             permittedUsersString = this.PermittedUsers[0].ToString();
             for (int i = 1; i < this.PermittedUsers.Count; i++)
             {
-                permittedUsersString += "," + this.PermittedUsers[i].ToString();
+                permittedUsersString += $",{this.PermittedUsers[i]}";
             }
         }
 
@@ -207,7 +206,7 @@ public class AreaConfig
             levelString = this.Level.ToString();
         }
 
-        return Id + ":" + Coords + ":" + permittedGroupsString + ":" + permittedUsersString + ":" + levelString;
+        return $"{Id}:{Coords}:{permittedGroupsString}:{permittedUsersString}:{levelString}";
     }
 }
 
@@ -215,16 +214,20 @@ public static class ServerConfigMisc
 {
     public static List<AreaConfig> getDefaultAreas()
     {
-        List<AreaConfig> defaultAreas = new List<AreaConfig>();
+        List<AreaConfig> defaultAreas = [];
 
-        AreaConfig publicArea = new AreaConfig();
-        publicArea.Id = 1;
-        publicArea.Coords = "0,0,1,9984,5000,128";
+        AreaConfig publicArea = new()
+        {
+            Id = 1,
+            Coords = "0,0,1,9984,5000,128"
+        };
         publicArea.PermittedGroups.Add("Guest");
         defaultAreas.Add(publicArea);
-        AreaConfig protectedArea = new AreaConfig();
-        protectedArea.Id = 2;
-        protectedArea.Coords = "0,0,1,9984,9984,128";
+        AreaConfig protectedArea = new()
+        {
+            Id = 2,
+            Coords = "0,0,1,9984,9984,128"
+        };
         protectedArea.PermittedGroups.Add("Builder");
         protectedArea.PermittedGroups.Add("Moderator");
         protectedArea.PermittedGroups.Add("Admin");

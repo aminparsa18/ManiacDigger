@@ -19,7 +19,7 @@
         }
     }
 
-    void GrenadeExplosion(Game game, int grenadeEntityId)
+    private static void GrenadeExplosion(Game game, int grenadeEntityId)
     {
         float LocalPlayerPositionX = game.player.position.x;
         float LocalPlayerPositionY = game.player.position.y;
@@ -32,15 +32,17 @@
         game.AudioPlayAt("grenadeexplosion.ogg", grenadeSprite.positionX, grenadeSprite.positionY, grenadeSprite.positionZ);
 
         {
-            Entity entity = new Entity();
+            Entity entity = new();
 
-            Sprite spritenew = new Sprite();
-            spritenew.image = "ani5.png";
-            spritenew.positionX = grenadeSprite.positionX;
-            spritenew.positionY = grenadeSprite.positionY + 1;
-            spritenew.positionZ = grenadeSprite.positionZ;
-            spritenew.size = 200;
-            spritenew.animationcount = 4;
+            Sprite spritenew = new()
+            {
+                image = "ani5.png",
+                positionX = grenadeSprite.positionX,
+                positionY = grenadeSprite.positionY + 1,
+                positionZ = grenadeSprite.positionZ,
+                size = 200,
+                animationcount = 4
+            };
 
             entity.sprite = spritenew;
             entity.expires = Expires.Create(1);
@@ -48,18 +50,24 @@
         }
 
         {
-            Packet_ServerExplosion explosion = new Packet_ServerExplosion();
-            explosion.XFloat = game.SerializeFloat(grenadeSprite.positionX);
-            explosion.YFloat = game.SerializeFloat(grenadeSprite.positionZ);
-            explosion.ZFloat = game.SerializeFloat(grenadeSprite.positionY);
-            explosion.RangeFloat = game.blocktypes[grenade.block].ExplosionRangeFloat;
-            explosion.IsRelativeToPlayerPosition = 0;
-            explosion.TimeFloat = game.blocktypes[grenade.block].ExplosionTimeFloat;
+            Packet_ServerExplosion explosion = new()
+            {
+                XFloat = game.SerializeFloat(grenadeSprite.positionX),
+                YFloat = game.SerializeFloat(grenadeSprite.positionZ),
+                ZFloat = game.SerializeFloat(grenadeSprite.positionY),
+                RangeFloat = game.blocktypes[grenade.block].ExplosionRangeFloat,
+                IsRelativeToPlayerPosition = 0,
+                TimeFloat = game.blocktypes[grenade.block].ExplosionTimeFloat
+            };
 
-            Entity entity = new Entity();
-            entity.push = explosion;
-            entity.expires = new Expires();
-            entity.expires.timeLeft = game.DeserializeFloat(game.blocktypes[grenade.block].ExplosionTimeFloat);
+            Entity entity = new()
+            {
+                push = explosion,
+                expires = new Expires
+                {
+                    timeLeft = game.DeserializeFloat(game.blocktypes[grenade.block].ExplosionTimeFloat)
+                }
+            };
             game.EntityAddLocal(entity);
         }
 

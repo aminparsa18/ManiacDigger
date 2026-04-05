@@ -35,9 +35,9 @@ public class Unproject
         inp = new float[4];
         out_ = new float[4];
     }
-    float[] finalMatrix;
-    float[] inp;
-    float[] out_;
+    private readonly float[] finalMatrix;
+    private readonly float[] inp;
+    private readonly float[] out_;
     public bool UnProject(int winX, int winY, int winZ, float[] model, float[] proj, float[] view, float[] objPos)
     {
         inp[0] = winX;
@@ -75,7 +75,7 @@ public class Unproject
         return true;
     }
 
-    void MultMatrixVec(float[] matrix, float[] inp__, float[] out__)
+    private static void MultMatrixVec(float[] matrix, float[] inp__, float[] out__)
     {
         for (int i = 0; i < 4; i = i + 1)
         {
@@ -97,11 +97,13 @@ public class RectFRef
 
     public static RectFRef Create(float x_, float y_, float w_, float h_)
     {
-        RectFRef r = new RectFRef();
-        r.x = x_;
-        r.y = y_;
-        r.w = w_;
-        r.h = h_;
+        RectFRef r = new()
+        {
+            x = x_,
+            y = y_,
+            w = w_,
+            h = h_
+        };
         return r;
     }
 
@@ -181,9 +183,9 @@ public class StringTools
 {
     public static string StringAppend(GamePlatform p, string a, string b)
     {
-        IntRef aLength = new IntRef();
+        IntRef aLength = new();
         int[] aChars = p.StringToCharArray(a, aLength);
-        IntRef bLength = new IntRef();
+        IntRef bLength = new();
         int[] bChars = p.StringToCharArray(b, bLength);
 
         int[] cChars = new int[aLength.value + bLength.value];
@@ -200,7 +202,7 @@ public class StringTools
 
     public static string StringSubstring(GamePlatform p, string a, int start, int count)
     {
-        IntRef aLength = new IntRef();
+        IntRef aLength = new();
         int[] aChars = p.StringToCharArray(a, aLength);
 
         int[] bChars = new int[count];
@@ -218,7 +220,7 @@ public class StringTools
 
     public static int StringLength(GamePlatform p, string a)
     {
-        IntRef aLength = new IntRef();
+        IntRef aLength = new();
         int[] aChars = p.StringToCharArray(a, aLength);
         return aLength.value;
     }
@@ -273,11 +275,13 @@ public class ConnectData
     internal bool IsServePasswordProtected;
     public static ConnectData FromUri(UriCi uri)
     {
-        ConnectData c = new ConnectData();
-        c = new ConnectData();
-        c.Ip = uri.GetIp();
-        c.Port = 25565;
-        c.Username = "gamer";
+        ConnectData c = new();
+        c = new ConnectData
+        {
+            Ip = uri.GetIp(),
+            Port = 25565,
+            Username = "gamer"
+        };
         if (uri.GetPort() != -1)
         {
             c.Port = uri.GetPort();
@@ -338,11 +342,11 @@ public class Ping_
         timeout = 10;
     }
 
-    int RoundtripTimeMilliseconds;
+    private int RoundtripTimeMilliseconds;
 
-    bool ready;
-    int timeSendMilliseconds;
-    int timeout; //in seconds
+    private bool ready;
+    private int timeSendMilliseconds;
+    private int timeout; //in seconds
 
     public int GetTimeoutValue()
     {
@@ -418,17 +422,21 @@ public class BitmapData_
 {
     public static BitmapData_ Create(int width, int height)
     {
-        BitmapData_ b = new BitmapData_();
-        b.width = width;
-        b.height = height;
-        b.argb = new int[width * height];
+        BitmapData_ b = new()
+        {
+            width = width,
+            height = height,
+            argb = new int[width * height]
+        };
         return b;
     }
     public static BitmapData_ CreateFromBitmap(GamePlatform p, BitmapCi atlas2d_)
     {
-        BitmapData_ b = new BitmapData_();
-        b.width = p.FloatToInt(p.BitmapGetWidth(atlas2d_));
-        b.height = p.FloatToInt(p.BitmapGetHeight(atlas2d_));
+        BitmapData_ b = new()
+        {
+            width = p.FloatToInt(p.BitmapGetWidth(atlas2d_)),
+            height = p.FloatToInt(p.BitmapGetHeight(atlas2d_))
+        };
         b.argb = new int[b.width * b.height];
         p.BitmapGetPixelsArgb(atlas2d_, b.argb);
         return b;
@@ -458,7 +466,7 @@ public class BitmapData_
 public class TextureAtlasConverter
 {
     //tiles = 16 means 16 x 16 atlas
-    public BitmapCi[] Atlas2dInto1d(GamePlatform p, BitmapCi atlas2d_, int tiles, int atlassizezlimit, IntRef retCount)
+    public static BitmapCi[] Atlas2dInto1d(GamePlatform p, BitmapCi atlas2d_, int tiles, int atlassizezlimit, IntRef retCount)
     {
         BitmapData_ orig = BitmapData_.CreateFromBitmap(p, atlas2d_);
 
@@ -506,10 +514,12 @@ public class VecCito3i
 
     public static VecCito3i CitoCtr(int _x, int _y, int _z)
     {
-        VecCito3i v = new VecCito3i();
-        v.x = _x;
-        v.y = _y;
-        v.z = _z;
+        VecCito3i v = new()
+        {
+            x = _x,
+            y = _y,
+            z = _z
+        };
 
         return v;
     }
@@ -537,9 +547,9 @@ public class GameVersionHelper
         return true;
     }
 
-    static bool IsVersionDate(GamePlatform platform, string version)
+    private static bool IsVersionDate(GamePlatform platform, string version)
     {
-        IntRef versionCharsCount = new IntRef();
+        IntRef versionCharsCount = new();
         int[] versionChars = platform.StringToCharArray(version, versionCharsCount);
         if (versionCharsCount.value >= 10)
         {
@@ -551,16 +561,16 @@ public class GameVersionHelper
         return false;
     }
 
-    static int VersionToInt(GamePlatform platform, string version)
+    private static int VersionToInt(GamePlatform platform, string version)
     {
         int max = 1000 * 1000 * 1000;
         if (!IsVersionDate(platform, version))
         {
             return max;
         }
-        FloatRef year = new FloatRef();
-        FloatRef month = new FloatRef();
-        FloatRef day = new FloatRef();
+        FloatRef year = new();
+        FloatRef month = new();
+        FloatRef day = new();
         if (platform.FloatTryParse(StringTools.StringSubstring(platform, version, 0, 4), year))
         {
             if (platform.FloatTryParse(StringTools.StringSubstring(platform, version, 5, 2), month))
@@ -577,7 +587,7 @@ public class GameVersionHelper
         return max;
     }
 
-    static int DateToInt(int year, int month, int day)
+    private static int DateToInt(int year, int month, int day)
     {
         return year * 10000 + month * 100 + day;
     }
@@ -711,10 +721,12 @@ public class Vector3Ref
 
     internal static Vector3Ref Create(float x, float y, float z)
     {
-        Vector3Ref v = new Vector3Ref();
-        v.X = x;
-        v.Y = y;
-        v.Z = z;
+        Vector3Ref v = new()
+        {
+            X = x,
+            Y = y,
+            Z = z
+        };
         return v;
     }
 
@@ -742,10 +754,12 @@ public class Vector3IntRef
 
     internal static Vector3IntRef Create(int x, int y, int z)
     {
-        Vector3IntRef v = new Vector3IntRef();
-        v.X = x;
-        v.Y = y;
-        v.Z = z;
+        Vector3IntRef v = new()
+        {
+            X = x,
+            Y = y,
+            Z = z
+        };
         return v;
     }
 }

@@ -6,8 +6,8 @@
         wasLoaded = false;
     }
 
-    DictionaryStringAudioData audioData;
-    bool wasLoaded;
+    private readonly DictionaryStringAudioData audioData;
+    private bool wasLoaded;
 
     public override void OnNewFrame(Game game, NewFrameEventArgs args)
     {
@@ -88,7 +88,7 @@
         }
     }
 
-    void Preload(Game game)
+    private void Preload(Game game)
     {
         for (int k = 0; k < game.assets.count; k++)
         {
@@ -102,7 +102,7 @@
         }
     }
 
-    AudioData GetAudioData(Game game, string sound)
+    private AudioData GetAudioData(Game game, string sound)
     {
         if (!audioData.Contains(sound))
         {
@@ -127,7 +127,7 @@ public class AudioControl
 
     internal Sound_[] sounds;
     internal int soundsCount;
-    const int soundsMax = 64;
+    private const int soundsMax = 64;
 
     public void Clear()
     {

@@ -1,10 +1,6 @@
-using System;
-using ManicDigger;
-using System.Threading;
-
 public class ServerConsole
 {
-    private Server server;
+    private readonly Server server;
     public GameExit Exit;
 
     public ServerConsole(Server server, GameExit exit)
@@ -13,13 +9,12 @@ public class ServerConsole
         this.Exit = exit;
 
         // run command line reader as seperate thread
-        Thread consoleInterpreterThread = new Thread(new ThreadStart(this.CommandLineReader));
+        Thread consoleInterpreterThread = new(new ThreadStart(this.CommandLineReader));
         consoleInterpreterThread.Start();
     }
 
     public void CommandLineReader()
     {
-        string input = "";
         while (!Exit.exit)
         {
             if (server.IsSinglePlayer)
@@ -28,7 +23,7 @@ public class ServerConsole
             }
             else
             {
-                input = Console.ReadLine();
+                string input = Console.ReadLine();
                 if (string.IsNullOrEmpty(input))
                 {
                     continue;
@@ -39,10 +34,8 @@ public class ServerConsole
         }
     }
 
-    public void Receive(string message)
+    public static void Receive(string message)
     {
         Console.WriteLine(message);
     }
 }
-
-

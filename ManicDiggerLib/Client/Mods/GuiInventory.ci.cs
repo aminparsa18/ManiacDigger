@@ -41,14 +41,14 @@
     public int InventoryStartY() { return game.Height() / 2 - 600 / 2; }
     public int CellsStartX() { return 33 + InventoryStartX(); }
     public int CellsStartY() { return 180 + InventoryStartY(); }
-    int MaterialSelectorStartX() { return game.platform.FloatToInt(MaterialSelectorBackgroundStartX() + 17 * game.Scale()); }
-    int MaterialSelectorStartY() { return game.platform.FloatToInt(MaterialSelectorBackgroundStartY() + 17 * game.Scale()); }
-    int MaterialSelectorBackgroundStartX() { return game.platform.FloatToInt(game.Width() / 2 - (512 / 2) * game.Scale()); }
-    int MaterialSelectorBackgroundStartY() { return game.platform.FloatToInt(game.Height() - 90 * game.Scale()); }
-    int CellCountInPageX;
-    int CellCountInPageY;
-    int CellCountTotalX;
-    int CellCountTotalY;
+    private int MaterialSelectorStartX() { return game.platform.FloatToInt(MaterialSelectorBackgroundStartX() + 17 * game.Scale()); }
+    private int MaterialSelectorStartY() { return game.platform.FloatToInt(MaterialSelectorBackgroundStartY() + 17 * game.Scale()); }
+    private int MaterialSelectorBackgroundStartX() { return game.platform.FloatToInt(game.Width() / 2 - (512 / 2) * game.Scale()); }
+    private int MaterialSelectorBackgroundStartY() { return game.platform.FloatToInt(game.Height() - 90 * game.Scale()); }
+    private readonly int CellCountInPageX;
+    private readonly int CellCountInPageY;
+    private readonly int CellCountTotalX;
+    private readonly int CellCountTotalY;
 
     public int ActiveMaterialCellSize() { return game.platform.FloatToInt(48 * game.Scale()); }
 
@@ -71,13 +71,13 @@
         if (keyChar == 48) { game.ActiveMaterial = 9; }
     }
 
-    int ScrollButtonSize() { return CellDrawSize; }
+    private int ScrollButtonSize() { return CellDrawSize; }
 
-    int ScrollUpButtonX() { return CellsStartX() + CellCountInPageX * CellDrawSize; }
-    int ScrollUpButtonY() { return CellsStartY(); }
+    private int ScrollUpButtonX() { return CellsStartX() + CellCountInPageX * CellDrawSize; }
+    private int ScrollUpButtonY() { return CellsStartY(); }
 
-    int ScrollDownButtonX() { return CellsStartX() + CellCountInPageX * CellDrawSize; }
-    int ScrollDownButtonY() { return CellsStartY() + (CellCountInPageY - 1) * CellDrawSize; }
+    private int ScrollDownButtonX() { return CellsStartX() + CellCountInPageX * CellDrawSize; }
+    private int ScrollDownButtonY() { return CellsStartY() + (CellCountInPageY - 1) * CellDrawSize; }
 
     public override void OnMouseDown(Game game_, MouseEventArgs args)
     {
@@ -94,9 +94,11 @@
             game.ActiveMaterial = SelectedMaterialSelectorSlot(scaledMouse).value;
             //if (oldActiveMaterial == ActiveMaterial.ActiveMaterial)
             {
-                Packet_InventoryPosition p = new Packet_InventoryPosition();
-                p.Type = Packet_InventoryPositionTypeEnum.MaterialSelector;
-                p.MaterialId = game.ActiveMaterial;
+                Packet_InventoryPosition p = new()
+                {
+                    Type = Packet_InventoryPositionTypeEnum.MaterialSelector,
+                    MaterialId = game.ActiveMaterial
+                };
                 controller.InventoryClick(p);
             }
             args.SetHandled(true);
@@ -115,10 +117,12 @@
         {
             if (args.GetButton() == MouseButtonEnum.Left)
             {
-                Packet_InventoryPosition p = new Packet_InventoryPosition();
-                p.Type = Packet_InventoryPositionTypeEnum.MainArea;
-                p.AreaX = cellInPage.X;
-                p.AreaY = cellInPage.Y + ScrollLine;
+                Packet_InventoryPosition p = new()
+                {
+                    Type = Packet_InventoryPositionTypeEnum.MainArea,
+                    AreaX = cellInPage.X,
+                    AreaY = cellInPage.Y + ScrollLine
+                };
                 controller.InventoryClick(p);
                 args.SetHandled(true);
                 return;
@@ -126,24 +130,30 @@
             else
             {
                 {
-                    Packet_InventoryPosition p = new Packet_InventoryPosition();
-                    p.Type = Packet_InventoryPositionTypeEnum.MainArea;
-                    p.AreaX = cellInPage.X;
-                    p.AreaY = cellInPage.Y + ScrollLine;
+                    Packet_InventoryPosition p = new()
+                    {
+                        Type = Packet_InventoryPositionTypeEnum.MainArea,
+                        AreaX = cellInPage.X,
+                        AreaY = cellInPage.Y + ScrollLine
+                    };
                     controller.InventoryClick(p);
                 }
                 {
-                    Packet_InventoryPosition p = new Packet_InventoryPosition();
-                    p.Type = Packet_InventoryPositionTypeEnum.WearPlace;
-                    p.WearPlace = WearPlace_.RightHand;
-                    p.ActiveMaterial = game.ActiveMaterial;
+                    Packet_InventoryPosition p = new()
+                    {
+                        Type = Packet_InventoryPositionTypeEnum.WearPlace,
+                        WearPlace = WearPlace_.RightHand,
+                        ActiveMaterial = game.ActiveMaterial
+                    };
                     controller.InventoryClick(p);
                 }
                 {
-                    Packet_InventoryPosition p = new Packet_InventoryPosition();
-                    p.Type = Packet_InventoryPositionTypeEnum.MainArea;
-                    p.AreaX = cellInPage.X;
-                    p.AreaY = cellInPage.Y + ScrollLine;
+                    Packet_InventoryPosition p = new()
+                    {
+                        Type = Packet_InventoryPositionTypeEnum.MainArea,
+                        AreaX = cellInPage.X,
+                        AreaY = cellInPage.Y + ScrollLine
+                    };
                     controller.InventoryClick(p);
                 }
             }
@@ -170,10 +180,12 @@
         //}
         if (SelectedWearPlace(scaledMouse) != null)
         {
-            Packet_InventoryPosition p = new Packet_InventoryPosition();
-            p.Type = Packet_InventoryPositionTypeEnum.WearPlace;
-            p.WearPlace = (SelectedWearPlace(scaledMouse).value);
-            p.ActiveMaterial = game.ActiveMaterial;
+            Packet_InventoryPosition p = new()
+            {
+                Type = Packet_InventoryPositionTypeEnum.WearPlace,
+                WearPlace = (SelectedWearPlace(scaledMouse).value),
+                ActiveMaterial = game.ActiveMaterial
+            };
             controller.InventoryClick(p);
             args.SetHandled(true);
             return;
@@ -200,7 +212,7 @@
 
     public override void OnTouchStart(Game game_, TouchEventArgs e)
     {
-        MouseEventArgs args = new MouseEventArgs();
+        MouseEventArgs args = new();
         args.SetX(e.GetX());
         args.SetY(e.GetY());
         OnMouseDown(game_, args);
@@ -225,8 +237,8 @@
         if (ScrollLine >= max) { ScrollLine = max; }
     }
 
-    int ScrollingUpTimeMilliseconds;
-    int ScrollingDownTimeMilliseconds;
+    private int ScrollingUpTimeMilliseconds;
+    private int ScrollingDownTimeMilliseconds;
 
     public override void OnMouseUp(Game game_, MouseEventArgs args)
     {
@@ -238,7 +250,7 @@
         ScrollingDownTimeMilliseconds = 0;
     }
 
-    IntRef SelectedMaterialSelectorSlot(PointRef scaledMouse)
+    private IntRef SelectedMaterialSelectorSlot(PointRef scaledMouse)
     {
         if (scaledMouse.X >= MaterialSelectorStartX() && scaledMouse.Y >= MaterialSelectorStartY()
             && scaledMouse.X < MaterialSelectorStartX() + 10 * ActiveMaterialCellSize()
@@ -249,7 +261,7 @@
         return null;
     }
 
-    PointRef SelectedCell(PointRef scaledMouse)
+    private PointRef SelectedCell(PointRef scaledMouse)
     {
         if (scaledMouse.X < CellsStartX() || scaledMouse.Y < CellsStartY()
             || scaledMouse.X > CellsStartX() + CellCountInPageX * CellDrawSize
@@ -262,7 +274,7 @@
         return cell;
     }
 
-    bool SelectedCellOrScrollbar(int scaledMouseX, int scaledMouseY)
+    private bool SelectedCellOrScrollbar(int scaledMouseX, int scaledMouseY)
     {
         if (scaledMouseX < CellsStartX() || scaledMouseY < CellsStartY()
             || scaledMouseX > CellsStartX() + (CellCountInPageX + 1) * CellDrawSize
@@ -280,8 +292,10 @@
         game = game_;
         if (dataItems == null)
         {
-            dataItems = new GameDataItemsClient();
-            dataItems.game = game_;
+            dataItems = new GameDataItemsClient
+            {
+                game = game_
+            };
             controller = ClientInventoryController.Create(game_);
             inventoryUtil = game.d_InventoryUtil;
         }
@@ -341,7 +355,7 @@
                     && selectedInPage.Y + sizey <= CellCountInPageY)
                 {
                     int c;
-                    IntRef itemsAtAreaCount = new IntRef();
+                    IntRef itemsAtAreaCount = new();
                     PointRef[] itemsAtArea = inventoryUtil.ItemsAtArea(selectedInPage.X, selectedInPage.Y + ScrollLine, sizex, sizey, itemsAtAreaCount);
                     if (itemsAtArea == null || itemsAtAreaCount.value > 1)
                     {
@@ -364,7 +378,7 @@
 
                 int c;
                 Packet_Item itemsAtArea = inventoryUtil.ItemAtWearPlace(selectedWear.value, game.ActiveMaterial);
-                if (!dataItems.CanWear(selectedWear.value, game.d_Inventory.DragDropItem))
+                if (!GameDataItemsClient.CanWear(selectedWear.value, game.d_Inventory.DragDropItem))
                 {
                     c = Game.ColorFromArgb(100, 255, 0, 0); // red
                 }
@@ -431,7 +445,7 @@
         }
     }
 
-    Packet_Item GetItem(Packet_Inventory inventory, int x, int y)
+    private static Packet_Item GetItem(Packet_Inventory inventory, int x, int y)
     {
         for (int i = 0; i < inventory.ItemsCount; i++)
         {
@@ -462,7 +476,7 @@
             MaterialSelectorStartY(), ActiveMaterialCellSize() * 64 / 48, ActiveMaterialCellSize() * 64 / 48);
     }
 
-    IntRef SelectedWearPlace(PointRef scaledMouse)
+    private IntRef SelectedWearPlace(PointRef scaledMouse)
     {
         for (int i = 0; i < wearPlaceStartLength; i++)
         {
@@ -480,13 +494,13 @@
         return null;
     }
 
-    const int wearPlaceStartLength = 5;
+    private const int wearPlaceStartLength = 5;
     //indexed by enum WearPlace
-    PointRef[] wearPlaceStart;
+    private readonly PointRef[] wearPlaceStart;
     //indexed by enum WearPlace
-    PointRef[] wearPlaceCells;
+    private readonly PointRef[] wearPlaceCells;
 
-    void DrawItem(int screenposX, int screenposY, Packet_Item item, int drawsizeX, int drawsizeY)
+    private void DrawItem(int screenposX, int screenposY, Packet_Item item, int drawsizeX, int drawsizeY)
     {
         if (item == null)
         {
@@ -506,18 +520,20 @@
                 return;
             }
             game.Draw2dTexture(game.terrainTexture, screenposX, screenposY,
-                drawsizeX, drawsizeY, IntRef.Create(dataItems.TextureIdForInventory()[item.BlockId]), game.texturesPacked(), Game.ColorFromArgb(255, 255, 255, 255), false);
+                drawsizeX, drawsizeY, IntRef.Create(dataItems.TextureIdForInventory()[item.BlockId]), Game.texturesPacked(), Game.ColorFromArgb(255, 255, 255, 255), false);
             if (item.BlockCount > 1)
             {
-                FontCi font = new FontCi();
-                font.size = 8;
-                font.family = "Arial";
+                FontCi font = new()
+                {
+                    size = 8,
+                    family = "Arial"
+                };
                 game.Draw2dText(game.platform.IntToString(item.BlockCount), font, screenposX, screenposY, null, false);
             }
         }
         else
         {
-            game.Draw2dBitmapFile(dataItems.ItemGraphics(item), screenposX, screenposY,
+            game.Draw2dBitmapFile(GameDataItemsClient.ItemGraphics(item), screenposX, screenposY,
                 drawsizeX, drawsizeY);
         }
     }
@@ -526,8 +542,8 @@
     {
         int sizex = dataItems.ItemSizeX(item);
         int sizey = dataItems.ItemSizeY(item);
-        IntRef tw = new IntRef();
-        IntRef th = new IntRef();
+        IntRef tw = new();
+        IntRef th = new();
         float one = 1;
         game.platform.TextSize(dataItems.ItemInfo(item), 11 + one / 2, tw, th);
         tw.value += 6;
@@ -540,12 +556,16 @@
         if (screenposY > game.Height() - (h + 20)) { screenposY = game.Height() - (h + 20); }
         game.Draw2dTexture(game.WhiteTexture(), screenposX - w, screenposY - h, w, h, null, 0, Game.ColorFromArgb(255, 0, 0, 0), false);
         game.Draw2dTexture(game.WhiteTexture(), screenposX - w + 2, screenposY - h + 2, w - 4, h - 4, null, 0, Game.ColorFromArgb(255, 105, 105, 105), false);
-        FontCi font = new FontCi();
-        font.family = "Arial";
-        font.size = 10;
+        FontCi font = new()
+        {
+            family = "Arial",
+            size = 10
+        };
         game.Draw2dText(dataItems.ItemInfo(item), font, screenposX - tw.value + 4, screenposY - h + 2, null, false);
-        Packet_Item item2 = new Packet_Item();
-        item2.BlockId = item.BlockId;
+        Packet_Item item2 = new()
+        {
+            BlockId = item.BlockId
+        };
         DrawItem(screenposX - w + 2, screenposY - h + 2, item2, 0, 0);
     }
 

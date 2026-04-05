@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Drawing;
-using ProtoBuf;
-using System.Runtime.Serialization;
+﻿using ProtoBuf;
 using ManicDigger;
 
 //separate class because it's used by server and client.
@@ -91,16 +86,16 @@ public class InventoryUtil
 
     public Item ItemAtWearPlace(int wearPlace, int activeMaterial)
     {
-        switch (wearPlace)
+        return wearPlace switch
         {
             //case WearPlace.LeftHand: return d_Inventory.LeftHand[activeMaterial];
-            case WearPlace_.RightHand: return d_Inventory.RightHand[activeMaterial];
-            case WearPlace_.MainArmor: return d_Inventory.MainArmor;
-            case WearPlace_.Boots: return d_Inventory.Boots;
-            case WearPlace_.Helmet: return d_Inventory.Helmet;
-            case WearPlace_.Gauntlet: return d_Inventory.Gauntlet;
-            default: throw new Exception();
-        }
+            WearPlace_.RightHand => d_Inventory.RightHand[activeMaterial],
+            WearPlace_.MainArmor => d_Inventory.MainArmor,
+            WearPlace_.Boots => d_Inventory.Boots,
+            WearPlace_.Helmet => d_Inventory.Helmet,
+            WearPlace_.Gauntlet => d_Inventory.Gauntlet,
+            _ => throw new Exception(),
+        };
     }
 
     public void SetItemAtWearPlace(int wearPlace, int activeMaterial, Item item)
@@ -166,7 +161,7 @@ public class InventoryUtil
                 {
                     for (int x = 0; x < CellCountX; x++)
                     {
-                        IntRef pCount = new IntRef();
+                        IntRef pCount = new();
                         PointRef[] p = ItemsAtArea(x, y, d_Items.ItemSizeX(item), d_Items.ItemSizeY(item), pCount);
                         if (p != null && pCount.value == 1)
                         {
@@ -184,7 +179,7 @@ public class InventoryUtil
                 {
                     for (int x = 0; x < CellCountX; x++)
                     {
-                        IntRef pCount = new IntRef();
+                        IntRef pCount = new();
                         PointRef[] p = ItemsAtArea(x, y, d_Items.ItemSizeX(item), d_Items.ItemSizeY(item), pCount);
                         if (p != null && pCount.value == 0)
                         {
@@ -248,18 +243,22 @@ public class InventoryPosition
 
     public static InventoryPosition MaterialSelector(int materialId)
     {
-        InventoryPosition pos = new InventoryPosition();
-        pos.type = InventoryPositionType.MaterialSelector;
-        pos.MaterialId = materialId;
+        InventoryPosition pos = new()
+        {
+            type = InventoryPositionType.MaterialSelector,
+            MaterialId = materialId
+        };
         return pos;
     }
 
     public static InventoryPosition MainArea(Point point)
     {
-        InventoryPosition pos = new InventoryPosition();
-        pos.type = InventoryPositionType.MainArea;
-        pos.AreaX = point.X;
-        pos.AreaY = point.Y;
+        InventoryPosition pos = new()
+        {
+            type = InventoryPositionType.MainArea,
+            AreaX = point.X,
+            AreaY = point.Y
+        };
         return pos;
     }
 }
@@ -283,10 +282,11 @@ public interface IDropItem
 
 public class InventoryServer : IInventoryController
 {
-    public IGameDataItems d_Items;
-    public Inventory d_Inventory;
-    public InventoryUtil d_InventoryUtil;
-    public IDropItem d_DropItem;
+    public IGameDataItems? d_Items;
+    public IDropItem? d_DropItem;
+
+    public Inventory? d_Inventory;
+    public InventoryUtil? d_InventoryUtil;
 
     public override void InventoryClick(Packet_InventoryPosition pos)
     {
@@ -313,7 +313,7 @@ public class InventoryServer : IInventoryController
             else if (d_Inventory.DragDropItem != null)
             {
                 //make sure there is nothing blocking drop.
-                IntRef itemsAtAreaCount = new IntRef();
+                IntRef itemsAtAreaCount = new();
                 PointRef[] itemsAtArea = d_InventoryUtil.ItemsAtArea(pos.AreaX, pos.AreaY,
                     d_Items.ItemSizeX(d_Inventory.DragDropItem), d_Items.ItemSizeY(d_Inventory.DragDropItem), itemsAtAreaCount);
                 if (itemsAtArea == null || itemsAtAreaCount.value > 1)
@@ -402,14 +402,15 @@ public class InventoryServer : IInventoryController
             throw new Exception();
         }
     }
-    private void SendInventory()
+
+    private static void SendInventory()
     {
     }
 
     public override void WearItem(Packet_InventoryPosition from, Packet_InventoryPosition to)
     {
         //todo
-        ProtoPoint originPoint = new ProtoPoint(from.AreaX, from.AreaY);
+        ProtoPoint originPoint = new(from.AreaX, from.AreaY);
         if (from.Type == Packet_InventoryPositionTypeEnum.MainArea
             && to.Type == Packet_InventoryPositionTypeEnum.MaterialSelector
             && d_Inventory.RightHand[to.MaterialId] == null
@@ -427,7 +428,6 @@ public class InventoryServer : IInventoryController
         if (from.Type == Packet_InventoryPositionTypeEnum.MaterialSelector)
         {
             //duplicate code with GrabItem().
-
             Item item = d_Inventory.RightHand[from.MaterialId];
             if (item == null)
             {
@@ -438,7 +438,7 @@ public class InventoryServer : IInventoryController
             {
                 for (int y = 0; y < d_InventoryUtil.CellCountY; y++)
                 {
-                    IntRef pCount = new IntRef();
+                    IntRef pCount = new();
                     PointRef[] p = d_InventoryUtil.ItemsAtArea(x, y, d_Items.ItemSizeX(item), d_Items.ItemSizeY(item), pCount);
                     if (p != null && pCount.value == 1)
                     {
@@ -457,7 +457,7 @@ public class InventoryServer : IInventoryController
             {
                 for (int y = 0; y < d_InventoryUtil.CellCountY; y++)
                 {
-                    IntRef pCount = new IntRef();
+                    IntRef pCount = new();
                     PointRef[] p = d_InventoryUtil.ItemsAtArea(x, y, d_Items.ItemSizeX(item), d_Items.ItemSizeY(item), pCount);
                     if (p != null && pCount.value == 0)
                     {
@@ -472,7 +472,7 @@ public class InventoryServer : IInventoryController
 }
 public class GameDataItemsBlocks : IGameDataItems
 {
-    public GameData d_Data;
+    public GameData? d_Data;
 
     public int ItemSizeX(Item item)
     {
@@ -498,10 +498,12 @@ public class GameDataItemsBlocks : IGameDataItems
                 return null;
             }
             //todo stack size limit
-            Item ret = new Item();
-            ret.ItemClass = itemA.ItemClass;
-            ret.BlockId = itemA.BlockId;
-            ret.BlockCount = itemA.BlockCount + itemB.BlockCount;
+            Item ret = new()
+            {
+                ItemClass = itemA.ItemClass,
+                BlockId = itemA.BlockId,
+                BlockCount = itemA.BlockCount + itemB.BlockCount
+            };
             return ret;
         }
         else
@@ -514,16 +516,16 @@ public class GameDataItemsBlocks : IGameDataItems
     {
         if (item == null) { return true; }
         if (item == null) { return true; }
-        switch (selectedWear)
+        return selectedWear switch
         {
             //case WearPlace.LeftHand: return false;
-            case WearPlace_.RightHand: return item.ItemClass == ItemClass.Block;
-            case WearPlace_.MainArmor: return false;
-            case WearPlace_.Boots: return false;
-            case WearPlace_.Helmet: return false;
-            case WearPlace_.Gauntlet: return false;
-            default: throw new Exception();
-        }
+            WearPlace_.RightHand => item.ItemClass == ItemClass.Block,
+            WearPlace_.MainArmor => false,
+            WearPlace_.Boots => false,
+            WearPlace_.Helmet => false,
+            WearPlace_.Gauntlet => false,
+            _ => throw new Exception(),
+        };
     }
 
     public string ItemGraphics(Item item)

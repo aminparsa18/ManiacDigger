@@ -2,18 +2,28 @@
 {
     public ScreenSingleplayer()
     {
-        play = new MenuWidget();
-        play.text = "Play";
-        newWorld = new MenuWidget();
-        newWorld.text = "New World";
-        modify = new MenuWidget();
-        modify.text = "Modify";
-        back = new MenuWidget();
-        back.text = "Back";
-        back.type = WidgetType.Button;
-        open = new MenuWidget();
-        open.text = "Create or open...";
-        open.type = WidgetType.Button;
+        play = new MenuWidget
+        {
+            text = "Play"
+        };
+        newWorld = new MenuWidget
+        {
+            text = "New World"
+        };
+        modify = new MenuWidget
+        {
+            text = "Modify"
+        };
+        back = new MenuWidget
+        {
+            text = "Back",
+            type = WidgetType.Button
+        };
+        open = new MenuWidget
+        {
+            text = "Create or open...",
+            type = WidgetType.Button
+        };
 
         title = "Singleplayer";
 
@@ -26,23 +36,25 @@
         worldButtons = new MenuWidget[10];
         for (int i = 0; i < 10; i++)
         {
-            worldButtons[i] = new MenuWidget();
-            worldButtons[i].visible = false;
+            worldButtons[i] = new MenuWidget
+            {
+                visible = false
+            };
             widgets[5 + i] = worldButtons[i];
         }
     }
 
-    MenuWidget newWorld;
-    MenuWidget play;
-    MenuWidget modify;
-    MenuWidget back;
-    MenuWidget open;
+    private readonly MenuWidget newWorld;
+    private readonly MenuWidget play;
+    private readonly MenuWidget modify;
+    private readonly MenuWidget back;
+    private readonly MenuWidget open;
 
-    MenuWidget[] worldButtons;
+    private readonly MenuWidget[] worldButtons;
 
-    string[] savegames;
-    int savegamesCount;
-    string title;
+    private string[] savegames;
+    private int savegamesCount;
+    private string title;
 
     public override void LoadTranslations()
     {
@@ -95,7 +107,7 @@
 
         if (savegames == null)
         {
-            IntRef savegamesCount_ = new IntRef();
+            IntRef savegamesCount_ = new();
             savegames = menu.GetSavegames(savegamesCount_);
             savegamesCount = savegamesCount_.value;
         }
@@ -153,7 +165,7 @@
 
         if (w == newWorld)
         {
-            menu.StartNewWorld();
+            MainMenu.StartNewWorld();
         }
 
         if (w == play)
@@ -162,7 +174,7 @@
 
         if (w == modify)
         {
-            menu.StartModifyWorld();
+            MainMenu.StartModifyWorld();
         }
 
         if (w == back)

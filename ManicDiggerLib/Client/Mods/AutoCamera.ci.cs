@@ -11,19 +11,19 @@
         position = new float[3];
         orientation = new float[3];
     }
-    ClientModManager m;
-    GamePlatform p;
+    private ClientModManager m;
+    private GamePlatform p;
 
-    float one;
-    CameraPoint[] cameraPoints;
-    int cameraPointsCount;
-    float playingTime;
+    private float one;
+    private CameraPoint[] cameraPoints;
+    private int cameraPointsCount;
+    private float playingTime;
     
     public override bool OnClientCommand(Game game, ClientCommandArgs args)
     {
         if (args.command == "cam")
         {
-            IntRef argumentsLength = new IntRef();
+            IntRef argumentsLength = new();
             string[] arguments = p.StringSplit(args.arguments, " ", argumentsLength);
             if (p.StringTrim(args.arguments) == "")
             {
@@ -40,13 +40,15 @@
             if (arguments[0] == "p")
             {
                 m.DisplayNotification("Point defined.");
-                CameraPoint point = new CameraPoint();
-                point.positionGlX = m.GetLocalPositionX();
-                point.positionGlY = m.GetLocalPositionY();
-                point.positionGlZ = m.GetLocalPositionZ();
-                point.orientationGlX = m.GetLocalOrientationX();
-                point.orientationGlY = m.GetLocalOrientationY();
-                point.orientationGlZ = m.GetLocalOrientationZ();
+                CameraPoint point = new()
+                {
+                    positionGlX = m.GetLocalPositionX(),
+                    positionGlY = m.GetLocalPositionY(),
+                    positionGlZ = m.GetLocalPositionZ(),
+                    orientationGlX = m.GetLocalOrientationX(),
+                    orientationGlY = m.GetLocalOrientationY(),
+                    orientationGlZ = m.GetLocalOrientationZ()
+                };
                 cameraPoints[cameraPointsCount++] = point;
             }
             if (arguments[0] == "start" || arguments[0] == "play" || arguments[0] == "rec")
@@ -134,19 +136,21 @@
             }
             if (arguments[0] == "load")
             {
-                IntRef pointsLength = new IntRef();
+                IntRef pointsLength = new();
                 string[] points = p.StringSplit(arguments[1], ",", pointsLength);
                 int n = (pointsLength.value - 1) / 6;
                 cameraPointsCount = 0;
                 for (int i = 0; i < n; i++)
                 {
-                    CameraPoint point = new CameraPoint();
-                    point.positionGlX = one * p.IntParse(points[1 + i * 6 + 0]) / 100;
-                    point.positionGlY = one * p.IntParse(points[1 + i * 6 + 1]) / 100;
-                    point.positionGlZ = one * p.IntParse(points[1 + i * 6 + 2]) / 100;
-                    point.orientationGlX = one * p.IntParse(points[1 + i * 6 + 3]) / 1000;
-                    point.orientationGlY = one * p.IntParse(points[1 + i * 6 + 4]) / 1000;
-                    point.orientationGlZ = one * p.IntParse(points[1 + i * 6 + 5]) / 1000;
+                    CameraPoint point = new()
+                    {
+                        positionGlX = one * p.IntParse(points[1 + i * 6 + 0]) / 100,
+                        positionGlY = one * p.IntParse(points[1 + i * 6 + 1]) / 100,
+                        positionGlZ = one * p.IntParse(points[1 + i * 6 + 2]) / 100,
+                        orientationGlX = one * p.IntParse(points[1 + i * 6 + 3]) / 1000,
+                        orientationGlY = one * p.IntParse(points[1 + i * 6 + 4]) / 1000,
+                        orientationGlZ = one * p.IntParse(points[1 + i * 6 + 5]) / 1000
+                    };
                     cameraPoints[cameraPointsCount++] = point;
                 }
                 m.DisplayNotification(p.StringFormat("Camera points loaded: {0}", p.IntToString(n)));
@@ -156,9 +160,9 @@
         return false;
     }
 
-    AviWriterCi avi;
+    private AviWriterCi avi;
 
-    void Stop()
+    private void Stop()
     {
         m.ShowGui(1);
         m.EnableCameraControl(true);
@@ -176,19 +180,19 @@
         }
     }
 
-    int previousFreemove;
-    float previousPositionX;
-    float previousPositionY;
-    float previousPositionZ;
-    float previousOrientationX;
-    float previousOrientationY;
-    float previousOrientationZ;
+    private int previousFreemove;
+    private float previousPositionX;
+    private float previousPositionY;
+    private float previousPositionZ;
+    private float previousOrientationX;
+    private float previousOrientationY;
+    private float previousOrientationZ;
 
-    float[] position;
-    float[] orientation;
-    float playingSpeed;
+    private float[] position;
+    private float[] orientation;
+    private float playingSpeed;
 
-    const int framerate = 60;
+    private const int framerate = 60;
 
     // Todo: cubic interpolation
     public override void OnNewFrame(Game game, NewFrameEventArgs args)
@@ -260,10 +264,10 @@
                 * (t * t * t));
     }
 
-    float recspeed;
-    float writeAccum;
-    bool firstFrameDone;
-    void UpdateAvi(float dt)
+    private float recspeed;
+    private float writeAccum;
+    private bool firstFrameDone;
+    private void UpdateAvi(float dt)
     {
         if (avi == null)
         {
@@ -287,7 +291,7 @@
         }
     }
 
-    float TotalDistance()
+    private float TotalDistance()
     {
         float totalDistance = 0;
         for (int i = 0; i < cameraPointsCount - 1; i++)
@@ -300,7 +304,7 @@
         return totalDistance;
     }
 
-    float Distance(CameraPoint a, CameraPoint b)
+    private float Distance(CameraPoint a, CameraPoint b)
     {
         float dx = a.positionGlX - b.positionGlX;
         float dy = a.positionGlY - b.positionGlY;

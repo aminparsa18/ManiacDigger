@@ -204,7 +204,7 @@ public class GamePlatformNative : GamePlatform
     }
 
     public bool TouchTest = false;
-    private string[] datapaths;
+    private readonly string[] datapaths;
 
     public override string Timestamp()
     {
@@ -217,8 +217,8 @@ public class GamePlatformNative : GamePlatform
         Clipboard.SetText(s);
     }
 
-    private ManicDigger.Renderers.TextRenderer r = new();
-    private Dictionary<TextAndSize, SizeF> textsizes = new();
+    private readonly ManicDigger.Renderers.TextRenderer r = new();
+    private readonly Dictionary<TextAndSize, SizeF> textsizes = new();
     public SizeF TextSize(string text, float fontsize)
     {
         SizeF size;
@@ -362,7 +362,7 @@ public class GamePlatformNative : GamePlatform
         return CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
     }
 
-    private Stopwatch start = new();
+    private readonly Stopwatch start = new();
 
     public override int TimeMillisecondsFromStart()
     {
@@ -473,7 +473,7 @@ public class GamePlatformNative : GamePlatform
         return LoadTexture(bmp_.bmp, false);
     }
 
-    private ManicDigger.Renderers.TextRenderer textrenderer = new();
+    private readonly ManicDigger.Renderers.TextRenderer textrenderer = new();
 
     public override BitmapCi CreateTextTexture(Text_ t)
     {
@@ -563,7 +563,7 @@ public class GamePlatformNative : GamePlatform
         return GameVersion.Version;
     }
 
-    private ICompression compression = new CompressionGzip();
+    private readonly ICompression compression = new CompressionGzip();
     public override void GzipDecompress(byte[] compressed, int compressedLength, byte[] ret)
     {
         byte[] data = new byte[compressedLength];
@@ -1023,7 +1023,7 @@ public class GamePlatformNative : GamePlatform
     public override void AudioUpdateListener(float posX, float posY, float posZ, float orientX, float orientY, float orientZ)
     {
         StartAudio();
-        audio.UpdateListener(new Vector3(posX, posY, posZ), new Vector3(orientX, orientY, orientZ));
+        AudioOpenAl.UpdateListener(new Vector3(posX, posY, posZ), new Vector3(orientX, orientY, orientZ));
     }
 
     #endregion
@@ -1069,7 +1069,7 @@ public class GamePlatformNative : GamePlatform
             }
         }
     }
-    private Queue<byte> tosend = new();
+    private readonly Queue<byte> tosend = new();
     public override void TcpSend(byte[] data, int length)
     {
         if (c == null)
@@ -1089,7 +1089,7 @@ public class GamePlatformNative : GamePlatform
             c.Send(data1);
         }
     }
-    private Queue<byte> received = new();
+    private readonly Queue<byte> received = new();
     public override int TcpReceive(byte[] data, int dataLength)
     {
         if (c == null)
@@ -1117,7 +1117,7 @@ public class GamePlatformNative : GamePlatform
         public Socket sock;
         public string address;
 
-        private Encoding encoding = Encoding.UTF8;
+        private readonly Encoding encoding = Encoding.UTF8;
 
         public Connection(Socket s)
         {
@@ -1125,7 +1125,7 @@ public class GamePlatformNative : GamePlatform
             address = s.RemoteEndPoint.ToString();
             this.BeginReceive();
         }
-        private Stopwatch st = new();
+        private readonly Stopwatch st = new();
         private void BeginReceive()
         {
             this.sock.BeginReceive(
@@ -1135,7 +1135,7 @@ public class GamePlatformNative : GamePlatform
                     new AsyncCallback(this.OnBytesReceived),
                     this);
         }
-        private byte[] dataRcvBuf = new byte[1024 * 8];
+        private readonly byte[] dataRcvBuf = new byte[1024 * 8];
         protected void OnBytesReceived(IAsyncResult result)
         {
             int nBytesRec;
@@ -1364,7 +1364,7 @@ public class GamePlatformNative : GamePlatform
         window.VSync = enabled ? VSyncMode.On : VSyncMode.Off;
     }
 
-    private Screenshot screenshot = new();
+    private readonly Screenshot screenshot = new();
 
     public override void SaveScreenshot()
     {
@@ -1483,10 +1483,10 @@ public class GamePlatformNative : GamePlatform
         GL.BindTexture(TextureTarget.Texture2D, texture);
     }
 
-    private float[] xyz = new float[65536 * 3];
-    private float[] uv = new float[65536 * 2];
-    private byte[] rgba = new byte[65536 * 4];
-    private ushort[] indices = new ushort[65536];
+    private readonly float[] xyz = new float[65536 * 3];
+    private readonly float[] uv = new float[65536 * 2];
+    private readonly byte[] rgba = new byte[65536 * 4];
+    private readonly ushort[] indices = new ushort[65536];
 
     public override Model CreateModel(ModelData data)
     {
@@ -2222,7 +2222,7 @@ public class AssetLoader
     {
         this.datapaths = datapaths_;
     }
-    private string[] datapaths;
+    private readonly string[] datapaths;
     public void LoadAssetsAsync(AssetList list, FloatRef progress)
     {
         List<Asset> assets = new();
@@ -2270,7 +2270,7 @@ public class AssetLoader
         }
     }
 
-    private MD5CryptoServiceProvider sha1 = new();
+    private readonly MD5CryptoServiceProvider sha1 = new();
     private string Md5(byte[] data)
     {
         string hash = ToHex(sha1.ComputeHash(data), false);

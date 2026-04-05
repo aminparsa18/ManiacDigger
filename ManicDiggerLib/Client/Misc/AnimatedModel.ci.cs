@@ -209,14 +209,14 @@ public class AnimatedModelBinding : TableBinding
         name[3] = "global"; count[3] = 1;
     }
 
-    int IntParse(string s)
+    private int IntParse(string s)
     {
         return p.FloatToInt(FloatParse(s));
     }
 
-    float FloatParse(string s)
+    private float FloatParse(string s)
     {
-        FloatRef ret = new FloatRef();
+        FloatRef ret = new();
         p.FloatTryParse(s, ret);
         return ret.value;
     }
@@ -230,12 +230,12 @@ public abstract class TableBinding
 
 public class TableSerializer
 {
-    public void Deserialize(GamePlatform p, string data, TableBinding b)
+    public static void Deserialize(GamePlatform p, string data, TableBinding b)
     {
-        IntRef linesCount = new IntRef();
+        IntRef linesCount = new();
         string[] lines = p.ReadAllLines(data, linesCount);
         string[] header = null;
-        IntRef headerLength = new IntRef();
+        IntRef headerLength = new();
         string current = "";
         int currentI = 0;
         for (int i = 0; i < linesCount.value; i++)
@@ -265,7 +265,7 @@ public class TableSerializer
                 {
                     continue;
                 }
-                IntRef ssLength = new IntRef();
+                IntRef ssLength = new();
                 string[] ss = p.StringSplit(s, "\t", ssLength);
                 for (int k = 0; k < ssLength.value; k++)
                 {
@@ -280,21 +280,21 @@ public class TableSerializer
 
 public class AnimatedModelSerializer
 {
-    const int sectionNodes = 1;
-    const int sectionKeyframes = 2;
-    const int sectionAnimations = 3;
-    const int sectionGlobal = 4;
     public static AnimatedModel Deserialize(GamePlatform p, string data)
     {
-        AnimatedModel model = new AnimatedModel();
-        model.nodes = new Node[256];
-        model.keyframes = new Keyframe[1024];
-        model.animations = new Animation[128];
-        AnimatedModelBinding b = new AnimatedModelBinding();
-        b.p = p;
-        b.m = model;
-        TableSerializer s = new TableSerializer();
-        s.Deserialize(p, data, b);
+        AnimatedModel model = new()
+        {
+            nodes = new Node[256],
+            keyframes = new Keyframe[1024],
+            animations = new Animation[128]
+        };
+        AnimatedModelBinding b = new()
+        {
+            p = p,
+            m = model
+        };
+        TableSerializer s = new();
+        TableSerializer.Deserialize(p, data, b);
         return model;
     }
 
@@ -313,7 +313,7 @@ public class AnimatedModelRenderer
         tempframesCount = new IntRef();
         tempVec3 = new float[3];
     }
-    float one;
+    private readonly float one;
     internal Game game;
     public void Start(Game game_, AnimatedModel model_)
     {
@@ -321,11 +321,11 @@ public class AnimatedModelRenderer
         m = model_;
     }
 
-    AnimatedModel m;
+    private AnimatedModel m;
 
-    int anim;
-    const int fps = 60;
-    float frame;
+    private readonly int anim;
+    private const int fps = 60;
+    private float frame;
     public void Render(float dt, float headDeg, bool walkAnimation, bool moves, float light)
     {
         if (m == null) { return; }
@@ -365,8 +365,8 @@ public class AnimatedModelRenderer
         DrawNode("root", headDeg, light);
     }
 
-    float[] tempVec3;
-    void DrawNode(string parent, float headDeg, float light)
+    private readonly float[] tempVec3;
+    private void DrawNode(string parent, float headDeg, float light)
     {
         for (int i = 0; i < m.nodesCount; i++)
         {
@@ -431,14 +431,14 @@ public class AnimatedModelRenderer
         }
     }
 
-    bool IsZero(float[] vec)
+    private static bool IsZero(float[] vec)
     {
         return vec[0] == 0
             && vec[1] == 0
             && vec[2] == 0;
     }
 
-    void GetAnimation(Node node, float[] ret, int type)
+    private void GetAnimation(Node node, float[] ret, int type)
     {
         GetFrames(node.name, type, tempframes, tempframesCount);
         int currentI = GetFrameCurrent(tempframes, tempframesCount.value);
@@ -481,7 +481,7 @@ public class AnimatedModelRenderer
         ret[2] = Lerp(current.z, next.z, t);
     }
 
-    void GetDefaultFrame(Node node, int type, float[] ret)
+    private static void GetDefaultFrame(Node node, int type, float[] ret)
     {
         switch (type)
         {
@@ -523,13 +523,12 @@ public class AnimatedModelRenderer
         }
     }
 
-    float Lerp(float v0, float v1, float t)
+    private static float Lerp(float v0, float v1, float t)
     {
         return v0 + (v1 - v0) * t;
     }
 
-
-    void GetFrames(string nodeName, int type, Keyframe[] frames, IntRef count)
+    private void GetFrames(string nodeName, int type, Keyframe[] frames, IntRef count)
     {
         count.value = 0;
         string animName = m.animations[anim].name;
@@ -556,9 +555,9 @@ public class AnimatedModelRenderer
         }
     }
 
-    Keyframe[] tempframes;
-    IntRef tempframesCount;
-    int GetFrameCurrent(Keyframe[] frames, int framesCount)
+    private readonly Keyframe[] tempframes;
+    private readonly IntRef tempframesCount;
+    private int GetFrameCurrent(Keyframe[] frames, int framesCount)
     {
         string animName = m.animations[anim].name;
         int current = -1;
@@ -638,10 +637,12 @@ public class CuboidRenderer
         float sizeX, float sizeY, float sizeZ,
         RectangleFloat[] texturecoords, float light)
     {
-        ModelData data = new ModelData();
-        data.xyz = new float[4 * 6 * 3];
-        data.uv = new float[4 * 6 * 2];
-        data.rgba = new byte[4 * 6 * 4];
+        ModelData data = new()
+        {
+            xyz = new float[4 * 6 * 3],
+            uv = new float[4 * 6 * 2],
+            rgba = new byte[4 * 6 * 4]
+        };
         int light255 = game.platform.FloatToInt(light * 255);
         int color = Game.ColorFromArgb(255, light255, light255, light255);
 
@@ -725,10 +726,12 @@ public class CuboidRenderer
         float sizeX, float sizeY, float sizeZ,
         RectangleFloat[] texturecoords, float light)
     {
-        ModelData data = new ModelData();
-        data.xyz = new float[4 * 6 * 3];
-        data.uv = new float[4 * 6 * 2];
-        data.rgba = new byte[4 * 6 * 4];
+        ModelData data = new()
+        {
+            xyz = new float[4 * 6 * 3],
+            uv = new float[4 * 6 * 2],
+            rgba = new byte[4 * 6 * 4]
+        };
         int light255 = game.platform.FloatToInt(light * 255);
         int color = Game.ColorFromArgb(255, light255, light255, light255);
 
@@ -810,11 +813,13 @@ public class RectangleFloat
 
     public static RectangleFloat Create(float x_, float y_, float width_, float height_)
     {
-        RectangleFloat r = new RectangleFloat();
-        r.X = x_;
-        r.Y = y_;
-        r.Width = width_;
-        r.Height = height_;
+        RectangleFloat r = new()
+        {
+            X = x_,
+            Y = y_,
+            Width = width_,
+            Height = height_
+        };
         return r;
     }
 }

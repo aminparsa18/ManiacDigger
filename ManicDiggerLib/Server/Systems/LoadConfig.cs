@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ManicDigger.ClientNative;
-using System.IO;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 using System.Xml;
 
 public class ServerSystemLoadConfig : ServerSystem
 {
+    private bool loaded;
+
     public override void Update(Server server, float dt)
     {
         if (!loaded)
@@ -22,8 +19,8 @@ public class ServerSystemLoadConfig : ServerSystem
             SaveConfig(server);
         }
     }
-    bool loaded;
-    public void LoadConfig(Server server)
+
+    public static void LoadConfig(Server server)
     {
         string filename = "ServerConfig.txt";
         if (!File.Exists(Path.Combine(GameStorePath.gamepathconfig, filename)))
@@ -34,12 +31,10 @@ public class ServerSystemLoadConfig : ServerSystem
         }
         try
         {
-            using (TextReader textReader = new StreamReader(Path.Combine(GameStorePath.gamepathconfig, filename)))
-            {
-                XmlSerializer deserializer = new XmlSerializer(typeof(ServerConfig));
-                server.config = (ServerConfig)deserializer.Deserialize(textReader);
-                textReader.Close();
-            }
+            using TextReader textReader = new StreamReader(Path.Combine(GameStorePath.gamepathconfig, filename));
+            XmlSerializer deserializer = new(typeof(ServerConfig));
+            server.config = (ServerConfig)deserializer.Deserialize(textReader);
+            textReader.Close();
         }
         catch //This if for the original format
         {
@@ -48,8 +43,8 @@ public class ServerSystemLoadConfig : ServerSystem
                 using (Stream s = new MemoryStream(File.ReadAllBytes(Path.Combine(GameStorePath.gamepathconfig, filename))))
                 {
                     server.config = new ServerConfig();
-                    StreamReader sr = new StreamReader(s);
-                    XmlDocument d = new XmlDocument();
+                    StreamReader sr = new(s);
+                    XmlDocument d = new();
                     d.Load(sr);
                     server.config.Format = int.Parse(XmlTool.XmlVal(d, "/ManicDiggerServerConfig/Format"));
                     server.config.Name = XmlTool.XmlVal(d, "/ManicDiggerServerConfig/Name");
@@ -90,7 +85,7 @@ public class ServerSystemLoadConfig : ServerSystem
                 //ServerConfig is really messed up. Backup a copy, then create a new one.
                 try
                 {
-                    File.Copy(Path.Combine(GameStorePath.gamepathconfig, filename), Path.Combine(GameStorePath.gamepathconfig, filename + ".old"));
+                    File.Copy(Path.Combine(GameStorePath.gamepathconfig, filename), Path.Combine(GameStorePath.gamepathconfig, $"{filename}.old"));
                     Console.WriteLine(server.language.ServerConfigCorruptBackup());
                 }
                 catch
@@ -105,7 +100,7 @@ public class ServerSystemLoadConfig : ServerSystem
         Console.WriteLine(server.language.ServerConfigLoaded());
     }
 
-    public void SaveConfig(Server server)
+    public static void SaveConfig(Server server)
     {
         //Verify that we have a directory to place the file into.
         if (!Directory.Exists(GameStorePath.gamepathconfig))
@@ -113,17 +108,19 @@ public class ServerSystemLoadConfig : ServerSystem
             Directory.CreateDirectory(GameStorePath.gamepathconfig);
         }
 
-        XmlSerializer serializer = new XmlSerializer(typeof(ServerConfig));
+        XmlSerializer serializer = new(typeof(ServerConfig));
         TextWriter textWriter = new StreamWriter(Path.Combine(GameStorePath.gamepathconfig, "ServerConfig.txt"));
 
         //Check to see if config has been initialized
         if (server.config == null)
         {
-            server.config = new ServerConfig();
-            //Set default language to user's locale
-            server.config.ServerLanguage = System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+            server.config = new ServerConfig
+            {
+                //Set default language to user's locale
+                ServerLanguage = System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName
+            };
             //Ask for config parameters the first time the server is started
-            string line;
+            string? line;
             bool wantsconfig = false;
             Console.WriteLine(server.language.ServerSetupFirstStart());
             Console.WriteLine(server.language.ServerSetupQuestion());

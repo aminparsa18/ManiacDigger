@@ -12,9 +12,9 @@
         game.packetHandlers[Packet_ServerIdEnum.EntityPosition] = position;
         game.packetHandlers[Packet_ServerIdEnum.EntityDespawn] = despawn;
     }
-    ClientPacketHandlerEntitySpawn spawn;
-    ClientPacketHandlerEntityPosition position;
-    ClientPacketHandlerEntityDespawn despawn;
+    private readonly ClientPacketHandlerEntitySpawn spawn;
+    private readonly ClientPacketHandlerEntityPosition position;
+    private readonly ClientPacketHandlerEntityDespawn despawn;
 }
 
 public class ClientPacketHandlerEntitySpawn : ClientPacketHandler
@@ -44,12 +44,14 @@ public class ClientPacketHandlerEntitySpawn : ClientPacketHandler
     public static EntityPosition_ ToClientEntityPosition(Packet_PositionAndOrientation pos)
     {
         float one = 1;
-        EntityPosition_ p = new EntityPosition_();
-        p.x = (one * pos.X) / 32;
-        p.y = (one * pos.Y) / 32;
-        p.z = (one * pos.Z) / 32;
-        p.rotx = Game.Angle256ToRad(pos.Pitch);
-        p.roty = Game.Angle256ToRad(pos.Heading);
+        EntityPosition_ p = new()
+        {
+            x = (one * pos.X) / 32,
+            y = (one * pos.Y) / 32,
+            z = (one * pos.Z) / 32,
+            rotx = Game.Angle256ToRad(pos.Pitch),
+            roty = Game.Angle256ToRad(pos.Heading)
+        };
         return p;
     }
 
@@ -67,11 +69,13 @@ public class ClientPacketHandlerEntitySpawn : ClientPacketHandler
         }
         if (entity.DrawModel != null)
         {
-            old.drawModel = new EntityDrawModel();
-            old.drawModel.eyeHeight = game.DeserializeFloat(entity.DrawModel.EyeHeight);
-            old.drawModel.ModelHeight = game.DeserializeFloat(entity.DrawModel.ModelHeight);
-            old.drawModel.Texture_ = entity.DrawModel.Texture_;
-            old.drawModel.Model_ = entity.DrawModel.Model_;
+            old.drawModel = new EntityDrawModel
+            {
+                eyeHeight = game.DeserializeFloat(entity.DrawModel.EyeHeight),
+                ModelHeight = game.DeserializeFloat(entity.DrawModel.ModelHeight),
+                Texture_ = entity.DrawModel.Texture_,
+                Model_ = entity.DrawModel.Model_
+            };
             if (old.drawModel.Model_ == null)
             {
                 old.drawModel.Model_ = "player.txt";
@@ -98,8 +102,10 @@ public class ClientPacketHandlerEntitySpawn : ClientPacketHandler
         }
         if (entity.DrawText != null)
         {
-            old.drawText = new EntityDrawText();
-            old.drawText.text = entity.DrawText.Text;
+            old.drawText = new EntityDrawText
+            {
+                text = entity.DrawText.Text
+            };
             float one_ = 1;
             old.drawText.dx = one_ * entity.DrawText.Dx / 32;
             old.drawText.dy = one_ * entity.DrawText.Dy / 32;
@@ -114,8 +120,10 @@ public class ClientPacketHandlerEntitySpawn : ClientPacketHandler
         }
         if (entity.Push != null)
         {
-            old.push = new Packet_ServerExplosion();
-            old.push.RangeFloat = entity.Push.RangeFloat;
+            old.push = new Packet_ServerExplosion
+            {
+                RangeFloat = entity.Push.RangeFloat
+            };
         }
         else
         {
@@ -125,13 +133,15 @@ public class ClientPacketHandlerEntitySpawn : ClientPacketHandler
         if (entity.DrawArea != null)
         {
             //New DrawArea
-            old.drawArea = new EntityDrawArea();
-            old.drawArea.x = entity.DrawArea.X;
-            old.drawArea.y = entity.DrawArea.Y;
-            old.drawArea.z = entity.DrawArea.Z;
-            old.drawArea.sizex = entity.DrawArea.Sizex;
-            old.drawArea.sizey = entity.DrawArea.Sizey;
-            old.drawArea.sizez = entity.DrawArea.Sizez;
+            old.drawArea = new EntityDrawArea
+            {
+                x = entity.DrawArea.X,
+                y = entity.DrawArea.Y,
+                z = entity.DrawArea.Z,
+                sizex = entity.DrawArea.Sizex,
+                sizey = entity.DrawArea.Sizey,
+                sizez = entity.DrawArea.Sizez
+            };
         }
         else
         {

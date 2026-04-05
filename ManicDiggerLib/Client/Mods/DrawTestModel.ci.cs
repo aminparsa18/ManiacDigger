@@ -10,7 +10,7 @@
         DrawTestModel(game, deltaTime);
     }
 
-    void DrawTestModel(Game game, float deltaTime)
+    private void DrawTestModel(Game game, float deltaTime)
     {
         if (!game.ENABLE_DRAW_TEST_CHARACTER)
         {
@@ -31,7 +31,7 @@
         testmodel.Render(deltaTime, 0, true, true, 1);
         game.GLPopMatrix();
     }
-    AnimatedModelRenderer testmodel;
+    private AnimatedModelRenderer testmodel;
 
     public override bool OnClientCommand(Game game, ClientCommandArgs args)
     {

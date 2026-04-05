@@ -4,8 +4,8 @@
     {
         lines = new DrawWireframeCube();
     }
-    
-    DrawWireframeCube lines;
+
+    private DrawWireframeCube lines;
 
     public override void OnNewFrameDraw3d(Game game, float deltaTime)
     {

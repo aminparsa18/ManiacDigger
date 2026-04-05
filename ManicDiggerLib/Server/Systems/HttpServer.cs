@@ -1,9 +1,11 @@
 ﻿using System.Net;
-using System;
-using System.Collections.Generic;
+using System.Text;
+
 public class ServerSystemHttpServer : ServerSystem
 {
-    bool started;
+    private bool started;
+    internal FragLabs.HTTP.HttpServer httpServer;
+
     public override void Update(Server server, float dt)
     {
         if (!started)
@@ -16,9 +18,11 @@ public class ServerSystemHttpServer : ServerSystem
                 try
                 {
                     httpServer = new FragLabs.HTTP.HttpServer(new IPEndPoint(IPAddress.Any, httpPort));
-                    MainHttpModule m = new MainHttpModule();
-                    m.server = server;
-                    m.system = this;
+                    MainHttpModule m = new()
+                    {
+                        server = server,
+                        system = this
+                    };
                     httpServer.Install(m);
                     foreach (var module in server.httpModules)
                     {
@@ -46,7 +50,6 @@ public class ServerSystemHttpServer : ServerSystem
             }
         }
     }
-    internal FragLabs.HTTP.HttpServer httpServer;
 
     public override void OnRestart(Server server)
     {
@@ -69,10 +72,11 @@ public class ActiveHttpModule
     public bool installed;
 }
 
-class MainHttpModule : FragLabs.HTTP.IHttpModule
+internal class MainHttpModule : FragLabs.HTTP.IHttpModule
 {
     public Server server;
     public ServerSystemHttpServer system;
+
     public void Installed(FragLabs.HTTP.HttpServer server)
     {
     }
@@ -83,7 +87,7 @@ class MainHttpModule : FragLabs.HTTP.IHttpModule
 
     public bool ResponsibleForRequest(FragLabs.HTTP.HttpRequest request)
     {
-        if (request.Uri.AbsolutePath.ToLower() == "/")
+        if (request.Uri.AbsolutePath.Equals("/", StringComparison.CurrentCultureIgnoreCase))
         {
             return true;
         }
@@ -92,25 +96,13 @@ class MainHttpModule : FragLabs.HTTP.IHttpModule
 
     public bool ProcessAsync(FragLabs.HTTP.ProcessRequestEventArgs args)
     {
-        string html = "<html>";
-        List<string> modules = new List<string>();
-        foreach (var m in server.httpModules)
-        {
-            modules.Add(m.name);
-        }
-        modules.Sort();
-        foreach (string s in modules)
-        {
-            foreach (var m in server.httpModules)
-            {
-                if (m.name == s)
-                {
-                    html += string.Format("<a href='{0}'>{0}</a> - {1}", m.name, m.description());
-                }
-            }
-        }
-        html += "</html>";
-        args.Response.Producer = new FragLabs.HTTP.BufferedProducer(html);
+        var sb = new StringBuilder("<html>");
+
+        foreach (var m in server.httpModules.OrderBy(m => m.name))
+            sb.Append($"<a href='{m.name}'>{m.name}</a> - {m.description()}");
+
+        sb.Append("</html>");
+        args.Response.Producer = new FragLabs.HTTP.BufferedProducer(sb.ToString());
         return false;
     }
 }

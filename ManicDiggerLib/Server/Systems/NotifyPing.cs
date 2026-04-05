@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-
-//Sends ping to all clients and disconnects timed-out players
+﻿//Sends ping to all clients and disconnects timed-out players
 public class ServerSystemNotifyPing : ServerSystem
 {
+    private readonly Timer pingtimer = new() { INTERVAL = 1, MaxDeltaTime = 5 };
+
     public override void Update(Server server, float dt)
     {
         pingtimer.Update(
@@ -14,7 +13,7 @@ public class ServerSystemNotifyPing : ServerSystem
                 //Instantly return if server wants to exit
                 return;
             }
-            List<int> keysToDelete = new List<int>();
+            List<int> keysToDelete = new();
             foreach (var k in server.clients)
             {
                 // Check if client is alive. Detect half-dropped connections.
@@ -36,8 +35,6 @@ public class ServerSystemNotifyPing : ServerSystem
             {
                 server.KillPlayer(key);
             }
-        }
-        );
+        });
     }
-    Timer pingtimer = new Timer() { INTERVAL = 1, MaxDeltaTime = 5 };
 }

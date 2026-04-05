@@ -1,23 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ManicDigger;
+﻿using System.Text;
 using System.Data.Common;
 using System.Data;
 using System.Data.SQLite;
-using System.IO;
-using ManicDigger.ClientNative;
 
 public struct Xyz
 {
     public int X;
     public int Y;
     public int Z;
-    public override int GetHashCode()
+
+    public override readonly int GetHashCode()
     {
         return X ^ Y ^ Z;
     }
-    public override bool Equals(object obj)
+
+    public override readonly bool Equals(object? obj)
     {
         if (obj is Xyz)
         {
@@ -27,6 +24,7 @@ public struct Xyz
         return base.Equals(obj);
     }
 }
+
 public struct DbChunk
 {
     public Xyz Position;
@@ -41,7 +39,7 @@ public static class ChunkDb
 {
     public static byte[] GetChunk(IChunkDb db, int x, int y, int z)
     {
-        List<byte[]> chunks = new List<byte[]>(db.GetChunks(new Xyz[] { new Xyz() { X = x, Y = y, Z = z } }));
+        List<byte[]> chunks = [.. db.GetChunks([new Xyz() { X = x, Y = y, Z = z }])];
         if (chunks.Count > 1)
         {
             throw new Exception();
@@ -52,14 +50,17 @@ public static class ChunkDb
         }
         return chunks[0];
     }
+
     public static void SetChunk(IChunkDb db, int x, int y, int z, byte[] c)
     {
-        db.SetChunks(new DbChunk[] { new DbChunk() { Position = new Xyz() { X = x, Y = y, Z = z }, Chunk = c } });
+        db.SetChunks([new DbChunk() { Position = new Xyz() { X = x, Y = y, Z = z }, Chunk = c }]);
     }
+
     public static void DeleteChunk(IChunkDb db, int x, int y, int z)
     {
-        db.DeleteChunks(new Xyz[] { new Xyz() { X = x, Y = y, Z = z } });
+        db.DeleteChunks([new Xyz() { X = x, Y = y, Z = z }]);
     }
+
     public static void DeleteChunks(IChunkDb db, List<Xyz> chunks)
     {
         db.DeleteChunks(chunks.ToArray());
@@ -67,11 +68,12 @@ public static class ChunkDb
 
     public static Dictionary<Xyz, byte[]> GetChunksFromFile(IChunkDb db, List<Xyz> chunksPositions, string filename)
     {
-        return db.GetChunksFromFile(chunksPositions.ToArray(), filename);
+        return db.GetChunksFromFile([.. chunksPositions], filename);
     }
+
     public static byte[] GetChunkFromFile(IChunkDb db, int x, int y, int z, string filename)
     {
-        Dictionary<Xyz, byte[]> chunks = db.GetChunksFromFile(new Xyz[] { new Xyz() { X = x, Y = y, Z = z } }, filename);
+        Dictionary<Xyz, byte[]> chunks = db.GetChunksFromFile([new Xyz() { X = x, Y = y, Z = z }], filename);
         if (chunks.Count > 1)
         {
             throw new Exception();
@@ -107,6 +109,7 @@ public interface IChunkDb
     bool GetReadOnly();
     void SetReadOnly(bool value);
 }
+
 /// <summary>
 /// Wrapper to compress data passed on to the actual chunk storage
 /// </summary>
@@ -140,7 +143,7 @@ public class ChunkDbCompressed : IChunkDb
 
     public Dictionary<Xyz, byte[]> GetChunksFromFile(IEnumerable<Xyz> chunkpositions, string filename)
     {
-        Dictionary<Xyz, byte[]> decompressedChunks = new Dictionary<Xyz, byte[]>();
+        Dictionary<Xyz, byte[]> decompressedChunks = [];
         foreach (var k in d_ChunkDb.GetChunksFromFile(chunkpositions, filename))
         {
             byte[] c;
@@ -159,7 +162,7 @@ public class ChunkDbCompressed : IChunkDb
 
     public void SetChunksToFile(IEnumerable<DbChunk> chunks, string filename)
     {
-        List<DbChunk> compressed = new List<DbChunk>();
+        List<DbChunk> compressed = [];
         foreach (DbChunk c in chunks)
         {
             byte[] b;
@@ -180,9 +183,10 @@ public class ChunkDbCompressed : IChunkDb
     {
         d_ChunkDb.DeleteChunks(chunkpositions);
     }
+
     public void SetChunks(IEnumerable<DbChunk> chunks)
     {
-        List<DbChunk> compressed = new List<DbChunk>();
+        List<DbChunk> compressed = [];
         foreach (DbChunk c in chunks)
         {
             byte[] b;
@@ -198,6 +202,7 @@ public class ChunkDbCompressed : IChunkDb
         }
         d_ChunkDb.SetChunks(compressed);
     }
+
     public byte[] GetGlobalData()
     {
         byte[] globaldata = d_ChunkDb.GetGlobalData();
@@ -210,6 +215,7 @@ public class ChunkDbCompressed : IChunkDb
             return d_Compression.Decompress(globaldata);
         }
     }
+
     public void SetGlobalData(byte[] data)
     {
         if (data == null)
@@ -227,13 +233,15 @@ public class ChunkDbCompressed : IChunkDb
     public bool GetReadOnly() { return d_ChunkDb.GetReadOnly(); }
     public void SetReadOnly(bool value) { d_ChunkDb.SetReadOnly(value); }
 }
+
 /// <summary>
 /// Dummy chunk storage
 /// </summary>
 public class ChunkDbDummy : IChunkDb
 {
-    string currentFilename = null;
-    Dictionary<Xyz, byte[]> chunks = new Dictionary<Xyz, byte[]>();
+    private string currentFilename = null;
+    private readonly Dictionary<Xyz, byte[]> chunks = [];
+
     public void Open(string filename)
     {
         if (filename != currentFilename)
@@ -242,16 +250,17 @@ public class ChunkDbDummy : IChunkDb
             chunks.Clear();
         }
     }
+
     public void Backup(string backupFilename)
     {
         // TODO: what to do here?
     }
+
     public IEnumerable<byte[]> GetChunks(IEnumerable<Xyz> chunkpositions)
     {
         foreach (Xyz pos in chunkpositions)
         {
-            byte[] c;
-            if (chunks.TryGetValue(pos, out c))
+            if (chunks.TryGetValue(pos, out byte[] c))
             {
                 yield return c;
             }
@@ -261,6 +270,7 @@ public class ChunkDbDummy : IChunkDb
             }
         }
     }
+
     public void DeleteChunks(IEnumerable<Xyz> chunkpositions)
     {
         foreach (Xyz pos in chunkpositions)
@@ -268,6 +278,7 @@ public class ChunkDbDummy : IChunkDb
             chunks[pos] = null;
         }
     }
+
     public void SetChunks(IEnumerable<DbChunk> chunks)
     {
         foreach (DbChunk c in chunks)
@@ -275,25 +286,30 @@ public class ChunkDbDummy : IChunkDb
             this.chunks[c.Position] = c.Chunk;
         }
     }
+
     public Dictionary<Xyz, byte[]> GetChunksFromFile(IEnumerable<Xyz> chunkpositions, string filename)
     {
         // TODO: what to do here?
         return null;
     }
+
     public void SetChunksToFile(IEnumerable<DbChunk> chunks, string filename)
     {
         // TODO: what to do here?
     }
-    byte[] globaldata = null;
+
+    private byte[] globaldata = null;
     public byte[] GetGlobalData()
     {
         return globaldata;
     }
+
     public void SetGlobalData(byte[] data)
     {
         globaldata = data;
     }
-    bool ReadOnly;
+
+    private bool ReadOnly;
     public bool GetReadOnly() { return ReadOnly; }
     public void SetReadOnly(bool value) { ReadOnly = value; }
 }
@@ -302,8 +318,9 @@ public class ChunkDbDummy : IChunkDb
 /// </summary>
 public class ChunkDbSqlite : IChunkDb
 {
-    SQLiteConnection sqliteConn;
-    string databasefile;
+    private SQLiteConnection sqliteConn;
+    private string databasefile;
+
     public void Open(string filename)
     {
         databasefile = filename;
@@ -312,7 +329,7 @@ public class ChunkDbSqlite : IChunkDb
         {
             newdatabase = true;
         }
-        StringBuilder b = new StringBuilder();
+        StringBuilder b = new();
         DbConnectionStringBuilder.AppendKeyValuePair(b, "Data Source", databasefile);
         DbConnectionStringBuilder.AppendKeyValuePair(b, "Version", "3");
         DbConnectionStringBuilder.AppendKeyValuePair(b, "New", "True");
@@ -324,25 +341,28 @@ public class ChunkDbSqlite : IChunkDb
         {
             CreateTables(sqliteConn);
         }
-        if (!integrityCheck(sqliteConn))
+        if (!IntegrityCheck(sqliteConn))
         {
             Console.WriteLine("Database is possibly corrupted.");
             //repair(sqliteConn);
         }
         //vacuum(sqliteBckConn);
     }
+
     public void Close()
     {
         sqliteConn.Close();
         sqliteConn.Dispose();
     }
-    private void CreateTables(SQLiteConnection sqliteConn)
+
+    private static void CreateTables(SQLiteConnection sqliteConn)
     {
         SQLiteCommand sqlite_cmd;
         sqlite_cmd = sqliteConn.CreateCommand();
         sqlite_cmd.CommandText = "CREATE TABLE chunks (position integer PRIMARY KEY, data BLOB);";
         sqlite_cmd.ExecuteNonQuery();
     }
+
     public void Backup(string backupFilename)
     {
         if (databasefile == backupFilename)
@@ -354,29 +374,29 @@ public class ChunkDbSqlite : IChunkDb
         {
             Console.WriteLine(string.Format("File {0} exists. Overwriting file.", backupFilename));
         }
-        StringBuilder b = new StringBuilder();
+        StringBuilder b = new();
         DbConnectionStringBuilder.AppendKeyValuePair(b, "Data Source", backupFilename);
         DbConnectionStringBuilder.AppendKeyValuePair(b, "Version", "3");
         DbConnectionStringBuilder.AppendKeyValuePair(b, "New", "True");
         DbConnectionStringBuilder.AppendKeyValuePair(b, "Compress", "True");
         DbConnectionStringBuilder.AppendKeyValuePair(b, "Journal Mode", "Off");
-        SQLiteConnection sqliteBckConn = new SQLiteConnection(b.ToString());
+        SQLiteConnection sqliteBckConn = new(b.ToString());
         sqliteBckConn.Open();
         sqliteConn.BackupDatabase(sqliteBckConn, sqliteBckConn.Database, sqliteConn.Database, -1, null, 10);
         // shrink database
-        vacuum(sqliteBckConn);
+        Vacuum(sqliteBckConn);
         sqliteBckConn.Close();
         sqliteBckConn.Dispose();
     }
-    private void vacuum(SQLiteConnection sqliteConn)
+
+    private static void Vacuum(SQLiteConnection sqliteConn)
     {
-        using (SQLiteCommand command = sqliteConn.CreateCommand())
-        {
-            command.CommandText = "vacuum;";
-            command.ExecuteNonQuery();
-        }
+        using SQLiteCommand command = sqliteConn.CreateCommand();
+        command.CommandText = "vacuum;";
+        command.ExecuteNonQuery();
     }
-    private bool integrityCheck(SQLiteConnection sqliteConn)
+
+    private static bool IntegrityCheck(SQLiteConnection sqliteConn)
     {
         bool okay = false;
         using (SQLiteCommand command = sqliteConn.CreateCommand())
@@ -396,7 +416,8 @@ public class ChunkDbSqlite : IChunkDb
         }
         return okay;
     }
-    private void repair(SQLiteConnection sqliteConn)
+
+    private static void repair(SQLiteConnection sqliteConn)
     {
         Console.WriteLine(string.Format("Database: {0}. Repairing database:", sqliteConn.DataSource));
         /*
@@ -410,29 +431,25 @@ public class ChunkDbSqlite : IChunkDb
         }
         */
     }
+
     public IEnumerable<byte[]> GetChunks(IEnumerable<Xyz> chunkpositions)
     {
-        using (SQLiteTransaction transaction = sqliteConn.BeginTransaction())
+        using SQLiteTransaction transaction = sqliteConn.BeginTransaction();
+        foreach (var xyz in chunkpositions)
         {
-            foreach (var xyz in chunkpositions)
-            {
-                ulong pos = MapUtil.ToMapPos(xyz.X, xyz.Y, xyz.Z);
-                yield return GetChunk(pos);
-            }
-            transaction.Commit();
+            ulong pos = MapUtil.ToMapPos(xyz.X, xyz.Y, xyz.Z);
+            yield return GetChunk(pos);
         }
+        transaction.Commit();
     }
-
-
-
 
     public byte[] GetChunk(ulong position)
     {
         if (ReadOnly)
         {
-            if (temporaryChunks.ContainsKey(position))
+            if (temporaryChunks.TryGetValue(position, out byte[]? value))
             {
-                return temporaryChunks[position];
+                return value;
             }
         }
         SQLiteCommand cmd = sqliteConn.CreateCommand();
@@ -446,17 +463,17 @@ public class ChunkDbSqlite : IChunkDb
         }
         return null;
     }
+
     public void DeleteChunks(IEnumerable<Xyz> chunkpositions)
     {
-        using (SQLiteTransaction transaction = sqliteConn.BeginTransaction())
+        using SQLiteTransaction transaction = sqliteConn.BeginTransaction();
+        foreach (var xyz in chunkpositions)
         {
-            foreach (var xyz in chunkpositions)
-            {
-                DeleteChunk(MapUtil.ToMapPos(xyz.X, xyz.Y, xyz.Z));
-            }
-            transaction.Commit();
+            DeleteChunk(MapUtil.ToMapPos(xyz.X, xyz.Y, xyz.Z));
         }
+        transaction.Commit();
     }
+
     public void DeleteChunk(ulong position)
     {
         if (ReadOnly)
@@ -469,6 +486,7 @@ public class ChunkDbSqlite : IChunkDb
         cmd.Parameters.Add(CreateParameter("position", DbType.UInt64, position, cmd));
         cmd.ExecuteNonQuery();
     }
+
     public void SetChunks(IEnumerable<DbChunk> chunks)
     {
         if (ReadOnly)
@@ -480,33 +498,30 @@ public class ChunkDbSqlite : IChunkDb
             }
             return;
         }
-        using (SQLiteTransaction transaction = sqliteConn.BeginTransaction())
+        using SQLiteTransaction transaction = sqliteConn.BeginTransaction();
+        foreach (DbChunk c in chunks)
         {
-            foreach (DbChunk c in chunks)
-            {
-                ulong pos = MapUtil.ToMapPos(c.Position.X, c.Position.Y, c.Position.Z);
-                InsertChunk(pos, c.Chunk);
-            }
-            transaction.Commit();
+            ulong pos = MapUtil.ToMapPos(c.Position.X, c.Position.Y, c.Position.Z);
+            InsertChunk(pos, c.Chunk);
         }
+        transaction.Commit();
     }
-
 
     public Dictionary<Xyz, byte[]> GetChunksFromFile(IEnumerable<Xyz> chunkpositions, string filename)
     {
-        Dictionary<Xyz, byte[]> chunks = new Dictionary<Xyz, byte[]>();
+        Dictionary<Xyz, byte[]> chunks = [];
         if (!File.Exists(filename))
         {
             Console.WriteLine(string.Format("File {0} does not exist.", filename));
             return null;
         }
-        StringBuilder b = new StringBuilder();
+        StringBuilder b = new();
         DbConnectionStringBuilder.AppendKeyValuePair(b, "Data Source", filename);
         DbConnectionStringBuilder.AppendKeyValuePair(b, "Version", "3");
         DbConnectionStringBuilder.AppendKeyValuePair(b, "New", "True");
         DbConnectionStringBuilder.AppendKeyValuePair(b, "Compress", "True");
         DbConnectionStringBuilder.AppendKeyValuePair(b, "Journal Mode", "Off");
-        SQLiteConnection conn = new SQLiteConnection(b.ToString());
+        SQLiteConnection conn = new(b.ToString());
         conn.Open();
         using (SQLiteTransaction transaction = conn.BeginTransaction())
         {
@@ -521,7 +536,8 @@ public class ChunkDbSqlite : IChunkDb
         }
         return chunks;
     }
-    private byte[] GetChunkFromFile(ulong position, SQLiteConnection conn)
+
+    private static byte[] GetChunkFromFile(ulong position, SQLiteConnection conn)
     {
         SQLiteCommand cmd = conn.CreateCommand();
         cmd.CommandText = "SELECT data FROM chunks WHERE position=?";
@@ -534,6 +550,7 @@ public class ChunkDbSqlite : IChunkDb
         }
         return null;
     }
+
     public void SetChunksToFile(IEnumerable<DbChunk> chunks, string filename)
     {
         bool newDatabase = true;
@@ -549,13 +566,13 @@ public class ChunkDbSqlite : IChunkDb
             newDatabase = false;
         }
 
-        StringBuilder b = new StringBuilder();
+        StringBuilder b = new();
         DbConnectionStringBuilder.AppendKeyValuePair(b, "Data Source", filename);
         DbConnectionStringBuilder.AppendKeyValuePair(b, "Version", "3");
         DbConnectionStringBuilder.AppendKeyValuePair(b, "New", "True");
         DbConnectionStringBuilder.AppendKeyValuePair(b, "Compress", "True");
         DbConnectionStringBuilder.AppendKeyValuePair(b, "Journal Mode", "Off");
-        SQLiteConnection sqliteConn = new SQLiteConnection(b.ToString());
+        SQLiteConnection sqliteConn = new(b.ToString());
         sqliteConn.Open();
 
         if (newDatabase)
@@ -578,13 +595,11 @@ public class ChunkDbSqlite : IChunkDb
         }
         sqliteConn.Close();
         sqliteConn.Dispose();
-
     }
 
-
     //when read only don't save this to disk
-    public Dictionary<ulong, byte[]> temporaryChunks = new Dictionary<ulong, byte[]>();
-    void InsertChunk(ulong position, byte[] data)
+    public Dictionary<ulong, byte[]> temporaryChunks = [];
+    private void InsertChunk(ulong position, byte[] data)
     {
         DbCommand cmd = sqliteConn.CreateCommand();
         cmd.CommandText = "INSERT OR REPLACE INTO chunks (position, data) VALUES (?,?)";
@@ -592,7 +607,8 @@ public class ChunkDbSqlite : IChunkDb
         cmd.Parameters.Add(CreateParameter("data", DbType.Object, data, cmd));
         cmd.ExecuteNonQuery();
     }
-    DbParameter CreateParameter(string parameterName, DbType dbType, object value, DbCommand command)
+
+    private static DbParameter CreateParameter(string parameterName, DbType dbType, object value, DbCommand command)
     {
         DbParameter p = command.CreateParameter();
         p.ParameterName = parameterName;
@@ -600,6 +616,7 @@ public class ChunkDbSqlite : IChunkDb
         p.Value = value;
         return p;
     }
+
     public byte[] GetGlobalData()
     {
         try
@@ -611,12 +628,13 @@ public class ChunkDbSqlite : IChunkDb
             return null;
         }
     }
+
     public void SetGlobalData(byte[] data)
     {
         InsertChunk(ulong.MaxValue / 2, data);
     }
 
-    bool ReadOnly;
+    private bool ReadOnly;
     public bool GetReadOnly() { return ReadOnly; }
     public void SetReadOnly(bool value) { ReadOnly = value; }
 }

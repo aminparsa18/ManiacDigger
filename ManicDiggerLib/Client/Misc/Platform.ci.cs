@@ -310,7 +310,7 @@ public class Preferences
         {
             return default_;
         }
-        FloatRef ret = new FloatRef();
+        FloatRef ret = new();
         if (platform.FloatTryParse(GetString(key, null), ret))
         {
             return platform.FloatToInt(ret.value);
@@ -401,8 +401,10 @@ public class FloatRef
 {
     public static FloatRef Create(float value_)
     {
-        FloatRef f = new FloatRef();
-        f.value = value_;
+        FloatRef f = new()
+        {
+            value = value_
+        };
         return f;
     }
     internal float value;
@@ -413,29 +415,29 @@ public class FloatRef
 
 public class KeyEventArgs
 {
-    int keyCode;
+    private int keyCode;
     public int GetKeyCode() { return keyCode; }
     public void SetKeyCode(int value) { keyCode = value; }
-    bool handled;
+    private bool handled;
     public bool GetHandled() { return handled; }
     public void SetHandled(bool value) { handled = value; }
-    bool modifierCtrl;
+    private bool modifierCtrl;
     public bool GetCtrlPressed() { return modifierCtrl; }
     public void SetCtrlPressed(bool value) { modifierCtrl = value; }
-    bool modifierShift;
+    private bool modifierShift;
     public bool GetShiftPressed() { return modifierShift; }
     public void SetShiftPressed(bool value) { modifierShift = value; }
-    bool modifierAlt;
+    private bool modifierAlt;
     public bool GetAltPressed() { return modifierAlt; }
     public void SetAltPressed(bool value) { modifierAlt = value; }
 }
 
 public class KeyPressEventArgs
 {
-    int keyChar;
+    private int keyChar;
     public int GetKeyChar() { return keyChar; }
     public void SetKeyChar(int value) { keyChar = value; }
-    bool handled;
+    private bool handled;
     public bool GetHandled() { return handled; }
     public void SetHandled(bool value) { handled = value; }
 }
@@ -607,31 +609,31 @@ public abstract class KeyEventHandler
 
 public class MouseEventArgs
 {
-    int x;
-    int y;
-    int movementX;
-    int movementY;
-    int button;
+    private int x;
+    private int y;
+    private int movementX;
+    private int movementY;
+    private int button;
     public int GetX() { return x; } public void SetX(int value) { x = value; }
     public int GetY() { return y; } public void SetY(int value) { y = value; }
     public int GetMovementX() { return movementX; } public void SetMovementX(int value) { movementX = value; }
     public int GetMovementY() { return movementY; } public void SetMovementY(int value) { movementY = value; }
     public int GetButton() { return button; } public void SetButton(int value) { button = value; }
-    bool handled;
+    private bool handled;
     public bool GetHandled() { return handled; }
     public void SetHandled(bool value) { handled = value; }
-    bool forceUsage;
+    private bool forceUsage;
     public bool GetForceUsage() { return forceUsage; }
     public void SetForceUsage(bool value) { forceUsage = value; }
-    bool emulated;
+    private bool emulated;
     public bool GetEmulated() { return emulated; }
     public void SetEmulated(bool value) { emulated = value; }
 }
 
 public class MouseWheelEventArgs
 {
-    int delta;
-    float deltaPrecise;
+    private int delta;
+    private float deltaPrecise;
     public int GetDelta() { return delta; } public void SetDelta(int value) { delta = value; }
     public float GetDeltaPrecise() { return deltaPrecise; } public void SetDeltaPrecise(float value) { deltaPrecise = value; }
 }
@@ -653,10 +655,10 @@ public abstract class MouseEventHandler
 
 public class TouchEventArgs
 {
-    int x;
-    int y;
-    int id;
-    bool handled;
+    private int x;
+    private int y;
+    private int id;
+    private bool handled;
     public int GetX() { return x; } public void SetX(int value) { x = value; }
     public int GetY() { return y; } public void SetY(int value) { y = value; }
     public int GetId() { return id; } public void SetId(int value) { id = value; }
@@ -672,7 +674,7 @@ public abstract class TouchEventHandler
 
 public class NewFrameEventArgs
 {
-    float dt;
+    private float dt;
     public float GetDt()
     {
         return dt;
@@ -705,8 +707,10 @@ public class IntRef
 {
     public static IntRef Create(int value_)
     {
-        IntRef intref = new IntRef();
-        intref.value = value_;
+        IntRef intref = new()
+        {
+            value = value_
+        };
         return intref;
     }
     internal int value;

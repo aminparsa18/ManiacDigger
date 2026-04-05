@@ -100,15 +100,17 @@
         }
 
         soundnow.value = false;
-        Vector3Ref diff1ref = new Vector3Ref();
+        Vector3Ref diff1ref = new();
         VectorTool.ToVectorInFixedSystem
             (move.movedx * movespeednow * dt,
             0,
             move.movedy * movespeednow * dt, stateplayerposition.rotx, stateplayerposition.roty, diff1ref);
-        Vector3Ref diff1 = new Vector3Ref();
-        diff1.X = diff1ref.X;
-        diff1.Y = diff1ref.Y;
-        diff1.Z = diff1ref.Z;
+        Vector3Ref diff1 = new()
+        {
+            X = diff1ref.X,
+            Y = diff1ref.Y,
+            Z = diff1ref.Z
+        };
         if (MiscCi.Vec3Length(push.X, push.Y, push.Z) > 0.01f)
         {
             push.Normalize();
@@ -285,12 +287,12 @@
         }
         Packet_BlockType blocktype = game.blocktypes[block];
         return blocktype.WalkableType == Packet_WalkableTypeEnum.Fluid
-            || game.IsEmptyForPhysics(blocktype)
-            || game.IsRail(blocktype);
+            || Game.IsEmptyForPhysics(blocktype)
+            || Game.IsRail(blocktype);
     }
 
-    float[] tmpPlayerPosition;		//Temporarily stores the player's position. Used in WallSlide()
-    IntRef tmpBlockingBlockType;
+    private readonly float[] tmpPlayerPosition;		//Temporarily stores the player's position. Used in WallSlide()
+    private readonly IntRef tmpBlockingBlockType;
     public float[] WallSlide(float[] oldposition, float[] newposition, float modelheight)
     {
         bool high = false;
@@ -352,15 +354,15 @@
         return tmpPlayerPosition;	//Return valid position
     }
 
-    bool StandingOnHalfBlock(float x, float y, float z)
+    private bool StandingOnHalfBlock(float x, float y, float z)
     {
         int under = game.map.GetBlock(game.platform.FloatToInt(x),
             game.platform.FloatToInt(z),
             game.platform.FloatToInt(y));
         return game.blocktypes[under].DrawType == Packet_DrawTypeEnum.HalfHeight;
     }
-    
-    bool IsEmptySpaceForPlayer(bool high, float x, float y, float z, IntRef blockingBlockType)
+
+    private bool IsEmptySpaceForPlayer(bool high, float x, float y, float z, IntRef blockingBlockType)
     {
         return IsEmptyPoint(x, y, z, blockingBlockType)
             && IsEmptyPoint(x, y + 1, z, blockingBlockType)
@@ -368,7 +370,7 @@
     }
 
     // Checks if there are no solid blocks in walldistance area around the point
-    bool IsEmptyPoint(float x, float y, float z, IntRef blockingBlocktype)
+    private bool IsEmptyPoint(float x, float y, float z, IntRef blockingBlocktype)
     {
         // Test 3x3x3 blocks around the point
         for (int xx = 0; xx < 3; xx++)
@@ -436,12 +438,12 @@
         }
     }
 
-    static float Max3(float a, float b, float c)
+    private static float Max3(float a, float b, float c)
     {
         return MathCi.MaxFloat(MathCi.MaxFloat(a, b), c);
     }
 
-    int FloatToInt(float value)
+    private int FloatToInt(float value)
     {
         return game.platform.FloatToInt(value);
     }

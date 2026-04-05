@@ -1,6 +1,6 @@
 ﻿public class ModClearInactivePlayersDrawInfo : ClientMod
 {
-    const int maxplayers = 64;
+    private const int maxplayers = 64;
     public override void OnNewFrameFixed(Game game, NewFrameEventArgs args)
     {
         float one = 1;

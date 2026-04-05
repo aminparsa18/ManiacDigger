@@ -1,7 +1,4 @@
 ﻿using System.Net.Sockets;
-using System.Text;
-using System;
-using System.Collections.Generic;
 using System.Net;
 
 public class TcpNetServer : NetServer
@@ -15,47 +12,53 @@ public class TcpNetServer : NetServer
     public override void Start()
     {
         server.StartServer(Port);
-        server.Connected += new EventHandler<ConnectionEventArgs>(server_Connected);
-        server.ReceivedMessage += new EventHandler<MessageEventArgs>(server_ReceivedMessage);
-        server.Disconnected += new EventHandler<ConnectionEventArgs>(server_Disconnected);
+        server.Connected += new EventHandler<ConnectionEventArgs>(ServerConnected);
+        server.ReceivedMessage += new EventHandler<MessageEventArgs>(ServerReceivedMessage);
+        server.Disconnected += new EventHandler<ConnectionEventArgs>(ServerDisconnected);
     }
 
-    void server_Connected(object sender, ConnectionEventArgs e)
+    private void ServerConnected(object? sender, ConnectionEventArgs e)
     {
-        NetIncomingMessage msg = new NetIncomingMessage();
-        msg.Type = NetworkMessageType.Connect;
-        msg.SenderConnection = new TcpNetConnection() { peer = (TcpConnection)e.ClientId };
+        NetIncomingMessage msg = new()
+        {
+            Type = NetworkMessageType.Connect,
+            SenderConnection = new TcpNetConnection() { peer = e.ClientId }
+        };
         lock (messages)
         {
             messages.Enqueue(msg);
         }
     }
 
-    void server_Disconnected(object sender, ConnectionEventArgs e)
+    private void ServerDisconnected(object? sender, ConnectionEventArgs e)
     {
-        NetIncomingMessage msg = new NetIncomingMessage();
-        msg.Type = NetworkMessageType.Disconnect;
-        msg.SenderConnection = new TcpNetConnection() { peer = (TcpConnection)e.ClientId };
+        NetIncomingMessage msg = new()
+        {
+            Type = NetworkMessageType.Disconnect,
+            SenderConnection = new TcpNetConnection() { peer = e.ClientId }
+        };
         lock (messages)
         {
             messages.Enqueue(msg);
         }
     }
 
-    void server_ReceivedMessage(object sender, MessageEventArgs e)
+    private void ServerReceivedMessage(object? sender, MessageEventArgs e)
     {
-        NetIncomingMessage msg = new NetIncomingMessage();
-        msg.Type = NetworkMessageType.Data;
-        msg.message = e.data;
-        msg.messageLength = e.data.Length;
-        msg.SenderConnection = new TcpNetConnection() { peer = (TcpConnection)e.ClientId };
+        NetIncomingMessage msg = new()
+        {
+            Type = NetworkMessageType.Data,
+            message = e.data,
+            messageLength = e.data.Length,
+            SenderConnection = new TcpNetConnection() { peer = e.ClientId }
+        };
         lock (messages)
         {
             messages.Enqueue(msg);
         }
     }
 
-    ServerManager server;
+    private readonly ServerManager server;
 
     public override NetIncomingMessage ReadMessage()
     {
@@ -69,9 +72,9 @@ public class TcpNetServer : NetServer
 
         return null;
     }
-    Queue<NetIncomingMessage> messages;
+    private readonly Queue<NetIncomingMessage> messages;
 
-    int Port;
+    private int Port;
 
     public override void SetPort(int port)
     {
@@ -111,8 +114,8 @@ public class TcpNetConnection : NetConnection
 
 public class ServerManager
 {
-    Socket sock;
-    IPAddress addr = IPAddress.Any;
+    private Socket sock;
+    private readonly IPAddress addr = IPAddress.Any;
     public void StartServer(int port)
     {
         this.sock = new Socket(
@@ -125,15 +128,15 @@ public class ServerManager
         this.sock.BeginAccept(this.OnConnectRequest, sock);
     }
 
-    void OnConnectRequest(IAsyncResult result)
+    private void OnConnectRequest(IAsyncResult result)
     {
         try
         {
             Socket sock = (Socket)result.AsyncState;
 
-            TcpConnection newConn = new TcpConnection(sock.EndAccept(result));
-            newConn.ReceivedMessage += new EventHandler<MessageEventArgs>(newConn_ReceivedMessage);
-            newConn.Disconnected += new EventHandler<ConnectionEventArgs>(newConn_Disconnected);
+            TcpConnection newConn = new(sock.EndAccept(result));
+            newConn.ReceivedMessage += new EventHandler<MessageEventArgs>(NewConnReceivedMessage);
+            newConn.Disconnected += new EventHandler<ConnectionEventArgs>(NewConnDisconnected);
             sock.BeginAccept(this.OnConnectRequest, sock);
         }
         catch
@@ -141,7 +144,7 @@ public class ServerManager
         }
     }
 
-    void newConn_Disconnected(object sender, ConnectionEventArgs e)
+    private void NewConnDisconnected(object sender, ConnectionEventArgs e)
     {
         try
         {
@@ -153,7 +156,7 @@ public class ServerManager
         }
     }
 
-    void newConn_ReceivedMessage(object sender, MessageEventArgs e)
+    private void NewConnReceivedMessage(object sender, MessageEventArgs e)
     {
         try
         {
@@ -174,11 +177,11 @@ public class ServerManager
         }
     }
 
-    public event EventHandler<ConnectionEventArgs> Connected;
-    public event EventHandler<MessageEventArgs> ReceivedMessage;
-    public event EventHandler<ConnectionEventArgs> Disconnected;
+    public event EventHandler<ConnectionEventArgs>? Connected;
+    public event EventHandler<MessageEventArgs>? ReceivedMessage;
+    public event EventHandler<ConnectionEventArgs>? Disconnected;
 
-    public void Send(object sender, byte[] data)
+    public static void Send(object sender, byte[] data)
     {
         try
         {
@@ -201,7 +204,8 @@ public class TcpConnection
         address = s.RemoteEndPoint.ToString();
         this.BeginReceive();
     }
-    void BeginReceive()
+
+    private void BeginReceive()
     {
         try
         {
@@ -217,8 +221,9 @@ public class TcpConnection
             InvokeDisconnected();
         }
     }
+
     public bool connected;
-    byte[] dataRcvBuf = new byte[1024 * 8];
+    private readonly byte[] dataRcvBuf = new byte[1024 * 8];
     protected void OnBytesReceived(IAsyncResult result)
     {
         try
@@ -293,7 +298,7 @@ public class TcpConnection
         }
     }
 
-    void InvokeDisconnected()
+    private void InvokeDisconnected()
     {
         if (Disconnected != null)
         {
@@ -327,7 +332,8 @@ public class TcpConnection
             InvokeDisconnected();
         }
     }
-    void OnSend(IAsyncResult result)
+
+    private void OnSend(IAsyncResult result)
     {
         try
         {
@@ -338,11 +344,12 @@ public class TcpConnection
             InvokeDisconnected();
         }
     }
-    List<byte> receivedBytes = new List<byte>();
+
+    private readonly List<byte> receivedBytes = [];
     public event EventHandler<MessageEventArgs> ReceivedMessage;
     public event EventHandler<ConnectionEventArgs> Disconnected;
 
-    void WriteInt(byte[] writeBuf, int writePos, int n)
+    private static void WriteInt(byte[] writeBuf, int writePos, int n)
     {
         int a = (n >> 24) & 0xFF;
         int b = (n >> 16) & 0xFF;
@@ -354,7 +361,7 @@ public class TcpConnection
         writeBuf[writePos + 3] = (byte)(d);
     }
 
-    int ReadInt(byte[] readBuf, int readPos)
+    private static int ReadInt(byte[] readBuf, int readPos)
     {
         int n = readBuf[readPos] << 24;
         n |= readBuf[readPos + 1] << 16;
@@ -373,13 +380,13 @@ public class TcpConnection
     }
 }
 
-public class ConnectionEventArgs : System.EventArgs
+public class ConnectionEventArgs : EventArgs
 {
-    public TcpConnection ClientId;
+    public TcpConnection? ClientId;
 }
 
-public class MessageEventArgs : System.EventArgs
+public class MessageEventArgs : EventArgs
 {
-    public TcpConnection ClientId;
-    public byte[] data;
+    public TcpConnection? ClientId;
+    public byte[]? data;
 }

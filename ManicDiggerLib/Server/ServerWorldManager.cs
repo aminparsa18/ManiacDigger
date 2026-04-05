@@ -1,15 +1,5 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Text;
-using System.Drawing;
-using ManicDigger;
-using Vector3iG = Vector3i;
-using Vector3iC = Vector3i;
-using PointG = System.Drawing.Point;
-using System.Diagnostics;
+﻿using PointG = System.Drawing.Point;
 using ProtoBuf;
-using ManicDigger.ClientNative;
 
 public partial class Server
 {
@@ -51,7 +41,7 @@ public partial class Server
         return pos;
     }
 
-    bool IsPlayerPositionDry(int x, int y, int z)
+    private bool IsPlayerPositionDry(int x, int y, int z)
     {
         for (int i = 0; i < 4; i++)
         {
@@ -70,12 +60,12 @@ public partial class Server
     public int playerareasize = 256;
     public int centerareasize = 128;
 
-    PointG PlayerArea(int playerId)
+    private PointG PlayerArea(int playerId)
     {
         return MapUtil.PlayerArea(playerareasize, centerareasize, PlayerBlockPosition(clients[playerId]));
     }
 
-    IEnumerable<Vector3iG> PlayerAreaChunks(int playerId)
+    private IEnumerable<Vector3i> PlayerAreaChunks(int playerId)
     {
         PointG p = PlayerArea(playerId);
         for (int x = 0; x < playerareasize / chunksize; x++)
@@ -93,6 +83,7 @@ public partial class Server
             }
         }
     }
+
     // Interfaces to manipulate server's map.
     public void SetBlock(int x, int y, int z, int blocktype)
     {
@@ -101,6 +92,7 @@ public partial class Server
             SetBlockAndNotify(x, y, z, blocktype);
         }
     }
+
     public int GetBlock(int x, int y, int z)
     {
         if (MapUtil.IsValidPos(d_Map, x, y, z))
@@ -109,22 +101,21 @@ public partial class Server
         }
         return 0;
     }
+
     public int GetHeight(int x, int y)
     {
         return MapUtil.blockheight(d_Map, 0, x, y);
     }
+
     public void SetChunk(int x, int y, int z, ushort[] data)
     {
         if (MapUtil.IsValidPos(d_Map, x, y, z))
         {
-            x = x / chunksize;
-            y = y / chunksize;
-            z = z / chunksize;
+            x /= chunksize;
+            y /= chunksize;
+            z /= chunksize;
             ServerChunk c = d_Map.GetChunkValid(x, y, z);
-            if (c == null)
-            {
-                c = new ServerChunk();
-            }
+            c ??= new ServerChunk();
             c.data = data;
             c.DirtyForSaving = true;
             d_Map.SetChunkValid(x, y, z, c);
@@ -154,10 +145,7 @@ public partial class Server
 
             // TODO: check bounds.
             ServerChunk c = d_Map.GetChunkValid(k.Key.X, k.Key.Y, k.Key.Z);
-            if (c == null)
-            {
-                c = new ServerChunk();
-            }
+            c ??= new ServerChunk();
             c.data = k.Value;
             c.DirtyForSaving = true;
             d_Map.SetChunkValid(k.Key.X, k.Key.Y, k.Key.Z, c);
@@ -188,10 +176,7 @@ public partial class Server
 
             // TODO: check bounds.
             ServerChunk c = d_Map.GetChunkValid(k.Key.X + offsetX, k.Key.Y + offsetY, k.Key.Z + offsetZ);
-            if (c == null)
-            {
-                c = new ServerChunk();
-            }
+            c ??= new ServerChunk();
             c.data = k.Value;
             c.DirtyForSaving = true;
             d_Map.SetChunkValid(k.Key.X + offsetX, k.Key.Y + offsetY, k.Key.Z + offsetZ, c);
@@ -210,20 +195,21 @@ public partial class Server
     {
         if (MapUtil.IsValidPos(d_Map, x, y, z))
         {
-            x = x / chunksize;
-            y = y / chunksize;
-            z = z / chunksize;
+            x /= chunksize;
+            y /= chunksize;
+            z /= chunksize;
             return d_Map.GetChunkValid(x, y, z).data;
         }
         return null;
     }
+
     public void DeleteChunk(int x, int y, int z)
     {
         if (MapUtil.IsValidPos(d_Map, x, y, z))
         {
-            x = x / chunksize;
-            y = y / chunksize;
-            z = z / chunksize;
+            x /= chunksize;
+            y /= chunksize;
+            z /= chunksize;
             ChunkDb.DeleteChunk(d_ChunkDb, x, y, z);
             d_Map.SetChunkValid(x, y, z, null);
             // update related chunk at clients
@@ -235,9 +221,10 @@ public partial class Server
             }
         }
     }
+
     public void DeleteChunks(List<Vector3i> chunkPositions)
     {
-        List<Xyz> chunks = new List<Xyz>();
+        List<Xyz> chunks = [];
         foreach (Vector3i pos in chunkPositions)
         {
             if (MapUtil.IsValidPos(d_Map, pos.x, pos.y, pos.z))
@@ -261,9 +248,10 @@ public partial class Server
             }
         }
     }
+
     public int[] GetMapSize()
     {
-        return new int[] { d_Map.MapSizeX, d_Map.MapSizeY, d_Map.MapSizeZ };
+        return [d_Map.MapSizeX, d_Map.MapSizeY, d_Map.MapSizeZ];
     }
 
     public ushort[] GetChunkFromDatabase(int x, int y, int z, string filename)
@@ -272,18 +260,18 @@ public partial class Server
         {
             if (!GameStorePath.IsValidName(filename))
             {
-                Console.WriteLine("Invalid backup filename: " + filename);
+                Console.WriteLine($"Invalid backup filename: {filename}");
                 return null;
             }
             if (!Directory.Exists(GameStorePath.gamepathbackup))
             {
                 Directory.CreateDirectory(GameStorePath.gamepathbackup);
             }
-            string finalFilename = Path.Combine(GameStorePath.gamepathbackup, filename + MapManipulator.BinSaveExtension);
+            string finalFilename = Path.Combine(GameStorePath.gamepathbackup, $"{filename}{MapManipulator.BinSaveExtension}");
 
-            x = x / chunksize;
-            y = y / chunksize;
-            z = z / chunksize;
+            x /= chunksize;
+            y /= chunksize;
+            z /= chunksize;
 
             byte[] serializedChunk = ChunkDb.GetChunkFromFile(d_ChunkDb, x, y, z, finalFilename);
             if (serializedChunk != null)
@@ -294,6 +282,7 @@ public partial class Server
         }
         return null;
     }
+
     public Dictionary<Xyz, ushort[]> GetChunksFromDatabase(List<Xyz> chunks, string filename)
     {
         if (chunks == null)
@@ -310,9 +299,9 @@ public partial class Server
         {
             Directory.CreateDirectory(GameStorePath.gamepathbackup);
         }
-        string finalFilename = Path.Combine(GameStorePath.gamepathbackup, filename + MapManipulator.BinSaveExtension);
+        string finalFilename = Path.Combine(GameStorePath.gamepathbackup, $"{filename}{MapManipulator.BinSaveExtension}");
 
-        Dictionary<Xyz, ushort[]> deserializedChunks = new Dictionary<Xyz, ushort[]>();
+        Dictionary<Xyz, ushort[]> deserializedChunks = [];
         Dictionary<Xyz, byte[]> serializedChunks = ChunkDb.GetChunksFromFile(d_ChunkDb, chunks, finalFilename);
 
         foreach (var k in serializedChunks)
@@ -326,7 +315,8 @@ public partial class Server
         }
         return deserializedChunks;
     }
-    private ServerChunk DeserializeChunk(byte[] serializedChunk)
+
+    private static ServerChunk DeserializeChunk(byte[] serializedChunk)
     {
         ServerChunk c = Serializer.Deserialize<ServerChunk>(new MemoryStream(serializedChunk));
         //convert savegame to new format
@@ -355,15 +345,15 @@ public partial class Server
         }
         string finalFilename = Path.Combine(GameStorePath.gamepathbackup, filename + MapManipulator.BinSaveExtension);
 
-        List<DbChunk> dbchunks = new List<DbChunk>();
+        List<DbChunk> dbchunks = [];
         foreach (Vector3i pos in chunkPositions)
         {
             int dx = pos.x / chunksize;
             int dy = pos.y / chunksize;
             int dz = pos.z / chunksize;
 
-            ServerChunk cc = new ServerChunk() { data = this.GetChunk(pos.x, pos.y, pos.z) };
-            MemoryStream ms = new MemoryStream();
+            ServerChunk cc = new() { data = this.GetChunk(pos.x, pos.y, pos.z) };
+            MemoryStream ms = new();
             Serializer.Serialize(ms, cc);
             dbchunks.Add(new DbChunk() { Position = new Xyz() { X = dx, Y = dy, Z = dz }, Chunk = ms.ToArray() });
         }
@@ -379,4 +369,3 @@ public partial class Server
         Console.WriteLine(string.Format("Saved {0} chunk(s) to database.", dbchunks.Count));
     }
 }
-

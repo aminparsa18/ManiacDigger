@@ -29,9 +29,11 @@
         platform.MonitorEnter(network.ServerReceiveBufferLock);
         {
             INetOutgoingMessage msg = message;
-            ByteArray b = new ByteArray();
-            b.data = msg.message;
-            b.length = msg.messageLength;
+            ByteArray b = new()
+            {
+                data = msg.message,
+                length = msg.messageLength
+            };
             network.ServerReceiveBuffer.Enqueue(b);
         }
         platform.MonitorExit(network.ServerReceiveBufferLock);
@@ -60,9 +62,11 @@ public class DummyNetConnection : NetConnection
         platform.MonitorEnter(network.ClientReceiveBufferLock);
         {
             INetOutgoingMessage msg2 = msg;
-            ByteArray b = new ByteArray();
-            b.data = msg2.message;
-            b.length = msg2.messageLength;
+            ByteArray b = new()
+            {
+                data = msg2.message,
+                length = msg2.messageLength
+            };
             network.ClientReceiveBuffer.Enqueue(b);
         }
         platform.MonitorExit(network.ClientReceiveBufferLock);
@@ -100,9 +104,9 @@ public class DummyNetServer : NetServer
     {
     }
 
-    DummyNetConnection connectedClient;
+    private readonly DummyNetConnection connectedClient;
 
-    bool receivedAnyMessage;
+    private bool receivedAnyMessage;
 
     public override NetIncomingMessage ReadMessage()
     {
@@ -117,9 +121,11 @@ public class DummyNetServer : NetServer
                 if (!receivedAnyMessage)
                 {
                     receivedAnyMessage = true;
-                    msg = new NetIncomingMessage();
-                    msg.Type = NetworkMessageType.Connect;
-                    msg.SenderConnection = connectedClient;
+                    msg = new NetIncomingMessage
+                    {
+                        Type = NetworkMessageType.Connect,
+                        SenderConnection = connectedClient
+                    };
                 }
                 else
                 {

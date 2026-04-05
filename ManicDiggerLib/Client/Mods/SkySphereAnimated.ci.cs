@@ -6,8 +6,8 @@ public class ModSkySphereAnimated : ClientMod
     {
         stars = new ModSkySphereStatic();
     }
-    ModelData skymodel;
-    ClientMod stars;
+    private ModelData skymodel;
+    private readonly ClientMod stars;
 
     public override void OnNewFrameDraw3d(Game game, float deltaTime)
     {
@@ -20,7 +20,7 @@ public class ModSkySphereAnimated : ClientMod
     }
 
     internal bool started;
-    const int textureSize = 512;
+    private const int textureSize = 512;
 
     internal void DrawSkySphere(Game game)
     {
@@ -44,8 +44,8 @@ public class ModSkySphereAnimated : ClientMod
         game.platform.GlEnableDepthTest();
     }
 
-    int[] skyPixels;
-    int[] glowPixels;
+    private int[] skyPixels;
+    private int[] glowPixels;
 
     public void Draw(Game game, float fov)
     {
@@ -72,7 +72,7 @@ public class ModSkySphereAnimated : ClientMod
         game.Set3dProjection(game.zfar(), fov);
     }
 
-    public ModelData GetSphereModelData2(ModelData data,
+    public static ModelData GetSphereModelData2(ModelData data,
     GamePlatform platform,
     float radius, float height, int segments, int rings,
     int[] skyPixels_, int[] glowPixels_,
@@ -82,10 +82,12 @@ public class ModSkySphereAnimated : ClientMod
 
         if (data == null)
         {
-            data = new ModelData();
-            data.xyz = new float[rings * segments * 3];
-            data.uv = new float[rings * segments * 2];
-            data.rgba = new byte[rings * segments * 4];
+            data = new ModelData
+            {
+                xyz = new float[rings * segments * 3],
+                uv = new float[rings * segments * 2],
+                rgba = new byte[rings * segments * 4]
+            };
             data.SetVerticesCount(segments * rings);
             data.SetIndicesCount(segments * rings * 6);
             data.setIndices(SphereModelData.CalculateElements(radius, height, segments, rings));
@@ -168,7 +170,7 @@ public class ModSkySphereAnimated : ClientMod
         return data;
     }
 
-    static int Texture2d(GamePlatform platform, int[] pixelsArgb, float x, float y)
+    private static int Texture2d(GamePlatform platform, int[] pixelsArgb, float x, float y)
     {
         int px = platform.FloatToInt(x * (textureSize - 1));
         int py = platform.FloatToInt(y * (textureSize - 1));
@@ -177,7 +179,7 @@ public class ModSkySphereAnimated : ClientMod
         return pixelsArgb[MapUtilCi.Index2d(px, py, textureSize)];
     }
 
-    static int positive_modulo(int i, int n)
+    private static int positive_modulo(int i, int n)
     {
         return (i % n + n) % n;
     }

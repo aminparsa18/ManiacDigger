@@ -18,13 +18,13 @@
         DrawCompass(game);
     }
 
-    float one;
-    int compassid;
-    int needleid;
-    float compassangle;
-    float compassvertex;
+    private readonly float one;
+    private int compassid;
+    private int needleid;
+    private float compassangle;
+    private float compassvertex;
 
-    bool CompassInActiveMaterials(Game game)
+    private static bool CompassInActiveMaterials(Game game)
     {
         for (int i = 0; i < 10; i++)
         {

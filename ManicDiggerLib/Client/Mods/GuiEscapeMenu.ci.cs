@@ -17,21 +17,27 @@
         widgets = new Button[1024];
         keyselectid = -1;
     }
-    float one;
-    Button buttonMainReturnToGame;
-    Button buttonMainOptions;
-    Button buttonMainExit;
+    private readonly float one;
+    private Button buttonMainReturnToGame;
+    private Button buttonMainOptions;
+    private Button buttonMainExit;
 
-    int widgetsCount;
-    void MainSet()
+    private int widgetsCount;
+    private void MainSet()
     {
         Language language = game.language;
-        buttonMainReturnToGame = new Button();
-        buttonMainReturnToGame.Text = language.ReturnToGame();
-        buttonMainOptions = new Button();
-        buttonMainOptions.Text = language.Options();
-        buttonMainExit = new Button();
-        buttonMainExit.Text = language.Exit();
+        buttonMainReturnToGame = new Button
+        {
+            Text = language.ReturnToGame()
+        };
+        buttonMainOptions = new Button
+        {
+            Text = language.Options()
+        };
+        buttonMainExit = new Button
+        {
+            Text = language.Exit()
+        };
 
         WidgetsClear();
         AddWidget(buttonMainReturnToGame);
@@ -39,7 +45,7 @@
         AddWidget(buttonMainExit);
     }
 
-    void MainHandleClick(Button b)
+    private void MainHandleClick(Button b)
     {
         if (b == buttonMainReturnToGame)
         {
@@ -56,21 +62,29 @@
         }
     }
 
-    Button optionsGraphics;
-    Button optionsKeys;
-    Button optionsOther;
-    Button optionsReturnToMainMenu;
-    void OptionsSet()
+    private Button optionsGraphics;
+    private Button optionsKeys;
+    private Button optionsOther;
+    private Button optionsReturnToMainMenu;
+    private void OptionsSet()
     {
         Language language = game.language;
-        optionsGraphics = new Button();
-        optionsGraphics.Text = language.Graphics();
-        optionsKeys = new Button();
-        optionsKeys.Text = language.Keys();
-        optionsOther = new Button();
-        optionsOther.Text = language.Other();
-        optionsReturnToMainMenu = new Button();
-        optionsReturnToMainMenu.Text = language.ReturnToMainMenu();
+        optionsGraphics = new Button
+        {
+            Text = language.Graphics()
+        };
+        optionsKeys = new Button
+        {
+            Text = language.Keys()
+        };
+        optionsOther = new Button
+        {
+            Text = language.Other()
+        };
+        optionsReturnToMainMenu = new Button
+        {
+            Text = language.ReturnToMainMenu()
+        };
 
         WidgetsClear();
         AddWidget(optionsGraphics);
@@ -79,7 +93,7 @@
         AddWidget(optionsReturnToMainMenu);
     }
 
-    void OptionsHandleClick(Button b)
+    private void OptionsHandleClick(Button b)
     {
         if (b == optionsGraphics)
         {
@@ -99,37 +113,55 @@
         }
     }
 
-    Button graphicsOptionSmoothShadows;
-    Button graphicsOptionDarkenSides;
-    Button graphicsViewDistanceOption;
-    Button graphicsOptionFramerate;
-    Button graphicsOptionResolution;
-    Button graphicsOptionFullscreen;
-    Button graphicsUseServerTexturesOption;
-    Button graphicsFontOption;
-    Button graphicsReturnToOptionsMenu;
-    void GraphicsSet()
+    private Button graphicsOptionSmoothShadows;
+    private Button graphicsOptionDarkenSides;
+    private Button graphicsViewDistanceOption;
+    private Button graphicsOptionFramerate;
+    private Button graphicsOptionResolution;
+    private Button graphicsOptionFullscreen;
+    private Button graphicsUseServerTexturesOption;
+    private Button graphicsFontOption;
+    private Button graphicsReturnToOptionsMenu;
+    private void GraphicsSet()
     {
         OptionsCi options = game.options;
         Language language = game.language;
-        graphicsOptionSmoothShadows = new Button();
-        graphicsOptionSmoothShadows.Text = game.platform.StringFormat(language.OptionSmoothShadows(), options.Smoothshadows ? language.On() : language.Off());
-        graphicsOptionDarkenSides = new Button();
-        graphicsOptionDarkenSides.Text = game.platform.StringFormat(language.Get("OptionDarkenSides"), options.EnableBlockShadow ? language.On() : language.Off());
-        graphicsViewDistanceOption = new Button();
-        graphicsViewDistanceOption.Text = game.platform.StringFormat(language.ViewDistanceOption(), game.platform.IntToString(game.platform.FloatToInt(game.d_Config3d.viewdistance)));
-        graphicsOptionFramerate = new Button();
-        graphicsOptionFramerate.Text = game.platform.StringFormat(language.OptionFramerate(), (VsyncString()));
-        graphicsOptionResolution = new Button();
-        graphicsOptionResolution.Text = game.platform.StringFormat(language.OptionResolution(), (ResolutionString()));
-        graphicsOptionFullscreen = new Button();
-        graphicsOptionFullscreen.Text = game.platform.StringFormat(language.OptionFullscreen(), options.Fullscreen ? language.On() : language.Off());
-        graphicsUseServerTexturesOption = new Button();
-        graphicsUseServerTexturesOption.Text = game.platform.StringFormat(language.UseServerTexturesOption(), (options.UseServerTextures ? language.On() : language.Off()));
-        graphicsFontOption = new Button();
-        graphicsFontOption.Text = game.platform.StringFormat(language.FontOption(), (FontString()));
-        graphicsReturnToOptionsMenu = new Button();
-        graphicsReturnToOptionsMenu.Text = language.ReturnToOptionsMenu();
+        graphicsOptionSmoothShadows = new Button
+        {
+            Text = game.platform.StringFormat(language.OptionSmoothShadows(), options.Smoothshadows ? language.On() : language.Off())
+        };
+        graphicsOptionDarkenSides = new Button
+        {
+            Text = game.platform.StringFormat(language.Get("OptionDarkenSides"), options.EnableBlockShadow ? language.On() : language.Off())
+        };
+        graphicsViewDistanceOption = new Button
+        {
+            Text = game.platform.StringFormat(language.ViewDistanceOption(), game.platform.IntToString(game.platform.FloatToInt(game.d_Config3d.viewdistance)))
+        };
+        graphicsOptionFramerate = new Button
+        {
+            Text = game.platform.StringFormat(language.OptionFramerate(), (VsyncString()))
+        };
+        graphicsOptionResolution = new Button
+        {
+            Text = game.platform.StringFormat(language.OptionResolution(), (ResolutionString()))
+        };
+        graphicsOptionFullscreen = new Button
+        {
+            Text = game.platform.StringFormat(language.OptionFullscreen(), options.Fullscreen ? language.On() : language.Off())
+        };
+        graphicsUseServerTexturesOption = new Button
+        {
+            Text = game.platform.StringFormat(language.UseServerTexturesOption(), (options.UseServerTextures ? language.On() : language.Off()))
+        };
+        graphicsFontOption = new Button
+        {
+            Text = game.platform.StringFormat(language.FontOption(), (FontString()))
+        };
+        graphicsReturnToOptionsMenu = new Button
+        {
+            Text = language.ReturnToOptionsMenu()
+        };
 
         WidgetsClear();
         AddWidget(graphicsOptionSmoothShadows);
@@ -142,7 +174,7 @@
         AddWidget(graphicsFontOption);
         AddWidget(graphicsReturnToOptionsMenu);
     }
-    void GraphicsHandleClick(Button b)
+    private void GraphicsHandleClick(Button b)
     {
         OptionsCi options = game.options;
         if (b == graphicsOptionSmoothShadows)
@@ -197,22 +229,30 @@
         }
     }
 
-    Button otherSoundOption;
-    Button otherReturnToOptionsMenu;
-    Button otherAutoJumpOption;
-    Button otherLanguageSetting;
-    void OtherSet()
+    private Button otherSoundOption;
+    private Button otherReturnToOptionsMenu;
+    private Button otherAutoJumpOption;
+    private Button otherLanguageSetting;
+    private void OtherSet()
     {
         Language language = game.language;
 
-        otherSoundOption = new Button();
-        otherSoundOption.Text = game.platform.StringFormat(language.SoundOption(), (game.AudioEnabled ? language.On() : language.Off()));
-        otherAutoJumpOption = new Button();
-        otherAutoJumpOption.Text = game.platform.StringFormat(language.AutoJumpOption(), (game.AutoJumpEnabled ? language.On() : language.Off()));
-        otherLanguageSetting = new Button();
-        otherLanguageSetting.Text = game.platform.StringFormat(language.ClientLanguageOption(), language.GetUsedLanguage());
-        otherReturnToOptionsMenu = new Button();
-        otherReturnToOptionsMenu.Text = language.ReturnToOptionsMenu();
+        otherSoundOption = new Button
+        {
+            Text = game.platform.StringFormat(language.SoundOption(), (game.AudioEnabled ? language.On() : language.Off()))
+        };
+        otherAutoJumpOption = new Button
+        {
+            Text = game.platform.StringFormat(language.AutoJumpOption(), (game.AutoJumpEnabled ? language.On() : language.Off()))
+        };
+        otherLanguageSetting = new Button
+        {
+            Text = game.platform.StringFormat(language.ClientLanguageOption(), language.GetUsedLanguage())
+        };
+        otherReturnToOptionsMenu = new Button
+        {
+            Text = language.ReturnToOptionsMenu()
+        };
 
         WidgetsClear();
         AddWidget(otherSoundOption);
@@ -221,7 +261,7 @@
         AddWidget(otherReturnToOptionsMenu);
     }
 
-    void OtherHandleClick(Button b)
+    private void OtherHandleClick(Button b)
     {
         if (b == otherSoundOption)
         {
@@ -243,12 +283,12 @@
     }
 
 
-    Button[] keyButtons;
-    Button keysDefaultKeys;
-    Button keysReturnToOptionsMenu;
+    private Button[] keyButtons;
+    private Button keysDefaultKeys;
+    private Button keysReturnToOptionsMenu;
 
-    const int keyButtonsCount = 1024;
-    void KeysSet()
+    private const int keyButtonsCount = 1024;
+    private void KeysSet()
     {
         Language language = game.language;
 
@@ -271,20 +311,26 @@
             {
                 key = game.options.Keys[defaultkey];
             }
-            keyButtons[i] = new Button();
-            keyButtons[i].Text = game.platform.StringFormat2(language.KeyChange(), helps[i].Text, KeyName(key));
+            keyButtons[i] = new Button
+            {
+                Text = game.platform.StringFormat2(language.KeyChange(), helps[i].Text, KeyName(key))
+            };
             AddWidget(keyButtons[i]);
 
         }
-        keysDefaultKeys = new Button();
-        keysDefaultKeys.Text = language.DefaultKeys();
-        keysReturnToOptionsMenu = new Button();
-        keysReturnToOptionsMenu.Text = language.ReturnToOptionsMenu();
+        keysDefaultKeys = new Button
+        {
+            Text = language.DefaultKeys()
+        };
+        keysReturnToOptionsMenu = new Button
+        {
+            Text = language.ReturnToOptionsMenu()
+        };
         AddWidget(keysDefaultKeys);
         AddWidget(keysReturnToOptionsMenu);
     }
 
-    void KeysHandleClick(Button b)
+    private void KeysHandleClick(Button b)
     {
         if (keyButtons != null)
         {
@@ -306,7 +352,7 @@
         }
     }
 
-    void HandleButtonClick(Button w)
+    private void HandleButtonClick(Button w)
     {
         MainHandleClick(w);
         OptionsHandleClick(w);
@@ -315,19 +361,19 @@
         KeysHandleClick(w);
     }
 
-    void AddWidget(Button b)
+    private void AddWidget(Button b)
     {
         widgets[widgetsCount++] = b;
     }
 
-    void WidgetsClear()
+    private void WidgetsClear()
     {
         widgetsCount = 0;
     }
 
     internal Game game;
-    EscapeMenuState escapemenustate;
-    void EscapeMenuMouse1()
+    private EscapeMenuState escapemenustate;
+    private void EscapeMenuMouse1()
     {
         for (int i = 0; i < widgetsCount; i++)
         {
@@ -341,7 +387,7 @@
         }
     }
 
-    bool RectContains(int x, int y, int w, int h, int px, int py)
+    private static bool RectContains(int x, int y, int w, int h, int px, int py)
     {
         return px >= x
             && py >= y
@@ -349,7 +395,7 @@
             && py < y + h;
     }
 
-    void SetEscapeMenuState(EscapeMenuState state)
+    private void SetEscapeMenuState(EscapeMenuState state)
     {
         Language language = game.language;
         escapemenustate = state;
@@ -383,7 +429,7 @@
         }
     }
 
-    void UseFullscreen()
+    private void UseFullscreen()
     {
         if (game.options.Fullscreen)
         {
@@ -403,7 +449,7 @@
         }
     }
 
-    string VsyncString()
+    private string VsyncString()
     {
         if (game.ENABLE_LAG == 0) { return "Vsync"; }
         else if (game.ENABLE_LAG == 1) { return "Unlimited"; }
@@ -411,9 +457,9 @@
         else return null; //throw new Exception();
     }
 
-    string ResolutionString()
+    private string ResolutionString()
     {
-        IntRef resolutionsCount = new IntRef();
+        IntRef resolutionsCount = new();
         DisplayResolutionCi res = game.platform.GetDisplayResolutions(resolutionsCount)[game.options.Resolution];
         return game.platform.StringFormat4("{0}x{1}, {2}, {3} Hz",
             game.platform.IntToString(res.Width),
@@ -422,12 +468,12 @@
             game.platform.IntToString(game.platform.FloatToInt(res.RefreshRate)));
     }
 
-    void ToggleResolution()
+    private void ToggleResolution()
     {
         OptionsCi options = game.options;
         options.Resolution++;
 
-        IntRef resolutionsCount = new IntRef();
+        IntRef resolutionsCount = new();
         game.platform.GetDisplayResolutions(resolutionsCount);
 
         if (options.Resolution >= resolutionsCount.value)
@@ -436,9 +482,9 @@
         }
     }
 
-    int originalResolutionWidth;
-    int originalResolutionHeight;
-    bool changedResolution;
+    private int originalResolutionWidth;
+    private int originalResolutionHeight;
+    private bool changedResolution;
     public void RestoreResolution()
     {
         if (changedResolution)
@@ -450,7 +496,7 @@
     public void UseResolution()
     {
         OptionsCi options = game.options;
-        IntRef resolutionsCount = new IntRef();
+        IntRef resolutionsCount = new();
         DisplayResolutionCi[] resolutions = game.platform.GetDisplayResolutions(resolutionsCount);
 
         if (resolutions == null)
@@ -476,15 +522,15 @@
         }
     }
 
-    string[] fonts;
-    int fontsLength;
-    int[] fontValues;
+    private readonly string[] fonts;
+    private readonly int fontsLength;
+    private readonly int[] fontValues;
 
-    string FontString()
+    private string FontString()
     {
         return fonts[game.options.Font];
     }
-    void ToggleFont()
+    private void ToggleFont()
     {
         OptionsCi options = game.options;
         options.Font++;
@@ -500,12 +546,12 @@
         }
     }
 
-    string KeyName(int key)
+    private string KeyName(int key)
     {
         return game.platform.KeyName(key);
     }
 
-    void MakeSimpleOptions(int fontsize, int textheight)
+    private void MakeSimpleOptions(int fontsize, int textheight)
     {
         int starty = game.ycenter(widgetsCount * textheight);
         for (int i = 0; i < widgetsCount; i++)
@@ -529,7 +575,7 @@
             }
         }
     }
-    bool loaded;
+    private bool loaded;
     public override void OnNewFrameDraw2d(Game game_, float deltaTime)
     {
         game = game_;
@@ -555,8 +601,8 @@
             game.Draw2dText1(w.Text, w.x, w.y, w.fontsize, IntRef.Create(w.selected ? w.fontcolorselected : w.fontcolor), false);
         }
     }
-    Button[] widgets;
-    KeyHelp[] keyhelps()
+    private readonly Button[] widgets;
+    private KeyHelp[] keyhelps()
     {
         int n = 1024;
         KeyHelp[] helps = new KeyHelp[n];
@@ -593,16 +639,18 @@
         return helps;
     }
 
-    KeyHelp KeyHelpCreate(string text, int defaultKey)
+    private static KeyHelp KeyHelpCreate(string text, int defaultKey)
     {
-        KeyHelp h = new KeyHelp();
-        h.Text = text;
-        h.DefaultKey = defaultKey;
+        KeyHelp h = new()
+        {
+            Text = text,
+            DefaultKey = defaultKey
+        };
         return h;
     }
 
 
-    int keyselectid;
+    private int keyselectid;
     public override void OnKeyDown(Game game_, KeyEventArgs args)
     {
         int eKey = args.GetKeyCode();
@@ -681,9 +729,9 @@
         UseResolution();
     }
 
-    OptionsCi LoadOptions_()
+    private OptionsCi LoadOptions_()
     {
-        OptionsCi options = new OptionsCi();
+        OptionsCi options = new();
         Preferences preferences = game.platform.GetPreferences();
                 
         options.Shadows = preferences.GetBool("Shadows", true);
@@ -734,7 +782,7 @@
         SaveOptions_(options);
     }
 
-    void SaveOptions_(OptionsCi options)
+    private void SaveOptions_(OptionsCi options)
     {
         Preferences preferences = game.platform.GetPreferences();
 

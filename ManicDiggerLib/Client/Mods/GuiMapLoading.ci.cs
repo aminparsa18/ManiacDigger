@@ -1,9 +1,9 @@
 ﻿public class ModGuiMapLoading : ClientMod
 {
-    int Width;
-    int Height;
-    int backgroundW;
-    int backgroundH;
+    private int Width;
+    private int Height;
+    private int backgroundW;
+    private int backgroundH;
 
     public override void OnNewFrameDraw2d(Game game, float deltaTime)
     {
@@ -37,21 +37,21 @@
             return;
         }
 
-        IntRef serverNameWidth = new IntRef();
-        IntRef serverNameHeight = new IntRef();
+        IntRef serverNameWidth = new();
+        IntRef serverNameHeight = new();
         platform.TextSize(game.ServerInfo.ServerName, 14, serverNameWidth, serverNameHeight);
         game.Draw2dText(game.ServerInfo.ServerName, game.fontMapLoading, game.xcenter(serverNameWidth.value), Height / 2 - 150, null, false);
 
         if (game.ServerInfo.ServerMotd != null)
         {
-            IntRef serverMotdWidth = new IntRef();
-            IntRef serverMotdHeight = new IntRef();
+            IntRef serverMotdWidth = new();
+            IntRef serverMotdHeight = new();
             platform.TextSize(game.ServerInfo.ServerMotd, 14, serverMotdWidth, serverMotdHeight);
             game.Draw2dText(game.ServerInfo.ServerMotd, game.fontMapLoading, game.xcenter(serverMotdWidth.value), Height / 2 - 100, null, false);
         }
 
-        IntRef connectingWidth = new IntRef();
-        IntRef connectingHeight = new IntRef();
+        IntRef connectingWidth = new();
+        IntRef connectingHeight = new();
         platform.TextSize(connecting, 14, connectingWidth, connectingHeight);
         game.Draw2dText(connecting, game.fontMapLoading, game.xcenter(connectingWidth.value), Height / 2 - 50, null, false);
 
@@ -60,13 +60,13 @@
 
         if (game.maploadingprogress.ProgressPercent > 0)
         {
-            IntRef progressWidth = new IntRef();
-            IntRef progressHeight = new IntRef();
+            IntRef progressWidth = new();
+            IntRef progressHeight = new();
             platform.TextSize(progress, 14, progressWidth, progressHeight);
             game.Draw2dText(progress, game.fontMapLoading, game.xcenter(progressWidth.value), Height / 2 - 20, null, false);
 
-            IntRef progress1Width = new IntRef();
-            IntRef progress1Height = new IntRef();
+            IntRef progress1Width = new();
+            IntRef progress1Height = new();
             platform.TextSize(progress1, 14, progress1Width, progress1Height);
             game.Draw2dText(progress1, game.fontMapLoading, game.xcenter(progress1Width.value), Height / 2 + 10, null, false);
 
@@ -86,7 +86,7 @@
         }
     }
 
-    void DrawBackground(Game game)
+    private void DrawBackground(Game game)
     {
         backgroundW = 512;
         backgroundH = 512;

@@ -10,8 +10,8 @@
         ImageSize = 96;
         day_length_in_seconds = 30;
     }
-    int hour;
-    float one;
+    private int hour;
+    private readonly float one;
     public int GetHour()
     {
         return hour;
@@ -21,9 +21,9 @@
         hour = value;
         t = (hour - 6) / (one * 24) * 2 * Game.GetPi();
     }
-    float t;
-    int suntexture;
-    int moontexture;
+    private float t;
+    private int suntexture;
+    private int moontexture;
     internal int ImageSize;
     internal float day_length_in_seconds;
     public override void OnNewFrameDraw3d(Game game, float dt)
@@ -65,7 +65,7 @@
         game.GLPopMatrix();
     }
 
-    void UpdateSunMoonPosition(Game game, float dt)
+    private void UpdateSunMoonPosition(Game game, float dt)
     {
         t += dt * 2 * Game.GetPi() / day_length_in_seconds;
         game.isNight = (t + 2 * Game.GetPi()) % (2 * Game.GetPi()) > Game.GetPi();

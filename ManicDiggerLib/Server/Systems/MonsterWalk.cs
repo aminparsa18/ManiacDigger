@@ -1,7 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-class ServerSystemMonsterWalk : ServerSystem
+﻿internal class ServerSystemMonsterWalk : ServerSystem
 {
 }

@@ -3,7 +3,8 @@
 #if CITO
     const
 #else
-    static
+    private static
+readonly
 #endif
  int[] cubeVertices = {
             // Front face
@@ -46,7 +47,8 @@
 #if CITO
     const
 #else
-    static
+    private static
+readonly
 #endif
  int[] cubeTextureCoords = {
             // Front face
@@ -89,7 +91,8 @@
 #if CITO
     const
 #else
-    static
+    private static
+readonly
 #endif
  int[] cubeVertexIndices = {
             0, 1, 2,      0, 2, 3,    // Front face
@@ -102,7 +105,7 @@
 
     public static ModelData GetCubeModelData()
     {
-        ModelData m = new ModelData();
+        ModelData m = new();
         float[] xyz = new float[3 * 4 * 6];
         for (int i = 0; i < 3 * 4 * 6; i++)
         {
@@ -127,7 +130,8 @@ public class QuadModelData
 #if CITO
     const
 #else
-    static
+    private static
+readonly
 #endif
  int[] cubeVertices = {
             // Front face
@@ -140,7 +144,8 @@ public class QuadModelData
 #if CITO
     const
 #else
-    static
+    private static
+readonly
 #endif
  int[] quadTextureCoords = {
             // Front face
@@ -153,7 +158,8 @@ public class QuadModelData
 #if CITO
     const
 #else
-    static
+    private static
+readonly
 #endif
  int[] quadVertexIndices = {
             0, 1, 2,      0, 2, 3    // Front face
@@ -161,7 +167,7 @@ public class QuadModelData
 
     public static ModelData GetQuadModelData()
     {
-        ModelData m = new ModelData();
+        ModelData m = new();
         float[] xyz = new float[3 * 4];
         for (int i = 0; i < 3 * 4; i++)
         {
@@ -184,7 +190,7 @@ public class QuadModelData
         float dx, float dy, float dw, float dh,
         byte r, byte g, byte b, byte a)
     {
-        ModelData m = new ModelData();
+        ModelData m = new();
         float[] xyz = new float[3 * 4];
 
         xyz[0] = dx;
@@ -241,7 +247,7 @@ public class QuadModelData
 
 public class SphereModelData
 {
-    static float GetPi()
+    private static float GetPi()
     {
         float a = 3141592;
         return a / 1000000;
@@ -284,7 +290,7 @@ public class SphereModelData
                 i++;
             }
         }
-        ModelData data = new ModelData();
+        ModelData data = new();
         data.SetVerticesCount(segments * rings);
         data.SetIndicesCount(segments * rings * 6);
         data.setXyz(xyz);
@@ -322,7 +328,7 @@ public class WireframeCube
 {
     public static ModelData Get()
     {
-        ModelData m = new ModelData();
+        ModelData m = new();
         m.setMode(DrawModeEnum.Lines);
         m.xyz = new float[3 * 4 * 6];
         m.uv = new float[2 * 4 * 6];
@@ -368,7 +374,7 @@ public class WireframeCube
 
         return m;
     }
-    static void DrawLineLoop(ModelData m, Vector3Ref p0, Vector3Ref p1, Vector3Ref p2, Vector3Ref p3)
+    private static void DrawLineLoop(ModelData m, Vector3Ref p0, Vector3Ref p1, Vector3Ref p2, Vector3Ref p3)
     {
         int startVertex = m.GetVerticesCount();
         AddVertex(m, p0.X, p0.Y, p0.Z, 0, 0, Game.ColorFromArgb(255, 255, 255, 255));
@@ -385,7 +391,7 @@ public class WireframeCube
         m.indices[m.indicesCount++] = startVertex + 0;
     }
 
-    static void AddVertex(ModelData model, float x, float y, float z, float u, float v, int color)
+    private static void AddVertex(ModelData model, float x, float y, float z, float u, float v, int color)
     {
         model.xyz[model.GetXyzCount() + 0] = x;
         model.xyz[model.GetXyzCount() + 1] = y;

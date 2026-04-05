@@ -32,7 +32,7 @@
                 }
                 if (game.overheadcamera)
                 {
-                    CameraMove m = new CameraMove();
+                    CameraMove m = new();
                     if (game.keyboardState[game.GetKey(GlKeys.A)]) { game.overheadcameraK.TurnRight(dt * overheadcameraspeed); }
                     if (game.keyboardState[game.GetKey(GlKeys.D)]) { game.overheadcameraK.TurnLeft(dt * overheadcameraspeed); }
                     if (game.keyboardState[game.GetKey(GlKeys.W)]) { angleup = true; }

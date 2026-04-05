@@ -17,19 +17,19 @@
         }
     }
 
-    float one;
-    int lasttitleupdateMilliseconds;
-    int fpscount;
-    string fpstext;
-    float longestframedt;
+    private readonly float one;
+    private int lasttitleupdateMilliseconds;
+    private int fpscount;
+    private string fpstext;
+    private float longestframedt;
 
     public override void Start(ClientModManager modmanager)
     {
         m = modmanager;
     }
-    float[] dtHistory;
-    const int MaxCount = 300;
-    ClientModManager m;
+    private readonly float[] dtHistory;
+    private const int MaxCount = 300;
+    private ClientModManager m;
 
     public override void OnNewFrame(Game game, NewFrameEventArgs args)
     {
@@ -39,7 +39,7 @@
         Draw();
     }
 
-    void UpdateTitleFps(float dt)
+    private void UpdateTitleFps(float dt)
     {
         GamePlatform p = m.GetPlatform();
         fpscount++;
@@ -101,14 +101,14 @@
         }
     }
 
-    bool drawfpstext;
-    bool drawfpsgraph;
+    private bool drawfpstext;
+    private bool drawfpsgraph;
 
     public override bool OnClientCommand(Game game, ClientCommandArgs args)
     {
         if (args.command == "fps")
         {
-            IntRef argumentsLength = new IntRef();
+            IntRef argumentsLength = new();
             string[] arguments = m.GetPlatform().StringSplit(args.arguments, " ", argumentsLength);
             if (m.GetPlatform().StringTrim(args.arguments) == "")
             {
@@ -134,7 +134,7 @@
         return false;
     }
 
-    void UpdateGraph(float dt)
+    private void UpdateGraph(float dt)
     {
         for (int i = 0; i < MaxCount - 1; i++)
         {
@@ -143,7 +143,7 @@
         dtHistory[MaxCount - 1] = dt;
     }
 
-    void Draw()
+    private void Draw()
     {
         if (drawfpsgraph || drawfpstext)
         {
@@ -160,8 +160,8 @@
         }
     }
 
-    Draw2dData[] todraw;
-    void DrawGraph()
+    private readonly Draw2dData[] todraw;
+    private void DrawGraph()
     {
         float maxtime = 0;
         for (int i = 0; i < MaxCount; i++)
@@ -204,5 +204,5 @@
         m.Draw2dText("150", posx, posy - historyheight * (one * 60 / 150), 6);
     }
 
-    const int ChatFontSize = 11;
+    private const int ChatFontSize = 11;
 }

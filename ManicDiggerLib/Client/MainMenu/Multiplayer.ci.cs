@@ -4,45 +4,61 @@
     {
         WidgetCount = 64 + serverButtonsCount;
         widgets = new MenuWidget[WidgetCount];
-        back = new MenuWidget();
-        back.text = "Back";
-        back.type = WidgetType.Button;
-        back.nextWidget = 1;
-        connect = new MenuWidget();
-        connect.text = "Connect";
-        connect.type = WidgetType.Button;
-        connect.nextWidget = 3;
-        connectToIp = new MenuWidget();
-        connectToIp.text = "Connect to IP";
-        connectToIp.type = WidgetType.Button;
-        connectToIp.nextWidget = 2;
-        refresh = new MenuWidget();
-        refresh.text = "Refresh";
-        refresh.type = WidgetType.Button;
-        refresh.nextWidget = 0;
+        back = new MenuWidget
+        {
+            text = "Back",
+            type = WidgetType.Button,
+            nextWidget = 1
+        };
+        connect = new MenuWidget
+        {
+            text = "Connect",
+            type = WidgetType.Button,
+            nextWidget = 3
+        };
+        connectToIp = new MenuWidget
+        {
+            text = "Connect to IP",
+            type = WidgetType.Button,
+            nextWidget = 2
+        };
+        refresh = new MenuWidget
+        {
+            text = "Refresh",
+            type = WidgetType.Button,
+            nextWidget = 0
+        };
 
         page = 0;
-        pageUp = new MenuWidget();
-        pageUp.text = "";
-        pageUp.type = WidgetType.Button;
-        pageUp.buttonStyle = ButtonStyle.Text;
-        pageUp.visible = false;
-        pageDown = new MenuWidget();
-        pageDown.text = "";
-        pageDown.type = WidgetType.Button;
-        pageDown.buttonStyle = ButtonStyle.Text;
-        pageDown.visible = false;
+        pageUp = new MenuWidget
+        {
+            text = "",
+            type = WidgetType.Button,
+            buttonStyle = ButtonStyle.Text,
+            visible = false
+        };
+        pageDown = new MenuWidget
+        {
+            text = "",
+            type = WidgetType.Button,
+            buttonStyle = ButtonStyle.Text,
+            visible = false
+        };
 
-        loggedInName = new MenuWidget();
-        loggedInName.text = "";
-        loggedInName.type = WidgetType.Button;
-        loggedInName.buttonStyle = ButtonStyle.Text;
+        loggedInName = new MenuWidget
+        {
+            text = "",
+            type = WidgetType.Button,
+            buttonStyle = ButtonStyle.Text
+        };
 
-        logout = new MenuWidget();
-        logout.text = "";
-        logout.type = WidgetType.Button;
-        //logout.image = "serverlist_entry_background.png";
-        logout.buttonStyle = ButtonStyle.Button;
+        logout = new MenuWidget
+        {
+            text = "",
+            type = WidgetType.Button,
+            //logout.image = "serverlist_entry_background.png";
+            buttonStyle = ButtonStyle.Button
+        };
 
         title = "Multiplayer";
 
@@ -63,27 +79,29 @@
         serverButtons = new MenuWidget[serverButtonsCount];
         for (int i = 0; i < serverButtonsCount; i++)
         {
-            MenuWidget b = new MenuWidget();
-            b = new MenuWidget();
-            b.text = "Invalid";
-            b.type = WidgetType.Button;
-            b.visible = false;
-            b.image = "serverlist_entry_noimage.png";
+            MenuWidget b = new();
+            b = new MenuWidget
+            {
+                text = "Invalid",
+                type = WidgetType.Button,
+                visible = false,
+                image = "serverlist_entry_noimage.png"
+            };
             serverButtons[i] = b;
             widgets[8 + i] = b;
         }
         loading = true;
     }
 
-    bool loaded;
-    HttpResponseCi serverListAddress;
-    HttpResponseCi serverListCsv;
-    ServerOnList[] serversOnList;
-    const int serversOnListCount = 1024;
-    int page;
-    int serversPerPage;
-    string title;
-    bool loading;
+    private bool loaded;
+    private readonly HttpResponseCi serverListAddress;
+    private readonly HttpResponseCi serverListCsv;
+    private readonly ServerOnList[] serversOnList;
+    private const int serversOnListCount = 1024;
+    private int page;
+    private int serversPerPage;
+    private string title;
+    private bool loading;
 
     public override void LoadTranslations()
     {
@@ -115,27 +133,29 @@
                 serversOnList[i] = null;
                 thumbResponses[i] = null;
             }
-            IntRef serversCount = new IntRef();
+            IntRef serversCount = new();
             string[] servers = menu.p.StringSplit(serverListCsv.GetString(menu.p), "\n", serversCount);
             for (int i = 0; i < serversCount.value; i++)
             {
-                IntRef ssCount = new IntRef();
+                IntRef ssCount = new();
                 string[] ss = menu.p.StringSplit(servers[i], "\t", ssCount);
                 if (ssCount.value < 10)
                 {
                     continue;
                 }
-                ServerOnList s = new ServerOnList();
-                s.hash = ss[0];
-                s.name = menu.p.DecodeHTMLEntities(ss[1]);
-                s.motd = menu.p.DecodeHTMLEntities(ss[2]);
-                s.port = menu.p.IntParse(ss[3]);
-                s.ip = ss[4];
-                s.version = ss[5];
-                s.users = menu.p.IntParse(ss[6]);
-                s.max = menu.p.IntParse(ss[7]);
-                s.gamemode = ss[8];
-                s.players = ss[9];
+                ServerOnList s = new()
+                {
+                    hash = ss[0],
+                    name = menu.p.DecodeHTMLEntities(ss[1]),
+                    motd = menu.p.DecodeHTMLEntities(ss[2]),
+                    port = menu.p.IntParse(ss[3]),
+                    ip = ss[4],
+                    version = ss[5],
+                    users = menu.p.IntParse(ss[6]),
+                    max = menu.p.IntParse(ss[7]),
+                    gamemode = ss[8],
+                    players = ss[9]
+                };
                 serversOnList[i] = s;
             }
         }
@@ -272,7 +292,7 @@
         DrawWidgets();
     }
 
-    ThumbnailResponseCi[] thumbResponses;
+    private readonly ThumbnailResponseCi[] thumbResponses;
     public void UpdateThumbnails()
     {
         for (int i = 0; i < serversOnListCount; i++)
@@ -378,16 +398,16 @@
             pageUp.visible = true;
         }
     }
-    MenuWidget back;
-    MenuWidget connect;
-    MenuWidget connectToIp;
-    MenuWidget refresh;
-    MenuWidget pageUp;
-    MenuWidget pageDown;
-    MenuWidget loggedInName;
-    MenuWidget logout;
-    MenuWidget[] serverButtons;
-    const int serverButtonsCount = 1024;
+    private readonly MenuWidget back;
+    private readonly MenuWidget connect;
+    private readonly MenuWidget connectToIp;
+    private readonly MenuWidget refresh;
+    private readonly MenuWidget pageUp;
+    private readonly MenuWidget pageDown;
+    private readonly MenuWidget loggedInName;
+    private readonly MenuWidget logout;
+    private readonly MenuWidget[] serverButtons;
+    private const int serverButtonsCount = 1024;
 
     public override void OnBackPressed()
     {
@@ -407,7 +427,7 @@
             PageDown_();
         }
     }
-    string selectedServerHash;
+    private string selectedServerHash;
     public override void OnButton(MenuWidget w)
     {
         for (int i = 0; i < serverButtonsCount; i++)

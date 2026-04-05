@@ -1,7 +1,5 @@
-﻿using System;
-using WebSocketSharp;
+﻿using WebSocketSharp;
 using WebSocketSharp.Server;
-using System.Collections.Generic;
 
 public class WebSocketNetServer : NetServer
 {
@@ -11,7 +9,7 @@ public class WebSocketNetServer : NetServer
         singleton = this;
     }
 
-    WebSocketServer server;
+    private WebSocketServer server;
 
     public static WebSocketNetServer singleton;
 
@@ -42,7 +40,7 @@ public class WebSocketNetServer : NetServer
 
     internal QueueNetIncomingMessage incoming;
 
-    int Port;
+    private int Port;
 
     public override void SetPort(int port)
     {
@@ -52,7 +50,7 @@ public class WebSocketNetServer : NetServer
 
 public class WebSocketConnection : NetConnection
 {
-    internal WebSocketGameServer server;
+    internal WebSocketGameServer? server;
 
     public override IPEndPointCi RemoteEndPoint()
     {
@@ -93,38 +91,46 @@ public class WebSocketGameServer : WebSocketBehavior
     public WebSocketGameServer()
     {
         IgnoreExtensions = true;
-        connection = new WebSocketConnection();
-        connection.server = this;
+        connection = new WebSocketConnection
+        {
+            server = this
+        };
     }
-    WebSocketConnection connection;
+    private readonly WebSocketConnection connection;
 
     protected override void OnOpen()
     {
-        NetIncomingMessage m = new NetIncomingMessage();
-        m.Type = NetworkMessageType.Connect;
-        m.SenderConnection = connection;
+        NetIncomingMessage m = new()
+        {
+            Type = NetworkMessageType.Connect,
+            SenderConnection = connection
+        };
         Enqueue(m);
     }
 
     protected override void OnMessage(WebSocketSharp.MessageEventArgs e)
     {
-        NetIncomingMessage m = new NetIncomingMessage();
-        m.message = e.RawData;
-        m.messageLength = e.RawData.Length;
-        m.Type = NetworkMessageType.Data;
-        m.SenderConnection = connection;
+        NetIncomingMessage m = new()
+        {
+            message = e.RawData,
+            messageLength = e.RawData.Length,
+            Type = NetworkMessageType.Data,
+            SenderConnection = connection
+        };
         Enqueue(m);
     }
 
     protected override void OnClose(CloseEventArgs e)
     {
-        NetIncomingMessage m = new NetIncomingMessage();
-        m.Type = NetworkMessageType.Disconnect;
-        m.SenderConnection = connection;
+        NetIncomingMessage m = new()
+        {
+            Type = NetworkMessageType.Disconnect,
+            SenderConnection = connection
+        };
         Enqueue(m);
     }
 
-    private void Enqueue(NetIncomingMessage m)
+    private static void Enqueue(NetIncomingMessage m)
     {
         lock (WebSocketNetServer.singleton.incoming)
         {
@@ -132,9 +138,9 @@ public class WebSocketGameServer : WebSocketBehavior
         }
     }
 
-    Queue<byte[]> toSend = new Queue<byte[]>();
-    bool isSending;
-    object sendLock = new object();
+    private readonly Queue<byte[]> toSend = new();
+    private bool isSending;
+    private readonly object sendLock = new();
     public void Send1(byte[] data)
     {
         lock (sendLock)
@@ -146,19 +152,19 @@ public class WebSocketGameServer : WebSocketBehavior
             else
             {
                 isSending = true;
-                SendAsync(data, f);
+                SendAsync(data, F);
             }
         }
     }
 
-    void f(bool completed)
+    private void F(bool completed)
     {
         lock (sendLock)
         {
             if (toSend.Count > 0)
             {
                 byte[] data = toSend.Dequeue();
-                SendAsync(data, f);
+                SendAsync(data, F);
             }
             else
             {

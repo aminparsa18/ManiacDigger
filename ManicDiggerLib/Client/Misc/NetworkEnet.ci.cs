@@ -13,9 +13,9 @@
         platform.EnetHostInitializeServer(host, Port, 256);
     }
 
-    EnetHost host;
+    private EnetHost host;
 
-    EnetEventRef event_;
+    private readonly EnetEventRef event_;
 
     public override NetIncomingMessage ReadMessage()
     {
@@ -34,12 +34,16 @@
                         {
                             EnetPeer peer = event_.e.Peer();
                             peer.SetUserData(clientid++);
-                            EnetNetConnection senderConnectionConnect = new EnetNetConnection();
-                            senderConnectionConnect.platform = platform;
-                            senderConnectionConnect.peer = event_.e.Peer();
-                            NetIncomingMessage message = new NetIncomingMessage();
-                            message.SenderConnection = senderConnectionConnect;
-                            message.Type = NetworkMessageType.Connect;
+                            EnetNetConnection senderConnectionConnect = new()
+                            {
+                                platform = platform,
+                                peer = event_.e.Peer()
+                            };
+                            NetIncomingMessage message = new()
+                            {
+                                SenderConnection = senderConnectionConnect,
+                                Type = NetworkMessageType.Connect
+                            };
                             messages.Enqueue(message);
                         }
                         break;
@@ -47,24 +51,32 @@
                         {
                             byte[] data = event_.e.Packet().GetBytes();
                             event_.e.Packet().Dispose();
-                            EnetNetConnection senderConnectionReceive = new EnetNetConnection();
-                            senderConnectionReceive.platform = platform;
-                            senderConnectionReceive.peer = event_.e.Peer();
-                            NetIncomingMessage message = new NetIncomingMessage();
-                            message.SenderConnection = senderConnectionReceive;
-                            message.message = data;
-                            message.Type = NetworkMessageType.Data;
+                            EnetNetConnection senderConnectionReceive = new()
+                            {
+                                platform = platform,
+                                peer = event_.e.Peer()
+                            };
+                            NetIncomingMessage message = new()
+                            {
+                                SenderConnection = senderConnectionReceive,
+                                message = data,
+                                Type = NetworkMessageType.Data
+                            };
                             messages.Enqueue(message);
                         }
                         break;
                     case EnetEventType.Disconnect:
                         {
-                            EnetNetConnection senderConnectionDisconnect = new EnetNetConnection();
-                            senderConnectionDisconnect.platform = platform;
-                            senderConnectionDisconnect.peer = event_.e.Peer();
-                            NetIncomingMessage message = new NetIncomingMessage();
-                            message.SenderConnection = senderConnectionDisconnect;
-                            message.Type = NetworkMessageType.Disconnect;
+                            EnetNetConnection senderConnectionDisconnect = new()
+                            {
+                                platform = platform,
+                                peer = event_.e.Peer()
+                            };
+                            NetIncomingMessage message = new()
+                            {
+                                SenderConnection = senderConnectionDisconnect,
+                                Type = NetworkMessageType.Disconnect
+                            };
                             messages.Enqueue(message);
                         }
                         break;
@@ -78,10 +90,10 @@
         }
         return null;
     }
-    int clientid;
-    QueueNetIncomingMessage messages;
-    
-    int Port;
+    private int clientid;
+    private readonly QueueNetIncomingMessage messages;
+
+    private int Port;
 
     public override void SetPort(int port)
     {
@@ -124,10 +136,10 @@ public class EnetNetClient : NetClient
         tosend = new QueueINetOutgoingMessage();
         messages = new QueueNetIncomingMessage();
     }
-    EnetHost host;
-    EnetPeer peer;
-    bool connected;
-    bool connected2;
+    private EnetHost host;
+    private EnetPeer peer;
+    private bool connected;
+    private bool connected2;
 
     public override NetConnection Connect(string ip, int port)
     {
@@ -155,7 +167,7 @@ public class EnetNetClient : NetClient
             }
         }
 
-        EnetEventRef event_ = new EnetEventRef();
+        EnetEventRef event_ = new();
         if (platform.EnetHostService(host, 0, event_))
         {
             do
@@ -169,9 +181,11 @@ public class EnetNetClient : NetClient
                         byte[] data = event_.e.Packet().GetBytes();
                         int dataLength = event_.e.Packet().GetBytesCount();
                         event_.e.Packet().Dispose();
-                        NetIncomingMessage msg = new NetIncomingMessage();
-                        msg.message = data;
-                        msg.messageLength = dataLength;
+                        NetIncomingMessage msg = new()
+                        {
+                            message = data,
+                            messageLength = dataLength
+                        };
                         messages.Enqueue(msg);
                         break;
                 }
@@ -185,15 +199,15 @@ public class EnetNetClient : NetClient
         return null;
     }
 
-    void DoSendPacket(INetOutgoingMessage msg)
+    private void DoSendPacket(INetOutgoingMessage msg)
     {
         INetOutgoingMessage msg1 = msg;
         platform.EnetPeerSend(peer, 0, msg1.message, msg1.messageLength, EnetPacketFlags.Reliable);
     }
 
-    QueueNetIncomingMessage messages;
+    private QueueNetIncomingMessage messages;
 
-    QueueINetOutgoingMessage tosend;
+    private QueueINetOutgoingMessage tosend;
     public override void SendMessage(INetOutgoingMessage message, MyNetDeliveryMethod method)
     {
         INetOutgoingMessage msg = message;

@@ -56,7 +56,7 @@
         AllowedFontsCount = 1;
         AllowedFonts = new string[AllowedFontsCount];
         AllowedFonts[0] = "Verdana";
-        fov = Game.GetPi() / 3;
+        fov = GetPi() / 3;
         cameratype = CameraType.Fpp;
         ENABLE_TPP_VIEW = false;
         basemovespeed = 5;
@@ -126,8 +126,10 @@
         soundnow = new BoolRef();
         camera = Mat4.Create();
         packetHandlers = new ClientPacketHandler[256];
-        player = new Entity();
-        player.position = new EntityPosition_();
+        player = new Entity
+        {
+            position = new EntityPosition_()
+        };
         currentlyAttackedEntity = -1;
         ChatLinesMax = 1;
         ChatLines = new Chatline[ChatLinesMax];
@@ -151,13 +153,15 @@
 
     public void Start()
     {
-        textColorRenderer = new TextColorRenderer();
-        textColorRenderer.platform = platform;
+        textColorRenderer = new TextColorRenderer
+        {
+            platform = platform
+        };
         language.platform = platform;
         language.LoadTranslations();
-        GameData gamedata = new GameData();
+        GameData gamedata = new();
         gamedata.Start();
-        Config3d config3d = new Config3d();
+        Config3d config3d = new();
         if (platform.IsFastSystem())
         {
             config3d.viewdistance = 128;
@@ -167,47 +171,59 @@
             config3d.viewdistance = 32;
         }
 
-        ITerrainTextures terrainTextures = new ITerrainTextures();
-        terrainTextures.game = this;
+        ITerrainTextures terrainTextures = new()
+        {
+            game = this
+        };
         d_TextureAtlasConverter = new TextureAtlasConverter();
         d_TerrainTextures = terrainTextures;
 
-        FrustumCulling frustumculling = new FrustumCulling();
-        frustumculling.d_GetCameraMatrix = this.CameraMatrix;
-        frustumculling.platform = platform;
+        FrustumCulling frustumculling = new()
+        {
+            d_GetCameraMatrix = this.CameraMatrix,
+            platform = platform
+        };
         d_FrustumCulling = frustumculling;
 
-        TerrainChunkTesselatorCi terrainchunktesselator = new TerrainChunkTesselatorCi();
+        TerrainChunkTesselatorCi terrainchunktesselator = new();
         d_TerrainChunkTesselator = terrainchunktesselator;
-        d_Batcher = new MeshBatcher();
-        d_Batcher.d_FrustumCulling = frustumculling;
-        d_Batcher.game = this;
+        d_Batcher = new MeshBatcher
+        {
+            d_FrustumCulling = frustumculling,
+            game = this
+        };
         d_FrustumCulling = frustumculling;
         d_Data = gamedata;
         d_DataMonsters = new GameDataMonsters();
         d_Config3d = config3d;
 
-        ModDrawParticleEffectBlockBreak particle = new ModDrawParticleEffectBlockBreak();
+        ModDrawParticleEffectBlockBreak particle = new();
         this.particleEffectBlockBreak = particle;
         this.d_Data = gamedata;
         d_TerrainTextures = terrainTextures;
 
         map.Reset(256, 256, 128);
 
-        SunMoonRenderer sunmoonrenderer = new SunMoonRenderer();
+        SunMoonRenderer sunmoonrenderer = new();
         d_SunMoonRenderer = sunmoonrenderer;
         d_SunMoonRenderer = sunmoonrenderer;
-        d_Heightmap = new InfiniteMapChunked2d();
-        d_Heightmap.d_Map = this;
+        d_Heightmap = new InfiniteMapChunked2d
+        {
+            d_Map = this
+        };
         d_Heightmap.Restart();
         d_TerrainChunkTesselator = terrainchunktesselator;
         terrainchunktesselator.game = this;
 
-        Packet_Inventory inventory = new Packet_Inventory();
-        inventory.RightHand = new Packet_Item[10];
-        GameDataItemsClient dataItems = new GameDataItemsClient();
-        dataItems.game = this;
-        InventoryUtilClient inventoryUtil = new InventoryUtilClient();
+        Packet_Inventory inventory = new()
+        {
+            RightHand = new Packet_Item[10]
+        };
+        GameDataItemsClient dataItems = new()
+        {
+            game = this
+        };
+        InventoryUtilClient inventoryUtil = new();
         d_Inventory = inventory;
         d_InventoryUtil = inventoryUtil;
         inventoryUtil.d_Inventory = inventory;
@@ -279,8 +295,10 @@
         AddMod(new ModScreenshot());
         AddMod(new ModAudio());
 
-        s = new BlockOctreeSearcher();
-        s.platform = platform;
+        s = new BlockOctreeSearcher
+        {
+            platform = platform
+        };
 
         //Prevent loding screen from immediately displaying lag symbol
         LastReceivedMilliseconds = platform.TimeMillisecondsFromStart();
@@ -319,10 +337,10 @@
     {
         taskScheduler.Update(this, deltaTime);
     }
-    TaskScheduler taskScheduler;
+    private readonly TaskScheduler taskScheduler;
 
     internal float[] camera;
-    float accumulator;
+    private float accumulator;
     internal void MainThreadOnRenderFrame(float deltaTime)
     {
         UpdateResize();
@@ -333,7 +351,7 @@
         }
         else
         {
-            platform.GlClearColorRgbaf(one * Game.clearcolorR / 255, one * Game.clearcolorG / 255, one * Game.clearcolorB / 255, one * Game.clearcolorA / 255);
+            platform.GlClearColorRgbaf(one * clearcolorR / 255, one * clearcolorG / 255, one * clearcolorB / 255, one * clearcolorA / 255);
         }
 
         mouseSmoothingAccum += deltaTime;
@@ -371,7 +389,7 @@
             platform.ThreadSpinWait(20 * 1000 * 1000);
         }
 
-        SetAmbientLight(terraincolor());
+        SetAmbientLight(Terraincolor());
         platform.GlClearColorBufferAndDepthBuffer();
         platform.BindTexture2d(d_TerrainTextures.terrainTexture());
 
@@ -401,7 +419,7 @@
 
     internal float one;
 
-    const int MaxBlockTypes = 1024;
+    private const int MaxBlockTypes = 1024;
 
     internal GamePlatform platform;
     internal Packet_BlockType[] blocktypes;
@@ -415,12 +433,12 @@
     internal Entity player;
     internal float constWallDistance;
 
-    public bool IsRail(Packet_BlockType block)
+    public static bool IsRail(Packet_BlockType block)
     {
         return block.Rail > 0;	//Does not include Rail0, but this can't be placed.
     }
 
-    public bool IsEmptyForPhysics(Packet_BlockType block)
+    public static bool IsEmptyForPhysics(Packet_BlockType block)
     {
         return (block.DrawType == Packet_DrawTypeEnum.Ladder)
             || (block.WalkableType != Packet_WalkableTypeEnum.Solid && block.WalkableType != Packet_WalkableTypeEnum.Fluid);
@@ -489,7 +507,7 @@
 
     internal int terrainTexturesPerAtlas;
 
-    internal int texturesPacked() { return GlobalVar.MAX_BLOCKTYPES_SQRT; } //16x16
+    internal static int texturesPacked() { return GlobalVar.MAX_BLOCKTYPES_SQRT; } //16x16
     internal int terrainTexture;
     internal int[] terrainTextures1d;
     internal ITerrainTextures d_TerrainTextures;
@@ -518,8 +536,8 @@
         }
     }
 
-    Model quadModel;
-    void Draw2dTextureSimple(int textureid, float x1, float y1, float width, float height, bool enabledepthtest)
+    private Model quadModel;
+    private void Draw2dTextureSimple(int textureid, float x1, float y1, float width, float height, bool enabledepthtest)
     {
         RectFRef rect = RectFRef.Create(0, 0, 1, 1);
         platform.GlDisableCullFace();
@@ -551,7 +569,7 @@
         platform.GlEnableTexture2d();
     }
 
-    void Draw2dTextureInAtlas(int textureid, float x1, float y1, float width, float height, IntRef inAtlasId, int atlastextures, int color, bool enabledepthtest)
+    private void Draw2dTextureInAtlas(int textureid, float x1, float y1, float width, float height, IntRef inAtlasId, int atlastextures, int color, bool enabledepthtest)
     {
         RectFRef rect = RectFRef.Create(0, 0, 1, 1);
         if (inAtlasId != null)
@@ -567,7 +585,7 @@
             platform.GlDisableDepthTest();
         }
         ModelData data = QuadModelData.GetQuadModelData2(rect.x, rect.y, rect.w, rect.h,
-            x1, y1, width, height, Game.IntToByte(Game.ColorR(color)), Game.IntToByte(Game.ColorG(color)), Game.IntToByte(Game.ColorB(color)), Game.IntToByte(Game.ColorA(color)));
+            x1, y1, width, height, IntToByte(ColorR(color)), IntToByte(ColorG(color)), IntToByte(ColorB(color)), IntToByte(ColorA(color)));
         DrawModelData(data);
         if (!enabledepthtest)
         {
@@ -589,7 +607,7 @@
             platform.GlDisableDepthTest();
         }
         ModelData data = QuadModelData.GetQuadModelData2(rect.x, rect.y, rect.w, rect.h,
-            dstx, dsty, dstwidth, dstheight, Game.IntToByte(Game.ColorR(color)), Game.IntToByte(Game.ColorG(color)), Game.IntToByte(Game.ColorB(color)), Game.IntToByte(Game.ColorA(color)));
+            dstx, dsty, dstwidth, dstheight, IntToByte(ColorR(color)), IntToByte(ColorG(color)), IntToByte(ColorB(color)), IntToByte(ColorA(color)));
         DrawModelData(data);
         if (!enabledepthtest)
         {
@@ -599,9 +617,9 @@
         platform.GlEnableTexture2d();
     }
 
-    public ModelData CombineModelData(ModelData[] modelDatas, int count)
+    public static ModelData CombineModelData(ModelData[] modelDatas, int count)
     {
-        ModelData ret = new ModelData();
+        ModelData ret = new();
         int totalIndices = 0;
         int totalVertices = 0;
         for (int i = 0; i < count; i++)
@@ -664,7 +682,7 @@
 
             ModelData modelData =
                 QuadModelData.GetQuadModelData2(rect.x, rect.y, rect.w, rect.h,
-                x1, y1, width, height, Game.IntToByte(ColorR(color)), Game.IntToByte(ColorG(color)), Game.IntToByte(ColorB(color)), Game.IntToByte(ColorA(color)));
+                x1, y1, width, height, IntToByte(ColorR(color)), IntToByte(ColorG(color)), IntToByte(ColorB(color)), IntToByte(ColorA(color)));
             modelDatas[modelDatasCount++] = modelData;
         }
 
@@ -752,7 +770,7 @@
         }
     }
 
-    float[] GLScaleTempVec3;
+    private readonly float[] GLScaleTempVec3;
     public void GLScale(float x, float y, float z)
     {
         float[] m;
@@ -768,11 +786,11 @@
         Mat4.Scale(m, m, GLScaleTempVec3);
     }
 
-    float[] GLRotateTempVec3;
+    private readonly float[] GLRotateTempVec3;
     public void GLRotate(float angle, float x, float y, float z)
     {
         angle /= 360;
-        angle *= 2 * Game.GetPi();
+        angle *= 2 * GetPi();
         float[] m;
         if (currentMatrixModeProjection)
         {
@@ -786,7 +804,7 @@
         Mat4.Rotate(m, m, angle, GLRotateTempVec3);
     }
 
-    float[] GLTranslateTempVec3;
+    private readonly float[] GLTranslateTempVec3;
     public void GLTranslate(float x, float y, float z)
     {
         float[] m;
@@ -814,7 +832,7 @@
         }
     }
 
-    float[] identityMatrix;
+    private readonly float[] identityMatrix;
     public void GLLoadIdentity()
     {
         if (currentMatrixModeProjection)
@@ -891,7 +909,7 @@
         }
         return this.whitetexture;
     }
-    int whitetexture;
+    private int whitetexture;
 
     public float getblockheight(int x, int y, int z)
     {
@@ -936,7 +954,7 @@
         }
     }
 
-    CachedTexture GetCachedTextTexture(Text_ t)
+    private CachedTexture GetCachedTextTexture(Text_ t)
     {
         for (int i = 0; i < cachedTextTexturesMax; i++)
         {
@@ -964,13 +982,15 @@
         {
             return;
         }
-        if (color == null) { color = IntRef.Create(Game.ColorFromArgb(255, 255, 255, 255)); }
-        Text_ t = new Text_();
-        t.text = text;
-        t.color = color.value;
-        t.fontsize = font.size;
-        t.fontfamily = font.family;
-        t.fontstyle = font.style;
+        if (color == null) { color = IntRef.Create(ColorFromArgb(255, 255, 255, 255)); }
+        Text_ t = new()
+        {
+            text = text,
+            color = color.value,
+            fontsize = font.size,
+            fontfamily = font.family,
+            fontstyle = font.style
+        };
         CachedTexture ct;
 
         if (GetCachedTextTexture(t) == null)
@@ -984,9 +1004,11 @@
             {
                 if (cachedTextTextures[i] == null)
                 {
-                    CachedTextTexture ct1 = new CachedTextTexture();
-                    ct1.text = t;
-                    ct1.texture = ct;
+                    CachedTextTexture ct1 = new()
+                    {
+                        text = t,
+                        texture = ct
+                    };
                     cachedTextTextures[i] = ct1;
                     break;
                 }
@@ -996,14 +1018,14 @@
         ct = GetCachedTextTexture(t);
         ct.lastuseMilliseconds = platform.TimeMillisecondsFromStart();
         platform.GLDisableAlphaTest();
-        Draw2dTexture(ct.textureId, x, y, ct.sizeX, ct.sizeY, null, 0, Game.ColorFromArgb(255, 255, 255, 255), enabledepthtest);
+        Draw2dTexture(ct.textureId, x, y, ct.sizeX, ct.sizeY, null, 0, ColorFromArgb(255, 255, 255, 255), enabledepthtest);
         platform.GLEnableAlphaTest();
         DeleteUnusedCachedTextTextures();
     }
 
-    CachedTexture MakeTextTexture(Text_ t)
+    private CachedTexture MakeTextTexture(Text_ t)
     {
-        CachedTexture ct = new CachedTexture();
+        CachedTexture ct = new();
         BitmapCi bmp = textColorRenderer.CreateTextTexture(t);
         ct.sizeX = platform.BitmapGetWidth(bmp);
         ct.sizeY = platform.BitmapGetHeight(bmp);
@@ -1024,9 +1046,9 @@
         }
     }
 
-    public byte[] Serialize(Packet_Client packet, IntRef retLength)
+    public static byte[] Serialize(Packet_Client packet, IntRef retLength)
     {
-        CitoMemoryStream ms = new CitoMemoryStream();
+        CitoMemoryStream ms = new();
         Packet_ClientSerializer.Serialize(ms, packet);
         byte[] data = ms.ToArray();
         retLength.value = ms.Length();
@@ -1037,7 +1059,7 @@
     {
         //try
         //{
-        INetOutgoingMessage msg = new INetOutgoingMessage();
+        INetOutgoingMessage msg = new();
         msg.Write(packet, packetLength);
         main.SendMessage(msg, MyNetDeliveryMethod.ReliableOrdered);
         //}
@@ -1049,7 +1071,7 @@
 
     internal NetClient main;
 
-    IntRef packetLen;
+    private readonly IntRef packetLen;
     public void SendPacketClient(Packet_Client packetClient)
     {
         byte[] packet = Serialize(packetClient, packetLen);
@@ -1117,7 +1139,7 @@
         if (game.platform.StringContains(s, "http://"))
         {
             containsLink = true;
-            IntRef r = new IntRef();
+            IntRef r = new();
             string[] temp = game.platform.StringSplit(s, " ", r);
             for (int i = 0; i < r.value; i++)
             {
@@ -1132,7 +1154,7 @@
         if (game.platform.StringContains(s, "https://"))
         {
             containsLink = true;
-            IntRef r = new IntRef();
+            IntRef r = new();
             string[] temp = game.platform.StringSplit(s, " ", r);
             for (int i = 0; i < r.value; i++)
             {
@@ -1169,7 +1191,7 @@
         }
     }
 
-    void ChatLinesAdd(Chatline chatline)
+    private void ChatLinesAdd(Chatline chatline)
     {
         if (ChatLinesCount >= ChatLinesMax)
         {
@@ -1211,7 +1233,7 @@
         }
         return !platform.IsMousePointerLocked();
     }
-    bool mousePointerLockShouldBe;
+    private bool mousePointerLockShouldBe;
     public void SetFreeMouse(bool value)
     {
         mousePointerLockShouldBe = !value;
@@ -1239,12 +1261,12 @@
     internal string invalidVersionDrawMessage;
     internal Packet_Server invalidVersionPacketIdentification;
 
-    DictionaryStringInt1024 textures;
+    private readonly DictionaryStringInt1024 textures;
     internal int GetTexture(string p)
     {
         if (!textures.Contains(p))
         {
-            BoolRef found = new BoolRef();
+            BoolRef found = new();
             BitmapCi bmp = platform.BitmapCreateFromPng(GetFile(p), GetFileLength(p));
             int texture = platform.LoadTextureFromBitmap(bmp);
             textures.Set(p, texture);
@@ -1257,7 +1279,7 @@
     {
         if (!textures.Contains(name))
         {
-            BoolRef found = new BoolRef();
+            BoolRef found = new();
             textures.Set(name, platform.LoadTextureFromBitmap(bmp));
         }
         return textures.Get(name);
@@ -1311,7 +1333,7 @@
 
     internal GetCameraMatrix CameraMatrix;
 
-    float[] Set3dProjectionTempMat4;
+    private readonly float[] Set3dProjectionTempMat4;
     public void Set3dProjection(float zfar, float fov)
     {
         float aspect_ratio = one * Width() / Height();
@@ -1337,8 +1359,8 @@
     internal int[] TotalAmmo;
     internal int[] LoadedAmmo;
 
-    string[] AllowedFonts;
-    int AllowedFontsCount;
+    private readonly string[] AllowedFonts;
+    private readonly int AllowedFontsCount;
 
     internal string ValidFont(string family)
     {
@@ -1440,20 +1462,24 @@
     internal float basemovespeed;
     internal float movespeed;
 
-    internal Packet_InventoryPosition InventoryPositionMaterialSelector(int materialId)
+    internal static Packet_InventoryPosition InventoryPositionMaterialSelector(int materialId)
     {
-        Packet_InventoryPosition pos = new Packet_InventoryPosition();
-        pos.Type = Packet_InventoryPositionTypeEnum.MaterialSelector;
-        pos.MaterialId = materialId;
+        Packet_InventoryPosition pos = new()
+        {
+            Type = Packet_InventoryPositionTypeEnum.MaterialSelector,
+            MaterialId = materialId
+        };
         return pos;
     }
 
-    internal Packet_InventoryPosition InventoryPositionMainArea(int x, int y)
+    internal static Packet_InventoryPosition InventoryPositionMainArea(int x, int y)
     {
-        Packet_InventoryPosition pos = new Packet_InventoryPosition();
-        pos.Type = Packet_InventoryPositionTypeEnum.MainArea;
-        pos.AreaX = x;
-        pos.AreaY = y;
+        Packet_InventoryPosition pos = new()
+        {
+            Type = Packet_InventoryPositionTypeEnum.MainArea,
+            AreaX = x,
+            AreaY = y
+        };
         return pos;
     }
 
@@ -1599,11 +1625,13 @@
             return;
         }
 
-        Sound_ s = new Sound_();
-        s.name = file_;
-        s.x = x;
-        s.y = y;
-        s.z = z;
+        Sound_ s = new()
+        {
+            name = file_,
+            x = x,
+            y = y,
+            z = z
+        };
         audio.Add(s);
     }
 
@@ -1641,9 +1669,11 @@
             }
             if (!alreadyPlaying)
             {
-                s = new Sound_();
-                s.name = file_;
-                s.loop = true;
+                s = new Sound_
+                {
+                    name = file_,
+                    loop = true
+                };
                 audio.Add(s);
             }
             s.x = EyesPosX();
@@ -1761,7 +1791,7 @@
         for (int i = map.MapSizeZ - 1; i >= 0; i--)
         {
             height = i;
-            if (!Game.IsTransparentForLight(blocktypes[map.GetBlock(x, y, i)]))
+            if (!IsTransparentForLight(blocktypes[map.GetBlock(x, y, i)]))
             {
                 break;
             }
@@ -1873,17 +1903,17 @@
     internal GameDataMonsters d_DataMonsters;
     internal int ReceivedMapLength;
 
-    void InvalidPlayerWarning(int playerid)
+    private void InvalidPlayerWarning(int playerid)
     {
         platform.ConsoleWriteLine(platform.StringFormat("Position update of nonexistent player {0}.", platform.IntToString(playerid)));
     }
 
-    internal bool EnablePlayerUpdatePosition(int kKey)
+    internal static bool EnablePlayerUpdatePosition(int kKey)
     {
         return true;
     }
 
-    internal bool EnablePlayerUpdatePositionContainsKey(int kKey)
+    internal static bool EnablePlayerUpdatePositionContainsKey(int kKey)
     {
         return false;
     }
@@ -1937,14 +1967,14 @@
 
     public byte HeadingByte(float orientationX, float orientationY, float orientationZ)
     {
-        return Game.IntToByte(platform.FloatToInt((((orientationY) % (2 * Game.GetPi())) / (2 * Game.GetPi())) * 256));
+        return IntToByte(platform.FloatToInt((((orientationY) % (2 * GetPi())) / (2 * GetPi())) * 256));
     }
 
     public byte PitchByte(float orientationX, float orientationY, float orientationZ)
     {
-        float xx = (orientationX + Game.GetPi()) % (2 * Game.GetPi());
-        xx = xx / (2 * Game.GetPi());
-        return Game.IntToByte(platform.FloatToInt(xx * 256));
+        float xx = (orientationX + GetPi()) % (2 * GetPi());
+        xx = xx / (2 * GetPi());
+        return IntToByte(platform.FloatToInt(xx * 256));
     }
 
     public void PlaySoundAt(string name, float x, float y, float z)
@@ -1961,10 +1991,12 @@
 
     internal void InvokeMapLoadingProgress(int progressPercent, int progressBytes, string status)
     {
-        maploadingprogress = new MapLoadingProgressEventArgs();
-        maploadingprogress.ProgressPercent = progressPercent;
-        maploadingprogress.ProgressBytes = progressBytes;
-        maploadingprogress.ProgressStatus = status;
+        maploadingprogress = new MapLoadingProgressEventArgs
+        {
+            ProgressPercent = progressPercent,
+            ProgressBytes = progressBytes,
+            ProgressStatus = status
+        };
     }
 
     internal void Log(string p)
@@ -2016,7 +2048,7 @@
             blockposX, blockposY, blockposZ, player.drawModel.ModelHeight);
     }
 
-    bool IsPlayerInPos(float playerposX, float playerposY, float playerposZ,
+    private bool IsPlayerInPos(float playerposX, float playerposY, float playerposZ,
                        int blockposX, int blockposY, int blockposZ, float playerHeight)
     {
         for (int i = 0; i < FloorFloat(playerHeight) + 1; i++)
@@ -2041,11 +2073,11 @@
 
     internal float mouseDeltaX;
     internal float mouseDeltaY;
-    float rotationspeed;
-    float mouseSmoothingVelX;
-    float mouseSmoothingVelY;
-    bool mouseSmoothing;
-    float mouseSmoothingAccum;
+    private readonly float rotationspeed;
+    private float mouseSmoothingVelX;
+    private float mouseSmoothingVelY;
+    private bool mouseSmoothing;
+    private float mouseSmoothingAccum;
 
     internal void UpdateMouseViewportControl(float dt)
     {
@@ -2073,8 +2105,8 @@
                     player.position.roty += mouseSmoothingVelX * rotationspeed * 1f / 75;
                     player.position.rotx += mouseSmoothingVelY * rotationspeed * 1f / 75;
                     player.position.rotx = MathCi.ClampFloat(player.position.rotx,
-                        Game.GetPi() / 2 + (one * 15 / 1000),
-                        (Game.GetPi() / 2 + Game.GetPi() - (one * 15 / 1000)));
+                        GetPi() / 2 + (one * 15 / 1000),
+                        (GetPi() / 2 + GetPi() - (one * 15 / 1000)));
                 }
 
                 player.position.rotx += touchOrientationDy * constRotationSpeed * (one / 75);
@@ -2137,21 +2169,21 @@
 
     internal int TextSizeWidth(string s, int size)
     {
-        IntRef width = new IntRef();
-        IntRef height = new IntRef();
+        IntRef width = new();
+        IntRef height = new();
         platform.TextSize(s, size, width, height);
         return width.value;
     }
 
     internal int TextSizeHeight(string s, int size)
     {
-        IntRef width = new IntRef();
-        IntRef height = new IntRef();
+        IntRef width = new();
+        IntRef height = new();
         platform.TextSize(s, size, width, height);
         return height.value;
     }
 
-    ModelData circleModelData;
+    private ModelData circleModelData;
     public void Circle3i(float x, float y, float radius)
     {
         float angle;
@@ -2178,7 +2210,7 @@
         }
         for (int i = 0; i < n; i++)
         {
-            angle = (i * 2 * Game.GetPi() / n);
+            angle = (i * 2 * GetPi() / n);
             circleModelData.xyz[i * 3 + 0] = x + (platform.MathCos(angle) * radius);
             circleModelData.xyz[i * 3 + 1] = y + (platform.MathSin(angle) * radius);
             circleModelData.xyz[i * 3 + 2] = 0;
@@ -2221,29 +2253,33 @@
 
     internal float PlayerPushDistance;
 
-    internal Entity CreateBulletEntity(float fromX, float fromY, float fromZ, float toX, float toY, float toZ, float speed)
+    internal static Entity CreateBulletEntity(float fromX, float fromY, float fromZ, float toX, float toY, float toZ, float speed)
     {
-        Entity entity = new Entity();
+        Entity entity = new();
 
-        Bullet_ bullet = new Bullet_();
-        bullet.fromX = fromX;
-        bullet.fromY = fromY;
-        bullet.fromZ = fromZ;
-        bullet.toX = toX;
-        bullet.toY = toY;
-        bullet.toZ = toZ;
-        bullet.speed = speed;
+        Bullet_ bullet = new()
+        {
+            fromX = fromX,
+            fromY = fromY,
+            fromZ = fromZ,
+            toX = toX,
+            toY = toY,
+            toZ = toZ,
+            speed = speed
+        };
         entity.bullet = bullet;
 
-        entity.sprite = new Sprite();
-        entity.sprite.image = "Sponge.png";
-        entity.sprite.size = 4;
-        entity.sprite.animationcount = 0;
+        entity.sprite = new Sprite
+        {
+            image = "Sponge.png",
+            size = 4,
+            animationcount = 0
+        };
 
         return entity;
     }
 
-    public bool Vec3Equal(float ax, float ay, float az, float bx, float by, float bz)
+    public static bool Vec3Equal(float ax, float ay, float az, float bx, float by, float bz)
     {
         return ax == bx && ay == by && az == bz;
     }
@@ -2285,7 +2321,7 @@
         return IsLava(GetCameraBlock());
     }
 
-    int GetCameraBlock()
+    private int GetCameraBlock()
     {
         int bx = MathFloor(CameraEyeX);
         int by = MathFloor(CameraEyeZ);
@@ -2331,27 +2367,27 @@
         return platform.StringContains(name, "Lava"); // todo
     }
 
-    internal int terraincolor()
+    internal int Terraincolor()
     {
         if (WaterSwimmingCamera())
         {
-            return Game.ColorFromArgb(255, 78, 95, 140);
+            return ColorFromArgb(255, 78, 95, 140);
         }
         else if (LavaSwimmingCamera())
         {
-            return Game.ColorFromArgb(255, 222, 101, 46);
+            return ColorFromArgb(255, 222, 101, 46);
         }
         else
         {
-            return Game.ColorFromArgb(255, 255, 255, 255);
+            return ColorFromArgb(255, 255, 255, 255);
         }
     }
 
     internal void SetAmbientLight(int color)
     {
-        int r = Game.ColorR(color);
-        int g = Game.ColorG(color);
-        int b = Game.ColorB(color);
+        int r = ColorR(color);
+        int g = ColorG(color);
+        int b = ColorB(color);
         platform.GlLightModelAmbient(r, g, b);
     }
 
@@ -2596,7 +2632,7 @@
         keyboardStateRaw[eKey] = false;
         for (int i = 0; i < clientmodsCount; i++)
         {
-            KeyEventArgs args_ = new KeyEventArgs();
+            KeyEventArgs args_ = new();
             args_.SetKeyCode(eKey);
             clientmods[i].OnKeyUp(this, args_);
             if (args_.GetHandled())
@@ -2628,9 +2664,11 @@
 
     internal void Draw2dText1(string text, int x, int y, int fontsize, IntRef color, bool enabledepthtest)
     {
-        FontCi font = new FontCi();
-        font.family = "Arial";
-        font.size = fontsize;
+        FontCi font = new()
+        {
+            family = "Arial",
+            size = fontsize
+        };
         Draw2dText(text, font, x, y, color, enabledepthtest);
     }
 
@@ -2646,7 +2684,7 @@
         for (int i = 0; i < clientmodsCount; i++)
         {
             if (clientmods[i] == null) { continue; }
-            KeyPressEventArgs args_ = new KeyPressEventArgs();
+            KeyPressEventArgs args_ = new();
             args_.SetKeyChar(eKeyChar);
             clientmods[i].OnKeyPress(this, args_);
             if (args_.GetHandled())
@@ -2658,8 +2696,7 @@
 
     public string CharToString(int c)
     {
-        int[] arr = new int[1];
-        arr[0] = c;
+        int[] arr = [c];
         return platform.CharArrayToString(arr, 1);
     }
 
@@ -2680,12 +2717,14 @@
             {
                 blockid = SpecialBlockId.Empty;
             }
-            Speculative s_ = new Speculative();
-            s_.x = x;
-            s_.y = y;
-            s_.z = z;
-            s_.blocktype = map.GetBlock(x, y, z);
-            s_.timeMilliseconds = platform.TimeMillisecondsFromStart();
+            Speculative s_ = new()
+            {
+                x = x,
+                y = y,
+                z = z,
+                blocktype = map.GetBlock(x, y, z),
+                timeMilliseconds = platform.TimeMillisecondsFromStart()
+            };
             AddSpeculative(s_);
             SetBlock(x, y, z, blockid);
             RedrawBlock(x, y, z);
@@ -2696,7 +2735,7 @@
         }
     }
 
-    void AddSpeculative(Speculative s_)
+    private void AddSpeculative(Speculative s_)
     {
         for (int i = 0; i < speculativeCount; i++)
         {
@@ -2741,7 +2780,7 @@
         SendPacketClient(ClientPackets.GameResolution(Width(), Height()));
     }
 
-    bool sendResize;
+    private bool sendResize;
     internal void OnResize()
     {
         platform.GlViewport(0, 0, Width(), Height());
@@ -2790,7 +2829,7 @@
         {
             return;
         }
-        IntRef ssCount = new IntRef();
+        IntRef ssCount = new();
         string[] ss = platform.StringSplit(s_, " ", ssCount);
         if (StringTools.StringStartsWith(platform, s_, "."))
         {
@@ -2892,7 +2931,7 @@
                     }
                     else
                     {
-                        float fov_ = (2 * Game.GetPi() * (one * arg / 360));
+                        float fov_ = (2 * GetPi() * (one * arg / 360));
                         this.fov = fov_;
                         OnResize();
                     }
@@ -2920,11 +2959,11 @@
                 else if (cmd == "serverinfo")
                 {
                     //Fetches server info from given adress
-                    IntRef splitCount = new IntRef();
+                    IntRef splitCount = new();
                     string[] split = platform.StringSplit(arguments, ":", splitCount);
                     if (splitCount.value == 2)
                     {
-                        QueryClient qClient = new QueryClient();
+                        QueryClient qClient = new();
                         qClient.SetPlatform(platform);
                         qClient.PerformQuery(split[0], platform.IntParse(split[1]));
                         if (qClient.querySuccess)
@@ -2957,9 +2996,11 @@
             //Process clientside mod commands anyway
             for (int i = 0; i < clientmodsCount; i++)
             {
-                ClientCommandArgs args = new ClientCommandArgs();
-                args.arguments = arguments;
-                args.command = cmd;
+                ClientCommandArgs args = new()
+                {
+                    arguments = arguments,
+                    command = cmd
+                };
                 clientmods[i].OnClientCommand(this, args);
             }
         }
@@ -2978,7 +3019,7 @@
     internal string[] typinglog;
     internal int typinglogCount;
 
-    string[] getAsset;
+    private readonly string[] getAsset;
     internal void ProcessServerIdentification(Packet_Server packet)
     {
         this.LocalPlayerId = packet.Identification.AssignedClientId;
@@ -3058,7 +3099,7 @@
         ChatLog("[GAME] Map initialized");
     }
 
-    bool HasAsset(string md5, string name)
+    private bool HasAsset(string md5, string name)
     {
         for (int i = 0; i < assets.count; i++)
         {
@@ -3081,7 +3122,7 @@
     internal string serverGameVersion;
     internal ClientPacketHandler[] packetHandlers;
 
-    void CacheAsset(Asset asset)
+    private void CacheAsset(Asset asset)
     {
         //Check if checksum is given (prevents crash on old servers)
         if (asset.md5 == null)
@@ -3112,11 +3153,13 @@
         }
 
         //Create new asset from given data
-        Asset newAsset = new Asset();
-        newAsset.data = downloaded;
-        newAsset.dataLength = downloadedLength;
-        newAsset.name = nameLowercase;
-        newAsset.md5 = md5;
+        Asset newAsset = new()
+        {
+            data = downloaded,
+            dataLength = downloadedLength,
+            name = nameLowercase,
+            md5 = md5
+        };
 
         for (int i = 0; i < assets.count; i++)
         {
@@ -3201,8 +3244,8 @@
     }
 
     internal int maxTextureSize; // detected at runtime
-    internal int atlas1dheight() { return maxTextureSize; }
-    internal int atlas2dtiles() { return GlobalVar.MAX_BLOCKTYPES_SQRT; } // 16x16
+    internal int Atlas1dheight() { return maxTextureSize; }
+    internal static int atlas2dtiles() { return GlobalVar.MAX_BLOCKTYPES_SQRT; } // 16x16
     internal TextureAtlasConverter d_TextureAtlasConverter;
 
     internal void UseTerrainTextureAtlas2d(BitmapCi atlas2d, int atlas2dWidth)
@@ -3211,9 +3254,9 @@
         int[] terrainTextures1d_;
         int terrainTextures1dCount = 0;
         {
-            terrainTexturesPerAtlas = atlas1dheight() / (atlas2dWidth / atlas2dtiles());
-            IntRef atlasesidCount = new IntRef();
-            BitmapCi[] atlases1d = d_TextureAtlasConverter.Atlas2dInto1d(platform, atlas2d, atlas2dtiles(), atlas1dheight(), atlasesidCount);
+            terrainTexturesPerAtlas = Atlas1dheight() / (atlas2dWidth / atlas2dtiles());
+            IntRef atlasesidCount = new();
+            BitmapCi[] atlases1d = TextureAtlasConverter.Atlas2dInto1d(platform, atlas2d, atlas2dtiles(), Atlas1dheight(), atlasesidCount);
             terrainTextures1d_ = new int[atlasesidCount.value];
             for (int i = 0; i < atlasesidCount.value; i++)
             {
@@ -3239,10 +3282,7 @@
                 continue;
             }
             byte[] fileData = GetFile(StringTools.StringAppend(platform, textureIds[i], ".png"));
-            if (fileData == null)
-            {
-                fileData = GetFile("Unknown.png");
-            }
+            fileData ??= GetFile("Unknown.png");
             if (fileData == null)
             {
                 continue;
@@ -3306,7 +3346,7 @@
             // only handle keys once game has been loaded
             for (int i = 0; i < clientmodsCount; i++)
             {
-                KeyEventArgs args_ = new KeyEventArgs();
+                KeyEventArgs args_ = new();
                 args_.SetKeyCode(eKey);
                 clientmods[i].OnKeyDown(this, args_);
                 if (args_.GetHandled())
@@ -3466,8 +3506,10 @@
                         for (int i = 0; i < clientmodsCount; i++)
                         {
                             if (clientmods[i] == null) { continue; }
-                            OnUseEntityArgs args = new OnUseEntityArgs();
-                            args.entityId = currentlyAttackedEntity;
+                            OnUseEntityArgs args = new()
+                            {
+                                entityId = currentlyAttackedEntity
+                            };
                             clientmods[i].OnUseEntity(this, args);
                         }
                         SendPacketClient(ClientPackets.UseEntity(currentlyAttackedEntity));
@@ -3627,7 +3669,7 @@
 
     internal void FrameTick(float dt)
     {
-        NewFrameEventArgs args_ = new NewFrameEventArgs();
+        NewFrameEventArgs args_ = new();
         args_.SetDt(dt);
         for (int i = 0; i < clientmodsCount; i++)
         {
@@ -3671,9 +3713,9 @@
         }
     }
 
-    float lastplayerpositionX;
-    float lastplayerpositionY;
-    float lastplayerpositionZ;
+    private float lastplayerpositionX;
+    private float lastplayerpositionY;
+    private float lastplayerpositionZ;
 
     public BlockPosSide[] Pick(BlockOctreeSearcher s_, Line3D line, IntRef retCount)
     {
@@ -3701,11 +3743,11 @@
         return pick2;
     }
 
-    float[] modelViewInverted;
+    private readonly float[] modelViewInverted;
 
-    void PickSort(BlockPosSide[] pick, int pickCount, float x, float y, float z)
+    private void PickSort(BlockPosSide[] pick, int pickCount, float x, float y, float z)
     {
-        bool changed = false;
+        bool changed;
         do
         {
             changed = false;
@@ -3811,9 +3853,9 @@
         MapLoadingStart();
     }
 
-    int lastWidth;
-    int lastHeight;
-    void UpdateResize()
+    private int lastWidth;
+    private int lastHeight;
+    private void UpdateResize()
     {
         if (lastWidth != platform.GetCanvasWidth()
             || lastHeight != platform.GetCanvasHeight())
@@ -3824,13 +3866,13 @@
         }
     }
 
-    bool startedconnecting;
+    private bool startedconnecting;
     internal void GotoDraw2d(float dt)
     {
-        SetAmbientLight(Game.ColorFromArgb(255, 255, 255, 255));
+        SetAmbientLight(ColorFromArgb(255, 255, 255, 255));
         Draw2d(dt);
 
-        NewFrameEventArgs args_ = new NewFrameEventArgs();
+        NewFrameEventArgs args_ = new();
         args_.SetDt(dt);
         for (int i = 0; i < clientmodsCount; i++)
         {
@@ -3916,7 +3958,7 @@
         }
     }
 
-    public void OnBackPressed()
+    public static void OnBackPressed()
     {
     }
 

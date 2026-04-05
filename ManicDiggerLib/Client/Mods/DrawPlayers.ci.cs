@@ -9,7 +9,7 @@
         DrawPlayers(game, deltaTime);
     }
 
-    float one;
+    private readonly float one;
 
     internal void DrawPlayers(Game game, float dt)
     {

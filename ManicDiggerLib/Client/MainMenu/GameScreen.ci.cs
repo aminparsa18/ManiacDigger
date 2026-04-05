@@ -4,7 +4,7 @@
     {
         game = new Game();
     }
-    Game game;
+    private readonly Game game;
 
     public void Start(GamePlatform platform_, bool singleplayer_, string singleplayerSavePath_, ConnectData connectData_)
     {
@@ -22,10 +22,10 @@
         Connect(platform);
     }
 
-    ServerSimple serverSimple;
-    ModServerSimple serverSimpleMod;
+    private ServerSimple serverSimple;
+    private ModServerSimple serverSimpleMod;
 
-    void Connect(GamePlatform platform)
+    private void Connect(GamePlatform platform)
     {
         if (singleplayer)
         {
@@ -38,23 +38,29 @@
                 serverSimple = new ServerSimple();
                 DummyNetwork network = platform.SinglePlayerServerGetNetwork();
                 network.Start(platform.MonitorCreate(), platform.MonitorCreate());
-                DummyNetServer server = new DummyNetServer();
-                server.network = network;
-                server.platform = platform;
+                DummyNetServer server = new()
+                {
+                    network = network,
+                    platform = platform
+                };
                 server.Start();
                 serverSimple.Start(server, singleplayerSavePath, platform);
 
-                serverSimpleMod = new ModServerSimple();
-                serverSimpleMod.server = serverSimple;
+                serverSimpleMod = new ModServerSimple
+                {
+                    server = serverSimple
+                };
                 game.AddMod(serverSimpleMod);
                 platform.SinglePlayerServerGetNetwork().ServerReceiveBuffer.Enqueue(new ByteArray());
             }
 
-            connectData = new ConnectData();
-            connectData.Username = "Local";
+            connectData = new ConnectData
+            {
+                Username = "Local"
+            };
             game.connectdata = connectData;
 
-            DummyNetClient netclient = new DummyNetClient();
+            DummyNetClient netclient = new();
             netclient.SetPlatform(platform);
             netclient.SetNetwork(platform.SinglePlayerServerGetNetwork());
             game.main = netclient;
@@ -64,19 +70,19 @@
             game.connectdata = connectData;
             if (platform.EnetAvailable())
             {
-                EnetNetClient client = new EnetNetClient();
+                EnetNetClient client = new();
                 client.SetPlatform(platform);
                 game.main = client;
             }
             else if (platform.TcpAvailable())
             {
-                TcpNetClient client = new TcpNetClient();
+                TcpNetClient client = new();
                 client.SetPlatform(platform);
                 game.main = client;
             }
             else if (platform.WebSocketAvailable())
             {
-                WebSocketClient client = new WebSocketClient();
+                WebSocketClient client = new();
                 client.SetPlatform(platform);
                 game.main = client;
             }
@@ -87,10 +93,10 @@
         }
     }
 
-    GamePlatform platform;
-    ConnectData connectData;
-    bool singleplayer;
-    string singleplayerSavePath;
+    private GamePlatform platform;
+    private ConnectData connectData;
+    private bool singleplayer;
+    private string singleplayerSavePath;
 
     public override void Render(float dt)
     {
@@ -106,7 +112,7 @@
             if (game.GetRedirect() != null)
             {
                 //Query new server for public key
-                QueryClient qclient = new QueryClient();
+                QueryClient qclient = new();
                 qclient.SetPlatform(platform);
                 qclient.PerformQuery(game.GetRedirect().GetIP(), game.GetRedirect().GetPort());
                 if (qclient.queryPerformed && !qclient.querySuccess)
@@ -118,8 +124,8 @@
                 }
                 QueryResult qresult = qclient.GetResult();
                 //Get auth hash for new server
-                LoginClientCi lic = new LoginClientCi();
-                LoginData lidata = new LoginData();
+                LoginClientCi lic = new();
+                LoginData lidata = new();
                 string token = platform.StringSplit(qresult.PublicHash, "=", new IntRef())[1];
                 lic.Login(platform, connectData.Username, "", token, platform.GetPreferences().GetString("Password", ""), new LoginResultRef(), lidata);
                 while (lic.loginResult.value == LoginResult.Connecting)
@@ -217,6 +223,6 @@
 
     public override void OnBackPressed()
     {
-        game.OnBackPressed();
+        Game.OnBackPressed();
     }
 }

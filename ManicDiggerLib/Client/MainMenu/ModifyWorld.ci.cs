@@ -2,14 +2,16 @@
 {
     public ScreenModifyWorld()
     {
-        back = new MenuWidget();
-        back.text = "Back";
-        back.type = WidgetType.Button;
+        back = new MenuWidget
+        {
+            text = "Back",
+            type = WidgetType.Button
+        };
 
         widgets[0] = back;
     }
 
-    MenuWidget back;
+    private readonly MenuWidget back;
 
     public override void Render(float dt)
     {

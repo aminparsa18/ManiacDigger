@@ -15,7 +15,7 @@ public class ModDrawMinecarts : ClientMod
     {
         minecarttexture = -1;
     }
-    int minecarttexture;
+    private int minecarttexture;
 
     public override void OnNewFrameDraw3d(Game game, float deltaTime)
     {
@@ -54,7 +54,7 @@ public class ModDrawMinecarts : ClientMod
         game.GLPopMatrix();
     }
 
-    float vehiclerotation(VehicleDirection12 dir)
+    private static float vehiclerotation(VehicleDirection12 dir)
     {
         switch (dir)
         {

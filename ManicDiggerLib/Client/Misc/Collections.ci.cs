@@ -8,10 +8,10 @@
         values = new AudioSampleCi[max];
     }
 
-    string[] keys;
-    AudioSampleCi[] values;
-    int max;
-    int count;
+    private readonly string[] keys;
+    private readonly AudioSampleCi[] values;
+    private readonly int max;
+    private int count;
 
     public void Set(string key, AudioSampleCi value)
     {
@@ -115,7 +115,7 @@ public class DictionaryStringAudioData
 }
 
 
-class DictionaryStringByteArray
+internal class DictionaryStringByteArray
 {
     public DictionaryStringByteArray()
     {
@@ -140,9 +140,11 @@ class DictionaryStringByteArray
         {
             if (items[i] == null)
             {
-                items[i] = new StringByteArray();
-                items[i].name = name;
-                items[i].data = value;
+                items[i] = new StringByteArray
+                {
+                    name = name,
+                    data = value
+                };
                 return;
             }
         }
@@ -176,7 +178,7 @@ public class DictionaryVector3Float
         return ItemIndex(x, y, z) != -1;
     }
 
-    int ItemIndex(int x, int y, int z)
+    private int ItemIndex(int x, int y, int z)
     {
         for (int i = 0; i < itemsCount; i++)
         {
@@ -220,11 +222,13 @@ public class DictionaryVector3Float
             {
                 if (items[i] == null)
                 {
-                    Vector3Float item = new Vector3Float();
-                    item.x = x;
-                    item.y = y;
-                    item.z = z;
-                    item.value = value;
+                    Vector3Float item = new()
+                    {
+                        x = x,
+                        y = y,
+                        z = z,
+                        value = value
+                    };
                     items[i] = item;
                     return;
                 }
@@ -288,9 +292,11 @@ public class DictionaryStringString
         {
             if (items[i] == null)
             {
-                items[i] = new KeyValueStringString();
-                items[i].key = key;
-                items[i].value = value;
+                items[i] = new KeyValueStringString
+                {
+                    key = key,
+                    value = value
+                };
                 return;
             }
         }
@@ -359,7 +365,7 @@ public class DictionaryStringInt1024
     }
     internal KeyValueStringInt[] items;
     internal int count;
-    const int max = 1024;
+    private const int max = 1024;
 
     /// <summary>
     /// Set the specified key to the specified value.
@@ -384,15 +390,19 @@ public class DictionaryStringInt1024
         {
             if (items[i] == null)
             {
-                items[i] = new KeyValueStringInt();
-                items[i].key = key;
-                items[i].value = value;
+                items[i] = new KeyValueStringInt
+                {
+                    key = key,
+                    value = value
+                };
                 return;
             }
         }
-        KeyValueStringInt k = new KeyValueStringInt();
-        k.key = key;
-        k.value = value;
+        KeyValueStringInt k = new()
+        {
+            key = key,
+            value = value
+        };
         items[count++] = k;
     }
 
@@ -474,7 +484,7 @@ public class ListAction
 {
     public static ListAction Create(int max_)
     {
-        ListAction l = new ListAction();
+        ListAction l = new();
         l.Start(max_);
         return l;
     }
@@ -552,12 +562,12 @@ public class QueueAction
     }
     public static QueueAction Create(int max_)
     {
-        QueueAction queue = new QueueAction();
+        QueueAction queue = new();
         queue.Start(max_);
         return queue;
     }
 
-    void Start(int max_)
+    private void Start(int max_)
     {
         max = max_;
         items = new Action_[max_];
@@ -581,7 +591,7 @@ public class QueueAction
         items[pos] = value;
     }
 
-    void Resize(int newSize)
+    private void Resize(int newSize)
     {
         Action_[] items2 = new Action_[newSize];
         for (int i = 0; i < max; i++)
@@ -618,9 +628,9 @@ public class QueueNetIncomingMessage
         itemsSize = 1;
         count = 0;
     }
-    NetIncomingMessage[] items;
-    int count;
-    int itemsSize;
+    private NetIncomingMessage[] items;
+    private int count;
+    private int itemsSize;
 
     internal int Count()
     {
@@ -662,9 +672,9 @@ public class QueueByteArray
         itemsSize = 1;
         count = 0;
     }
-    ByteArray[] items;
-    int count;
-    int itemsSize;
+    private ByteArray[] items;
+    private int count;
+    private int itemsSize;
 
     internal int Count()
     {
@@ -705,7 +715,7 @@ public class QueueByte
         max = 1024 * 1024 * 5;
         items = new byte[max];
     }
-    byte[] items;
+    private readonly byte[] items;
     internal int start;
     internal int count;
     internal int max;
@@ -758,9 +768,9 @@ public class QueueINetOutgoingMessage
         itemsSize = 1;
         count = 0;
     }
-    INetOutgoingMessage[] items;
-    int count;
-    int itemsSize;
+    private INetOutgoingMessage[] items;
+    private int count;
+    private int itemsSize;
 
     internal int Count()
     {
@@ -805,11 +815,11 @@ public class FastQueueInt
         start = 0;
         end = 0;
     }
-    int maxCount;
-    int[] values;
+    private int maxCount;
+    private int[] values;
     internal int Count;
-    int start;
-    int end;
+    private int start;
+    private int end;
     public void Push(int value)
     {
         values[end] = value;
@@ -846,8 +856,8 @@ public class FastStackInt
         valuesLength = maxCount;
         values = new int[maxCount];
     }
-    int[] values;
-    int valuesLength;
+    private int[] values;
+    private int valuesLength;
     internal int count;
     public void Push(int value)
     {

@@ -2,47 +2,65 @@
 {
     public ScreenLogin()
     {
-        login = new MenuWidget();
-        login.text = "Login";
-        login.type = WidgetType.Button;
-        login.nextWidget = 9;
-        loginUsername = new MenuWidget();
-        loginUsername.type = WidgetType.Textbox;
-        loginUsername.text = "";
-        loginUsername.description = "Username";
-        loginUsername.nextWidget = 2;
-        loginPassword = new MenuWidget();
-        loginPassword.type = WidgetType.Textbox;
-        loginPassword.text = "";
-        loginPassword.description = "Password";
-        loginPassword.password = true;
-        loginPassword.nextWidget = 3;
-        loginRememberMe = new MenuWidget();
-        loginRememberMe.text = "Yes";
-        loginRememberMe.type = WidgetType.Button;
-        loginRememberMe.description = "Remember me";
-        loginRememberMe.nextWidget = 0;
+        login = new MenuWidget
+        {
+            text = "Login",
+            type = WidgetType.Button,
+            nextWidget = 9
+        };
+        loginUsername = new MenuWidget
+        {
+            type = WidgetType.Textbox,
+            text = "",
+            description = "Username",
+            nextWidget = 2
+        };
+        loginPassword = new MenuWidget
+        {
+            type = WidgetType.Textbox,
+            text = "",
+            description = "Password",
+            password = true,
+            nextWidget = 3
+        };
+        loginRememberMe = new MenuWidget
+        {
+            text = "Yes",
+            type = WidgetType.Button,
+            description = "Remember me",
+            nextWidget = 0
+        };
 
-        createAccount = new MenuWidget();
-        createAccount.text = "Create account";
-        createAccount.type = WidgetType.Button;
-        createAccountUsername = new MenuWidget();
-        createAccountUsername.text = "";
-        createAccountUsername.type = WidgetType.Textbox;
-        createAccountUsername.description = "Username";
-        createAccountPassword = new MenuWidget();
-        createAccountPassword.text = "";
-        createAccountPassword.type = WidgetType.Textbox;
-        createAccountPassword.description = "Password";
-        createAccountPassword.password = true;
-        createAccountRememberMe = new MenuWidget();
-        createAccountRememberMe.text = "Yes";
-        createAccountRememberMe.type = WidgetType.Button;
-        createAccountRememberMe.description = "Remember me";
-        back = new MenuWidget();
-        back.text = "Back";
-        back.type = WidgetType.Button;
-        back.nextWidget = 1;
+        createAccount = new MenuWidget
+        {
+            text = "Create account",
+            type = WidgetType.Button
+        };
+        createAccountUsername = new MenuWidget
+        {
+            text = "",
+            type = WidgetType.Textbox,
+            description = "Username"
+        };
+        createAccountPassword = new MenuWidget
+        {
+            text = "",
+            type = WidgetType.Textbox,
+            description = "Password",
+            password = true
+        };
+        createAccountRememberMe = new MenuWidget
+        {
+            text = "Yes",
+            type = WidgetType.Button,
+            description = "Remember me"
+        };
+        back = new MenuWidget
+        {
+            text = "Back",
+            type = WidgetType.Button,
+            nextWidget = 1
+        };
 
         title = "Login";
 
@@ -61,20 +79,20 @@
         loginResult = new LoginResultRef();
     }
 
-    MenuWidget login;
-    MenuWidget loginUsername;
-    MenuWidget loginPassword;
-    MenuWidget loginRememberMe;
+    private readonly MenuWidget login;
+    private readonly MenuWidget loginUsername;
+    private readonly MenuWidget loginPassword;
+    private readonly MenuWidget loginRememberMe;
 
-    MenuWidget createAccount;
-    MenuWidget createAccountUsername;
-    MenuWidget createAccountPassword;
-    MenuWidget createAccountRememberMe;
+    private readonly MenuWidget createAccount;
+    private readonly MenuWidget createAccountUsername;
+    private readonly MenuWidget createAccountPassword;
+    private readonly MenuWidget createAccountRememberMe;
 
-    MenuWidget back;
+    private readonly MenuWidget back;
 
-    bool triedSavedLogin;
-    string title;
+    private bool triedSavedLogin;
+    private string title;
 
     public override void LoadTranslations()
     {
@@ -216,8 +234,8 @@
         menu.StartMultiplayer();
     }
 
-    LoginResultRef loginResult;
-    LoginData loginResultData;
+    private readonly LoginResultRef loginResult;
+    private LoginData loginResultData;
 
     public override void OnButton(MenuWidget w)
     {
@@ -241,16 +259,18 @@
                     menu.p.SetPreferences(preferences);
                 }
 
-                ConnectData connectdata = new ConnectData();
-                connectdata.Ip = serverIp;
-                connectdata.Port = serverPort;
-                connectdata.Username = loginUsername.text;
+                ConnectData connectdata = new()
+                {
+                    Ip = serverIp,
+                    Port = serverPort,
+                    Username = loginUsername.text
+                };
                 menu.StartGame(false, null, connectdata);
             }
         }
         if (w == createAccount)
         {
-            menu.CreateAccount(createAccountUsername.text, createAccountPassword.text, loginResult);
+            MainMenu.CreateAccount(createAccountUsername.text, createAccountPassword.text, loginResult);
         }
         if (w == loginRememberMe || w == createAccountRememberMe)
         {

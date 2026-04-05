@@ -17,7 +17,7 @@
         }
         LoadPlayerTextures(game);
     }
-    bool started;
+    private bool started;
     internal string skinserver;
     internal HttpResponseCi skinserverResponse;
     internal void LoadPlayerTextures(Game game)

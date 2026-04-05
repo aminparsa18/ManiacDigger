@@ -17,9 +17,9 @@
         }
     }
     public const int BlockDamageToPlayerEvery = 1;
-    TimerCi BlockDamageToPlayerTimer;
+    private readonly TimerCi BlockDamageToPlayerTimer;
 
-    float one;
+    private readonly float one;
 
     //TODO server side?
     internal void UpdateBlockDamageToPlayer(Game game, float dt)

@@ -9,13 +9,15 @@
     {
         if (d_RailMapUtil == null)
         {
-            this.d_RailMapUtil = new RailMapUtil();
-            this.d_RailMapUtil.game = game;
+            this.d_RailMapUtil = new RailMapUtil
+            {
+                game = game
+            };
         }
         RailOnNewFrame(game, args.GetDt());
     }
 
-    float one;
+    private readonly float one;
 
     internal Entity localMinecart;
     internal float minecartheight() { return one / 2; }
@@ -26,8 +28,10 @@
     {
         if (localMinecart == null)
         {
-            localMinecart = new Entity();
-            localMinecart.minecart = new Minecart();
+            localMinecart = new Entity
+            {
+                minecart = new Minecart()
+            };
             game.EntityAddLocal(localMinecart);
         }
         localMinecart.minecart.enabled = railriding;
@@ -63,7 +67,7 @@
             {
                 lastdirection = currentdirection;
                 currentrailblockprogress = 0;
-                TileEnterData newenter = new TileEnterData();
+                TileEnterData newenter = new();
                 Vector3IntRef nexttile = NextTile(currentdirection, currentrailblockX, currentrailblockY, currentrailblockZ);
                 newenter.BlockPositionX = nexttile.X;
                 newenter.BlockPositionY = nexttile.Y;
@@ -83,7 +87,7 @@
                 }
 
                 newenter.EnterDirection = DirectionUtils.ResultEnter(DirectionUtils.ResultExit(currentdirection));
-                BoolRef newdirFound = new BoolRef();
+                BoolRef newdirFound = new();
                 VehicleDirection12 newdir = BestNewDirection(PossibleRails(game, newenter), turnleft, turnright, newdirFound);
                 if (!newdirFound.value)
                 {
@@ -173,7 +177,7 @@
         wasepressed = game.keyboardState[game.GetKey(GlKeys.E)] && game.GuiTyping != TypingState.Typing;
     }
 
-    internal VehicleDirection12 BestNewDirection(int dirVehicleDirection12Flags, bool turnleft, bool turnright, BoolRef retFound)
+    internal static VehicleDirection12 BestNewDirection(int dirVehicleDirection12Flags, bool turnleft, bool turnright, BoolRef retFound)
     {
         // 0-- x
         // |
@@ -352,8 +356,8 @@
     internal float railheight;
 
     internal bool railriding;
-    int lastrailsoundtimeMilliseconds;
-    int lastrailsound;
+    private int lastrailsoundtimeMilliseconds;
+    private int lastrailsound;
     internal void RailSound(Game game)
     {
         float railsoundpersecond = currentvehiclespeed;
@@ -446,7 +450,7 @@
         }
     }
 
-    internal int PossibleRails(Game game, TileEnterData enter)
+    internal static int PossibleRails(Game game, TileEnterData enter)
     {
         int possible_railsVehicleDirection12Flags = 0;
         if (game.map.IsValidPos(enter.BlockPositionX, enter.BlockPositionY, enter.BlockPositionZ))

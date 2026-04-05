@@ -24,9 +24,9 @@
             UpdateFallDamageToPlayer(game, args.GetDt());
         }
     }
-    float one;
-    bool fallSoundPlaying;
-    int lastfalldamagetimeMilliseconds;
+    private readonly float one;
+    private bool fallSoundPlaying;
+    private int lastfalldamagetimeMilliseconds;
     internal void UpdateFallDamageToPlayer(Game game, float dt)
     {
         float movedz = game.movedz;

@@ -6,8 +6,8 @@
         lines = new DrawWireframeCube();
     }
 
-    bool draw;
-    DrawWireframeCube lines;
+    private bool draw;
+    private readonly DrawWireframeCube lines;
 
     public override bool OnClientCommand(Game game, ClientCommandArgs args)
     {

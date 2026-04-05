@@ -60,7 +60,7 @@ public class TextRenderer
         return bmp2;
     }
 
-    private Bitmap BlackBackgroundFont(Text_ t)
+    private static Bitmap BlackBackgroundFont(Text_ t)
     {
         Font font = new("Verdana", t.fontsize, (FontStyle)t.GetFontStyle());
         SizeF size;
@@ -87,7 +87,7 @@ public class TextRenderer
         return bmp2;
     }
 
-    private Bitmap SimpleFont(Text_ t)
+    private static Bitmap SimpleFont(Text_ t)
     {
         float fontsize = t.fontsize;
         fontsize = Math.Max(t.fontsize, 9);
@@ -120,7 +120,7 @@ public class TextRenderer
         return bmp2;
     }
 
-    private Bitmap NiceFont(Text_ t)
+    private static Bitmap NiceFont(Text_ t)
     {
         float fontsize = t.fontsize;
         Font font;
@@ -171,9 +171,9 @@ public class TextRenderer
         return this.Font switch
         {
             FontType.Default => this.defaultFont(t),
-            FontType.BlackBackground => this.BlackBackgroundFont(t),
-            FontType.Simple => this.SimpleFont(t),
-            FontType.Nice => this.NiceFont(t),
+            FontType.BlackBackground => BlackBackgroundFont(t),
+            FontType.Simple => SimpleFont(t),
+            FontType.Nice => NiceFont(t),
             _ => this.defaultFont(t),
         };
     }
@@ -185,7 +185,7 @@ public class TextRenderer
         return path;
     }
 
-    int textalpha = 0;
+    private readonly int textalpha = 0;
     protected static uint NextPowerOfTwo(uint x)
     {
         x--;

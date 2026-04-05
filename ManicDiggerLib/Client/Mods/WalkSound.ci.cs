@@ -7,7 +7,7 @@
         lastwalksound = 0;
         stepsoundduration = one * 4 / 10;
     }
-    float one;
+    private readonly float one;
     public override void OnNewFrameFixed(Game game, NewFrameEventArgs args)
     {
         if (game.FollowId() == null)
@@ -53,7 +53,7 @@
     internal int lastwalksound;
     internal float stepsoundduration;
 
-    internal string[] soundwalkcurrent(Game game)
+    internal static string[] soundwalkcurrent(Game game)
     {
         int b = game.BlockUnderPlayer();
         if (b != -1)
@@ -63,7 +63,7 @@
         return game.d_Data.WalkSound()[0];
     }
 
-    internal int GetSoundCount(string[] soundwalk)
+    internal static int GetSoundCount(string[] soundwalk)
     {
         int count = 0;
         for (int i = 0; i < GameData.SoundCount; i++)

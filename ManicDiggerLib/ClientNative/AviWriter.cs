@@ -84,7 +84,7 @@ public class AviWriter
             return err_msg;
         }
         private const int AVIERR_BADPARAM = -2147205018;
-        private string err_msg;
+        private readonly string err_msg;
     }
 
     public Bitmap Open(string fileName, uint frameRate, int width, int height)
@@ -143,29 +143,31 @@ public class AviWriter
 
     private void CreateStream()
     {
-        AVISTREAMINFOW strhdr = new AVISTREAMINFOW();
-        strhdr.fccType = fccType_;
-        strhdr.fccHandler = fccHandler_;
-        strhdr.dwFlags = 0;
-        strhdr.dwCaps = 0;
-        strhdr.wPriority = 0;
-        strhdr.wLanguage = 0;
-        strhdr.dwScale = 1;
-        strhdr.dwRate = frameRate_; // Frames per Second
-        strhdr.dwStart = 0;
-        strhdr.dwLength = 0;
-        strhdr.dwInitialFrames = 0;
-        strhdr.dwSuggestedBufferSize = height_ * stride_;
-        strhdr.dwQuality = 0xffffffff; //-1;         // Use default
-        strhdr.dwSampleSize = 0;
-        strhdr.rect_top = 0;
-        strhdr.rect_left = 0;
-        strhdr.rect_bottom = height_;
-        strhdr.rect_right = width_;
-        strhdr.dwEditCount = 0;
-        strhdr.dwFormatChangeCount = 0;
-        strhdr.szName0 = 0;
-        strhdr.szName1 = 0;
+        AVISTREAMINFOW strhdr = new()
+        {
+            fccType = fccType_,
+            fccHandler = fccHandler_,
+            dwFlags = 0,
+            dwCaps = 0,
+            wPriority = 0,
+            wLanguage = 0,
+            dwScale = 1,
+            dwRate = frameRate_, // Frames per Second
+            dwStart = 0,
+            dwLength = 0,
+            dwInitialFrames = 0,
+            dwSuggestedBufferSize = height_ * stride_,
+            dwQuality = 0xffffffff, //-1;         // Use default
+            dwSampleSize = 0,
+            rect_top = 0,
+            rect_left = 0,
+            rect_bottom = height_,
+            rect_right = width_,
+            dwEditCount = 0,
+            dwFormatChangeCount = 0,
+            szName0 = 0,
+            szName1 = 0
+        };
 
         int hr = AVIFileCreateStream(pfile_, out ps_, ref strhdr);
 
@@ -274,8 +276,8 @@ public class AviWriter
     private uint width_ = 0;
     private uint stride_ = 0;
     private uint height_ = 0;
-    private uint fccType_ = 1935960438;  // vids
-    private uint fccHandler_ = 808810089;// IV50
+    private readonly uint fccType_ = 1935960438;  // vids
+    private readonly uint fccHandler_ = 808810089;// IV50
     //1145656899;  // CVID
     private Bitmap bmp_;
 };

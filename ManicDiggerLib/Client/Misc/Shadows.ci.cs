@@ -6,10 +6,10 @@ public class LightFlood
         q = new FastQueueInt();
         q.Initialize(1024);
     }
-    
-    FastQueueInt q;
 
-    const int minlight = 0;
+    private readonly FastQueueInt q;
+
+    private const int minlight = 0;
 
     public const int XPlus = 1;
     public const int XMinus = -1;
@@ -21,7 +21,7 @@ public class LightFlood
 #if CITO
     macro Index3d(x, y, h, sizex, sizey) ((((((h) * (sizey)) + (y))) * (sizex)) + (x))
 #else
-    static int Index3d(int x, int y, int h, int sizex, int sizey)
+    private static int Index3d(int x, int y, int h, int sizex, int sizey)
     {
         return (h * sizey + y) * sizex + x;
     }
@@ -67,7 +67,7 @@ public class LightFlood
         }
     }
 
-    static void Push(FastQueueInt q_, byte[] light, int vLight, int newPos)
+    private static void Push(FastQueueInt q_, byte[] light, int vLight, int newPos)
     {
         if (light[newPos] < vLight - 1)
         {
@@ -86,8 +86,8 @@ public class LightBase
         flood = new LightFlood();
         workData = new int[16 * 16 * 16];
     }
-    LightFlood flood;
-    int[] workData;
+    private readonly LightFlood flood;
+    private readonly int[] workData;
 
     public void CalculateChunkBaseLight(Game game, int cx, int cy, int cz, int[] dataLightRadius, bool[] transparentForLight)
     {
@@ -123,13 +123,13 @@ public class LightBase
 #if CITO
     macro Index3d(x, y, h, sizex, sizey) ((((((h) * (sizey)) + (y))) * (sizex)) + (x))
 #else
-    static int Index3d(int x, int y, int h, int sizex, int sizey)
+    private static int Index3d(int x, int y, int h, int sizex, int sizey)
     {
         return (h * sizey + y) * sizex + x;
     }
 #endif
-    
-    static void Sunlight(Game game, int cx, int cy, int cz, byte[] worklight, int[] dataLightRadius, int sunlight)
+
+    private static void Sunlight(Game game, int cx, int cy, int cz, byte[] worklight, int[] dataLightRadius, int sunlight)
     {
         int baseheight = cz * Game.chunksize;
         for (int xx = 0; xx < 16; xx++)
@@ -150,8 +150,8 @@ public class LightBase
             }
         }
     }
-    
-    static int GetLightHeight(Game game, int cx, int cy, int xx, int yy)
+
+    private static int GetLightHeight(Game game, int cx, int cy, int xx, int yy)
     {
         int[] chunk = game.d_Heightmap.chunks[MapUtilCi.Index2d(cx, cy, game.map.MapSizeX / Game.chunksize)];
         if (chunk == null)
@@ -160,8 +160,8 @@ public class LightBase
         }
         return chunk[MapUtilCi.Index2d(xx % Game.chunksize, yy % Game.chunksize, Game.chunksize)];
     }
-    
-    void SunlightFlood(int[] workportion, byte[] worklight, int[] dataLightRadius, bool[] dataTransparent)
+
+    private void SunlightFlood(int[] workportion, byte[] worklight, int[] dataLightRadius, bool[] dataTransparent)
     {
         for (int xx = 0; xx < 16; xx++)
         {
@@ -195,8 +195,8 @@ public class LightBase
             }
         }
     }
-    
-    void LightEmitting(int[] workportion, byte[] worklight, int[] dataLightRadius, bool[] dataTransparent)
+
+    private void LightEmitting(int[] workportion, byte[] worklight, int[] dataLightRadius, bool[] dataTransparent)
     {
         const int portionsize = 16;
         const int portionsize3 = portionsize * portionsize * portionsize;
@@ -242,15 +242,15 @@ public class LightBetweenChunks
         flood = new LightFlood();
     }
 
-    LightFlood flood;
+    private readonly LightFlood flood;
 
-    byte[][] chunksLight;
-    int[][] chunksData;
+    private readonly byte[][] chunksLight;
+    private readonly int[][] chunksData;
 
 #if CITO
     macro Index3d(x, y, h, sizex, sizey) ((((((h) * (sizey)) + (y))) * (sizex)) + (x))
 #else
-    static int Index3d(int x, int y, int h, int sizex, int sizey)
+    private static int Index3d(int x, int y, int h, int sizex, int sizey)
     {
         return (h * sizey + y) * sizex + x;
     }
@@ -263,7 +263,7 @@ public class LightBetweenChunks
         Output(game, cx, cy, cz);
     }
 
-    void Input(Game game, int cx, int cy, int cz)
+    private void Input(Game game, int cx, int cy, int cz)
     {
         for (int x = 0; x < 3; x++)
         {
@@ -306,7 +306,7 @@ public class LightBetweenChunks
         }
     }
 
-    void FloodBetweenChunks_(int[] dataLightRadius, bool[] dataTransparent)
+    private void FloodBetweenChunks_(int[] dataLightRadius, bool[] dataTransparent)
     {
         for (int i = 0; i < 2; i++)
         {
@@ -392,7 +392,7 @@ public class LightBetweenChunks
         }
     }
 
-    void ArrayFillInt(int[] arr, int n, int value)
+    private static void ArrayFillInt(int[] arr, int n, int value)
     {
         for (int i = 0; i < n; i++)
         {
@@ -400,7 +400,7 @@ public class LightBetweenChunks
         }
     }
 
-    void ArrayFillByte(byte[] arr, int n, byte value)
+    private static void ArrayFillByte(byte[] arr, int n, byte value)
     {
         for (int i = 0; i < n; i++)
         {
@@ -408,7 +408,7 @@ public class LightBetweenChunks
         }
     }
 
-    void FloodBetweenChunks(byte[][] chunksLight_, byte[] cLight, byte[] dcLight, int cx, int cy, int cz, int dcx, int dcy, int dcz, int xx, int yy, int zz, int dxx, int dyy, int dzz, int[] dataLightRadius, bool[] dataTransparent)
+    private void FloodBetweenChunks(byte[][] chunksLight_, byte[] cLight, byte[] dcLight, int cx, int cy, int cz, int dcx, int dcy, int dcz, int xx, int yy, int zz, int dxx, int dyy, int dzz, int[] dataLightRadius, bool[] dataTransparent)
     {
         int sourceLight = cLight[Index3d(xx, yy, zz, 16, 16)];
         int targetLight = dcLight[Index3d(dxx, dyy, dzz, 16, 16)];
@@ -418,8 +418,8 @@ public class LightBetweenChunks
             flood.FloodLight(chunksData[Index3d(dcx, dcy, dcz, 3, 3)], dcLight, dxx, dyy, dzz, dataLightRadius, dataTransparent);
         }
     }
-    
-    void Output(Game game, int cx, int cy, int cz)
+
+    private void Output(Game game, int cx, int cy, int cz)
     {
         Chunk chunk = game.map.GetChunk_(cx, cy, cz);
         for (int x = 0; x < 18; x++)

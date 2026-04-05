@@ -26,7 +26,7 @@ public class Screenshot : IScreenshot
         int width = d_GameWindow.Width;
         int height = d_GameWindow.Height;
 
-        Bitmap bmp = new Bitmap(width, height);
+        Bitmap bmp = new(width, height);
         System.Drawing.Imaging.BitmapData data = bmp.LockBits(new Rectangle(0, 0, width, height),
         System.Drawing.Imaging.ImageLockMode.WriteOnly,
         System.Drawing.Imaging.PixelFormat.Format24bppRgb);

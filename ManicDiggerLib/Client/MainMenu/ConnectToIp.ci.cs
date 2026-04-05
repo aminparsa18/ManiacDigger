@@ -2,25 +2,33 @@
 {
     public ScreenConnectToIp()
     {
-        buttonConnect = new MenuWidget();
-        buttonConnect.text = "Connect";
-        buttonConnect.type = WidgetType.Button;
-        buttonConnect.nextWidget = 3;
-        textboxIp = new MenuWidget();
-        textboxIp.type = WidgetType.Textbox;
-        textboxIp.text = "";
-        textboxIp.description = "Ip";
-        textboxIp.nextWidget = 2;
-        textboxPort = new MenuWidget();
-        textboxPort.type = WidgetType.Textbox;
-        textboxPort.text = "";
-        textboxPort.description = "Port";
-        textboxPort.nextWidget = 0;
+        buttonConnect = new MenuWidget
+        {
+            text = "Connect",
+            type = WidgetType.Button,
+            nextWidget = 3
+        };
+        textboxIp = new MenuWidget
+        {
+            type = WidgetType.Textbox,
+            text = "",
+            description = "Ip",
+            nextWidget = 2
+        };
+        textboxPort = new MenuWidget
+        {
+            type = WidgetType.Textbox,
+            text = "",
+            description = "Port",
+            nextWidget = 0
+        };
 
-        back = new MenuWidget();
-        back.text = "Back";
-        back.type = WidgetType.Button;
-        back.nextWidget = 1;
+        back = new MenuWidget
+        {
+            text = "Back",
+            type = WidgetType.Button,
+            nextWidget = 1
+        };
 
         title = "Connect to IP";
 
@@ -32,14 +40,14 @@
         textboxIp.GetFocus();
     }
 
-    MenuWidget buttonConnect;
-    MenuWidget textboxIp;
-    MenuWidget textboxPort;
+    private readonly MenuWidget buttonConnect;
+    private readonly MenuWidget textboxIp;
+    private readonly MenuWidget textboxPort;
 
-    MenuWidget back;
+    private readonly MenuWidget back;
 
-    bool loaded;
-    string title;
+    private bool loaded;
+    private string title;
 
     public override void LoadTranslations()
     {
@@ -49,8 +57,8 @@
         title = menu.lang.Get("MainMenu_MultiplayerConnectIP");
     }
 
-    string preferences_ip;
-    string preferences_port;
+    private string preferences_ip;
+    private string preferences_port;
     public override void Render(float dt)
     {
         if (!loaded)
@@ -116,7 +124,7 @@
         DrawWidgets();
     }
 
-    string errorText;
+    private readonly string errorText;
 
     public override void OnBackPressed()
     {
@@ -127,7 +135,7 @@
     {
         if (w == buttonConnect)
         {
-            FloatRef ret = new FloatRef();
+            FloatRef ret = new();
             if (!Game.StringEquals(textboxIp.text, "")
                 && menu.p.FloatTryParse(textboxPort.text, ret))
             {

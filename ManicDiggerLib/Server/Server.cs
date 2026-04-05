@@ -1,5 +1,4 @@
 using ManicDigger;
-using ManicDigger.ClientNative;
 using OpenTK;
 using ProtoBuf;
 using System.Diagnostics;
@@ -84,7 +83,7 @@ public partial class Server : ICurrentTime, IDropItem
     internal int systemsCount;
     internal ServerPlatform serverPlatform;
 
-    GamePlatform gameplatform;
+    private readonly GamePlatform gameplatform;
     public GameExit exit;
     public ServerMap d_Map;
     public GameData d_Data;
@@ -98,7 +97,7 @@ public partial class Server : ICurrentTime, IDropItem
     public bool LocalConnectionsOnly { get; set; }
     public string[] PublicDataPaths = new string[0];
     public int singleplayerport = 25570;
-    public Random rnd = new Random();
+    public Random rnd = new();
     public int SpawnPositionRandomizationRange = 96;
     public bool IsMono = Type.GetType("Mono.Runtime") != null;
 
@@ -166,10 +165,10 @@ public partial class Server : ICurrentTime, IDropItem
 
     public bool Public;
     public bool enableshadows = true;
-    public Language language = new Language();
+    public Language language = new();
 
-    Stopwatch stopwatchDt = new Stopwatch();
-    public Stopwatch serverUptime = new Stopwatch();
+    private readonly Stopwatch stopwatchDt = new();
+    public Stopwatch serverUptime = new();
     public void Process()
     {
         try
@@ -220,7 +219,7 @@ public partial class Server : ICurrentTime, IDropItem
             return;
         }
 
-        Packet_ServerSeason p = new Packet_ServerSeason()
+        Packet_ServerSeason p = new()
         {
             Hour = _time.GetQuarterHourPartOfDay(),
 
@@ -234,7 +233,7 @@ public partial class Server : ICurrentTime, IDropItem
         SendPacket(clientid, Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.Season, Season = p }));
     }
 
-    private GameTime _time = new GameTime();
+    private readonly GameTime _time = new();
     private int _nLastHourChangeNotify = 0;
 
     public void ProcessMain()
@@ -273,7 +272,7 @@ public partial class Server : ICurrentTime, IDropItem
         oldtime = currenttime;
 
         NetIncomingMessage msg;
-        Stopwatch s = new Stopwatch();
+        Stopwatch s = new();
         s.Start();
 
         //Process client packets
@@ -328,15 +327,17 @@ public partial class Server : ICurrentTime, IDropItem
     public void OnConfigLoaded()
     {
         //Initialize server map
-        var map = new ServerMap();
-        map.server = this;
-        map.d_CurrentTime = this;
-        map.ChunkSize = 32;
+        var map = new ServerMap
+        {
+            server = this,
+            d_CurrentTime = this,
+            ChunkSize = 32
+        };
         for (int i = 0; i < BlockTypes.Length; i++)
         {
             BlockTypes[i] = new BlockType() { };
         }
-        map.d_Heightmap = new InfiniteMapChunked2dServer() { chunksize = Server.chunksize, d_Map = map };
+        map.d_Heightmap = new InfiniteMapChunked2dServer() { chunksize = chunksize, d_Map = map };
         map.Reset(config.MapSizeX, config.MapSizeY, config.MapSizeZ);
         d_Map = map;
 
@@ -413,10 +414,12 @@ public partial class Server : ICurrentTime, IDropItem
             playername = "Server",
             queryClient = false
         };
-        ManicDigger.Group serverGroup = new ManicDigger.Group();
-        serverGroup.Name = "Server";
-        serverGroup.Level = 255;
-        serverGroup.GroupPrivileges = new List<string>();
+        ManicDigger.Group serverGroup = new()
+        {
+            Name = "Server",
+            Level = 255,
+            GroupPrivileges = new List<string>()
+        };
         serverGroup.GroupPrivileges = all_privileges;
         serverGroup.GroupColor = ServerClientMisc.ClientColor.Red;
         serverConsoleClient.AssignGroup(serverGroup);
@@ -432,7 +435,7 @@ public partial class Server : ICurrentTime, IDropItem
         }
         serverUptime.Start();
     }
-    void Start(int port)
+    private void Start(int port)
     {
         Port = port;
         mainSockets[0].SetPort(port);
@@ -473,16 +476,16 @@ public partial class Server : ICurrentTime, IDropItem
         exit.SetExit(true);
     }
 
-    public List<string> all_privileges = new List<string>();
+    public List<string> all_privileges = new();
 
-    public List<string> ModPaths = new List<string>();
+    public List<string> ModPaths = new();
     public ModManager1 modManager;
 
     internal string gameMode = "Fortress";
 
     private ServerMonitor serverMonitor;
     private ServerConsole serverConsole;
-    private int serverConsoleId = -1; // make sure that not a regular client is assigned this ID
+    private readonly int serverConsoleId = -1; // make sure that not a regular client is assigned this ID
     public int ServerConsoleId { get { return serverConsoleId; } }
     internal ClientOnServer serverConsoleClient;
     public void ReceiveServerConsole(string message)
@@ -528,7 +531,7 @@ public partial class Server : ICurrentTime, IDropItem
             {
                 Seed = config.Seed;
             }
-            MemoryStream ms = new MemoryStream();
+            MemoryStream ms = new();
             SaveGame(ms);
             d_ChunkDb.SetGlobalData(ms.ToArray());
             this._time.Init(TimeSpan.Parse("08:00").Ticks);
@@ -545,18 +548,18 @@ public partial class Server : ICurrentTime, IDropItem
         this.LastMonsterId = save.LastMonsterId;
         this.moddata = save.moddata;
     }
-    public List<ManicDigger.Action> onload = new List<ManicDigger.Action>();
-    public List<ManicDigger.Action> onsave = new List<ManicDigger.Action>();
+    public List<ManicDigger.Action> onload = new();
+    public List<ManicDigger.Action> onsave = new();
     public int LastMonsterId;
-    public Dictionary<string, PacketServerInventory> Inventory = new Dictionary<string, PacketServerInventory>(StringComparer.InvariantCultureIgnoreCase);
-    public Dictionary<string, PacketServerPlayerStats> PlayerStats = new Dictionary<string, PacketServerPlayerStats>(StringComparer.InvariantCultureIgnoreCase);
+    public Dictionary<string, PacketServerInventory> Inventory = new(StringComparer.InvariantCultureIgnoreCase);
+    public Dictionary<string, PacketServerPlayerStats> PlayerStats = new(StringComparer.InvariantCultureIgnoreCase);
     public void SaveGame(Stream s)
     {
         for (int i = 0; i < onsave.Count; i++)
         {
             onsave[i]();
         }
-        ManicDiggerSave save = new ManicDiggerSave();
+        ManicDiggerSave save = new();
         SaveAllLoadedChunks();
         if (!config.IsCreative)
         {
@@ -570,7 +573,7 @@ public partial class Server : ICurrentTime, IDropItem
         save.moddata = moddata;
         Serializer.Serialize(s, save);
     }
-    public Dictionary<string, byte[]> moddata = new Dictionary<string, byte[]>();
+    public Dictionary<string, byte[]> moddata = new();
     public bool BackupDatabase(string backupFilename)
     {
         if (!GameStorePath.IsValidName(backupFilename))
@@ -609,7 +612,7 @@ public partial class Server : ICurrentTime, IDropItem
     }
     private void SaveAllLoadedChunks()
     {
-        List<DbChunk> tosave = new List<DbChunk>();
+        List<DbChunk> tosave = new();
         for (int cx = 0; cx < d_Map.MapSizeX / chunksize; cx++)
         {
             for (int cy = 0; cy < d_Map.MapSizeY / chunksize; cy++)
@@ -626,7 +629,7 @@ public partial class Server : ICurrentTime, IDropItem
                         continue;
                     }
                     c.DirtyForSaving = false;
-                    MemoryStream ms = new MemoryStream();
+                    MemoryStream ms = new();
                     Serializer.Serialize(ms, c);
                     tosave.Add(new DbChunk() { Position = new Xyz() { X = cx, Y = cy, Z = cz }, Chunk = ms.ToArray() });
                     if (tosave.Count > 200)
@@ -653,11 +656,11 @@ public partial class Server : ICurrentTime, IDropItem
 
     private void SaveGlobalData()
     {
-        MemoryStream ms = new MemoryStream();
+        MemoryStream ms = new();
         SaveGame(ms);
         d_ChunkDb.SetGlobalData(ms.ToArray());
     }
-    DateTime lastsave = DateTime.UtcNow;
+    private DateTime lastsave = DateTime.UtcNow;
 
     public ServerConfig config;
     public ServerBanlist banlist;
@@ -671,16 +674,16 @@ public partial class Server : ICurrentTime, IDropItem
         }
         disposed = true;
     }
-    bool disposed = false;
-    double starttime = gettime();
-    static double gettime()
+    private bool disposed = false;
+    private readonly double starttime = gettime();
+    private static double gettime()
     {
         return (double)DateTime.UtcNow.Ticks / (10 * 1000 * 1000);
     }
     internal int simulationcurrentframe;
-    double oldtime;
-    double accumulator;
-    float lastServerTick;
+    private double oldtime;
+    private double accumulator;
+    private float lastServerTick;
 
     private int lastClientId;
     public int GenerateClientId()
@@ -693,7 +696,7 @@ public partial class Server : ICurrentTime, IDropItem
         return i;
     }
 
-    public GamePlatformNative platform = new GamePlatformNative();
+    public GamePlatformNative platform = new();
 
     private void ProcessNetMessage(NetIncomingMessage msg, NetServer mainSocket, Stopwatch s)
     {
@@ -721,9 +724,11 @@ public partial class Server : ICurrentTime, IDropItem
                 NetConnection client1 = msg.SenderConnection;
                 IPEndPointCi iep1 = client1.RemoteEndPoint();
 
-                ClientOnServer c = new ClientOnServer();
-                c.mainSocket = mainSocket;
-                c.socket = client1;
+                ClientOnServer c = new()
+                {
+                    mainSocket = mainSocket,
+                    socket = client1
+                };
                 c.Ping.SetTimeoutValue(config.ClientConnectionTimeout);
                 c.chunksseen = new bool[d_Map.MapSizeX / chunksize * d_Map.MapSizeY / chunksize * d_Map.MapSizeZ / chunksize];
                 lock (clients)
@@ -770,9 +775,9 @@ public partial class Server : ICurrentTime, IDropItem
         }
     }
 
-    DateTime statsupdate;
+    private DateTime statsupdate;
 
-    public Dictionary<Timer, Timer.Tick> timers = new Dictionary<Timer, Timer.Tick>();
+    public Dictionary<Timer, Timer.Tick> timers = new();
 
     private void NotifyPing(int targetClientId, int ping)
     {
@@ -783,7 +788,7 @@ public partial class Server : ICurrentTime, IDropItem
     }
     private void SendPlayerPing(int recipientClientId, int targetClientId, int ping)
     {
-        Packet_ServerPlayerPing p = new Packet_ServerPlayerPing()
+        Packet_ServerPlayerPing p = new()
         {
             ClientId = targetClientId,
             Ping = ping
@@ -813,13 +818,13 @@ public partial class Server : ICurrentTime, IDropItem
 
     internal void DoSaveChunk(int x, int y, int z, ServerChunk c)
     {
-        MemoryStream ms = new MemoryStream();
+        MemoryStream ms = new();
         Serializer.Serialize(ms, c);
         ChunkDb.SetChunk(d_ChunkDb, x, y, z, ms.ToArray());
     }
 
-    int SEND_CHUNKS_PER_SECOND = 10;
-    int SEND_MONSTER_UDAPTES_PER_SECOND = 3;
+    private readonly int SEND_CHUNKS_PER_SECOND = 10;
+    private readonly int SEND_MONSTER_UDAPTES_PER_SECOND = 3;
 
     public void LoadChunk(int cx, int cy, int cz)
     {
@@ -858,28 +863,32 @@ public partial class Server : ICurrentTime, IDropItem
         {
             return null;
         }
-        Packet_ServerInventory p = new Packet_ServerInventory();
+        Packet_ServerInventory p = new();
         if (inv.Inventory != null)
         {
-            p.Inventory = new Packet_Inventory();
-            p.Inventory.Boots = ConvertItem(inv.Inventory.Boots);
-            p.Inventory.DragDropItem = ConvertItem(inv.Inventory.DragDropItem);
-            p.Inventory.Gauntlet = ConvertItem(inv.Inventory.Gauntlet);
-            p.Inventory.Helmet = ConvertItem(inv.Inventory.Helmet);
-            // todo
-            //p.Inventory.Items = inv.Inventory.Items;
-            p.Inventory.Items = new Packet_PositionItem[inv.Inventory.Items.Count];
-            p.Inventory.ItemsCount = inv.Inventory.Items.Count;
-            p.Inventory.ItemsLength = inv.Inventory.Items.Count;
+            p.Inventory = new Packet_Inventory
+            {
+                Boots = ConvertItem(inv.Inventory.Boots),
+                DragDropItem = ConvertItem(inv.Inventory.DragDropItem),
+                Gauntlet = ConvertItem(inv.Inventory.Gauntlet),
+                Helmet = ConvertItem(inv.Inventory.Helmet),
+                // todo
+                //p.Inventory.Items = inv.Inventory.Items;
+                Items = new Packet_PositionItem[inv.Inventory.Items.Count],
+                ItemsCount = inv.Inventory.Items.Count,
+                ItemsLength = inv.Inventory.Items.Count
+            };
             {
                 int i = 0;
                 foreach (var k in inv.Inventory.Items)
                 {
-                    Packet_PositionItem item = new Packet_PositionItem();
-                    item.Key_ = SerializePoint(k.Key.X, k.Key.Y);
-                    item.Value_ = ConvertItem(k.Value);
-                    item.X = k.Key.X;
-                    item.Y = k.Key.Y;
+                    Packet_PositionItem item = new()
+                    {
+                        Key_ = SerializePoint(k.Key.X, k.Key.Y),
+                        Value_ = ConvertItem(k.Value),
+                        X = k.Key.X,
+                        Y = k.Key.Y
+                    };
                     p.Inventory.Items[i++] = item;
                 }
             }
@@ -902,22 +911,24 @@ public partial class Server : ICurrentTime, IDropItem
         return p;
     }
 
-    private string SerializePoint(int x, int y)
+    private static string SerializePoint(int x, int y)
     {
         return x.ToString() + " " + y.ToString();
     }
 
-    private Packet_Item ConvertItem(Item item)
+    private static Packet_Item ConvertItem(Item item)
     {
         if (item == null)
         {
             return null;
         }
-        Packet_Item p = new Packet_Item();
-        p.BlockCount = item.BlockCount;
-        p.BlockId = item.BlockId;
-        p.ItemClass = (int)item.ItemClass;
-        p.ItemId = item.ItemId;
+        Packet_Item p = new()
+        {
+            BlockCount = item.BlockCount,
+            BlockId = item.BlockId,
+            ItemClass = (int)item.ItemClass,
+            ItemId = item.ItemId
+        };
         return p;
     }
 
@@ -959,8 +970,8 @@ public partial class Server : ICurrentTime, IDropItem
                     }
                     foreach (Monster m in chunk.Monsters)
                     {
-                        Vector3i mpos = new Vector3i { x = m.X, y = m.Y, z = m.Z };
-                        Vector3i ppos = new Vector3i
+                        Vector3i mpos = new() { x = m.X, y = m.Y, z = m.Z };
+                        Vector3i ppos = new()
                         {
                             x = clients[clientid].PositionMul32GlX / 32,
                             y = clients[clientid].PositionMul32GlZ / 32,
@@ -1031,7 +1042,7 @@ public partial class Server : ICurrentTime, IDropItem
     }
     public int FiniteInventoryMax = 200;
 
-    Inventory StartInventory()
+    private Inventory StartInventory()
     {
         Inventory inv = ManicDigger.Inventory.Create();
         int x = 0;
@@ -1065,20 +1076,22 @@ public partial class Server : ICurrentTime, IDropItem
         }
         return inv;
     }
-    PacketServerPlayerStats StartPlayerStats()
+    private static PacketServerPlayerStats StartPlayerStats()
     {
-        var p = new PacketServerPlayerStats();
-        p.CurrentHealth = 20;
-        p.MaxHealth = 20;
-        p.CurrentOxygen = 10;
-        p.MaxOxygen = 10;
+        var p = new PacketServerPlayerStats
+        {
+            CurrentHealth = 20,
+            MaxHealth = 20,
+            CurrentOxygen = 10,
+            MaxOxygen = 10
+        };
         return p;
     }
-    public Vector3i PlayerBlockPosition(ClientOnServer c)
+    public static Vector3i PlayerBlockPosition(ClientOnServer c)
     {
         return new Vector3i(c.PositionMul32GlX / 32, c.PositionMul32GlZ / 32, c.PositionMul32GlY / 32);
     }
-    public int DistanceSquared(Vector3i a, Vector3i b)
+    public static int DistanceSquared(Vector3i a, Vector3i b)
     {
         int dx = a.x - b.x;
         int dy = a.y - b.y;
@@ -1146,7 +1159,7 @@ public partial class Server : ICurrentTime, IDropItem
     {
         ClientOnServer c = clients[clientid];
         //PacketClient packet = Serializer.Deserialize<PacketClient>(new MemoryStream(data));
-        Packet_Client packet = new Packet_Client();
+        Packet_Client packet = new();
         Packet_ClientSerializer.DeserializeBuffer(data, data.Length, packet);
         if (c.queryClient)
         {
@@ -1200,7 +1213,7 @@ public partial class Server : ICurrentTime, IDropItem
                     string username = packet.Identification.Username;
 
                     // allowed characters in username: a-z,A-Z,0-9,-,_ length: 1-16
-                    Regex allowedUsername = new Regex(@"^(\w|-){1,16}$");
+                    Regex allowedUsername = new(@"^(\w|-){1,16}$");
 
                     if (string.IsNullOrEmpty(username) || !allowedUsername.IsMatch(username))
                     {
@@ -1290,8 +1303,10 @@ public partial class Server : ICurrentTime, IDropItem
                     if (config.EnablePlayerPushing)
                     {
                         // Player pushing
-                        clients[clientid].entity.push = new ServerEntityPush();
-                        clients[clientid].entity.push.range = 1;
+                        clients[clientid].entity.push = new ServerEntityPush
+                        {
+                            range = 1
+                        };
                     }
                     PlayerEntitySetDirty(clientid);
                 }
@@ -1377,8 +1392,8 @@ public partial class Server : ICurrentTime, IDropItem
                         SendMessage(clientid, colorError + language.ServerNoSpectatorBuild());
                         break;
                     }
-                    Vector3i a = new Vector3i(packet.FillArea.X1, packet.FillArea.Y1, packet.FillArea.Z1);
-                    Vector3i b = new Vector3i(packet.FillArea.X2, packet.FillArea.Y2, packet.FillArea.Z2);
+                    Vector3i a = new(packet.FillArea.X1, packet.FillArea.Y1, packet.FillArea.Z1);
+                    Vector3i b = new(packet.FillArea.X2, packet.FillArea.Y2, packet.FillArea.Z2);
 
                     int blockCount = (Math.Abs(a.x - b.x) + 1) * (Math.Abs(a.y - b.y) + 1) * (Math.Abs(a.z - b.z) + 1);
 
@@ -1547,7 +1562,7 @@ public partial class Server : ICurrentTime, IDropItem
                 {
                     try
                     {
-                        DialogClickArgs args = new DialogClickArgs();
+                        DialogClickArgs args = new();
                         args.SetPlayer(clientid);
                         args.SetWidgetId(packet.DialogClick_.WidgetId);
                         args.SetTextBoxValue(packet.DialogClick_.TextBoxValue);
@@ -1571,8 +1586,8 @@ public partial class Server : ICurrentTime, IDropItem
                 }
                 else
                 {
-                    Vector3 from = new Vector3(DeserializeFloat(packet.Shot.FromX), DeserializeFloat(packet.Shot.FromY), DeserializeFloat(packet.Shot.FromZ));
-                    Vector3 to = new Vector3(DeserializeFloat(packet.Shot.ToX), DeserializeFloat(packet.Shot.ToY), DeserializeFloat(packet.Shot.ToZ));
+                    Vector3 from = new(DeserializeFloat(packet.Shot.FromX), DeserializeFloat(packet.Shot.FromY), DeserializeFloat(packet.Shot.FromZ));
+                    Vector3 to = new(DeserializeFloat(packet.Shot.ToX), DeserializeFloat(packet.Shot.ToY), DeserializeFloat(packet.Shot.ToZ));
                     Vector3 v = to - from;
                     v.Normalize();
                     v *= BlockTypes[packet.Shot.WeaponBlock].ProjectileSpeed;
@@ -1634,13 +1649,15 @@ public partial class Server : ICurrentTime, IDropItem
                     {
                         continue;
                     }
-                    Line3D pick = new Line3D();
-                    pick.Start = new float[] { DeserializeFloat(packet.Shot.FromX), DeserializeFloat(packet.Shot.FromY), DeserializeFloat(packet.Shot.FromZ) };
-                    pick.End = new float[] { DeserializeFloat(packet.Shot.ToX), DeserializeFloat(packet.Shot.ToY), DeserializeFloat(packet.Shot.ToZ) };
+                    Line3D pick = new()
+                    {
+                        Start = new float[] { DeserializeFloat(packet.Shot.FromX), DeserializeFloat(packet.Shot.FromY), DeserializeFloat(packet.Shot.FromZ) },
+                        End = new float[] { DeserializeFloat(packet.Shot.ToX), DeserializeFloat(packet.Shot.ToY), DeserializeFloat(packet.Shot.ToZ) }
+                    };
 
-                    Vector3 feetpos = new Vector3((float)k.Value.PositionMul32GlX / 32, (float)k.Value.PositionMul32GlY / 32, (float)k.Value.PositionMul32GlZ / 32);
+                    Vector3 feetpos = new((float)k.Value.PositionMul32GlX / 32, (float)k.Value.PositionMul32GlY / 32, (float)k.Value.PositionMul32GlZ / 32);
                     //var p = PlayerPositionSpawn;
-                    Box3D bodybox = new Box3D();
+                    Box3D bodybox = new();
                     float headsize = (k.Value.ModelHeight - k.Value.EyeHeight) * 2; //0.4f;
                     float h = k.Value.ModelHeight - headsize;
                     float r = 0.35f;
@@ -1655,7 +1672,7 @@ public partial class Server : ICurrentTime, IDropItem
                     bodybox.AddPoint(feetpos.X + r, feetpos.Y + h, feetpos.Z - r);
                     bodybox.AddPoint(feetpos.X + r, feetpos.Y + h, feetpos.Z + r);
 
-                    Box3D headbox = new Box3D();
+                    Box3D headbox = new();
 
                     headbox.AddPoint(feetpos.X - r, feetpos.Y + h, feetpos.Z - r);
                     headbox.AddPoint(feetpos.X - r, feetpos.Y + h, feetpos.Z + r);
@@ -1751,7 +1768,7 @@ public partial class Server : ICurrentTime, IDropItem
                 Console.WriteLine("ServerQuery processed.");
                 lastQuery = DateTime.UtcNow;
                 //Client only wants server information. No real client.
-                List<string> playernames = new List<string>();
+                List<string> playernames = new();
                 lock (clients)
                 {
                     foreach (var k in clients)
@@ -1765,7 +1782,7 @@ public partial class Server : ICurrentTime, IDropItem
                     }
                 }
                 //Create query answer
-                Packet_ServerQueryAnswer answer = new Packet_ServerQueryAnswer()
+                Packet_ServerQueryAnswer answer = new()
                 {
                     Name = config.Name,
                     MOTD = config.Motd,
@@ -1836,7 +1853,7 @@ public partial class Server : ICurrentTime, IDropItem
         }
         for (int i = 0; i < server.modEventHandlers.onpermission.Count; i++)
         {
-            PermissionArgs args = new PermissionArgs();
+            PermissionArgs args = new();
             args.SetPlayer(player);
             args.SetX(x);
             args.SetY(y);
@@ -1930,12 +1947,14 @@ public partial class Server : ICurrentTime, IDropItem
 
     public void SendServerRedirect(int clientid, string ip_, int port_)
     {
-        Packet_Server p = new Packet_Server();
-        p.Id = Packet_ServerIdEnum.ServerRedirect;
-        p.Redirect = new Packet_ServerRedirect()
+        Packet_Server p = new()
         {
-            IP = ip_,
-            Port = port_,
+            Id = Packet_ServerIdEnum.ServerRedirect,
+            Redirect = new Packet_ServerRedirect()
+            {
+                IP = ip_,
+                Port = port_,
+            }
         };
         SendPacket(clientid, p);
     }
@@ -1966,7 +1985,7 @@ public partial class Server : ICurrentTime, IDropItem
             //Resize the image if it does not have the proper size
             bmp2 = new Bitmap(bmp, 64, 64);
         }
-        using (MemoryStream ms = new MemoryStream())
+        using (MemoryStream ms = new())
         {
             //Convert image to a byte[] for transfer
             bmp2.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
@@ -1974,7 +1993,7 @@ public partial class Server : ICurrentTime, IDropItem
         }
     }
 
-    private float DeserializeFloat(int p)
+    private static float DeserializeFloat(int p)
     {
         return (float)p / 32;
     }
@@ -1987,19 +2006,21 @@ public partial class Server : ICurrentTime, IDropItem
             {
                 continue;
             }
-            Packet_Server p = new Packet_Server();
-            p.Id = Packet_ServerIdEnum.Projectile;
-            p.Projectile = new Packet_ServerProjectile()
+            Packet_Server p = new()
             {
-                FromXFloat = SerializeFloat(fromx),
-                FromYFloat = SerializeFloat(fromy),
-                FromZFloat = SerializeFloat(fromz),
-                VelocityXFloat = SerializeFloat(velocityx),
-                VelocityYFloat = SerializeFloat(velocityy),
-                VelocityZFloat = SerializeFloat(velocityz),
-                BlockId = block,
-                ExplodesAfterFloat = SerializeFloat(explodesafter),
-                SourcePlayerID = player,
+                Id = Packet_ServerIdEnum.Projectile,
+                Projectile = new Packet_ServerProjectile()
+                {
+                    FromXFloat = SerializeFloat(fromx),
+                    FromYFloat = SerializeFloat(fromy),
+                    FromZFloat = SerializeFloat(fromz),
+                    VelocityXFloat = SerializeFloat(velocityx),
+                    VelocityYFloat = SerializeFloat(velocityy),
+                    VelocityZFloat = SerializeFloat(velocityz),
+                    BlockId = block,
+                    ExplodesAfterFloat = SerializeFloat(explodesafter),
+                    SourcePlayerID = player,
+                }
             };
             SendPacket(k.Key, Serialize(p));
         }
@@ -2013,22 +2034,24 @@ public partial class Server : ICurrentTime, IDropItem
             {
                 continue;
             }
-            Packet_Server p = new Packet_Server();
-            p.Id = Packet_ServerIdEnum.Bullet;
-            p.Bullet = new Packet_ServerBullet()
+            Packet_Server p = new()
             {
-                FromXFloat = SerializeFloat(fromx),
-                FromYFloat = SerializeFloat(fromy),
-                FromZFloat = SerializeFloat(fromz),
-                ToXFloat = SerializeFloat(tox),
-                ToYFloat = SerializeFloat(toy),
-                ToZFloat = SerializeFloat(toz),
-                SpeedFloat = SerializeFloat(speed)
+                Id = Packet_ServerIdEnum.Bullet,
+                Bullet = new Packet_ServerBullet()
+                {
+                    FromXFloat = SerializeFloat(fromx),
+                    FromYFloat = SerializeFloat(fromy),
+                    FromZFloat = SerializeFloat(fromz),
+                    ToXFloat = SerializeFloat(tox),
+                    ToYFloat = SerializeFloat(toy),
+                    ToZFloat = SerializeFloat(toz),
+                    SpeedFloat = SerializeFloat(speed)
+                }
             };
             SendPacket(k.Key, Serialize(p));
         }
     }
-    int pistolcycle;
+    private int pistolcycle;
     public Vector3i GetPlayerSpawnPositionMul32(int clientid)
     {
         Vector3i position;
@@ -2136,7 +2159,7 @@ public partial class Server : ICurrentTime, IDropItem
                 return colorNormal;
         }
     }
-    bool CompareByteArray(byte[] a, byte[] b)
+    private static bool CompareByteArray(byte[] a, byte[] b)
     {
         if (a.Length != b.Length) { return false; }
         for (int i = 0; i < a.Length; i++)
@@ -2152,7 +2175,7 @@ public partial class Server : ICurrentTime, IDropItem
             SendSetBlock(k.Key, x, y, z, blocktype);
         }
     }
-    bool ENABLE_FINITEINVENTORY { get { return !config.IsCreative; } }
+    private bool ENABLE_FINITEINVENTORY { get { return !config.IsCreative; } }
     private bool DoCommandCraft(bool execute, Packet_ClientCraft cmd)
     {
         if (d_Map.GetBlock(cmd.X, cmd.Y, cmd.Z) != d_Data.BlockIdCraftingTable())
@@ -2163,11 +2186,11 @@ public partial class Server : ICurrentTime, IDropItem
         {
             return false;
         }
-        IntRef tableCount = new IntRef();
+        IntRef tableCount = new();
         Vector3IntRef[] table = d_CraftingTableTool.GetTable(cmd.X, cmd.Y, cmd.Z, tableCount);
-        IntRef ontableCount = new IntRef();
+        IntRef ontableCount = new();
         int[] ontable = d_CraftingTableTool.GetOnTable(table, tableCount.value, ontableCount);
-        List<int> outputtoadd = new List<int>();
+        List<int> outputtoadd = new();
         //for (int i = 0; i < craftingrecipes.Count; i++)
         int i = cmd.RecipeId;
         {
@@ -2217,7 +2240,7 @@ public partial class Server : ICurrentTime, IDropItem
         return true;
     }
 
-    private int ontableFindAllCount(int[] ontable, IntRef ontableCount, int p)
+    private static int ontableFindAllCount(int[] ontable, IntRef ontableCount, int p)
     {
         int count = 0;
         for (int i = 0; i < ontableCount.value; i++)
@@ -2230,7 +2253,7 @@ public partial class Server : ICurrentTime, IDropItem
         return count;
     }
 
-    private void ReplaceOne<T>(T[] l, int lCount, T from, T to)
+    private static void ReplaceOne<T>(T[] l, int lCount, T from, T to)
     {
         for (int ii = 0; ii < lCount; ii++)
         {
@@ -2244,19 +2267,23 @@ public partial class Server : ICurrentTime, IDropItem
     public IGameDataItems d_DataItems;
     public InventoryUtil GetInventoryUtil(Inventory inventory)
     {
-        InventoryUtil util = new InventoryUtil();
-        util.d_Inventory = inventory;
-        util.d_Items = d_DataItems;
+        InventoryUtil util = new()
+        {
+            d_Inventory = inventory,
+            d_Items = d_DataItems
+        };
         return util;
     }
     private void DoCommandInventory(int player_id, Packet_ClientInventoryAction cmd)
     {
         Inventory inventory = GetPlayerInventory(clients[player_id].playername).Inventory;
-        var s = new InventoryServer();
-        s.d_Inventory = inventory;
-        s.d_InventoryUtil = GetInventoryUtil(inventory);
-        s.d_Items = d_DataItems;
-        s.d_DropItem = this;
+        var s = new InventoryServer
+        {
+            d_Inventory = inventory,
+            d_InventoryUtil = GetInventoryUtil(inventory),
+            d_Items = d_DataItems,
+            d_DropItem = this
+        };
 
         switch (cmd.Action)
         {
@@ -2307,8 +2334,8 @@ public partial class Server : ICurrentTime, IDropItem
     }
     private bool DoFillArea(int player_id, Packet_ClientFillArea fill, int blockCount)
     {
-        Vector3i a = new Vector3i(fill.X1, fill.Y1, fill.Z1);
-        Vector3i b = new Vector3i(fill.X2, fill.Y2, fill.Z2);
+        Vector3i a = new(fill.X1, fill.Y1, fill.Z1);
+        Vector3i b = new(fill.X2, fill.Y2, fill.Z2);
 
         int startx = Math.Min(a.x, b.x);
         int endx = Math.Max(a.x, b.x);
@@ -2334,11 +2361,13 @@ public partial class Server : ICurrentTime, IDropItem
             {
                 for (int z = startz; z <= endz; ++z)
                 {
-                    Packet_ClientSetBlock cmd = new Packet_ClientSetBlock();
-                    cmd.X = x;
-                    cmd.Y = y;
-                    cmd.Z = z;
-                    cmd.MaterialSlot = fill.MaterialSlot;
+                    Packet_ClientSetBlock cmd = new()
+                    {
+                        X = x,
+                        Y = y,
+                        Z = z,
+                        MaterialSlot = fill.MaterialSlot
+                    };
                     if (GetBlock(x, y, z) != 0)
                     {
                         cmd.Mode = Packet_BlockSetModeEnum.Destroy;
@@ -2407,8 +2436,8 @@ public partial class Server : ICurrentTime, IDropItem
     {
         // TODO: better to send a chunk?
 
-        Vector3i v = new Vector3i((int)(a.x / chunksize), (int)(a.y / chunksize), (int)(a.z / chunksize));
-        Vector3i w = new Vector3i((int)(b.x / chunksize), (int)(b.y / chunksize), (int)(b.z / chunksize));
+        Vector3i v = new((int)(a.x / chunksize), (int)(a.y / chunksize), (int)(a.z / chunksize));
+        Vector3i w = new((int)(b.x / chunksize), (int)(b.y / chunksize), (int)(b.z / chunksize));
 
         // TODO: Is it sufficient to regard only start- and endpoint?
         if (!ClientSeenChunk(clientid, v.x, v.y, v.z) && !ClientSeenChunk(clientid, w.x, w.y, w.z))
@@ -2416,7 +2445,7 @@ public partial class Server : ICurrentTime, IDropItem
             return;
         }
 
-        Packet_ServerFillArea p = new Packet_ServerFillArea()
+        Packet_ServerFillArea p = new()
         {
             X1 = a.x,
             Y1 = a.y,
@@ -2469,7 +2498,7 @@ public partial class Server : ICurrentTime, IDropItem
 
     private void SendFillAreaLimit(int clientid, int limit)
     {
-        Packet_ServerFillAreaLimit p = new Packet_ServerFillAreaLimit()
+        Packet_ServerFillAreaLimit p = new()
         {
             Limit = limit
         };
@@ -2478,7 +2507,7 @@ public partial class Server : ICurrentTime, IDropItem
 
     private bool DoCommandBuild(int player_id, bool execute, Packet_ClientSetBlock cmd)
     {
-        Vector3 v = new Vector3(cmd.X, cmd.Y, cmd.Z);
+        Vector3 v = new(cmd.X, cmd.Y, cmd.Z);
         Inventory inventory = GetPlayerInventory(clients[player_id].playername).Inventory;
         if (cmd.Mode == Packet_BlockSetModeEnum.Use)
         {
@@ -2569,8 +2598,10 @@ public partial class Server : ICurrentTime, IDropItem
         }
         else
         {
-            var item = new Item();
-            item.ItemClass = ItemClass.Block;
+            var item = new Item
+            {
+                ItemClass = ItemClass.Block
+            };
             int blockid = d_Map.GetBlock(cmd.X, cmd.Y, cmd.Z);
             item.BlockId = d_Data.WhenPlayerPlacesGetsConvertedTo()[blockid];
             if (!config.IsCreative)
@@ -2666,10 +2697,12 @@ public partial class Server : ICurrentTime, IDropItem
                 (blocktype - d_Data.BlockIdRailstart()));
         }
 
-        var item = new Item();
-        item.ItemClass = ItemClass.Block;
-        item.BlockId = d_Data.WhenPlayerPlacesGetsConvertedTo()[blocktype];
-        item.BlockCount = blockstopick;
+        var item = new Item
+        {
+            ItemClass = ItemClass.Block,
+            BlockId = d_Data.WhenPlayerPlacesGetsConvertedTo()[blocktype],
+            BlockCount = blockstopick
+        };
         if (!config.IsCreative)
         {
             GetInventoryUtil(inventory).GrabItem(item, cmd.MaterialSlot);
@@ -2704,7 +2737,7 @@ public partial class Server : ICurrentTime, IDropItem
         d_Map.SetBlockNotMakingDirty(x, y, z, blocktype);
         NotifyBlock(x, y, z, blocktype);
     }
-    private int TotalAmount(Dictionary<int, int> inventory)
+    private static int TotalAmount(Dictionary<int, int> inventory)
     {
         int sum = 0;
         foreach (var k in inventory)
@@ -2756,7 +2789,7 @@ public partial class Server : ICurrentTime, IDropItem
         }
         return blocktypea == blocktypeb;
     }
-    public byte[] Serialize(Packet_Server p)
+    public static byte[] Serialize(Packet_Server p)
     {
         byte[] data = Packet_ServerSerializer.SerializeToBytes(p);
         return data;
@@ -2803,17 +2836,17 @@ public partial class Server : ICurrentTime, IDropItem
     		// don't send block updates for chunks a player can not see
             return;
         }
-        Packet_ServerSetBlock p = new Packet_ServerSetBlock() { X = x, Y = y, Z = z, BlockType = blocktype };
+        Packet_ServerSetBlock p = new() { X = x, Y = y, Z = z, BlockType = blocktype };
         SendPacket(clientid, Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.SetBlock, SetBlock = p }));
     }
     public void SendSound(int clientid, string name, int x, int y, int z)
     {
-        Packet_ServerSound p = new Packet_ServerSound() { Name = name, X = x, Y = y, Z = z };
+        Packet_ServerSound p = new() { Name = name, X = x, Y = y, Z = z };
         SendPacket(clientid, Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.Sound, Sound = p }));
     }
     private void SendPlayerSpawnPosition(int clientid, int x, int y, int z)
     {
-        Packet_ServerPlayerSpawnPosition p = new Packet_ServerPlayerSpawnPosition()
+        Packet_ServerPlayerSpawnPosition p = new()
         {
             X = x,
             Y = y,
@@ -2835,15 +2868,15 @@ public partial class Server : ICurrentTime, IDropItem
     {
         if (clientid == this.serverConsoleId)
         {
-            this.serverConsole.Receive(message);
+            ServerConsole.Receive(message);
             return;
         }
 
         SendPacket(clientid, ServerPackets.Message(message));
     }
 
-    int StatTotalPackets = 0;
-    int StatTotalPacketsLength = 0;
+    private int StatTotalPackets = 0;
+    private int StatTotalPacketsLength = 0;
     public long TotalSentBytes;
     public long TotalReceivedBytes;
 
@@ -2863,7 +2896,7 @@ public partial class Server : ICurrentTime, IDropItem
         TotalSentBytes += packet.Length;
         try
         {
-            INetOutgoingMessage msg = new INetOutgoingMessage();
+            INetOutgoingMessage msg = new();
             msg.Write(packet, packet.Length);
             clients[clientid].socket.SendMessage(msg, MyNetDeliveryMethod.ReliableOrdered, 0);
         }
@@ -2873,13 +2906,13 @@ public partial class Server : ICurrentTime, IDropItem
             KillPlayer(clientid);
         }
     }
-    void EmptyCallback(IAsyncResult result)
+    private static void EmptyCallback(IAsyncResult result)
     {
     }
     public int drawdistance = 128;
     public const int chunksize = 32;
     public const double invertedChunkSize = 1.0/chunksize;
-    public int invertChunk(int num)
+    public static int invertChunk(int num)
     {
         return (int)(num*invertedChunkSize);
     }
@@ -2890,8 +2923,8 @@ public partial class Server : ICurrentTime, IDropItem
     }
     public byte[] CompressChunkNetwork(byte[, ,] chunk)
     {
-        MemoryStream ms = new MemoryStream();
-        BinaryWriter bw = new BinaryWriter(ms);
+        MemoryStream ms = new();
+        BinaryWriter bw = new(ms);
         for (int z = 0; z <= chunk.GetUpperBound(2); z++)
         {
             for (int y = 0; y <= chunk.GetUpperBound(1); y++)
@@ -2906,10 +2939,10 @@ public partial class Server : ICurrentTime, IDropItem
         return compressedchunk;
     }
 
-    Packet_StringList GetRequiredBlobMd5()
+    private Packet_StringList GetRequiredBlobMd5()
     {
-        Packet_StringList p = new Packet_StringList();
-        List<string> list = new List<string>();
+        Packet_StringList p = new();
+        List<string> list = new();
 
         for (int i = 0; i < assets.count; i++)
         {
@@ -2920,10 +2953,10 @@ public partial class Server : ICurrentTime, IDropItem
         return p;
     }
 
-    Packet_StringList GetRequiredBlobName()
+    private Packet_StringList GetRequiredBlobName()
     {
-        Packet_StringList p = new Packet_StringList();
-        List<string> list = new List<string>();
+        Packet_StringList p = new();
+        List<string> list = new();
 
         for (int i = 0; i < assets.count; i++)
         {
@@ -2934,16 +2967,16 @@ public partial class Server : ICurrentTime, IDropItem
         return p;
     }
 
-    AssetLoader assetLoader;
-    AssetList assets = new AssetList();
+    private AssetLoader assetLoader;
+    private readonly AssetList assets = new();
 
-    int BlobPartLength = 1024 * 1;
+    private readonly int BlobPartLength = 1024 * 1;
     private void SendBlobs(int clientid, Packet_StringList list)
     {
         SendPacket(clientid, ServerPackets.LevelInitialize());
         LoadAssets();
 
-        List<Asset> tosend = new List<Asset>();
+        List<Asset> tosend = new();
         for (int i = 0; i < assets.count; i++)
         {
             Asset f = assets.items[i];
@@ -2975,9 +3008,9 @@ public partial class Server : ICurrentTime, IDropItem
         SendLevelProgress(clientid, 0, language.ServerProgressGenerating());
     }
 
-    void LoadAssets()
+    private void LoadAssets()
     {
-        FloatRef progress = new FloatRef();
+        FloatRef progress = new();
         assetLoader.LoadAssetsAsync(assets, progress);
         while (progress.value < 1)
         {
@@ -3004,17 +3037,17 @@ public partial class Server : ICurrentTime, IDropItem
     }
     private void SendBlobInitialize(int clientid, string hash, string name)
     {
-        Packet_ServerBlobInitialize p = new Packet_ServerBlobInitialize() { Name = name, Md5 = hash };
+        Packet_ServerBlobInitialize p = new() { Name = name, Md5 = hash };
         SendPacket(clientid, Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.BlobInitialize, BlobInitialize = p }));
     }
     private void SendBlobPart(int clientid, byte[] data)
     {
-        Packet_ServerBlobPart p = new Packet_ServerBlobPart() { Data = data };
+        Packet_ServerBlobPart p = new() { Data = data };
         SendPacket(clientid, Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.BlobPart, BlobPart = p }));
     }
     private void SendBlobFinalize(int clientid)
     {
-        Packet_ServerBlobFinalize p = new Packet_ServerBlobFinalize() { };
+        Packet_ServerBlobFinalize p = new() { };
         SendPacket(clientid, Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.BlobFinalize, BlobFinalize = p }));
     }
     public BlockType[] BlockTypes = new BlockType[GlobalVar.MAX_BLOCKTYPES];
@@ -3022,10 +3055,10 @@ public partial class Server : ICurrentTime, IDropItem
     {
         for (int i = 0; i < BlockTypes.Length; i++)
         {
-            Packet_ServerBlockType p1 = new Packet_ServerBlockType() { Id = i, Blocktype = BlockTypeConverter.GetBlockType(BlockTypes[i]) };
+            Packet_ServerBlockType p1 = new() { Id = i, Blocktype = BlockTypeConverter.GetBlockType(BlockTypes[i]) };
             SendPacket(clientid, Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.BlockType, BlockType = p1 }));
         }
-        Packet_ServerBlockTypes p = new Packet_ServerBlockTypes() { };
+        Packet_ServerBlockTypes p = new() { };
         SendPacket(clientid, Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.BlockTypes, BlockTypes = p }));
     }
 
@@ -3039,7 +3072,7 @@ public partial class Server : ICurrentTime, IDropItem
             {
                 continue;
             }
-            Packet_ServerTranslatedString p = new Packet_ServerTranslatedString()
+            Packet_ServerTranslatedString p = new()
             {
                 Lang = transString.language,
                 Id = transString.id,
@@ -3056,13 +3089,13 @@ public partial class Server : ICurrentTime, IDropItem
 
     private void SendSunLevels(int clientid)
     {
-        Packet_ServerSunLevels p = new Packet_ServerSunLevels();
+        Packet_ServerSunLevels p = new();
         p.SetSunlevels(sunlevels, sunlevels.Length, sunlevels.Length);
         SendPacket(clientid, Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.SunLevels, SunLevels = p }));
     }
     private void SendLightLevels(int clientid)
     {
-        Packet_ServerLightLevels p = new Packet_ServerLightLevels();
+        Packet_ServerLightLevels p = new();
         int[] l = new int[lightlevels.Length];
         for (int i = 0; i < lightlevels.Length; i++)
         {
@@ -3078,7 +3111,7 @@ public partial class Server : ICurrentTime, IDropItem
         {
             recipes[i] = ConvertCraftingRecipe(craftingrecipes[i]);
         }
-        Packet_ServerCraftingRecipes p = new Packet_ServerCraftingRecipes();
+        Packet_ServerCraftingRecipes p = new();
         p.SetCraftingRecipes(recipes, recipes.Length, recipes.Length);
         SendPacket(clientid, Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.CraftingRecipes, CraftingRecipes = p }));
     }
@@ -3089,7 +3122,7 @@ public partial class Server : ICurrentTime, IDropItem
         {
             return null;
         }
-        Packet_CraftingRecipe r = new Packet_CraftingRecipe();
+        Packet_CraftingRecipe r = new();
         if (craftingRecipe.ingredients != null)
         {
             r.Ingredients = new Packet_Ingredient[craftingRecipe.ingredients.Length];
@@ -3102,30 +3135,34 @@ public partial class Server : ICurrentTime, IDropItem
         }
         if (craftingRecipe.output != null)
         {
-            r.Output = new Packet_Ingredient();
-            r.Output.Amount = craftingRecipe.output.Amount;
-            r.Output.Type = craftingRecipe.output.Type;
+            r.Output = new Packet_Ingredient
+            {
+                Amount = craftingRecipe.output.Amount,
+                Type = craftingRecipe.output.Type
+            };
         }
         return r;
     }
 
-    private Packet_Ingredient ConvertIngredient(Ingredient ingredient)
+    private static Packet_Ingredient ConvertIngredient(Ingredient ingredient)
     {
-        Packet_Ingredient p = new Packet_Ingredient();
-        p.Amount = ingredient.Amount;
-        p.Type = ingredient.Type;
+        Packet_Ingredient p = new()
+        {
+            Amount = ingredient.Amount,
+            Type = ingredient.Type
+        };
         return p;
     }
 
     private void SendLevelProgress(int clientid, int percentcomplete, string status)
     {
-        Packet_ServerLevelProgress p = new Packet_ServerLevelProgress() { PercentComplete = percentcomplete, Status = status };
+        Packet_ServerLevelProgress p = new() { PercentComplete = percentcomplete, Status = status };
         SendPacket(clientid, Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.LevelDataChunk, LevelDataChunk = p }));
     }
     public RenderHint RenderHint = RenderHint.Fast;
     private void SendServerIdentification(int clientid)
     {
-        Packet_ServerIdentification p = new Packet_ServerIdentification()
+        Packet_ServerIdentification p = new()
         {
             MdProtocolVersion = GameVersion.Version,
             AssignedClientId = clientid,
@@ -3147,27 +3184,27 @@ public partial class Server : ICurrentTime, IDropItem
 
     public void SendFreemoveState(int clientid, bool isEnabled)
     {
-        Packet_ServerFreemove p = new Packet_ServerFreemove()
+        Packet_ServerFreemove p = new()
         {
             IsEnabled = isEnabled ? 1 : 0
         };
         SendPacket(clientid, Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.Freemove, Freemove = p }));
     }
 
-    byte[] terrainTextureMd5 { get { byte[] b = new byte[16]; b[0] = 1; return b; } }
-    MD5 md5 = System.Security.Cryptography.MD5.Create();
-    byte[] ComputeMd5(byte[] b)
+    private static byte[] terrainTextureMd5 { get { byte[] b = new byte[16]; b[0] = 1; return b; } }
+    private readonly MD5 md5 = MD5.Create();
+    private byte[] ComputeMd5(byte[] b)
     {
         return md5.ComputeHash(b);
     }
-    string ComputeMd5(string input)
+    private string ComputeMd5(string input)
     {
         // step 1, calculate MD5 hash from input
-        byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
+        byte[] inputBytes = Encoding.ASCII.GetBytes(input);
         byte[] hash = md5.ComputeHash(inputBytes);
 
         // step 2, convert byte array to hex string
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new();
         for (int i = 0; i < hash.Length; i++)
         {
             sb.Append(hash[i].ToString("X2"));
@@ -3181,9 +3218,9 @@ public partial class Server : ICurrentTime, IDropItem
         public string Name;
         public byte[] Data;
     }
-    public Dictionary<int, ClientOnServer> clients = new Dictionary<int, ClientOnServer>();
-    public Dictionary<string, bool> disabledprivileges = new Dictionary<string, bool>();
-    public Dictionary<string, bool> extraPrivileges = new Dictionary<string, bool>();
+    public Dictionary<int, ClientOnServer> clients = new();
+    public Dictionary<string, bool> disabledprivileges = new();
+    public Dictionary<string, bool> extraPrivileges = new();
     public ClientOnServer GetClient(int id)
     {
         if (id == this.serverConsoleId)
@@ -3212,7 +3249,7 @@ public partial class Server : ICurrentTime, IDropItem
 
     internal bool serverClientNeedsSaving;
     public ServerClient serverClient;
-    public ManicDigger.Group defaultGroupGuest;
+    public ManicDigger.Group? defaultGroupGuest;
     public ManicDigger.Group defaultGroupRegistered;
     public Vector3i defaultPlayerSpawn;
 
@@ -3271,7 +3308,7 @@ public partial class Server : ICurrentTime, IDropItem
     }
     private Vector3i? FindDumpPlace(Vector3i pos)
     {
-        List<Vector3i> l = new List<Vector3i>();
+        List<Vector3i> l = new();
         for (int x = 0; x < 10; x++)
         {
             for (int y = 0; y < 10; y++)
@@ -3311,11 +3348,11 @@ public partial class Server : ICurrentTime, IDropItem
         }
         return null;
     }
-    private Vector3i Minus(Vector3i a, Vector3i b)
+    private static Vector3i Minus(Vector3i a, Vector3i b)
     {
         return new Vector3i(a.x - b.x, a.y - b.y, a.z - b.z);
     }
-    int Length(Vector3i v)
+    private static int Length(Vector3i v)
     {
         return (int)Math.Sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
     }
@@ -3338,17 +3375,17 @@ public partial class Server : ICurrentTime, IDropItem
         }
     }
 
-    int[] sunlevels = [];
+    private int[] sunlevels = [];
     public void SetSunLevels(int[] sunLevels)
     {
         this.sunlevels = sunLevels;
     }
-    float[] lightlevels = [];
+    private float[] lightlevels = [];
     public void SetLightLevels(float[] lightLevels)
     {
         this.lightlevels = lightLevels;
     }
-    public List<CraftingRecipe> craftingrecipes = new List<CraftingRecipe>();
+    public List<CraftingRecipe> craftingrecipes = new();
 
     public bool IsSinglePlayer
     {
@@ -3357,7 +3394,7 @@ public partial class Server : ICurrentTime, IDropItem
 
     public void SendDialog(int player, string id, Dialog dialog)
     {
-        Packet_ServerDialog p = new Packet_ServerDialog()
+        Packet_ServerDialog p = new()
         {
             DialogId = id,
             Dialog = ConvertDialog(dialog),
@@ -3371,9 +3408,11 @@ public partial class Server : ICurrentTime, IDropItem
         {
             return null;
         }
-        Packet_Dialog p = new Packet_Dialog();
-        p.Height_ = dialog.Height;
-        p.IsModal = dialog.IsModal ? 1 : 0;
+        Packet_Dialog p = new()
+        {
+            Height_ = dialog.Height,
+            IsModal = dialog.IsModal ? 1 : 0
+        };
         if (dialog.Widgets != null)
         {
             Packet_Widget[] widgets = new Packet_Widget[dialog.Widgets.Length];
@@ -3393,32 +3432,36 @@ public partial class Server : ICurrentTime, IDropItem
         {
             return null;
         }
-        Packet_Widget w = new Packet_Widget();
-        w.Click = widget.Click ? 1 : 0;
-        w.ClickKey = widget.ClickKey;
-        w.Color = widget.Color;
-        w.Font = ConvertFont(widget.Font);
-        w.Height_ = widget.Height;
-        w.Id = widget.Id;
-        w.Image = widget.Image;
-        w.Text = widget.Text;
-        w.Type = (int)widget.Type;
-        w.Width = widget.Width;
-        w.X = widget.X;
-        w.Y = widget.Y;
+        Packet_Widget w = new()
+        {
+            Click = widget.Click ? 1 : 0,
+            ClickKey = widget.ClickKey,
+            Color = widget.Color,
+            Font = ConvertFont(widget.Font),
+            Height_ = widget.Height,
+            Id = widget.Id,
+            Image = widget.Image,
+            Text = widget.Text,
+            Type = (int)widget.Type,
+            Width = widget.Width,
+            X = widget.X,
+            Y = widget.Y
+        };
         return w;
     }
 
-    private Packet_DialogFont ConvertFont(DialogFont dialogFont)
+    private static Packet_DialogFont ConvertFont(DialogFont dialogFont)
     {
         if (dialogFont == null)
         {
             return null;
         }
-        Packet_DialogFont f = new Packet_DialogFont();
-        f.FamilyName = dialogFont.FamilyName;
-        f.FontStyle = (int)dialogFont.FontStyle;
-        f.SizeFloat = SerializeFloat(dialogFont.Size);
+        Packet_DialogFont f = new()
+        {
+            FamilyName = dialogFont.FamilyName,
+            FontStyle = (int)dialogFont.FontStyle,
+            SizeFloat = SerializeFloat(dialogFont.Size)
+        };
         return f;
     }
 
@@ -3442,7 +3485,7 @@ public partial class Server : ICurrentTime, IDropItem
 
     public void PlaySoundAtExceptPlayer(int posx, int posy, int posz, string sound, int? player)
     {
-        Vector3i pos = new Vector3i(posx, posy, posz);
+        Vector3i pos = new(posx, posy, posz);
         foreach (var k in clients)
         {
             if (player != null && player == k.Key)
@@ -3463,7 +3506,7 @@ public partial class Server : ICurrentTime, IDropItem
     }
     public void PlaySoundAtExceptPlayer(int posx, int posy, int posz, string sound, int? player, int range)
     {
-        Vector3i pos = new Vector3i(posx, posy, posz);
+        Vector3i pos = new(posx, posy, posz);
         foreach (var k in clients)
         {
             if (player != null && player == k.Key)
@@ -3480,7 +3523,7 @@ public partial class Server : ICurrentTime, IDropItem
 
     public void SendPacketFollow(int player, int target, bool tpp)
     {
-        Packet_ServerFollow p = new Packet_ServerFollow()
+        Packet_ServerFollow p = new()
         {
             Client = target == -1 ? null : clients[target].playername,
             Tpp = tpp ? 1 : 0,
@@ -3490,7 +3533,7 @@ public partial class Server : ICurrentTime, IDropItem
 
     public void SendAmmo(int playerid, Dictionary<int, int> totalAmmo)
     {
-        Packet_ServerAmmo p = new Packet_ServerAmmo();
+        Packet_ServerAmmo p = new();
         Packet_IntInt[] t = new Packet_IntInt[totalAmmo.Count];
         int i = 0;
         foreach (var k in totalAmmo)
@@ -3505,13 +3548,15 @@ public partial class Server : ICurrentTime, IDropItem
 
     public void SendExplosion(int player, float x, float y, float z, bool relativeposition, float range, float time)
     {
-        Packet_ServerExplosion p = new Packet_ServerExplosion();
-        p.XFloat = SerializeFloat(x);
-        p.YFloat = SerializeFloat(y);
-        p.ZFloat = SerializeFloat(z);
-        p.IsRelativeToPlayerPosition = relativeposition ? 1 : 0;
-        p.RangeFloat = SerializeFloat(range);
-        p.TimeFloat = SerializeFloat(time);
+        Packet_ServerExplosion p = new()
+        {
+            XFloat = SerializeFloat(x),
+            YFloat = SerializeFloat(y),
+            ZFloat = SerializeFloat(z),
+            IsRelativeToPlayerPosition = relativeposition ? 1 : 0,
+            RangeFloat = SerializeFloat(range),
+            TimeFloat = SerializeFloat(time)
+        };
         SendPacket(player, Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.Explosion, Explosion = p }));
     }
 
@@ -3527,15 +3572,17 @@ public partial class Server : ICurrentTime, IDropItem
 
     internal void InstallHttpModule(string name, ManicDigger.Func<string> description, FragLabs.HTTP.IHttpModule module)
     {
-        ActiveHttpModule m = new ActiveHttpModule();
-        m.name = name;
-        m.description = description;
-        m.module = module;
+        ActiveHttpModule m = new()
+        {
+            name = name,
+            description = description,
+            module = module
+        };
         httpModules.Add(m);
     }
-    internal List<ActiveHttpModule> httpModules = new List<ActiveHttpModule>();
+    internal List<ActiveHttpModule> httpModules = new();
 
-    public ModEventHandlers modEventHandlers = new ModEventHandlers();
+    public ModEventHandlers modEventHandlers = new();
 
     internal static bool IsTransparentForLight(BlockType b)
     {
@@ -3586,13 +3633,13 @@ public partial class Server : ICurrentTime, IDropItem
                 }
             }
         }
-        ServerChunk chunk = d_Map.GetChunk(id.chunkx * Server.chunksize, id.chunky * Server.chunksize, id.chunkz * Server.chunksize);
+        ServerChunk chunk = d_Map.GetChunk(id.chunkx * chunksize, id.chunky * chunksize, id.chunkz * chunksize);
         chunk.DirtyForSaving = true;
     }
 
     internal void DespawnEntity(ServerEntityId id)
     {
-        ServerChunk chunk = d_Map.GetChunk(id.chunkx * Server.chunksize, id.chunky * Server.chunksize, id.chunkz * Server.chunksize);
+        ServerChunk chunk = d_Map.GetChunk(id.chunkx * chunksize, id.chunky * chunksize, id.chunkz * chunksize);
         chunk.Entities[id.id] = null;
         if (id.id == chunk.EntitiesCount - 1)
         {
@@ -3622,13 +3669,21 @@ public class ClientOnServer
     public ClientOnServer()
     {
         float one = 1;
-        entity = new ServerEntity();
-        entity.drawName = new ServerEntityDrawName();
-        entity.drawName.clientAutoComplete = true;
-        entity.position = new ServerEntityPositionAndOrientation();
-        entity.position.pitch = 2 * 255 / 4;
-        entity.drawModel = new ServerEntityAnimatedModel();
-        entity.drawModel.downloadSkin = true;
+        entity = new ServerEntity
+        {
+            drawName = new ServerEntityDrawName
+            {
+                clientAutoComplete = true
+            },
+            position = new ServerEntityPositionAndOrientation
+            {
+                pitch = 2 * 255 / 4
+            },
+            drawModel = new ServerEntityAnimatedModel
+            {
+                downloadSkin = true
+            }
+        };
         Id = -1;
         state = ClientStateOnServer.Connecting;
         queryClient = true;
@@ -3737,44 +3792,46 @@ public class ServerEntityId
 
     internal ServerEntityId Clone()
     {
-        ServerEntityId ret = new ServerEntityId();
-        ret.chunkx = chunkx;
-        ret.chunky = chunky;
-        ret.chunkz = chunkz;
-        ret.id = id;
+        ServerEntityId ret = new()
+        {
+            chunkx = chunkx,
+            chunky = chunky,
+            chunkz = chunkz,
+            id = id
+        };
         return ret;
     }
 }
 
 public class ModEventHandlers
 {
-    public List<ModDelegates.WorldGenerator> getchunk = new List<ModDelegates.WorldGenerator>();
-    public List<ModDelegates.BlockUse> onuse = new List<ModDelegates.BlockUse>();
-    public List<ModDelegates.BlockBuild> onbuild = new List<ModDelegates.BlockBuild>();
-    public List<ModDelegates.BlockDelete> ondelete = new List<ModDelegates.BlockDelete>();
-    public List<ModDelegates.BlockUseWithTool> onusewithtool = new List<ModDelegates.BlockUseWithTool>();
-    public List<ModDelegates.ChangedActiveMaterialSlot> changedactivematerialslot = new List<ModDelegates.ChangedActiveMaterialSlot>();
-    public List<ModDelegates.BlockUpdate> blockticks = new List<ModDelegates.BlockUpdate>();
-    public List<ModDelegates.PopulateChunk> populatechunk = new List<ModDelegates.PopulateChunk>();
-    public List<ModDelegates.Command> oncommand = new List<ModDelegates.Command>();
-    public List<ModDelegates.WeaponShot> onweaponshot = new List<ModDelegates.WeaponShot>();
-    public List<ModDelegates.WeaponHit> onweaponhit = new List<ModDelegates.WeaponHit>();
-    public List<ModDelegates.SpecialKey1> onspecialkey = new List<ModDelegates.SpecialKey1>();
-    public List<ModDelegates.PlayerJoin> onplayerjoin = new List<ModDelegates.PlayerJoin>();
-    public List<ModDelegates.PlayerLeave> onplayerleave = new List<ModDelegates.PlayerLeave>();
-    public List<ModDelegates.PlayerDisconnect> onplayerdisconnect = new List<ModDelegates.PlayerDisconnect>();
-    public List<ModDelegates.PlayerChat> onplayerchat = new List<ModDelegates.PlayerChat>();
-    public List<ModDelegates.PlayerDeath> onplayerdeath = new List<ModDelegates.PlayerDeath>();
-    public List<ModDelegates.DialogClick> ondialogclick = new List<ModDelegates.DialogClick>();
-    public List<ModDelegates.DialogClick2> ondialogclick2 = new List<ModDelegates.DialogClick2>();
-    public List<ModDelegates.LoadWorld> onloadworld = new List<ModDelegates.LoadWorld>();
-    public List<ModDelegates.UpdateEntity> onupdateentity = new List<ModDelegates.UpdateEntity>();
-    public List<ModDelegates.UseEntity> onuseentity = new List<ModDelegates.UseEntity>();
-    public List<ModDelegates.HitEntity> onhitentity = new List<ModDelegates.HitEntity>();
-    public List<ModDelegates.Permission> onpermission = new List<ModDelegates.Permission>();
-    public List<ModDelegates.CheckBlockUse> checkonuse = new List<ModDelegates.CheckBlockUse>();
-    public List<ModDelegates.CheckBlockBuild> checkonbuild = new List<ModDelegates.CheckBlockBuild>();
-    public List<ModDelegates.CheckBlockDelete> checkondelete = new List<ModDelegates.CheckBlockDelete>();
+    public List<ModDelegates.WorldGenerator> getchunk = new();
+    public List<ModDelegates.BlockUse> onuse = new();
+    public List<ModDelegates.BlockBuild> onbuild = new();
+    public List<ModDelegates.BlockDelete> ondelete = new();
+    public List<ModDelegates.BlockUseWithTool> onusewithtool = new();
+    public List<ModDelegates.ChangedActiveMaterialSlot> changedactivematerialslot = new();
+    public List<ModDelegates.BlockUpdate> blockticks = new();
+    public List<ModDelegates.PopulateChunk> populatechunk = new();
+    public List<ModDelegates.Command> oncommand = new();
+    public List<ModDelegates.WeaponShot> onweaponshot = new();
+    public List<ModDelegates.WeaponHit> onweaponhit = new();
+    public List<ModDelegates.SpecialKey1> onspecialkey = new();
+    public List<ModDelegates.PlayerJoin> onplayerjoin = new();
+    public List<ModDelegates.PlayerLeave> onplayerleave = new();
+    public List<ModDelegates.PlayerDisconnect> onplayerdisconnect = new();
+    public List<ModDelegates.PlayerChat> onplayerchat = new();
+    public List<ModDelegates.PlayerDeath> onplayerdeath = new();
+    public List<ModDelegates.DialogClick> ondialogclick = new();
+    public List<ModDelegates.DialogClick2> ondialogclick2 = new();
+    public List<ModDelegates.LoadWorld> onloadworld = new();
+    public List<ModDelegates.UpdateEntity> onupdateentity = new();
+    public List<ModDelegates.UseEntity> onuseentity = new();
+    public List<ModDelegates.HitEntity> onhitentity = new();
+    public List<ModDelegates.Permission> onpermission = new();
+    public List<ModDelegates.CheckBlockUse> checkonuse = new();
+    public List<ModDelegates.CheckBlockBuild> checkonbuild = new();
+    public List<ModDelegates.CheckBlockDelete> checkondelete = new();
 }
 
 #region GameTime
@@ -3784,7 +3841,7 @@ public class GameTime
     private int _nDaysPerYear = 4;
     private long _nLastIngameSecond = 0;
 
-    private Stopwatch _watchIngameTime = null;
+    private readonly Stopwatch _watchIngameTime = null;
     private TimeSpan _time = TimeSpan.Zero;
 
     /// <summary>
@@ -3961,52 +4018,54 @@ public class BlockTypeConverter
 {
     public static Packet_BlockType GetBlockType(BlockType block)
     {
-        Packet_BlockType p = new Packet_BlockType();
-        p.AimRadiusFloat = Server.SerializeFloat(block.AimRadius);
-        p.AmmoMagazine = block.AmmoMagazine;
-        p.AmmoTotal = block.AmmoTotal;
-        p.BulletsPerShotFloat = Server.SerializeFloat(block.BulletsPerShot);
-        p.DamageBodyFloat = Server.SerializeFloat(block.DamageBody);
-        p.DamageHeadFloat = Server.SerializeFloat(block.DamageHead);
-        p.DamageToPlayer = block.DamageToPlayer;
-        p.DelayFloat = Server.SerializeFloat(block.Delay);
-        p.DrawType = (int)block.DrawType;
-        p.ExplosionRangeFloat = Server.SerializeFloat(block.ExplosionRange);
-        p.ExplosionTimeFloat = Server.SerializeFloat(block.ExplosionTime);
-        p.Handimage = block.handimage;
-        p.IronSightsAimRadiusFloat = Server.SerializeFloat(block.IronSightsAimRadius);
-        p.IronSightsEnabled = block.IronSightsEnabled;
-        p.IronSightsFovFloat = Server.SerializeFloat(block.IronSightsFov);
-        p.IronSightsImage = block.IronSightsImage;
-        p.IronSightsMoveSpeedFloat = Server.SerializeFloat(block.IronSightsMoveSpeed);
-        p.IsBuildable = block.IsBuildable;
-        p.IsPistol = block.IsPistol;
-        p.IsSlipperyWalk = block.IsSlipperyWalk;
-        p.IsTool = block.IsTool;
-        p.IsUsable = block.IsUsable;
-        p.LightRadius = block.LightRadius;
-        p.Name = block.Name;
-        p.PistolType = (int)block.PistolType;
-        p.ProjectileBounce = block.ProjectileBounce;
-        p.ProjectileSpeedFloat = Server.SerializeFloat(block.ProjectileSpeed);
-        p.Rail = block.Rail;
-        p.RecoilFloat = Server.SerializeFloat(block.Recoil);
-        p.ReloadDelayFloat = Server.SerializeFloat(block.ReloadDelay);
-        p.Sounds = GetSoundSet(block.Sounds);
-        p.StartInventoryAmount = block.StartInventoryAmount;
-        p.Strength = block.Strength;
-        p.TextureIdBack = block.TextureIdBack;
-        p.TextureIdBottom = block.TextureIdBottom;
-        p.TextureIdForInventory = block.TextureIdForInventory;
-        p.TextureIdFront = block.TextureIdFront;
-        p.TextureIdLeft = block.TextureIdLeft;
-        p.TextureIdRight = block.TextureIdRight;
-        p.TextureIdTop = block.TextureIdTop;
-        p.WalkableType = (int)block.WalkableType;
-        p.WalkSpeedFloat = Server.SerializeFloat(block.WalkSpeed);
-        p.WalkSpeedWhenUsedFloat = Server.SerializeFloat(block.WalkSpeedWhenUsed);
-        p.WhenPlacedGetsConvertedTo = block.WhenPlayerPlacesGetsConvertedTo;
-        p.PickDistanceWhenUsedFloat = Server.SerializeFloat(block.PickDistanceWhenUsed);
+        Packet_BlockType p = new()
+        {
+            AimRadiusFloat = Server.SerializeFloat(block.AimRadius),
+            AmmoMagazine = block.AmmoMagazine,
+            AmmoTotal = block.AmmoTotal,
+            BulletsPerShotFloat = Server.SerializeFloat(block.BulletsPerShot),
+            DamageBodyFloat = Server.SerializeFloat(block.DamageBody),
+            DamageHeadFloat = Server.SerializeFloat(block.DamageHead),
+            DamageToPlayer = block.DamageToPlayer,
+            DelayFloat = Server.SerializeFloat(block.Delay),
+            DrawType = (int)block.DrawType,
+            ExplosionRangeFloat = Server.SerializeFloat(block.ExplosionRange),
+            ExplosionTimeFloat = Server.SerializeFloat(block.ExplosionTime),
+            Handimage = block.handimage,
+            IronSightsAimRadiusFloat = Server.SerializeFloat(block.IronSightsAimRadius),
+            IronSightsEnabled = block.IronSightsEnabled,
+            IronSightsFovFloat = Server.SerializeFloat(block.IronSightsFov),
+            IronSightsImage = block.IronSightsImage,
+            IronSightsMoveSpeedFloat = Server.SerializeFloat(block.IronSightsMoveSpeed),
+            IsBuildable = block.IsBuildable,
+            IsPistol = block.IsPistol,
+            IsSlipperyWalk = block.IsSlipperyWalk,
+            IsTool = block.IsTool,
+            IsUsable = block.IsUsable,
+            LightRadius = block.LightRadius,
+            Name = block.Name,
+            PistolType = (int)block.PistolType,
+            ProjectileBounce = block.ProjectileBounce,
+            ProjectileSpeedFloat = Server.SerializeFloat(block.ProjectileSpeed),
+            Rail = block.Rail,
+            RecoilFloat = Server.SerializeFloat(block.Recoil),
+            ReloadDelayFloat = Server.SerializeFloat(block.ReloadDelay),
+            Sounds = GetSoundSet(block.Sounds),
+            StartInventoryAmount = block.StartInventoryAmount,
+            Strength = block.Strength,
+            TextureIdBack = block.TextureIdBack,
+            TextureIdBottom = block.TextureIdBottom,
+            TextureIdForInventory = block.TextureIdForInventory,
+            TextureIdFront = block.TextureIdFront,
+            TextureIdLeft = block.TextureIdLeft,
+            TextureIdRight = block.TextureIdRight,
+            TextureIdTop = block.TextureIdTop,
+            WalkableType = (int)block.WalkableType,
+            WalkSpeedFloat = Server.SerializeFloat(block.WalkSpeed),
+            WalkSpeedWhenUsedFloat = Server.SerializeFloat(block.WalkSpeedWhenUsed),
+            WhenPlacedGetsConvertedTo = block.WhenPlayerPlacesGetsConvertedTo,
+            PickDistanceWhenUsedFloat = Server.SerializeFloat(block.PickDistanceWhenUsed)
+        };
         return p;
     }
 
@@ -4016,7 +4075,7 @@ public class BlockTypeConverter
         {
             return null;
         }
-        Packet_SoundSet p = new Packet_SoundSet();
+        Packet_SoundSet p = new();
         p.SetBreak1(soundSet.Break, soundSet.Break.Length, soundSet.Break.Length);
         p.SetBuild(soundSet.Build, soundSet.Build.Length, soundSet.Build.Length);
         p.SetClone(soundSet.Clone, soundSet.Clone.Length, soundSet.Clone.Length);
@@ -4148,7 +4207,7 @@ public static class MapUtil
         return map.GetMapSizeZ() / 2;
     }
 
-    static ulong pow20minus1 = 1048576 - 1;
+    private static readonly ulong pow20minus1 = 1048576 - 1;
     public static Vector3i FromMapPos(ulong v)
     {
         uint z = (uint)(v & pow20minus1);
@@ -4220,15 +4279,16 @@ public class MapManipulator
 {
     public const string BinSaveExtension = ".mddbs";
 }
+
 public class Timer
 {
     public double INTERVAL { get { return interval; } set { interval = value; } }
     public double MaxDeltaTime { get { return maxDeltaTime; } set { maxDeltaTime = value; } }
-    double interval = 1;
-    double maxDeltaTime = double.PositiveInfinity;
+    private double interval = 1;
+    private double maxDeltaTime = double.PositiveInfinity;
 
-    double starttime;
-    double oldtime;
+    private double starttime;
+    private double oldtime;
     public double accumulator;
     public Timer()
     {
@@ -4236,12 +4296,12 @@ public class Timer
     }
     public void Reset()
     {
-        starttime = gettime();
+        starttime = GetTime();
     }
     public delegate void Tick();
     public void Update(Tick tick)
     {
-        double currenttime = gettime() - starttime;
+        double currenttime = GetTime() - starttime;
         double deltaTime = currenttime - oldtime;
         accumulator += deltaTime;
         double dt = INTERVAL;
@@ -4256,11 +4316,13 @@ public class Timer
         }
         oldtime = currenttime;
     }
-    static double gettime()
+
+    private static double GetTime()
     {
         return (double)DateTime.UtcNow.Ticks / (10 * 1000 * 1000);
     }
 }
+
 public struct Vector2i
 {
     public Vector2i(int x, int y)

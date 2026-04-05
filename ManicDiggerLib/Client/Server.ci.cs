@@ -5,7 +5,7 @@
         one = 1;
         mainSocketsCount = 3;
     }
-    float one;
+    private readonly float one;
     internal NetServer[] mainSockets;
     internal int mainSocketsCount;
 }

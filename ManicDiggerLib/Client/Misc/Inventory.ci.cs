@@ -139,7 +139,7 @@ public class GameDataItemsClient
         game.platform.ThrowException("ItemClass");
         return 1;
     }
-    public Packet_Item Stack(Packet_Item itemA, Packet_Item itemB)
+    public static Packet_Item Stack(Packet_Item itemA, Packet_Item itemB)
     {
         if (itemA.ItemClass == Packet_ItemClassEnum.Block
             && itemB.ItemClass == Packet_ItemClassEnum.Block)
@@ -151,10 +151,12 @@ public class GameDataItemsClient
             //    return null;
             //}
             //todo stack size limit
-            Packet_Item ret = new Packet_Item();
-            ret.ItemClass = itemA.ItemClass;
-            ret.BlockId = itemA.BlockId;
-            ret.BlockCount = itemA.BlockCount + itemB.BlockCount;
+            Packet_Item ret = new()
+            {
+                ItemClass = itemA.ItemClass,
+                BlockId = itemA.BlockId,
+                BlockCount = itemA.BlockCount + itemB.BlockCount
+            };
             return ret;
         }
         else
@@ -162,7 +164,7 @@ public class GameDataItemsClient
             return null;
         }
     }
-    public bool CanWear(int selectedWear, Packet_Item item)
+    public static bool CanWear(int selectedWear, Packet_Item item)
     {
         if (item == null) { return true; }
         if (item == null) { return true; }
@@ -177,7 +179,7 @@ public class GameDataItemsClient
             default: return false;
         }
     }
-    public string ItemGraphics(Packet_Item item)
+    public static string ItemGraphics(Packet_Item item)
     {
         return null;
     }
@@ -193,9 +195,11 @@ public class PointRef
     internal int Y;
     public static PointRef Create(int x_, int y_)
     {
-        PointRef p = new PointRef();
-        p.X = x_;
-        p.Y = y_;
+        PointRef p = new()
+        {
+            X = x_,
+            Y = y_
+        };
         return p;
     }
 }
@@ -206,9 +210,11 @@ public class PointFloatRef
     internal float Y;
     public static PointFloatRef Create(float x_, float y_)
     {
-        PointFloatRef p = new PointFloatRef();
-        p.X = x_;
-        p.Y = y_;
+        PointFloatRef p = new()
+        {
+            X = x_,
+            Y = y_
+        };
         return p;
     }
 }
