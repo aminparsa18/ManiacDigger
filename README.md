@@ -1,75 +1,76 @@
-[![Travis Build Status](https://img.shields.io/travis/manicdigger/manicdigger.svg?style=flat-square)](https://travis-ci.org/manicdigger/manicdigger)
-[![GitHub Issues](https://img.shields.io/github/issues/manicdigger/manicdigger.svg?style=flat-square)](https://github.com/manicdigger/manicdigger/issues)
-[![Latest GitHub Release](https://img.shields.io/github/release/manicdigger/manicdigger.svg?style=flat-square)](https://github.com/manicdigger/manicdigger/releases/latest)
-[![GitHub Downloads](https://img.shields.io/github/downloads/manicdigger/manicdigger/latest/total.svg?style=flat-square)](https://github.com/manicdigger/manicdigger/releases/latest)
+# Manic Digger — OpenTK 4 Migration 
 
-Manic Digger
-============
-Manic Digger is a 3D voxel building game similar to Minecraft.  
-Build yourself a home in your own world or connect to an online server to team up with others to create great buildings!
+This project is based on the excellent work of the original [manicdigger/manicdigger](https://github.com/manicdigger/manicdigger) team — a multiplayer block-building voxel game inspired by Minecraft. All credit for the original game design, architecture, and content goes to them.
 
-You can download the game directly from the GitHub releases page:  
-https://github.com/manicdigger/manicdigger/releases/latest
+---
 
+## What's Different in This Fork
 
-Features
---------
-- Singleplayer and Multiplayer
-- Full support for custom textures
-- Powerful server side modding API
-- Large world: 9984x9984x128 by default
-- War game mode - first person shooter
+The original project was built on old OpenTK, which is no longer maintained. This fork migrates the entire client to **OpenTK 4.x**, which is built on top of GLFW and supports modern platforms and runtimes.
 
+### Migration Highlights
 
-Game modes
------------
-#### Creative Mode
+#### .NET 3.5 → .NET 10 Migration
+The original project targeted **.NET Framework 3.5** — a runtime from 2007 that is no longer supported on modern systems and has no cross-platform support. This fork migrates the entire solution to **.NET 10**, bringing:
+- Full cross-platform support (Windows, Linux, macOS)
+- Modern C# language features (pattern matching, records, nullable reference types, etc.)
+- Significantly improved performance and runtime optimizations
+- Active long-term support
 
-In creative mode there are no limits on the amount of blocks you can place. Build whatever you like without having to worry about collecting resources or crafting.  
-Build spaceships, flying islands or cool pixelart - your imagination is the only limit!
+#### OpenTK 4 Upgrade
+- Replaced the old `GameWindow` constructor (which took `GraphicsMode` and display settings) with the new `GameWindowSettings` / `NativeWindowSettings` pattern
+- `DisplayDevice` and `GraphicsMode` are gone — GLFW now manages context creation automatically
+- VSync is now configured via `VSyncMode` on the window instance
+- Unlimited framerate is set via `GameWindowSettings.UpdateFrequency = 0`
 
-[![Spaceship](https://raw.githubusercontent.com/manicdigger/manicdigger-screenshots/master/2014-11-27_18-35-13-thumb.png)](https://raw.githubusercontent.com/manicdigger/manicdigger-screenshots/master/2014-11-27_18-35-13.png)
-[![Floating Island](https://raw.githubusercontent.com/manicdigger/manicdigger-screenshots/master/2014-12-19_20-42-13-thumb.png)](https://raw.githubusercontent.com/manicdigger/manicdigger-screenshots/master/2014-12-19_20-42-13.png)
-[![Pixelart](https://raw.githubusercontent.com/manicdigger/manicdigger-screenshots/master/2014-12-19_20-43-46-thumb.png)](https://raw.githubusercontent.com/manicdigger/manicdigger-screenshots/master/2014-12-19_20-43-46.png)
-[![Mansion](https://raw.githubusercontent.com/manicdigger/manicdigger-screenshots/master/2014-12-25_22-38-53-thumb.png)](https://raw.githubusercontent.com/manicdigger/manicdigger-screenshots/master/2014-12-25_22-38-53.png)
+#### Input System Rewrite
+- `OpenTK.Input.Key` (sequential arbitrary integers) replaced with `OpenTK.Windowing.GraphicsLibraryFramework.Keys` (GLFW USB HID key codes)
+- `KeyPress` event replaced with `TextInput` event (`TextInputEventArgs.Unicode`) for proper character input handling
+- Modifier key checks updated from `== KeyModifiers.X` to `HasFlag(KeyModifiers.X)` to correctly handle multiple simultaneous modifiers
+- `MouseButtonEventArgs` no longer carries X/Y position — mouse position is now read from `window.MouseState.Position`
+- Mouse wheel changed from `Delta`/`DeltaPrecise` to `OffsetX`/`OffsetY`
+- Mouse look (captured cursor) now uses `CursorState.Grabbed` and `MouseState.Delta` instead of manual `SetPosition` centering hacks
 
-#### Survival Mode
+#### Audio (OpenAL)
+- `AudioContext` replaced with `ALC.OpenDevice` / `ALC.CreateContext` / `ALC.MakeContextCurrent`
+- OpenAL native library now sourced via NuGet (`OpenTK.redist.openal`) instead of a bundled DLL
+- Fixed a threading bug where the OpenAL context was not made current on audio worker threads, causing native crashes
 
-For those of you who like gathering resources and crafting stuff there is a survival mode.  
-Please note that this is still in development (no friendly/hostile mobs right now)
+#### OpenGL Compatibility Mode
+The game currently runs in **OpenGL Compatibility Profile** mode. The original rendering code uses the legacy fixed-function pipeline (`GL.Begin`, `GL.Vertex`, `GL.MatrixMode`, etc.) which is not available in OpenGL Core Profile.
 
-[![City](https://raw.githubusercontent.com/manicdigger/manicdigger-screenshots/master/9c1d22eac9aac5f36bf12a5fb5c8a856-300x240.png)](https://raw.githubusercontent.com/manicdigger/manicdigger-screenshots/master/9c1d22eac9aac5f36bf12a5fb5c8a856.png)
+```csharp
+Profile = ContextProfile.Compatability,
+APIVersion = new Version(3, 3),
+```
 
-#### War Mod
+This keeps the game running without rewriting all rendering code at once.
 
-The War Mod is a gamemode that comes bundled with Manic Digger. It transforms the game into a fast-paced first-person shooter.
+---
 
-[![War Mod 1](https://raw.githubusercontent.com/manicdigger/manicdigger-screenshots/master/2012-10-15_02-13-14-300x227.png)](https://raw.githubusercontent.com/manicdigger/manicdigger-screenshots/master/2012-10-15_02-13-14.png)
-[![War Mod 2](https://raw.githubusercontent.com/manicdigger/manicdigger-screenshots/master/2012-10-15_02-12-27-300x227.png)](https://raw.githubusercontent.com/manicdigger/manicdigger-screenshots/master/2012-10-15_02-12-27.png)
+## Roadmap
 
+- [ ] Migrate rendering code away from the fixed-function pipeline to modern OpenGL (shaders, VAOs, VBOs)
+- [ ] Switch from Compatibility Profile to Core Profile
+- [ ] Full 64-bit support
+- [ ] Cross-platform testing (Linux, macOS)
 
-Links
------
-- Serverlist: http://manicdigger.sourceforge.net/play/
-- Forum: http://manicdigger.sourceforge.net/forum/
-- Wiki: http://manicdigger.sourceforge.net/wiki/
-- IRC: http://chat.mibbit.com/?server=irc.esper.net&channel=%23manicdigger
+---
 
+## Building
 
-Code
-----
-The OpenGL game client is written in a common subset of C# and [Ć programming lanuguage](http://cito.sourceforge.net/).  
-It can be transcompiled to Java, C#, JavaScript, ActionScript, Perl and D.
-The only external dependency is [GamePlatform interface](ManicDiggerLib/Client/Platform.ci.cs).
+Requires **.NET 10** and **Visual Studio 2022+** or the `dotnet` CLI.
 
-Server mods can be implemented in C# or interpreted Javascript.
+```
+dotnet build
+dotnet run --project ManicDigger
+```
 
-#### Contributing
+---
 
-If you want to help developing Manic Digger feel free to fork this repository on GitHub and submit your changes by sending a pull request.  
-Once you've contributed some good patches you can also get direct push access to the repository.
+## Original Project
 
+All game design, assets, server architecture, and mod API belong to the original Manic Digger project:
+https://github.com/manicdigger/manicdigger
 
-License
--------
-You can find detailed information in [COPYING.md](COPYING.md)
+Please support and credit the original authors for their work.
