@@ -211,7 +211,7 @@ public class LightBase
                         int yy = MapUtilCi.PosY(pos, portionsize, portionsize);
                         int zz = MapUtilCi.PosZ(pos, portionsize, portionsize);
                         int l = dataLightRadius[workportion[pos]];
-                        worklight[pos] = Game.IntToByte(MathCi.MaxInt(l, worklight[pos]));
+                        worklight[pos] = Game.IntToByte(Math.Max(l, worklight[pos]));
                         flood.FloodLight(workportion, worklight, xx, yy, zz, dataLightRadius, dataTransparent);
                     }
                 }

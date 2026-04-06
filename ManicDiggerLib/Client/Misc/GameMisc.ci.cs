@@ -1757,7 +1757,7 @@ public class TextColorRenderer
             sizesY[i] = outHeight.value;
 
             totalwidth += outWidth.value;
-            totalheight = MathCi.MaxFloat(totalheight, outHeight.value);
+            totalheight = Math.Max(totalheight, outHeight.value);
         }
 
         int size2X = NextPowerOfTwo(platform.FloatToInt(totalwidth) + 1);

@@ -56,16 +56,16 @@
 
     internal Packet_Item ItemAtWearPlace(int wearPlace, int activeMaterial)
     {
-        switch (wearPlace)
+        return wearPlace switch
         {
             //case WearPlace.LeftHand: return d_Inventory.LeftHand[activeMaterial];
-            case WearPlace_.RightHand: return d_Inventory.RightHand[activeMaterial];
-            case WearPlace_.MainArmor: return d_Inventory.MainArmor;
-            case WearPlace_.Boots: return d_Inventory.Boots;
-            case WearPlace_.Helmet: return d_Inventory.Helmet;
-            case WearPlace_.Gauntlet: return d_Inventory.Gauntlet;
-            default: return null;
-        }
+            WearPlace_.RightHand => d_Inventory.RightHand[activeMaterial],
+            WearPlace_.MainArmor => d_Inventory.MainArmor,
+            WearPlace_.Boots => d_Inventory.Boots,
+            WearPlace_.Helmet => d_Inventory.Helmet,
+            WearPlace_.Gauntlet => d_Inventory.Gauntlet,
+            _ => null,
+        };
     }
 
     internal Point? ItemAtCell(Point? p)
@@ -180,6 +180,7 @@ public class GameDataItemsClient
     {
         return null;
     }
+
     public int[] TextureIdForInventory()
     {
         return game.TextureIdForInventory;

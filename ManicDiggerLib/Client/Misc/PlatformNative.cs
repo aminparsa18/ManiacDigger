@@ -13,11 +13,13 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 using Monitor = System.Threading.Monitor;
+using Vector3 = OpenTK.Mathematics.Vector3;
 
 public class GamePlatformNative : GamePlatform
 {
@@ -1625,11 +1627,13 @@ public class GamePlatformNative : GamePlatform
     {
         Bitmap bmp = bmpArg;
         bool convertedbitmap = false;
-        if ((!ALLOW_NON_POWER_OF_TWO) &&
-            (!(BitTools.IsPowerOfTwo(bmp.Width) && BitTools.IsPowerOfTwo(bmp.Height))))
+        if (!ALLOW_NON_POWER_OF_TWO &&
+            !(BitOperations.IsPow2((uint)bmp.Width) && BitOperations.IsPow2((uint)bmp.Height)))
         {
-            Bitmap bmp2 = new(BitTools.NextPowerOfTwo(bmp.Width),
-                BitTools.NextPowerOfTwo(bmp.Height));
+            Bitmap bmp2 = new(
+                (int)BitOperations.RoundUpToPowerOf2((uint)bmp.Width),
+                (int)BitOperations.RoundUpToPowerOf2((uint)bmp.Height)
+            );
             using (Graphics g = Graphics.FromImage(bmp2))
             {
                 g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;

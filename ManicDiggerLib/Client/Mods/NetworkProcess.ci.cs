@@ -225,12 +225,12 @@ public class ModNetworkProcess : ClientMod
                     int by = packet.FillArea.Y2;
                     int bz = packet.FillArea.Z2;
 
-                    int startx = MathCi.MinInt(ax, bx);
-                    int endx = MathCi.MaxInt(ax, bx);
-                    int starty = MathCi.MinInt(ay, by);
-                    int endy = MathCi.MaxInt(ay, by);
-                    int startz = MathCi.MinInt(az, bz);
-                    int endz = MathCi.MaxInt(az, bz);
+                    int startx = Math.Min(ax, bx);
+                    int endx = Math.Max(ax, bx);
+                    int starty = Math.Min(ay, by);
+                    int endy = Math.Max(ay, by);
+                    int startz = Math.Min(az, bz);
+                    int endz = Math.Max(az, bz);
 
                     int blockCount = packet.FillArea.BlockCount;
                     {
@@ -441,7 +441,7 @@ public class ModNetworkProcess : ClientMod
                     for (int i = 0; i < packet.Ammo.TotalAmmoCount; i++)
                     {
                         Packet_IntInt k = packet.Ammo.TotalAmmo[i];
-                        game.LoadedAmmo[k.Key_] = MathCi.MinInt(k.Value_, game.blocktypes[k.Key_].AmmoMagazine);
+                        game.LoadedAmmo[k.Key_] = Math.Min(k.Value_, game.blocktypes[k.Key_].AmmoMagazine);
                     }
                 }
                 game.TotalAmmo = new int[GlobalVar.MAX_BLOCKTYPES];

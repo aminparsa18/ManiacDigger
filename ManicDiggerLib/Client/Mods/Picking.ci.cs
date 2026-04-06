@@ -768,12 +768,12 @@ public class ModPicking : ClientMod
 
     internal void FillFill(Game game, Vector3i a_, Vector3i? b_)
     {
-        int startx = MathCi.MinInt(a_.X, b_.Value.X);
-        int endx = MathCi.MaxInt(a_.X, b_.Value.X);
-        int starty = MathCi.MinInt(a_.Y, b_.Value.Y);
-        int endy = MathCi.MaxInt(a_.Y, b_.Value.Y);
-        int startz = MathCi.MinInt(a_.Z, b_.Value.Z);
-        int endz = MathCi.MaxInt(a_.Z, b_.Value.Z);
+        int startx = Math.Min(a_.X, b_.Value.X);
+        int endx = Math.Max(a_.X, b_.Value.X);
+        int starty = Math.Min(a_.Y, b_.Value.Y);
+        int endy = Math.Max(a_.Y, b_.Value.Y);
+        int startz = Math.Min(a_.Z, b_.Value.Z);
+        int endz = Math.Max(a_.Z, b_.Value.Z);
         for (int x = startx; x <= endx; x++)
         {
             for (int y = starty; y <= endy; y++)
@@ -978,8 +978,8 @@ public class ModPicking : ClientMod
         tempViewport[2] = game.Width();
         tempViewport[3] = game.Height();
 
-        unproject.UnProject(mouseX, game.Height() - mouseY, 1, game.mvMatrix.Peek(), game.pMatrix.Peek(), tempViewport, out Vector3 tempRay);
-        unproject.UnProject(mouseX, game.Height() - mouseY, 0, game.mvMatrix.Peek(), game.pMatrix.Peek(), tempViewport, out Vector3 tempRayStartPoint);
+        Unproject.UnProject(mouseX, game.Height() - mouseY, 1, game.mvMatrix.Peek(), game.pMatrix.Peek(), tempViewport, out Vector3 tempRay);
+        Unproject.UnProject(mouseX, game.Height() - mouseY, 0, game.mvMatrix.Peek(), game.pMatrix.Peek(), tempViewport, out Vector3 tempRayStartPoint);
 
         float raydirX = (tempRay.X - tempRayStartPoint.X);
         float raydirY = (tempRay.Y - tempRayStartPoint.Y);

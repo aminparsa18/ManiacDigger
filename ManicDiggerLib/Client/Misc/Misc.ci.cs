@@ -21,7 +21,7 @@ public class VectorTool
 
 public class Unproject
 {
-    public bool UnProject(int winX, int winY, int winZ, Matrix4 model, Matrix4 proj, int[] view, out Vector3 objPos)
+    public static bool UnProject(int winX, int winY, int winZ, Matrix4 model, Matrix4 proj, int[] view, out Vector3 objPos)
     {
         objPos = Vector3.Zero;
 
@@ -78,36 +78,6 @@ public class InterpolationCi
         return Game.ColorFromArgb(A, R, G, B);
     }
 }
-
-public class BitTools
-{
-    public static bool IsPowerOfTwo(int x)
-    {
-        return (
-          x == 1 || x == 2 || x == 4 || x == 8 || x == 16 || x == 32 ||
-          x == 64 || x == 128 || x == 256 || x == 512 || x == 1024 ||
-          x == 2048 || x == 4096 || x == 8192 || x == 16384 ||
-          x == 32768 || x == 65536 || x == 131072 || x == 262144 ||
-          x == 524288 || x == 1048576 || x == 2097152 ||
-          x == 4194304 || x == 8388608 || x == 16777216 ||
-          x == 33554432 || x == 67108864 || x == 134217728 ||
-          x == 268435456 || x == 536870912 || x == 1073741824 // ||
-            //x == 2147483648);
-          );
-    }
-    public static int NextPowerOfTwo(int x)
-    {
-        x--;
-        x |= x >> 1;  // handle  2 bit numbers
-        x |= x >> 2;  // handle  4 bit numbers
-        x |= x >> 4;  // handle  8 bit numbers
-        x |= x >> 8;  // handle 16 bit numbers
-        x |= x >> 16; // handle 32 bit numbers
-        x++;
-        return x;
-    }
-}
-
 
 public class StringTools
 {
@@ -400,7 +370,7 @@ public class TextureAtlasConverter
 
         int tilesize = orig.width / tiles;
 
-        int atlasescount = MathCi.MaxInt(1, (tiles * tiles * tilesize) / atlassizezlimit);
+        int atlasescount = Math.Max(1, (tiles * tiles * tilesize) / atlassizezlimit);
         BitmapCi[] atlases = new BitmapCi[128];
         int atlasesCount = 0;
 
@@ -518,113 +488,6 @@ public class GameVersionHelper
     private static int DateToInt(int year, int month, int day)
     {
         return year * 10000 + month * 100 + day;
-    }
-}
-
-public class MathCi
-{
-    public static float MinFloat(float a, float b)
-    {
-        if (a <= b)
-        {
-            return a;
-        }
-        else
-        {
-            return b;
-        }
-    }
-
-    public static float MaxFloat(float a, float b)
-    {
-        if (a >= b)
-        {
-            return a;
-        }
-        else
-        {
-            return b;
-        }
-    }
-
-    public static float AbsFloat(float b)
-    {
-        if (b >= 0)
-        {
-            return b;
-        }
-        else
-        {
-            return 0 - b;
-        }
-    }
-
-    public static int Sign(float q)
-    {
-        if (q < 0)
-        {
-            return -1;
-        }
-        else if (q == 0)
-        {
-            return 0;
-        }
-        else
-        {
-            return 1;
-        }
-    }
-
-    public static int MaxInt(int a, int b)
-    {
-        if (a >= b)
-        {
-            return a;
-        }
-        else
-        {
-            return b;
-        }
-    }
-
-    public static int MinInt(int a, int b)
-    {
-        if (a <= b)
-        {
-            return a;
-        }
-        else
-        {
-            return b;
-        }
-    }
-
-    public static float ClampFloat(float value, float min, float max)
-    {
-        float result = value;
-        if (value > max)
-        {
-            result = max;
-        }
-        if (value < min)
-        {
-            result = min;
-        }
-        return result;
-    }
-
-    public static int ClampInt(int value, int min, int max)
-    {
-        int result = value;
-        if (value > max)
-        {
-            result = max;
-        }
-        if (value < min)
-        {
-            result = min;
-        }
-        return result;
     }
 }
 

@@ -46,8 +46,8 @@ public class ScriptCharacterPhysics : EntityScript
             return;
         }
         movespeednow = game.MoveSpeedNow();
-        game.controls.movedx = MathCi.ClampFloat(game.controls.movedx, -1, 1);
-        game.controls.movedy = MathCi.ClampFloat(game.controls.movedy, -1, 1);
+        game.controls.movedx = Math.Clamp(game.controls.movedx, -1, 1);
+        game.controls.movedy = Math.Clamp(game.controls.movedy, -1, 1);
         Controls move = game.controls;
         jumpstartacceleration = 13.333f * constGravity; // default
         jumpstartaccelerationhalf = 9 * constGravity;
@@ -433,7 +433,7 @@ public class ScriptCharacterPhysics : EntityScript
 
     private static float Max3(float a, float b, float c)
     {
-        return MathCi.MaxFloat(MathCi.MaxFloat(a, b), c);
+        return Math.Max(Math.Max(a, b), c);
     }
 
     private int FloatToInt(float value)

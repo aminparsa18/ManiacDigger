@@ -71,7 +71,7 @@ public class NetworkInterpolation : INetworkInterpolation
         {
             p1 = receivedCount - 2;
             p2 = receivedCount - 1;
-            interpolationtimeMilliseconds = MathCi.MinInt(interpolationtimeMilliseconds, received[receivedCount - 1].timestampMilliseconds + EXTRAPOLATION_TIMEMILLISECONDS);
+            interpolationtimeMilliseconds = Math.Min(interpolationtimeMilliseconds, received[receivedCount - 1].timestampMilliseconds + EXTRAPOLATION_TIMEMILLISECONDS);
         }
         else
         {

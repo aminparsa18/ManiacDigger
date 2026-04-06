@@ -13,7 +13,7 @@ public class ModSkySphereAnimated : ClientMod
 
     public override void OnNewFrameDraw3d(Game game, float deltaTime)
     {
-        game.SkySphereNight = true;
+        game.SkySphereNight = false;
         stars.OnNewFrameDraw3d(game, deltaTime);
 
         game.platform.GlDisableFog();

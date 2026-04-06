@@ -8,7 +8,7 @@
         {
             {
                 int loaded = game.TotalAmmo[game.reloadblock];
-                loaded = MathCi.MinInt(game.blocktypes[game.reloadblock].AmmoMagazine, loaded);
+                loaded = Math.Min(game.blocktypes[game.reloadblock].AmmoMagazine, loaded);
                 game.LoadedAmmo[game.reloadblock] = loaded;
                 game.reloadstartMilliseconds = 0;
                 game.reloadblock = -1;

@@ -45,7 +45,7 @@ public class ModFpsHistoryGraph : ClientMod
     {
         GamePlatform p = m.GetPlatform();
         fpscount++;
-        longestframedt = MathCi.MaxFloat(longestframedt, dt);
+        longestframedt = Math.Max(longestframedt, dt);
         float elapsed = one * (p.TimeMillisecondsFromStart() - lasttitleupdateMilliseconds) / 1000;
         if (elapsed >= 1)
         {

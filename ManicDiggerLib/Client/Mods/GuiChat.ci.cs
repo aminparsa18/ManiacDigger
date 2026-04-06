@@ -171,7 +171,7 @@ public class ModGuiChat : ClientMod
             ChatPageScroll--;
             args.SetHandled(true);
         }
-        ChatPageScroll = MathCi.ClampInt(ChatPageScroll, 0, game.ChatLinesCount / ChatLinesMaxToDraw);
+        ChatPageScroll = Math.Clamp(ChatPageScroll, 0, game.ChatLinesCount / ChatLinesMaxToDraw);
         if (eKey == game.GetKey(Keys.Enter) || eKey == game.GetKey(Keys.KeyPadEnter))
         {
             if (game.GuiTyping == TypingState.Typing)

@@ -39,12 +39,12 @@ public class Box3D
             MinEdge = new Vector3(x, y, z);
             MaxEdge = new Vector3(x, y, z);
         }
-        MinEdge[0] = MathCi.MinFloat(MinEdge[0], x);
-        MinEdge[1] = MathCi.MinFloat(MinEdge[1], y);
-        MinEdge[2] = MathCi.MinFloat(MinEdge[2], z);
-        MaxEdge[0] = MathCi.MaxFloat(MaxEdge[0], x);
-        MaxEdge[1] = MathCi.MaxFloat(MaxEdge[1], y);
-        MaxEdge[2] = MathCi.MaxFloat(MaxEdge[2], z);
+        MinEdge[0] = Math.Min(MinEdge[0], x);
+        MinEdge[1] = Math.Min(MinEdge[1], y);
+        MinEdge[2] = Math.Min(MinEdge[2], z);
+        MaxEdge[0] = Math.Min(MaxEdge[0], x);
+        MaxEdge[1] = Math.Min(MaxEdge[1], y);
+        MaxEdge[2] = Math.Min(MaxEdge[2], z);
     }
     public static float[] Center()
     {

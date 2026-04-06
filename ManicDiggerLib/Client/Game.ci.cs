@@ -1,7 +1,9 @@
 ﻿using ManicDigger.Mods;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
+using System.Numerics;
 using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
+using Vector3 = OpenTK.Mathematics.Vector3;
 
 public class Game
 {
@@ -741,7 +743,7 @@ public class Game
     {
         if (currentMatrixModeProjection)
         {
-            if (pMatrix.Count() > 0)
+            if (pMatrix.Count > 0)
             {
                 pMatrix.Pop();
             }
@@ -749,7 +751,7 @@ public class Game
         }
         else
         {
-            if (mvMatrix.Count() > 0)
+            if (mvMatrix.Count > 0)
             {
                 mvMatrix.Pop();
             }
@@ -761,7 +763,7 @@ public class Game
     {
         if (currentMatrixModeProjection)
         {
-            if (pMatrix.Count() > 1)
+            if (pMatrix.Count > 1)
             {
                 pMatrix.Pop();
             }
@@ -1530,7 +1532,7 @@ public class Game
         {
             radius = (DeserializeFloat(blocktypes[item.BlockId].IronSightsAimRadiusFloat) / 800) * Width();
         }
-        return radius + RadiusWhenMoving * radius * (MathCi.MinFloat(playervelocity.Length / movespeed, 1));
+        return radius + RadiusWhenMoving * radius * (Math.Min(playervelocity.Length / movespeed, 1));
     }
 
     internal RandomCi rnd;
@@ -1817,8 +1819,8 @@ public class Game
         UpdateColumnHeight(x, y);
         //update shadows in all chunks below
         int newheight = d_Heightmap.GetBlock(x, y);
-        int min = MathCi.MinInt(oldheight, newheight);
-        int max = MathCi.MaxInt(oldheight, newheight);
+        int min = Math.Min(oldheight, newheight);
+        int max = Math.Max(oldheight, newheight);
         for (int i = min; i < max; i++)
         {
             if (i / chunksize != z / chunksize)
@@ -2116,7 +2118,7 @@ public class Game
                 {
                     player.position.roty += mouseSmoothingVelX * rotationspeed * 1f / 75;
                     player.position.rotx += mouseSmoothingVelY * rotationspeed * 1f / 75;
-                    player.position.rotx = MathCi.ClampFloat(player.position.rotx,
+                    player.position.rotx = Math.Clamp(player.position.rotx,
                         GetPi() / 2 + (one * 15 / 1000),
                         (GetPi() / 2 + GetPi() - (one * 15 / 1000)));
                 }
@@ -2460,7 +2462,7 @@ public class Game
 
     internal float VectorAngleGet(float qX, float qY, float qZ)
     {
-        return (platform.MathAcos(qX / Length(qX, qY, qZ)) * MathCi.Sign(qZ));
+        return (platform.MathAcos(qX / Length(qX, qY, qZ)) * Math.Sign(qZ));
     }
 
     internal float Length(float x, float y, float z)
@@ -3002,7 +3004,7 @@ public class Game
             else
             {
                 //Send client command to server if none matches
-                string chatline = StringTools.StringSubstring(platform, GuiTypingBuffer, 0, MathCi.MinInt(GuiTypingBuffer.Length, 256));
+                string chatline = StringTools.StringSubstring(platform, GuiTypingBuffer, 0, Math.Min(GuiTypingBuffer.Length, 256));
                 SendChat(chatline);
             }
             //Process clientside mod commands anyway
@@ -3019,7 +3021,7 @@ public class Game
         else
         {
             //Regular chat message or server command. Send to server
-            string chatline = StringTools.StringSubstring(platform, GuiTypingBuffer, 0, MathCi.MinInt(StringTools.StringLength(platform, GuiTypingBuffer), 4096));
+            string chatline = StringTools.StringSubstring(platform, GuiTypingBuffer, 0, Math.Min(StringTools.StringLength(platform, GuiTypingBuffer), 4096));
             SendChat(chatline);
         }
     }
@@ -3732,22 +3734,22 @@ public class Game
     public BlockPosSide[] Pick(BlockOctreeSearcher s_, Line3D line, IntRef retCount)
     {
         //pick terrain
-        int minX = platform.FloatToInt(MathCi.MinFloat(line.Start[0], line.End[0]));
-        int minY = platform.FloatToInt(MathCi.MinFloat(line.Start[1], line.End[1]));
-        int minZ = platform.FloatToInt(MathCi.MinFloat(line.Start[2], line.End[2]));
+        int minX = platform.FloatToInt(Math.Min(line.Start[0], line.End[0]));
+        int minY = platform.FloatToInt(Math.Min(line.Start[1], line.End[1]));
+        int minZ = platform.FloatToInt(Math.Min(line.Start[2], line.End[2]));
         if (minX < 0) { minX = 0; }
         if (minY < 0) { minY = 0; }
         if (minZ < 0) { minZ = 0; }
-        int maxX = platform.FloatToInt(MathCi.MaxFloat(line.Start[0], line.End[0]));
-        int maxY = platform.FloatToInt(MathCi.MaxFloat(line.Start[1], line.End[1]));
-        int maxZ = platform.FloatToInt(MathCi.MaxFloat(line.Start[2], line.End[2]));
+        int maxX = platform.FloatToInt(Math.Max(line.Start[0], line.End[0]));
+        int maxY = platform.FloatToInt(Math.Max(line.Start[1], line.End[1]));
+        int maxZ = platform.FloatToInt(Math.Max(line.Start[2], line.End[2]));
         if (maxX > map.MapSizeX) { maxX = map.MapSizeX; }
         if (maxY > map.MapSizeZ) { maxY = map.MapSizeZ; }
         if (maxZ > map.MapSizeY) { maxZ = map.MapSizeY; }
         int sizex = maxX - minX + 1;
         int sizey = maxY - minY + 1;
         int sizez = maxZ - minZ + 1;
-        int size = BitTools.NextPowerOfTwo(MathCi.MaxInt(sizex, MathCi.MaxInt(sizey, sizez)));
+        int size = (int)BitOperations.RoundUpToPowerOf2((uint)Math.Max(sizex, Math.Max(sizey, sizez)));
         s_.StartBox = Box3D.Create(minX, minY, minZ, size);
         //s_.StartBox = Box3D.Create(0, 0, 0, BitTools.NextPowerOfTwo(MaxInt(MapSizeX, MaxInt(MapSizeY, MapSizeZ))));
         BlockPosSide[] pick2 = s_.LineIntersection(IsBlockEmpty_.Create(this), GetBlockHeight_.Create(this), line, retCount);

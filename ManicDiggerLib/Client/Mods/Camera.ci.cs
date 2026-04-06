@@ -107,7 +107,7 @@ public class ModCamera : ClientMod
             float pickY = pick2nearest.blockPos[1] - target.Y;
             float pickZ = pick2nearest.blockPos[2] - target.Z;
             float pickdistance = game.Length(pickX, pickY, pickZ);
-            curtppcameradistance.value = MathCi.MinFloat(pickdistance - 1, curtppcameradistance.value);
+            curtppcameradistance.value = Math.Min(pickdistance - 1, curtppcameradistance.value);
             if (curtppcameradistance.value < one * 3 / 10) { curtppcameradistance.value = one * 3 / 10; }
         }
 
