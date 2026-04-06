@@ -60,7 +60,7 @@ public class ModGrenade : ClientMod
         newposition.Y += walldistance;
 
         //Math.Floor() is needed because casting negative values to integer is not floor.
-        Vector3IntRef oldpositioni = Vector3IntRef.Create(game.MathFloor(oldposition.X),
+        Vector3i oldpositioni = new Vector3i(game.MathFloor(oldposition.X),
            game.MathFloor(oldposition.Z),
           game.MathFloor(oldposition.Y));
         float playerpositionX = newposition.X;

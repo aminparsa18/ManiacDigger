@@ -71,10 +71,10 @@ public class ModRail : ClientMod
                 lastdirection = currentdirection;
                 currentrailblockprogress = 0;
                 TileEnterData newenter = new();
-                Vector3IntRef nexttile = NextTile(currentdirection, currentrailblockX, currentrailblockY, currentrailblockZ);
-                newenter.BlockPositionX = nexttile.X;
-                newenter.BlockPositionY = nexttile.Y;
-                newenter.BlockPositionZ = nexttile.Z;
+                var nexttile = NextTile(currentdirection, currentrailblockX, currentrailblockY, currentrailblockZ);
+                newenter.BlockPositionX = nexttile.Value.X;
+                newenter.BlockPositionY = nexttile.Value.Y;
+                newenter.BlockPositionZ = nexttile.Value.Z;
                 //slope
                 if (GetUpDownMove(game, currentrailblockX, currentrailblockY, currentrailblockZ,
                     DirectionUtils.ResultEnter(DirectionUtils.ResultExit(currentdirection))) == UpDown.Up)
@@ -431,26 +431,21 @@ public class ModRail : ClientMod
         return UpDown.None;
     }
 
-    public static Vector3IntRef NextTile(VehicleDirection12 direction, int currentTileX, int currentTileY, int currentTileZ)
+    public static Vector3i? NextTile(VehicleDirection12 direction, int currentTileX, int currentTileY, int currentTileZ)
     {
         return NextTile_(DirectionUtils.ResultExit(direction), currentTileX, currentTileY, currentTileZ);
     }
 
-    public static Vector3IntRef NextTile_(TileExitDirection direction, int currentTileX, int currentTileY, int currentTileZ)
+    public static Vector3i? NextTile_(TileExitDirection direction, int currentTileX, int currentTileY, int currentTileZ)
     {
-        switch (direction)
+        return direction switch
         {
-            case TileExitDirection.Left:
-                return Vector3IntRef.Create(currentTileX - 1, currentTileY, currentTileZ);
-            case TileExitDirection.Right:
-                return Vector3IntRef.Create(currentTileX + 1, currentTileY, currentTileZ);
-            case TileExitDirection.Up:
-                return Vector3IntRef.Create(currentTileX, currentTileY - 1, currentTileZ);
-            case TileExitDirection.Down:
-                return Vector3IntRef.Create(currentTileX, currentTileY + 1, currentTileZ);
-            default:
-                return null;
-        }
+            TileExitDirection.Left => new Vector3i(currentTileX - 1, currentTileY, currentTileZ),
+            TileExitDirection.Right => new Vector3i(currentTileX + 1, currentTileY, currentTileZ),
+            TileExitDirection.Up => new Vector3i(currentTileX, currentTileY - 1, currentTileZ),
+            TileExitDirection.Down => new Vector3i(currentTileX, currentTileY + 1, currentTileZ),
+            _ => null,
+        };
     }
 
     internal static int PossibleRails(Game game, TileEnterData enter)

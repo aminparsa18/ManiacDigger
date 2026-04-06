@@ -1355,7 +1355,7 @@ public class MapUtilCi
         return new Vector3(x, y, h);
     }
 
-    internal static void PosInt(int index, int sizex, int sizey, Vector3IntRef ret)
+    internal static void PosInt(int index, int sizex, int sizey, ref Vector3i ret)
     {
         int x = index % sizex;
         int y = (index / sizex) % sizey;
@@ -2955,10 +2955,10 @@ public class Map
 
     public void SetBlockDirty(int x, int y, int z)
     {
-        Vector3IntRef[] around = ModDrawTerrain.BlocksAround7(Vector3IntRef.Create(x, y, z));
+        Vector3i[] around = ModDrawTerrain.BlocksAround7(new Vector3i(x, y, z));
         for (int i = 0; i < 7; i++)
         {
-            Vector3IntRef a = around[i];
+            Vector3i a = around[i];
             int xx = a.X;
             int yy = a.Y;
             int zz = a.Z;

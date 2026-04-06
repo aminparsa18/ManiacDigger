@@ -1,4 +1,5 @@
-﻿using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
+﻿using OpenTK.Mathematics;
+using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 public class ModGuiCrafting : ClientMod
 {
@@ -111,6 +112,7 @@ public class ModGuiCrafting : ClientMod
             }
         }
     }
+
     private static int craftingblocksFindAllCount(int[] craftingblocks_, int craftingblocksCount_, int p)
     {
         int count = 0;
@@ -165,7 +167,7 @@ public class ModGuiCrafting : ClientMod
                 {
                     //draw crafting recipes list.
                     IntRef tableCount = new();
-                    Vector3IntRef[] table = d_CraftingTableTool.GetTable(posx, posy, posz, tableCount);
+                    Vector3i[] table = d_CraftingTableTool.GetTable(posx, posy, posz, tableCount);
                     IntRef onTableCount = new();
                     int[] onTable = d_CraftingTableTool.GetOnTable(table, tableCount.value, onTableCount);
                     CraftingRecipesStart(game, d_CraftingRecipes, d_CraftingRecipesCount, onTable, onTableCount.value, posx, posy, posz);
@@ -213,56 +215,57 @@ public class CraftingTableTool
 {
     internal IMapStorage2 d_Map;
     internal GameData d_Data;
-    public int[] GetOnTable(Vector3IntRef[] table, int tableCount, IntRef retCount)
+    public int[] GetOnTable(Vector3i[] table, int tableCount, IntRef retCount)
     {
         int[] ontable = new int[2048];
         int ontableCount = 0;
         for (int i = 0; i < tableCount; i++)
         {
-            Vector3IntRef v = table[i];
+            Vector3i v = table[i];
             int t = d_Map.GetBlock(v.X, v.Y, v.Z + 1);
             ontable[ontableCount++] = t;
         }
         retCount.value = ontableCount;
         return ontable;
     }
+
     private const int maxcraftingtablesize = 2000;
-    public Vector3IntRef[] GetTable(int posx, int posy, int posz, IntRef retCount)
+    public Vector3i[] GetTable(int posx, int posy, int posz, IntRef retCount)
     {
-        Vector3IntRef[] l = new Vector3IntRef[2048];
+        Vector3i[] l = new Vector3i[2048];
         int lCount = 0;
-        Vector3IntRef[] todo = new Vector3IntRef[2048];
+        Vector3i[] todo = new Vector3i[2048];
         int todoCount = 0;
-        todo[todoCount++] = Vector3IntRef.Create(posx, posy, posz);
+        todo[todoCount++] = new Vector3i(posx, posy, posz);
         for (; ; )
         {
             if (todoCount == 0 || lCount >= maxcraftingtablesize)
             {
                 break;
             }
-            Vector3IntRef p = todo[todoCount - 1];
+            Vector3i p = todo[todoCount - 1];
             todoCount--;
             if (Vector3IntRefArrayContains(l, lCount, p))
             {
                 continue;
             }
             l[lCount++] = p;
-            Vector3IntRef a = Vector3IntRef.Create(p.X + 1, p.Y, p.Z);
+            Vector3i a = new(p.X + 1, p.Y, p.Z);
             if (d_Map.GetBlock(a.X, a.Y, a.Z) == d_Data.BlockIdCraftingTable())
             {
                 todo[todoCount++] = a;
             }
-            Vector3IntRef b = Vector3IntRef.Create(p.X - 1, p.Y, p.Z);
+            Vector3i b = new(p.X - 1, p.Y, p.Z);
             if (d_Map.GetBlock(b.X, b.Y, b.Z) == d_Data.BlockIdCraftingTable())
             {
                 todo[todoCount++] = b;
             }
-            Vector3IntRef c = Vector3IntRef.Create(p.X, p.Y + 1, p.Z);
+            Vector3i c = new(p.X, p.Y + 1, p.Z);
             if (d_Map.GetBlock(c.X, c.Y, c.Z) == d_Data.BlockIdCraftingTable())
             {
                 todo[todoCount++] = c;
             }
-            Vector3IntRef d = Vector3IntRef.Create(p.X, p.Y - 1, p.Z);
+            Vector3i d = new(p.X, p.Y - 1, p.Z);
             if (d_Map.GetBlock(d.X, d.Y, d.Z) == d_Data.BlockIdCraftingTable())
             {
                 todo[todoCount++] = d;
@@ -272,7 +275,7 @@ public class CraftingTableTool
         return l;
     }
 
-    private static bool Vector3IntRefArrayContains(Vector3IntRef[] l, int lCount, Vector3IntRef p)
+    private static bool Vector3IntRefArrayContains(Vector3i[] l, int lCount, Vector3i p)
     {
         for (int i = 0; i < lCount; i++)
         {

@@ -1,4 +1,6 @@
-﻿public class ModDrawTerrain : ClientMod
+﻿using OpenTK.Mathematics;
+
+public class ModDrawTerrain : ClientMod
 {
     public ModDrawTerrain()
     {
@@ -39,7 +41,7 @@
     }
 #endif
 
-    public override void  OnNewFrameDraw3d(Game game_, float deltaTime)
+    public override void OnNewFrameDraw3d(Game game_, float deltaTime)
     {
         game = game_;
         if (!started)
@@ -58,7 +60,7 @@
     internal void UpdatePerformanceInfo(float dt)
     {
         float msPerSecond = 1.0f / 1000;
-        float elapsed =  (game.platform.TimeMillisecondsFromStart() - lastPerformanceInfoupdateMilliseconds) * msPerSecond;
+        float elapsed = (game.platform.TimeMillisecondsFromStart() - lastPerformanceInfoupdateMilliseconds) * msPerSecond;
         int triangles = TrianglesCount();
         if (elapsed >= 1)
         {
@@ -81,14 +83,14 @@
         game.d_TerrainChunkTesselator.Start();
         terrainRendererStarted = true;
         chunksize = Game.chunksize;
-        bufferedChunkSize = chunksize +2;
-        invertedChunkSize = 1.0f/chunksize;
+        bufferedChunkSize = chunksize + 2;
+        invertedChunkSize = 1.0f / chunksize;
     }
 
     internal int chunksize;
     internal int bufferedChunkSize;
     internal float invertedChunkSize;
-    internal float getInvertedChunkSize() { return invertedChunkSize;}
+    internal float getInvertedChunkSize() { return invertedChunkSize; }
 
 #if !CITO
     internal int invertChunk(int num)
@@ -97,7 +99,7 @@
     }
 #endif
     private int mapAreaSize() { return game.platform.FloatToInt(game.d_Config3d.viewdistance) * 2; }
-    private int centerAreaSize() { return game.platform.FloatToInt(game.d_Config3d.viewdistance*0.5f); }
+    private int centerAreaSize() { return game.platform.FloatToInt(game.d_Config3d.viewdistance * 0.5f); }
     private int mapAreaSizeZ() { return mapAreaSize(); }
 
     private int mapsizexchunks() { return game.map.mapsizexchunks(); }
@@ -117,11 +119,11 @@
         unchecked
         {
 #endif
-        for (int i = 0; i < redrawCount; i++)
-        {
-            DoRedraw(redraw[i]);
-            redraw[i] = null;
-        }
+            for (int i = 0; i < redrawCount; i++)
+            {
+                DoRedraw(redraw[i]);
+                redraw[i] = null;
+            }
 #if !CITO
         }
 #endif
@@ -154,85 +156,81 @@
         unchecked
         {
 
-        if (!(game.lastplacedblockX == -1 && game.lastplacedblockY == -1 && game.lastplacedblockZ == -1))
-        {
-            HashSetVector3IntRef ChunksToRedraw = new();
-            Vector3IntRef[] around = BlocksAround7(Vector3IntRef.Create(game.lastplacedblockX, game.lastplacedblockY, game.lastplacedblockZ));
-            for (int i = 0; i < 7; i++)
+            if (!(game.lastplacedblockX == -1 && game.lastplacedblockY == -1 && game.lastplacedblockZ == -1))
             {
-                Vector3IntRef a = around[i];
-                ChunksToRedraw.Set(Vector3IntRef.Create(invertChunk( a.X), invertChunk(a.Y), invertChunk(a.Z)));
-            }
-            int mapSizeX = invertChunk(game.map.MapSizeX);
-            int mapSizeY = invertChunk(game.map.MapSizeY);
-            int mapSizeZ = invertChunk(game.map.MapSizeZ);
+                HashSet<Vector3i> ChunksToRedraw = new();
+                Vector3i[] around = BlocksAround7(new(game.lastplacedblockX, game.lastplacedblockY, game.lastplacedblockZ));
+                for (int i = 0; i < 7; i++)
+                {
+                    Vector3i a = around[i];
+                    ChunksToRedraw.Add(new(invertChunk(a.X), invertChunk(a.Y), invertChunk(a.Z)));
+                }
+                int mapSizeX = invertChunk(game.map.MapSizeX);
+                int mapSizeY = invertChunk(game.map.MapSizeY);
+                int mapSizeZ = invertChunk(game.map.MapSizeZ);
 #endif
-            int mapsizexchunks_ = mapsizexchunks();
-                          int mapsizeychunks_ = mapsizeychunks();
+                int mapsizexchunks_ = mapsizexchunks();
+                int mapsizeychunks_ = mapsizeychunks();
 
-            for (int i = 0; i < ChunksToRedraw.max; i++)
+                foreach (Vector3i chunk3 in ChunksToRedraw)
+                {
+                    int[] c = new int[3];
+
+                    int xx = chunk3.X;
+                    int yy = chunk3.Y;
+                    int zz = chunk3.Z;
+                    if (xx >= 0 && yy >= 0 && zz >= 0 && xx < mapSizeX && yy < mapSizeY && zz < mapSizeZ)
+                    {
+                        Chunk chunk = game.map.chunks[Index3d(xx, yy, zz, mapsizexchunks_, mapsizeychunks_)];
+                        if (chunk == null || chunk.rendered == null)
+                        {
+                            continue;
+                        }
+                        if (chunk.rendered.dirty)
+                        {
+                            RedrawChunk(xx, yy, zz);
+                        }
+                    }
+                }
+                game.lastplacedblockX = -1;
+                game.lastplacedblockY = -1;
+                game.lastplacedblockZ = -1;
+            }
+            int updated = 0;
+            for (; ; )
             {
-            Vector3IntRef chunk3 = ChunksToRedraw.values[i];
-                if (chunk3 == null)
+                NearestDirty(tempnearestpos);
+                if (tempnearestpos[0] == -1 && tempnearestpos[1] == -1 && tempnearestpos[2] == -1)
                 {
                     break;
                 }
-                int[] c = new int[3];
-
-                int xx = chunk3.X;
-                int yy = chunk3.Y;
-                int zz = chunk3.Z;
-                if (xx >= 0 && yy >= 0 && zz >= 0 && xx < mapSizeX && yy < mapSizeY  && zz < mapSizeZ)
+                RedrawChunk(tempnearestpos[0], tempnearestpos[1], tempnearestpos[2]);
+                //if (updated++ >= 1)
                 {
-                    Chunk chunk = game.map.chunks[Index3d(xx, yy, zz, mapsizexchunks_, mapsizeychunks_)];
-                    if (chunk == null || chunk.rendered == null)
-                    {
-                        continue;
-                    }
-                    if (chunk.rendered.dirty)
-                    {
-                        RedrawChunk(xx, yy, zz);
-                    }
+                    break;
                 }
+                //if (framestopwatch.ElapsedMilliseconds > 5)
+                //{
+                //    break;
+                //}
             }
-            game.lastplacedblockX = -1;
-            game.lastplacedblockY = -1;
-            game.lastplacedblockZ = -1;
-        }
-        int updated = 0;
-        for (; ; )
-        {
-            NearestDirty(tempnearestpos);
-            if (tempnearestpos[0] == -1 && tempnearestpos[1] == -1 && tempnearestpos[2] == -1)
-            {
-                break;
-            }
-            RedrawChunk(tempnearestpos[0], tempnearestpos[1], tempnearestpos[2]);
-            //if (updated++ >= 1)
-            {
-                break;
-            }
-            //if (framestopwatch.ElapsedMilliseconds > 5)
-            //{
-            //    break;
-            //}
-        }
 #if !CITO
         }
 #endif
     }
 
-    public static Vector3IntRef[] BlocksAround7(Vector3IntRef pos)
+    public static Vector3i[] BlocksAround7(Vector3i pos)
     {
-        Vector3IntRef[] arr = new Vector3IntRef[7];
-        arr[0] = pos;
-        arr[1] = Vector3IntRef.Create(pos.X + 1, pos.Y + 0, pos.Z + 0);
-        arr[2] = Vector3IntRef.Create(pos.X - 1, pos.Y + 0, pos.Z + 0);
-        arr[3] = Vector3IntRef.Create(pos.X + 0, pos.Y + 1, pos.Z + 0);
-        arr[4] = Vector3IntRef.Create(pos.X + 0, pos.Y - 1, pos.Z + 0);
-        arr[5] = Vector3IntRef.Create(pos.X + 0, pos.Y + 0, pos.Z + 1);
-        arr[6] = Vector3IntRef.Create(pos.X + 0, pos.Y + 0, pos.Z - 1);
-        return arr;
+        return
+        [
+        pos,
+        new(pos.X + 1, pos.Y, pos.Z),
+        new(pos.X - 1, pos.Y, pos.Z),
+        new(pos.X, pos.Y + 1, pos.Z),
+        new(pos.X, pos.Y - 1, pos.Z),
+        new(pos.X, pos.Y, pos.Z + 1),
+        new(pos.X, pos.Y, pos.Z - 1),
+        ];
     }
 
     private const int intMaxValue = 2147483647;
@@ -243,10 +241,10 @@
         unchecked
         {
 #endif
-        int nearestdist = intMaxValue;
-        nearestpos[0] = -1;
-        nearestpos[1] = -1;
-        nearestpos[2] = -1;
+            int nearestdist = intMaxValue;
+            nearestpos[0] = -1;
+            nearestpos[1] = -1;
+            nearestpos[2] = -1;
 #if CITO
         int px = game.platform.FloatToInt(game.player.position.x) / chunksize;
         int py = game.platform.FloatToInt(game.player.position.z) / chunksize;
@@ -255,58 +253,58 @@
         int chunksxy = this.mapAreaSize()/ chunksize /2;
         int chunksz = this.mapAreaSizeZ()/ chunksize /2;
 #else
-        int px = invertChunk(game.platform.FloatToInt(game.player.position.x));
-        int py = invertChunk(game.platform.FloatToInt(game.player.position.z));
-        int pz = invertChunk( game.platform.FloatToInt(game.player.position.y));
+            int px = invertChunk(game.platform.FloatToInt(game.player.position.x));
+            int py = invertChunk(game.platform.FloatToInt(game.player.position.z));
+            int pz = invertChunk(game.platform.FloatToInt(game.player.position.y));
 
-        int chunksxy = invertChunk(this.mapAreaSize()) /2;
-        int chunksz = invertChunk(this.mapAreaSizeZ()) /2;
- #endif
-        int startx = px - chunksxy;
-        int endx = px + chunksxy;
-        int starty = py - chunksxy;
-        int endy = py + chunksxy;
-        int startz = pz - chunksz;
-        int endz = pz + chunksz;
+            int chunksxy = invertChunk(this.mapAreaSize()) / 2;
+            int chunksz = invertChunk(this.mapAreaSizeZ()) / 2;
+#endif
+            int startx = px - chunksxy;
+            int endx = px + chunksxy;
+            int starty = py - chunksxy;
+            int endy = py + chunksxy;
+            int startz = pz - chunksz;
+            int endz = pz + chunksz;
 
-        if (startx < 0) { startx = 0; }
-        if (starty < 0) { starty = 0; }
-        if (startz < 0) { startz = 0; }
-        int mapsizexchunks_ = mapsizexchunks();
-        int mapsizeychunks_ = mapsizeychunks();
-        if (endx >= mapsizexchunks_) { endx = mapsizexchunks_ - 1; }
-        if (endy >= mapsizeychunks_) { endy = mapsizeychunks_ - 1; }
-        if (endz >= mapsizezchunks()) { endz = mapsizezchunks() - 1; }
+            if (startx < 0) { startx = 0; }
+            if (starty < 0) { starty = 0; }
+            if (startz < 0) { startz = 0; }
+            int mapsizexchunks_ = mapsizexchunks();
+            int mapsizeychunks_ = mapsizeychunks();
+            if (endx >= mapsizexchunks_) { endx = mapsizexchunks_ - 1; }
+            if (endy >= mapsizeychunks_) { endy = mapsizeychunks_ - 1; }
+            if (endz >= mapsizezchunks()) { endz = mapsizezchunks() - 1; }
 
 
-        for (int x = startx; x <= endx; x++)
-        {
-            for (int y = starty; y <= endy; y++)
+            for (int x = startx; x <= endx; x++)
             {
-                for (int z = startz; z <= endz; z++)
+                for (int y = starty; y <= endy; y++)
                 {
-                    Chunk c = game.map.chunks[Index3d(x, y, z, mapsizexchunks_, mapsizeychunks_)];
-                    if (c == null || c.rendered == null)
+                    for (int z = startz; z <= endz; z++)
                     {
-                        continue;
-                    }
-                    if (c.rendered.dirty)
-                    {
-                        int dx = px - x;
-                        int dy = py - y;
-                        int dz = pz - z;
-                        int dist = dx * dx + dy * dy + dz * dz;
-                        if (dist < nearestdist)
+                        Chunk c = game.map.chunks[Index3d(x, y, z, mapsizexchunks_, mapsizeychunks_)];
+                        if (c == null || c.rendered == null)
                         {
-                            nearestdist = dist;
-                            nearestpos[0] = x;
-                            nearestpos[1] = y;
-                            nearestpos[2] = z;
+                            continue;
+                        }
+                        if (c.rendered.dirty)
+                        {
+                            int dx = px - x;
+                            int dy = py - y;
+                            int dz = pz - z;
+                            int dist = dx * dx + dy * dy + dz * dz;
+                            if (dist < nearestdist)
+                            {
+                                nearestdist = dist;
+                                nearestpos[0] = x;
+                                nearestpos[1] = y;
+                                nearestpos[2] = z;
+                            }
                         }
                     }
                 }
             }
-        }
 #if !CITO
         }
 #endif
@@ -334,20 +332,20 @@
         unchecked
         {
 #endif
-        for (int i = 0; i < chunksLength; i++)
-        {
-            Chunk c = game.map.chunks[i];
-            if (c == null)
+            for (int i = 0; i < chunksLength; i++)
             {
-                continue;
+                Chunk c = game.map.chunks[i];
+                if (c == null)
+                {
+                    continue;
+                }
+                if (c.rendered == null)
+                {
+                    c.rendered = new RenderedChunk();
+                }
+                c.rendered.dirty = true;
+                c.baseLightDirty = true;
             }
-            if (c.rendered == null)
-            {
-                c.rendered = new RenderedChunk();
-            }
-            c.rendered.dirty = true;
-            c.baseLightDirty = true;
-        }
 #if !CITO
         }
 #endif
@@ -361,37 +359,37 @@
         unchecked
         {
 #endif
-        idsCount = 0;
-        RenderedChunk c = r.c.rendered;
-        if (c.ids != null)
-        {
-            for (int i = 0; i < c.idsCount; i++)
+            idsCount = 0;
+            RenderedChunk c = r.c.rendered;
+            if (c.ids != null)
             {
-                int loadedSubmesh = c.ids[i];
-                game.d_Batcher.Remove(loadedSubmesh);
+                for (int i = 0; i < c.idsCount; i++)
+                {
+                    int loadedSubmesh = c.ids[i];
+                    game.d_Batcher.Remove(loadedSubmesh);
+                }
             }
-        }
-        for (int i = 0; i < r.dataCount; i++)
-        {
-            VerticesIndicesToLoad submesh = r.data[i];
-            if (submesh.modelData.GetIndicesCount() != 0)
+            for (int i = 0; i < r.dataCount; i++)
             {
-                float centerVecX = submesh.positionX + chunksize *0.5f;
-                float centerVecY = submesh.positionZ + chunksize *0.5f;
-                float centerVecZ = submesh.positionY + chunksize *0.5f;
-                float radius = sqrt3half * chunksize;
-                ids[idsCount++] = game.d_Batcher.Add(submesh.modelData, submesh.transparent, submesh.texture, centerVecX, centerVecY, centerVecZ, radius);
+                VerticesIndicesToLoad submesh = r.data[i];
+                if (submesh.modelData.GetIndicesCount() != 0)
+                {
+                    float centerVecX = submesh.positionX + chunksize * 0.5f;
+                    float centerVecY = submesh.positionZ + chunksize * 0.5f;
+                    float centerVecZ = submesh.positionY + chunksize * 0.5f;
+                    float radius = sqrt3half * chunksize;
+                    ids[idsCount++] = game.d_Batcher.Add(submesh.modelData, submesh.transparent, submesh.texture, centerVecX, centerVecY, centerVecZ, radius);
+                }
             }
-        }
-        int[] idsarr = new int[idsCount];
-        for (int i = 0; i < idsCount; i++)
-        {
-            idsarr[i] = ids[i];
-        }
-        c.ids = idsarr;
-        c.idsCount = idsCount;
+            int[] idsarr = new int[idsCount];
+            for (int i = 0; i < idsCount; i++)
+            {
+                idsarr[i] = ids[i];
+            }
+            c.ids = idsarr;
+            c.idsCount = idsCount;
 #if !CITO
-       }
+        }
 #endif
     }
 
@@ -401,19 +399,19 @@
         unchecked
         {
 #endif
-        Chunk c = game.map.chunks[MapUtilCi.Index3d(x, y, z, mapsizexchunks(), mapsizeychunks())];
-        if (c == null)
-        {
-            return;
-        }
-        if (c.rendered == null)
-        {
-            c.rendered = new RenderedChunk();
-        }
-        c.rendered.dirty = false;
-        chunkupdates++;
+            Chunk c = game.map.chunks[MapUtilCi.Index3d(x, y, z, mapsizexchunks(), mapsizeychunks())];
+            if (c == null)
+            {
+                return;
+            }
+            if (c.rendered == null)
+            {
+                c.rendered = new RenderedChunk();
+            }
+            c.rendered.dirty = false;
+            chunkupdates++;
 
-        GetExtendedChunk(x, y, z);
+            GetExtendedChunk(x, y, z);
 
             TerrainRendererRedraw r = new()
             {
@@ -421,20 +419,20 @@
             };
 
             VerticesIndicesToLoad[] a = null;
-        IntRef retCount = new();
-        if (!IsSolidChunk(currentChunk, (bufferedChunkSize) * (bufferedChunkSize) * (bufferedChunkSize)))
-        {
-            CalculateShadows(x, y, z);
-            a = game.d_TerrainChunkTesselator.MakeChunk(x, y, z, currentChunk, currentChunkShadows, game.mLightLevels, retCount);
-        }
+            IntRef retCount = new();
+            if (!IsSolidChunk(currentChunk, (bufferedChunkSize) * (bufferedChunkSize) * (bufferedChunkSize)))
+            {
+                CalculateShadows(x, y, z);
+                a = game.d_TerrainChunkTesselator.MakeChunk(x, y, z, currentChunk, currentChunkShadows, game.mLightLevels, retCount);
+            }
 
-        r.data = new VerticesIndicesToLoad[retCount.value];
-        for (int i = 0; i < retCount.value; i++)
-        {
-            r.data[i] = VerticesIndicesToLoadClone(a[i]);
-        }
-        r.dataCount = retCount.value;
-        redraw[redrawCount++] = r;
+            r.data = new VerticesIndicesToLoad[retCount.value];
+            for (int i = 0; i < retCount.value; i++)
+            {
+                r.data[i] = VerticesIndicesToLoadClone(a[i]);
+            }
+            r.dataCount = retCount.value;
+            redraw[redrawCount++] = r;
 #if !CITO
         }
 #endif
@@ -461,28 +459,28 @@
         unchecked
         {
 #endif
-        dest.xyz = new float[source.GetXyzCount()];
-        for (int i = 0; i < source.GetXyzCount(); i++)
-        {
-            dest.xyz[i] = source.xyz[i];
-        }
-        dest.uv = new float[source.GetUvCount()];
-        for (int i = 0; i < source.GetUvCount(); i++)
-        {
-            dest.uv[i] = source.uv[i];
-        }
-        dest.rgba = new byte[source.GetRgbaCount()];
-        for (int i = 0; i < source.GetRgbaCount(); i++)
-        {
-            dest.rgba[i] = source.rgba[i];
-        }
-        dest.indices = new int[source.GetIndicesCount()];
-        for (int i = 0; i < source.GetIndicesCount(); i++)
-        {
-            dest.indices[i] = source.indices[i];
-        }
-        dest.SetVerticesCount(source.GetVerticesCount());
-        dest.SetIndicesCount(source.GetIndicesCount());
+            dest.xyz = new float[source.GetXyzCount()];
+            for (int i = 0; i < source.GetXyzCount(); i++)
+            {
+                dest.xyz[i] = source.xyz[i];
+            }
+            dest.uv = new float[source.GetUvCount()];
+            for (int i = 0; i < source.GetUvCount(); i++)
+            {
+                dest.uv[i] = source.uv[i];
+            }
+            dest.rgba = new byte[source.GetRgbaCount()];
+            for (int i = 0; i < source.GetRgbaCount(); i++)
+            {
+                dest.rgba[i] = source.rgba[i];
+            }
+            dest.indices = new int[source.GetIndicesCount()];
+            for (int i = 0; i < source.GetIndicesCount(); i++)
+            {
+                dest.indices[i] = source.indices[i];
+            }
+            dest.SetVerticesCount(source.GetVerticesCount());
+            dest.SetIndicesCount(source.GetIndicesCount());
 #if !CITO
         }
 #endif
@@ -501,13 +499,13 @@
         unchecked
         {
 #endif
-        for (int i = 0; i < length; i++)
-        {
-            if (currentChunk[i] != block)
+            for (int i = 0; i < length; i++)
             {
-                return false;
+                if (currentChunk[i] != block)
+                {
+                    return false;
+                }
             }
-        }
 #if !CITO
         }
 #endif
@@ -539,58 +537,58 @@
         unchecked
         {
 #endif
-        for (int i = 0; i < GlobalVar.MAX_BLOCKTYPES; i++)
-        {
-            if (game.blocktypes[i] == null)
+            for (int i = 0; i < GlobalVar.MAX_BLOCKTYPES; i++)
             {
-                continue;
-            }
-            CalculateShadowslightRadius[i] = game.blocktypes[i].LightRadius;
-            CalculateShadowsisTransparentForLight[i] = IsTransparentForLight(i);
-        }
-
-        for (int xx = 0; xx < 3; xx++)
-        {
-            int cx1 = cx + xx - 1;
-            int cx1Chunked = cx1 * chunksize;
-            for (int yy = 0; yy < 3; yy++)
-            {
-                int cy1 = cy + yy - 1;
-                int cy1Chunked = cy1 * chunksize;
-                for (int zz = 0; zz < 3; zz++)
+                if (game.blocktypes[i] == null)
                 {
-                    int cz1 = cz + zz - 1;
-                    if (!game.map.IsValidChunkPos(cx1, cy1, cz1))
+                    continue;
+                }
+                CalculateShadowslightRadius[i] = game.blocktypes[i].LightRadius;
+                CalculateShadowsisTransparentForLight[i] = IsTransparentForLight(i);
+            }
+
+            for (int xx = 0; xx < 3; xx++)
+            {
+                int cx1 = cx + xx - 1;
+                int cx1Chunked = cx1 * chunksize;
+                for (int yy = 0; yy < 3; yy++)
+                {
+                    int cy1 = cy + yy - 1;
+                    int cy1Chunked = cy1 * chunksize;
+                    for (int zz = 0; zz < 3; zz++)
                     {
-                        continue;
-                    }
-                    Chunk c = game.map.GetChunk(cx1Chunked, cy1Chunked, cz1 * chunksize);
-                    if (c.baseLightDirty)
-                    {
-                        lightBase.CalculateChunkBaseLight(game, cx1, cy1, cz1, CalculateShadowslightRadius, CalculateShadowsisTransparentForLight);
-                        c.baseLightDirty = false;
+                        int cz1 = cz + zz - 1;
+                        if (!game.map.IsValidChunkPos(cx1, cy1, cz1))
+                        {
+                            continue;
+                        }
+                        Chunk c = game.map.GetChunk(cx1Chunked, cy1Chunked, cz1 * chunksize);
+                        if (c.baseLightDirty)
+                        {
+                            lightBase.CalculateChunkBaseLight(game, cx1, cy1, cz1, CalculateShadowslightRadius, CalculateShadowsisTransparentForLight);
+                            c.baseLightDirty = false;
+                        }
                     }
                 }
             }
-        }
 
-        RenderedChunk chunk = game.map.GetChunk(cx * chunksize, cy * chunksize, cz * chunksize).rendered;
+            RenderedChunk chunk = game.map.GetChunk(cx * chunksize, cy * chunksize, cz * chunksize).rendered;
 
-        if (chunk.light == null)
-        {
-            chunk.light = new byte[18 * 18 * 18];
+            if (chunk.light == null)
+            {
+                chunk.light = new byte[18 * 18 * 18];
+                for (int i = 0; i < 18 * 18 * 18; i++)
+                {
+                    chunk.light[i] = 15;
+                }
+            }
+
+            lightBetweenChunks.CalculateLightBetweenChunks(game, cx, cy, cz, CalculateShadowslightRadius, CalculateShadowsisTransparentForLight);
+
             for (int i = 0; i < 18 * 18 * 18; i++)
             {
-                chunk.light[i] = 15;
+                currentChunkShadows[i] = chunk.light[i];
             }
-        }
-
-        lightBetweenChunks.CalculateLightBetweenChunks(game, cx, cy, cz, CalculateShadowslightRadius, CalculateShadowsisTransparentForLight);
-
-        for (int i = 0; i < 18 * 18 * 18; i++)
-        {
-            currentChunkShadows[i] = chunk.light[i];
-        }
 #if !CITO
         }
 #endif
@@ -613,7 +611,7 @@
     }
 }
 
-public class TerrainRendererCommit 
+public class TerrainRendererCommit
 {
     public static Action Create(ModDrawTerrain renderer)
     {
@@ -632,7 +630,7 @@ public class ModUnloadRendererChunks : ClientMod
 {
     public ModUnloadRendererChunks()
     {
-        unloadxyztemp = new Vector3IntRef();
+        unloadxyztemp = new Vector3i();
     }
 
     private Game game;
@@ -660,14 +658,14 @@ public class ModUnloadRendererChunks : ClientMod
         game = game_;
 
         chunksize = Game.chunksize;
-        invertedChunk = 1.0f/chunksize;
+        invertedChunk = 1.0f / chunksize;
         mapsizexchunks = game.platform.FloatToInt(game.map.MapSizeX * invertedChunk);
         mapsizeychunks = game.platform.FloatToInt(game.map.MapSizeY * invertedChunk);
         mapsizezchunks = game.platform.FloatToInt(game.map.MapSizeZ * invertedChunk);
 
-        int px = game.platform.FloatToInt(game.player.position.x*invertedChunk);
-        int py = game.platform.FloatToInt(game.player.position.z*invertedChunk);
-        int pz = game.platform.FloatToInt(game.player.position.y*invertedChunk);
+        int px = game.platform.FloatToInt(game.player.position.x * invertedChunk);
+        int py = game.platform.FloatToInt(game.player.position.z * invertedChunk);
+        int pz = game.platform.FloatToInt(game.player.position.y * invertedChunk);
 
         int chunksxy = game.platform.FloatToInt(this.mapAreaSize() * invertedChunk * 0.5f);
         int chunksz = game.platform.FloatToInt(this.mapAreaSizeZ() * invertedChunk * 0.5f);
@@ -689,7 +687,7 @@ public class ModUnloadRendererChunks : ClientMod
         int mapsizexchunks_ = mapsizexchunks;
         int mapsizeychunks_ = mapsizeychunks;
         int mapsizezchunks_ = mapsizezchunks;
-        int sizeChunks =  mapsizexchunks_ * mapsizeychunks_ * mapsizezchunks_;
+        int sizeChunks = mapsizexchunks_ * mapsizeychunks_ * mapsizezchunks_;
         int count;
         if (game.platform.IsFastSystem())
         {
@@ -703,11 +701,11 @@ public class ModUnloadRendererChunks : ClientMod
         for (int i = 0; i < count; i++)
         {
             unloadIterationXy++;
-            if (unloadIterationXy >=sizeChunks)
+            if (unloadIterationXy >= sizeChunks)
             {
                 unloadIterationXy = 0;
             }
-            MapUtilCi.PosInt(unloadIterationXy, mapsizexchunks_, mapsizeychunks_, unloadxyztemp);
+            MapUtilCi.PosInt(unloadIterationXy, mapsizexchunks_, mapsizeychunks_, ref unloadxyztemp);
             int x = unloadxyztemp.X;
             int y = unloadxyztemp.Y;
             int z = unloadxyztemp.Z;
@@ -736,7 +734,7 @@ public class ModUnloadRendererChunks : ClientMod
     }
 
     private int mapAreaSize() { return game.platform.FloatToInt(game.d_Config3d.viewdistance) * 2; }
-    private int centerAreaSize() { return game.platform.FloatToInt(game.d_Config3d.viewdistance *0.5f) ; }
+    private int centerAreaSize() { return game.platform.FloatToInt(game.d_Config3d.viewdistance * 0.5f); }
     private int mapAreaSizeZ() { return mapAreaSize(); }
 
     private int mapsizexchunks;
@@ -748,50 +746,5 @@ public class ModUnloadRendererChunks : ClientMod
 
 
     private int unloadIterationXy;
-    private readonly Vector3IntRef unloadxyztemp;
-}
-
-public class HashSetVector3IntRef
-{
-    public HashSetVector3IntRef()
-    {
-        max = 16;
-        Start();
-    }
-
-    public void Start()
-    {
-        values = new Vector3IntRef[max];
-    }
-
-    internal Vector3IntRef[] values;
-    internal int max;
-
-    internal Vector3IntRef _tempValue;    //outside of the function to prevent regular need for GC
-    public void Set(Vector3IntRef value)
-    {
-        int i = 0;
-#if !CITO
-        unchecked
-        {
-#endif
-        for (i = 0; i < max; i++)
-        {
-        _tempValue = values[i];
-            if (_tempValue == null)
-            {
-                break;
-            }
-            if (_tempValue.X == value.X
-                && _tempValue.Y == value.Y
-                && _tempValue.Z == value.Z)
-            {
-                return;
-            }
-        }
-        values[i] = Vector3IntRef.Create(value.X, value.Y, value.Z);
-#if !CITO
-        }
-#endif
-    }
+    private Vector3i unloadxyztemp;
 }

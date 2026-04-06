@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using Jint.Native;
+using OpenTK.Mathematics;
 
 public class ModPicking : ClientMod
 {
@@ -192,7 +193,7 @@ public class ModPicking : ClientMod
             int ntileZ = game.platform.FloatToInt(pick0.Current()[2]);
             if (game.IsUsableBlock(game.map.GetBlock(ntileX, ntileZ, ntileY)))
             {
-                game.currentAttackedBlock = Vector3IntRef.Create(ntileX, ntileZ, ntileY);
+                game.currentAttackedBlock = new Vector3i(ntileX, ntileZ, ntileY);
             }
         }
         if (game.GetFreeMouse())
@@ -568,7 +569,7 @@ public class ModPicking : ClientMod
                             int posx = newtileX;
                             int posy = newtileZ;
                             int posz = newtileY;
-                            game.currentAttackedBlock = Vector3IntRef.Create(posx, posy, posz);
+                            game.currentAttackedBlock = new Vector3i(posx, posy, posz);
                             var key = (posx, posy, posz);
 
                             if (!game.blockHealth.ContainsKey(key))
@@ -632,8 +633,8 @@ public class ModPicking : ClientMod
 
     //value is original block.
     internal Dictionary<(int x, int y, int z), float> fillarea;
-    internal Vector3IntRef fillstart;
-    internal Vector3IntRef fillend;
+    internal Vector3i? fillstart;
+    internal Vector3i? fillend;
 
     internal void OnPick(Game game, int blockposX, int blockposY, int blockposZ, int blockposoldX, int blockposoldY, int blockposoldZ, Vector3 collisionPos, bool right)
     {
@@ -671,9 +672,9 @@ public class ModPicking : ClientMod
             {
                 return;
             }
-            Vector3IntRef v = Vector3IntRef.Create(x, y, z);
-            Vector3IntRef oldfillstart = fillstart;
-            Vector3IntRef oldfillend = fillend;
+            Vector3i v = new(x, y, z);
+            Vector3i? oldfillstart = fillstart;
+            Vector3i? oldfillend = fillend;
             if (mode == Packet_BlockSetModeEnum.Create)
             {
                 if (game.blocktypes[activematerial].IsTool)
@@ -688,12 +689,12 @@ public class ModPicking : ClientMod
 
                     if (fillstart != null)
                     {
-                        Vector3IntRef f = fillstart;
-                        if (!game.IsFillBlock(game.map.GetBlock(f.X, f.Y, f.Z)))
+                        Vector3i? f = fillstart;
+                        if (!game.IsFillBlock(game.map.GetBlock(f.Value.X, f.Value.Y, f.Value.Z)))
                         {
-                            fillarea[(f.X, f.Y, f.Z)] = game.map.GetBlock(f.X, f.Y, f.Z);
+                            fillarea[(f.Value.X, f.Value.Y, f.Value.Z)] = game.map.GetBlock(f.Value.X, f.Value.Y, f.Value.Z);
                         }
-                        game.SetBlock(f.X, f.Y, f.Z, game.d_Data.BlockIdFillStart());
+                        game.SetBlock(f.Value.X, f.Value.Y, f.Value.Z, game.d_Data.BlockIdFillStart());
 
 
                         FillFill(game, v, fillstart);
@@ -722,7 +723,7 @@ public class ModPicking : ClientMod
                 }
                 if (fillarea.ContainsKey((v.X, v.Y, v.Z)))
                 {
-                    game.SendFillArea(fillstart.X, fillstart.Y, fillstart.Z, fillend.X, fillend.Y, fillend.Z, activematerial);
+                    game.SendFillArea(fillstart.Value.X, fillstart.Value.Y, fillstart.Value.Z, fillend.Value.X, fillend.Value.Y, fillend.Value.Z, activematerial);
                     ClearFillArea(game);
                     fillstart = null;
                     fillend = null;
@@ -737,7 +738,7 @@ public class ModPicking : ClientMod
                     return;
                 }
                 //delete fill start
-                if (fillstart != null && fillstart.X == v.X && fillstart.Y == v.Y && fillstart.Z == v.Z)
+                if (fillstart != null && fillstart.Value.X == v.X && fillstart.Value.Y == v.Y && fillstart.Value.Z == v.Z)
                 {
                     ClearFillArea(game);
                     fillstart = null;
@@ -745,7 +746,7 @@ public class ModPicking : ClientMod
                     return;
                 }
                 //delete fill end
-                if (fillend != null && fillend.X == v.X && fillend.Y == v.Y && fillend.Z == v.Z)
+                if (fillend != null && fillend.Value.X == v.X && fillend.Value.Y == v.Y && fillend.Value.Z == v.Z)
                 {
                     ClearFillArea(game);
                     fillend = null;
@@ -766,14 +767,14 @@ public class ModPicking : ClientMod
         fillarea.Clear();
     }
 
-    internal void FillFill(Game game, Vector3IntRef a_, Vector3IntRef b_)
+    internal void FillFill(Game game, Vector3i a_, Vector3i? b_)
     {
-        int startx = MathCi.MinInt(a_.X, b_.X);
-        int endx = MathCi.MaxInt(a_.X, b_.X);
-        int starty = MathCi.MinInt(a_.Y, b_.Y);
-        int endy = MathCi.MaxInt(a_.Y, b_.Y);
-        int startz = MathCi.MinInt(a_.Z, b_.Z);
-        int endz = MathCi.MaxInt(a_.Z, b_.Z);
+        int startx = MathCi.MinInt(a_.X, b_.Value.X);
+        int endx = MathCi.MaxInt(a_.X, b_.Value.X);
+        int starty = MathCi.MinInt(a_.Y, b_.Value.Y);
+        int endy = MathCi.MaxInt(a_.Y, b_.Value.Y);
+        int startz = MathCi.MinInt(a_.Z, b_.Value.Z);
+        int endz = MathCi.MaxInt(a_.Z, b_.Value.Z);
         for (int x = startx; x <= endx; x++)
         {
             for (int y = starty; y <= endy; y++)

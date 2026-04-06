@@ -668,26 +668,6 @@ public class MathCi
     }
 }
 
-
-
-public class Vector3IntRef
-{
-    internal int X;
-    internal int Y;
-    internal int Z;
-
-    internal static Vector3IntRef Create(int x, int y, int z)
-    {
-        Vector3IntRef v = new()
-        {
-            X = x,
-            Y = y,
-            Z = z
-        };
-        return v;
-    }
-}
-
 public class BoolRef
 {
     internal bool value;

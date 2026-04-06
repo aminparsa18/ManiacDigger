@@ -269,10 +269,8 @@ public class BlockOctreeSearcher
                 node2.MaxEdge[1] = node2.MinEdge[1] + getBlockHeight.GetBlockHeight(platform.FloatToInt(x),platform.FloatToInt(y),platform.FloatToInt(z));
 
                 BlockPosSide b = new();
-                Vector3 hit2 = Vector3.Zero;
-
                 float[] dir = [line.End[0] - line.Start[0], line.End[1] - line.Start[1], line.End[2] - line.Start[2]];
-                bool ishit = Intersection.HitBoundingBox(node2.MinEdge, node2.MaxEdge, line.Start, dir, out hit2);
+                bool ishit = Intersection.HitBoundingBox(node2.MinEdge, node2.MaxEdge, line.Start, dir, out Vector3 hit2);
                 if (ishit)
                 {
                     //hit2.pos = Vec3.FromValues(x, z, y);

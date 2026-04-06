@@ -3,12 +3,12 @@ using OpenTK.Mathematics;
 
 public class ServerSystemUnloadUnusedChunks : ServerSystem
 {
-    private readonly Vector3IntRef chunkpos;
+    private Vector3i chunkpos;
     private int CompressUnusedIteration = 0;
 
     public ServerSystemUnloadUnusedChunks()
     {
-        chunkpos = new Vector3IntRef();
+        chunkpos = new Vector3i();
     }
 
     public override void Update(Server server, float dt)
@@ -19,7 +19,7 @@ public class ServerSystemUnloadUnusedChunks : ServerSystem
 
         for (int i = 0; i < 100; i++)
         {
-            MapUtilCi.PosInt(CompressUnusedIteration, sizexchunks, sizeychunks, chunkpos);
+            MapUtilCi.PosInt(CompressUnusedIteration, sizexchunks, sizeychunks, ref chunkpos);
             ServerChunk c = server.d_Map.GetChunkValid(chunkpos.X, chunkpos.Y, chunkpos.Z);
             bool stop = false;
             if (c != null)

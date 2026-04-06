@@ -1897,7 +1897,7 @@ public class Game
         return d_Data.Strength()[blocktype];
     }
 
-    internal Vector3IntRef currentAttackedBlock;
+    internal Vector3i? currentAttackedBlock;
     internal int currentlyAttackedEntity;
 
     internal void SendRequestBlob(string[] required, int requiredCount)
@@ -3486,10 +3486,10 @@ public class Game
             {
                 if (currentAttackedBlock != null)
                 {
-                    int posX = currentAttackedBlock.X;
-                    int posY = currentAttackedBlock.Y;
-                    int posZ = currentAttackedBlock.Z;
-                    int blocktype = map.GetBlock(currentAttackedBlock.X, currentAttackedBlock.Y, currentAttackedBlock.Z);
+                    int posX = currentAttackedBlock.Value.X;
+                    int posY = currentAttackedBlock.Value.Y;
+                    int posZ = currentAttackedBlock.Value.Z;
+                    int blocktype = map.GetBlock(currentAttackedBlock.Value.X, currentAttackedBlock.Value.Y, currentAttackedBlock.Value.Z);
                     if (IsUsableBlock(blocktype))
                     {
                         if (d_Data.IsRailTile(blocktype))

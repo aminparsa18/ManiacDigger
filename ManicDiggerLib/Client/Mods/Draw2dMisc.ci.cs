@@ -1,4 +1,6 @@
-﻿public class ModDraw2dMisc : ClientMod
+﻿using OpenTK.Mathematics;
+
+public class ModDraw2dMisc : ClientMod
 {
     public override void OnNewFrameDraw2d(Game game, float deltaTime)
     {
@@ -36,7 +38,7 @@
         {
             return;
         }
-        game.currentAttackedBlock = Vector3IntRef.Create(x, y, z);
+        game.currentAttackedBlock = new Vector3i(x, y, z);
         DrawEnemyHealthBlock(game);
     }
 
@@ -56,9 +58,9 @@
     {
         if (game.currentAttackedBlock != null)
         {
-            int x = game.currentAttackedBlock.X;
-            int y = game.currentAttackedBlock.Y;
-            int z = game.currentAttackedBlock.Z;
+            int x = game.currentAttackedBlock.Value.X;
+            int y = game.currentAttackedBlock.Value.Y;
+            int z = game.currentAttackedBlock.Value.Z;
             int blocktype = game.map.GetBlock(x, y, z);
             float health = game.GetCurrentBlockHealth(x, y, z);
             float progress = health / game.d_Data.Strength()[blocktype];

@@ -2188,7 +2188,7 @@ public partial class Server : ICurrentTime, IDropItem
             return false;
         }
         IntRef tableCount = new();
-        Vector3IntRef[] table = d_CraftingTableTool.GetTable(cmd.X, cmd.Y, cmd.Z, tableCount);
+        Vector3i[] table = d_CraftingTableTool.GetTable(cmd.X, cmd.Y, cmd.Z, tableCount);
         IntRef ontableCount = new();
         int[] ontable = d_CraftingTableTool.GetOnTable(table, tableCount.value, ontableCount);
         List<int> outputtoadd = new();
@@ -2233,7 +2233,7 @@ public partial class Server : ICurrentTime, IDropItem
         {
             for (int k = 0; k < tableCount.value; k++)
             {
-                Vector3IntRef v = table[k];
+                Vector3i v = table[k];
                 SetBlockAndNotify(v.X, v.Y, v.Z + 1, ontable[zz]);
                 zz++;
             }
