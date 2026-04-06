@@ -1,4 +1,6 @@
-﻿public class CubeModelData
+﻿using OpenTK.Mathematics;
+
+public class CubeModelData
 {
 #if CITO
     const
@@ -273,9 +275,9 @@ public class SphereModelData
             {
                 float xFloat = x;
                 float thetaFloat = (xFloat / (segments - 1)) * 2 * GetPi();
-                float vxFloat = radius * Platform.Sin(phiFloat) * Platform.Cos(thetaFloat);
-                float vyFloat = height * Platform.Cos(phiFloat);
-                float vzFloat = radius * Platform.Sin(phiFloat) * Platform.Sin(thetaFloat);
+                float vxFloat = radius * (float)MathHelper.Sin(phiFloat) * (float)MathHelper.Cos(thetaFloat);
+                float vyFloat = height * (float)MathHelper.Cos(phiFloat);
+                float vzFloat = radius * (float)MathHelper.Sin(phiFloat) * (float)MathHelper.Sin(thetaFloat);
                 float uFloat = xFloat / (segments - 1);
                 float vFloat = yFloat / (rings - 1);
                 xyz[i * 3 + 0] = vxFloat;

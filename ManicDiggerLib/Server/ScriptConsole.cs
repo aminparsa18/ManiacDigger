@@ -1,4 +1,6 @@
 ﻿// Copyright (c) 2011 by Henon <meinrad.recheis@gmail.com>
+using OpenTK.Mathematics;
+
 public class ScriptConsole
 {
     public ScriptConsole(Server s, int client_id)
@@ -70,7 +72,7 @@ public class ScriptConsole
     {
         var client = m_server.GetClient(m_client);
         var pos = GetPosition();
-        Print(string.Format("Position: X {0}, Y {1}, Z{2}", pos.x, pos.y, pos.z));
+        Print(string.Format("Position: X {0}, Y {1}, Z{2}", pos.X, pos.Y, pos.Z));
     }
 
     public Vector3i GetPosition()
@@ -110,7 +112,7 @@ public class ScriptConsole
             {
                 for (int z = (int)z1; z < (int)z2; z += chunksize)
                 {
-                    chunkPositions.Add(new Vector3i() { x = x, y = y, z = z });
+                    chunkPositions.Add(new Vector3i() { X = x, Y = y, Z = z });
                 }
             }
         }
@@ -172,7 +174,7 @@ public class ScriptConsole
             {
                 for (int z = (int)z1; z < (int)z2; z += chunksize)
                 {
-                    chunkPositions.Add(new Vector3i() { x = x, y = y, z = z });
+                    chunkPositions.Add(new Vector3i() { X = x, Y = y, Z = z });
                 }
             }
         }
@@ -220,11 +222,11 @@ public class Turtle
 
     public Vector3i position = new(0, 0, 0);
 
-    public double x { get { return position.x; } }
+    public double x { get { return position.X; } }
 
-    public double y { get { return position.y; } }
+    public double y { get { return position.Y; } }
 
-    public double z { get { return position.z; } }
+    public double z { get { return position.Z; } }
 
     //public Orientation orientation;
 
@@ -274,17 +276,17 @@ public class Turtle
 
     public void forward()
     {
-        position = new Vector3i(position.x + direction.x, position.y + direction.y, position.z + direction.z);
+        position = new Vector3i(position.X + direction.X, position.Y + direction.Y, position.Z + direction.Z);
     }
 
     public void back()
     {
-        position = new Vector3i(position.x - direction.x, position.y - direction.y, position.z - direction.z);
+        position = new Vector3i(position.X - direction.X, position.Y - direction.Y, position.Z - direction.Z);
     }
 
     public void save() // push the current turtle position and direction to the stack
     {
-        m_stack.Push(new Vector3i[] { position, direction });
+        m_stack.Push([position, direction]);
     }
 
     public void load() // pop position and direction from the stack and set them
@@ -307,28 +309,28 @@ public class Turtle
 
     public static string DirectionToString(Vector3i dir)
     {
-        if (dir.x == 0)
+        if (dir.X == 0)
         {
-            if (dir.y == 0)
+            if (dir.Y == 0)
             {
-                if (dir.z == 1)
+                if (dir.Z == 1)
                     return "Up";
-                else if (dir.z == -1)
+                else if (dir.Z == -1)
                     return "Down";
             }
-            if (dir.z == 0)
+            if (dir.Z == 0)
             {
-                if (dir.y == 1)
+                if (dir.Y == 1)
                     return "South";
-                else if (dir.y == -1)
+                else if (dir.Y == -1)
                     return "North";
             }
         }
-        else if (dir.y == 0 && dir.z == 0)
+        else if (dir.Y == 0 && dir.Z == 0)
         {
-            if (dir.x == 1)
+            if (dir.X == 1)
                 return "West";
-            else if (dir.x == -1)
+            else if (dir.X == -1)
                 return "East";
         }
         return "Unknown direction";

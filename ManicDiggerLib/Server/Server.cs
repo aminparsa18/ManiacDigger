@@ -971,12 +971,12 @@ public partial class Server : ICurrentTime, IDropItem
                     }
                     foreach (Monster m in chunk.Monsters)
                     {
-                        Vector3i mpos = new() { x = m.X, y = m.Y, z = m.Z };
+                        Vector3i mpos = new() { X = m.X, Y = m.Y, Z = m.Z };
                         Vector3i ppos = new()
                         {
-                            x = clients[clientid].PositionMul32GlX / 32,
-                            y = clients[clientid].PositionMul32GlZ / 32,
-                            z = clients[clientid].PositionMul32GlY / 32
+                            X = clients[clientid].PositionMul32GlX / 32,
+                            Y = clients[clientid].PositionMul32GlZ / 32,
+                            Z = clients[clientid].PositionMul32GlY / 32
                         };
                         if (DistanceSquared(mpos, ppos) < 15)
                         {
@@ -1094,9 +1094,9 @@ public partial class Server : ICurrentTime, IDropItem
     }
     public static int DistanceSquared(Vector3i a, Vector3i b)
     {
-        int dx = a.x - b.x;
-        int dy = a.y - b.y;
-        int dz = a.z - b.z;
+        int dx = a.X - b.X;
+        int dy = a.Y - b.Y;
+        int dz = a.Z - b.Z;
         return dx * dx + dy * dy + dz * dz;
     }
     public void KillPlayer(int clientid)
@@ -1317,9 +1317,9 @@ public partial class Server : ICurrentTime, IDropItem
                     // Set player's spawn position
                     Vector3i position = GetPlayerSpawnPositionMul32(clientid);
 
-                    clients[clientid].PositionMul32GlX = position.x;
-                    clients[clientid].PositionMul32GlY = position.y + (int)(0.5 * 32);
-                    clients[clientid].PositionMul32GlZ = position.z;
+                    clients[clientid].PositionMul32GlX = position.X;
+                    clients[clientid].PositionMul32GlY = position.Y + (int)(0.5 * 32);
+                    clients[clientid].PositionMul32GlZ = position.Z;
 
                     string ip = (clients[clientid].socket.RemoteEndPoint()).AddressToString();
                     SendMessageToAll(string.Format(language.ServerPlayerJoin(), clients[clientid].ColoredPlayername(colorNormal)));
@@ -1396,7 +1396,7 @@ public partial class Server : ICurrentTime, IDropItem
                     Vector3i a = new(packet.FillArea.X1, packet.FillArea.Y1, packet.FillArea.Z1);
                     Vector3i b = new(packet.FillArea.X2, packet.FillArea.Y2, packet.FillArea.Z2);
 
-                    int blockCount = (Math.Abs(a.x - b.x) + 1) * (Math.Abs(a.y - b.y) + 1) * (Math.Abs(a.z - b.z) + 1);
+                    int blockCount = (Math.Abs(a.X - b.X) + 1) * (Math.Abs(a.Y - b.Y) + 1) * (Math.Abs(a.Z - b.Z) + 1);
 
                     if (blockCount > clients[clientid].FillLimit)
                     {
@@ -1410,9 +1410,9 @@ public partial class Server : ICurrentTime, IDropItem
                     }
                     this.DoFillArea(clientid, packet.FillArea, blockCount);
 
-                    BuildLog(string.Format("{0} {1} {2} - {3} {4} {5} {6} {7} {8}", a.x, a.y, a.z, b.x, b.y, b.z,
+                    BuildLog(string.Format("{0} {1} {2} - {3} {4} {5} {6} {7} {8}", a.X, a.Y, a.Z, b.X, b.Y, b.Z,
                         c.playername, (c.socket.RemoteEndPoint()).AddressToString(),
-                        d_Map.GetBlock(a.x, a.y, a.z)));
+                        d_Map.GetBlock(a.X, a.Y, a.Z)));
                 }
                 break;
             case Packet_ClientIdEnum.PositionandOrientation:
@@ -1652,8 +1652,8 @@ public partial class Server : ICurrentTime, IDropItem
                     }
                     Line3D pick = new()
                     {
-                        Start = new float[] { DeserializeFloat(packet.Shot.FromX), DeserializeFloat(packet.Shot.FromY), DeserializeFloat(packet.Shot.FromZ) },
-                        End = new float[] { DeserializeFloat(packet.Shot.ToX), DeserializeFloat(packet.Shot.ToY), DeserializeFloat(packet.Shot.ToZ) }
+                        Start = new Vector3(DeserializeFloat(packet.Shot.FromX), DeserializeFloat(packet.Shot.FromY), DeserializeFloat(packet.Shot.FromZ)),
+                        End = new Vector3(DeserializeFloat(packet.Shot.ToX), DeserializeFloat(packet.Shot.ToY), DeserializeFloat(packet.Shot.ToZ))
                     };
 
                     Vector3 feetpos = new((float)k.Value.PositionMul32GlX / 32, (float)k.Value.PositionMul32GlY / 32, (float)k.Value.PositionMul32GlZ / 32);
@@ -2077,7 +2077,7 @@ public partial class Server : ICurrentTime, IDropItem
 
         if (playerSpawn == null)
         {
-            position = new Vector3i(this.defaultPlayerSpawn.x * 32, this.defaultPlayerSpawn.z * 32, this.defaultPlayerSpawn.y * 32);
+            position = new Vector3i(this.defaultPlayerSpawn.X * 32, this.defaultPlayerSpawn.Z * 32, this.defaultPlayerSpawn.Y * 32);
         }
         else
         {
@@ -2306,18 +2306,18 @@ public partial class Server : ICurrentTime, IDropItem
 
     private bool IsFillAreaValid(ClientOnServer client, Vector3i a, Vector3i b)
     {
-        if (!MapUtil.IsValidPos(this.d_Map, a.x, a.y, a.z) || !MapUtil.IsValidPos(this.d_Map, b.x, b.y, b.z))
+        if (!MapUtil.IsValidPos(this.d_Map, a.X, a.Y, a.Z) || !MapUtil.IsValidPos(this.d_Map, b.X, b.Y, b.Z))
         {
             return false;
         }
 
         // TODO: Is there a more efficient way?
-        int startx = Math.Min(a.x, b.x);
-        int endx = Math.Max(a.x, b.x);
-        int starty = Math.Min(a.y, b.y);
-        int endy = Math.Max(a.y, b.y);
-        int startz = Math.Min(a.z, b.z);
-        int endz = Math.Max(a.z, b.z);
+        int startx = Math.Min(a.X, b.X);
+        int endx = Math.Max(a.X, b.X);
+        int starty = Math.Min(a.Y, b.Y);
+        int endy = Math.Max(a.Y, b.Y);
+        int startz = Math.Min(a.Z, b.Z);
+        int endz = Math.Max(a.Z, b.Z);
         for (int x = startx; x <= endx; x++)
         {
             for (int y = starty; y <= endy; y++)
@@ -2333,17 +2333,18 @@ public partial class Server : ICurrentTime, IDropItem
         }
         return true;
     }
+
     private bool DoFillArea(int player_id, Packet_ClientFillArea fill, int blockCount)
     {
         Vector3i a = new(fill.X1, fill.Y1, fill.Z1);
         Vector3i b = new(fill.X2, fill.Y2, fill.Z2);
 
-        int startx = Math.Min(a.x, b.x);
-        int endx = Math.Max(a.x, b.x);
-        int starty = Math.Min(a.y, b.y);
-        int endy = Math.Max(a.y, b.y);
-        int startz = Math.Min(a.z, b.z);
-        int endz = Math.Max(a.z, b.z);
+        int startx = Math.Min(a.X, b.X);
+        int endx = Math.Max(a.X, b.X);
+        int starty = Math.Min(a.Y, b.Y);
+        int endy = Math.Max(a.Y, b.Y);
+        int startz = Math.Min(a.Z, b.Z);
+        int endz = Math.Max(a.Z, b.Z);
 
         int blockType = fill.BlockType;
         blockType = d_Data.WhenPlayerPlacesGetsConvertedTo()[blockType];
@@ -2433,32 +2434,34 @@ public partial class Server : ICurrentTime, IDropItem
         clients[clientid].chunksseenTime[pos] = 0;
         //Console.WriteLine("UnseenChunk: {0},{1},{2} Client: {3}", vx, vy, vz, clientid);
     }
+
     private void SendFillArea(int clientid, Vector3i a, Vector3i b, int blockType, int blockCount)
     {
         // TODO: better to send a chunk?
 
-        Vector3i v = new((int)(a.x / chunksize), (int)(a.y / chunksize), (int)(a.z / chunksize));
-        Vector3i w = new((int)(b.x / chunksize), (int)(b.y / chunksize), (int)(b.z / chunksize));
+        Vector3i v = new((int)(a.X / chunksize), (int)(a.Y / chunksize), (int)(a.Z / chunksize));
+        Vector3i w = new((int)(b.X / chunksize), (int)(b.Y / chunksize), (int)(b.Z / chunksize));
 
         // TODO: Is it sufficient to regard only start- and endpoint?
-        if (!ClientSeenChunk(clientid, v.x, v.y, v.z) && !ClientSeenChunk(clientid, w.x, w.y, w.z))
+        if (!ClientSeenChunk(clientid, v.X, v.Y, v.Z) && !ClientSeenChunk(clientid, w.X, w.Y, w.Z))
         {
             return;
         }
 
         Packet_ServerFillArea p = new()
         {
-            X1 = a.x,
-            Y1 = a.y,
-            Z1 = a.z,
-            X2 = b.x,
-            Y2 = b.y,
-            Z2 = b.z,
+            X1 = a.X,
+            Y1 = a.Y,
+            Z1 = a.Z,
+            X2 = b.X,
+            Y2 = b.Y,
+            Z2 = b.Z,
             BlockType = blockType,
             BlockCount = blockCount
         };
         SendPacket(clientid, Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.FillArea, FillArea = p }));
     }
+
     private void SetFillAreaLimit(int clientid)
     {
         ClientOnServer client = GetClient(clientid);
@@ -3294,7 +3297,7 @@ public partial class Server : ICurrentTime, IDropItem
                     {
                         break;
                     }
-                    SetBlockAndNotify(nearpos.Value.x, nearpos.Value.y, nearpos.Value.z, item.BlockId);
+                    SetBlockAndNotify(nearpos.Value.X, nearpos.Value.Y, nearpos.Value.Z, item.BlockId);
                     item.BlockCount--;
                 }
                 if (item.BlockCount == 0)
@@ -3316,9 +3319,9 @@ public partial class Server : ICurrentTime, IDropItem
             {
                 for (int z = 0; z < 10; z++)
                 {
-                    int xx = pos.x + x - 10 / 2;
-                    int yy = pos.y + y - 10 / 2;
-                    int zz = pos.z + z - 10 / 2;
+                    int xx = pos.X + x - 10 / 2;
+                    int yy = pos.Y + y - 10 / 2;
+                    int zz = pos.Z + z - 10 / 2;
                     if (!MapUtil.IsValidPos(d_Map, xx, yy, zz))
                     {
                         continue;
@@ -3349,13 +3352,15 @@ public partial class Server : ICurrentTime, IDropItem
         }
         return null;
     }
+
     private static Vector3i Minus(Vector3i a, Vector3i b)
     {
-        return new Vector3i(a.x - b.x, a.y - b.y, a.z - b.z);
+        return new Vector3i(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
     }
+
     private static int Length(Vector3i v)
     {
-        return (int)Math.Sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+        return (int)Math.Sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z);
     }
 
     public void SetBlockType(int id, string name, BlockType block)
@@ -3364,6 +3369,7 @@ public partial class Server : ICurrentTime, IDropItem
         block.Name = name;
         d_Data.UseBlockType(platform, id, BlockTypeConverter.GetBlockType(block));
     }
+
     public void SetBlockType(string name, BlockType block)
     {
         for (int i = 0; i < BlockTypes.Length; i++)
@@ -3496,7 +3502,7 @@ public partial class Server : ICurrentTime, IDropItem
             int distance = DistanceSquared(new Vector3i((int)k.Value.PositionMul32GlX / 32, (int)k.Value.PositionMul32GlZ / 32, (int)k.Value.PositionMul32GlY / 32), pos);
             if (distance < 64 * 64)
             {
-                SendSound(k.Key, sound, pos.x, posy, posz);
+                SendSound(k.Key, sound, pos.X, posy, posz);
             }
         }
     }
@@ -3517,7 +3523,7 @@ public partial class Server : ICurrentTime, IDropItem
             int distance = DistanceSquared(new Vector3i((int)k.Value.PositionMul32GlX / 32, (int)k.Value.PositionMul32GlZ / 32, (int)k.Value.PositionMul32GlY / 32), pos);
             if (distance < range)
             {
-                SendSound(k.Key, sound, pos.x, posy, posz);
+                SendSound(k.Key, sound, pos.X, posy, posz);
             }
         }
     }
@@ -4269,8 +4275,8 @@ public static class MapUtil
 
     public static Point PlayerCenterArea(int playerAreaSize, int centerAreaSize, Vector3i blockPosition)
     {
-        int px = blockPosition.x;
-        int py = blockPosition.y;
+        int px = blockPosition.X;
+        int py = blockPosition.Y;
         int gridposx = (px / centerAreaSize) * centerAreaSize;
         int gridposy = (py / centerAreaSize) * centerAreaSize;
         return new Point(gridposx, gridposy);
@@ -4321,63 +4327,6 @@ public class Timer
     private static double GetTime()
     {
         return (double)DateTime.UtcNow.Ticks / (10 * 1000 * 1000);
-    }
-}
-
-public struct Vector3i
-{
-    public int x;
-    public int y;
-    public int z;
-
-    public Vector3i(int x, int y, int z)
-    {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-    }
-
-    public Vector3i Add(Vector3i v)
-    {
-        return Add(v.x, v.y, v.z);
-    }
-
-    public Vector3i Add(int x, int y, int z)
-    {
-        return new Vector3i(this.x + x, this.y + y, this.z + z);
-    }
-
-    public override bool Equals(object obj)
-    {
-        if (obj is Vector3i)
-        {
-            Vector3i other = (Vector3i)obj;
-            return this.x == other.x && this.y == other.y && this.z == other.z;
-        }
-        return base.Equals(obj);
-    }
-    public static bool operator ==(Vector3i a, Vector3i b)
-    {
-        return a.x == b.x && a.y == b.y && a.z == b.z;
-    }
-    public static bool operator !=(Vector3i a, Vector3i b)
-    {
-        return !(a.x == b.x && a.y == b.y && a.z == b.z);
-    }
-    public override int GetHashCode()
-    {
-        int hash = 23;
-        unchecked
-        {
-            hash = hash * 37 + x;
-            hash = hash * 37 + y;
-            hash = hash * 37 + z;
-        }
-        return hash;
-    }
-    public override string ToString()
-    {
-        return string.Format("[{0}, {1}, {2}]", x, y, z);
     }
 }
 

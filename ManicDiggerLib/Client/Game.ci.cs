@@ -1,4 +1,5 @@
-﻿using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
+﻿using OpenTK.Mathematics;
+using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 public class Game
 {
@@ -113,9 +114,9 @@ public class Game
         enable_move = true;
         handTexture = -1;
         modelViewInverted = new float[16];
-        GLScaleTempVec3 = Vec3.Create();
-        GLRotateTempVec3 = Vec3.Create();
-        GLTranslateTempVec3 = Vec3.Create();
+        GLScaleTempVec3 = Vector3.Zero;
+        GLRotateTempVec3 = Vector3.Zero;
+        GLTranslateTempVec3 = Vector3.Zero;
         identityMatrix = Mat4.Identity_(Mat4.Create());
         Set3dProjectionTempMat4 = Mat4.Create();
         getAsset = new string[1024 * 2];
@@ -772,7 +773,7 @@ public class Game
         }
     }
 
-    private readonly float[] GLScaleTempVec3;
+    private Vector3 GLScaleTempVec3;
     public void GLScale(float x, float y, float z)
     {
         float[] m;
@@ -784,11 +785,11 @@ public class Game
         {
             m = mvMatrix.Peek();
         }
-        Vec3.Set(GLScaleTempVec3, x, y, z);
+        GLScaleTempVec3 = new Vector3(x, y, z);
         Mat4.Scale(m, m, GLScaleTempVec3);
     }
 
-    private readonly float[] GLRotateTempVec3;
+    private Vector3 GLRotateTempVec3;
     public void GLRotate(float angle, float x, float y, float z)
     {
         angle /= 360;
@@ -802,11 +803,11 @@ public class Game
         {
             m = mvMatrix.Peek();
         }
-        Vec3.Set(GLRotateTempVec3, x, y, z);
+        GLRotateTempVec3 = new Vector3(x, y, z);
         Mat4.Rotate(m, m, angle, GLRotateTempVec3);
     }
 
-    private readonly float[] GLTranslateTempVec3;
+    private Vector3 GLTranslateTempVec3;
     public void GLTranslate(float x, float y, float z)
     {
         float[] m;
@@ -818,7 +819,7 @@ public class Game
         {
             m = mvMatrix.Peek();
         }
-        Vec3.Set(GLTranslateTempVec3, x, y, z);
+        GLTranslateTempVec3 = new Vector3(x, y, z);
         Mat4.Translate(m, m, GLTranslateTempVec3);
     }
 

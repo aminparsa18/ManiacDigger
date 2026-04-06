@@ -1,4 +1,6 @@
-﻿public class ScriptCharacterPhysics : EntityScript
+﻿using OpenTK.Mathematics;
+
+public class ScriptCharacterPhysics : EntityScript
 {
     public ScriptCharacterPhysics()
     {
@@ -11,7 +13,7 @@
         jumpstartaccelerationhalf = 0;
         movespeednow = 0;
 
-        tmpPlayerPosition = new float[3];
+        tmpPlayerPosition = Vector3.Zero;
         tmpBlockingBlockType = new IntRef();
 
         constGravity = 0.3f;
@@ -220,9 +222,9 @@
         Vector3Ref previousposition = Vector3Ref.Create(stateplayerposition.x, stateplayerposition.y, stateplayerposition.z);
         if (!move.noclip)
         {
-            float[] v = WallSlide(
-                Vec3.FromValues(stateplayerposition.x, stateplayerposition.y, stateplayerposition.z),
-                Vec3.FromValues(newposition.X, newposition.Y, newposition.Z),
+            var v = WallSlide(
+                new Vector3(stateplayerposition.x, stateplayerposition.y, stateplayerposition.z),
+                new Vector3(newposition.X, newposition.Y, newposition.Z),
                 modelheight);
             stateplayerposition.x = v[0];
             stateplayerposition.y = v[1];
@@ -291,67 +293,67 @@
             || Game.IsRail(blocktype);
     }
 
-    private readonly float[] tmpPlayerPosition;		//Temporarily stores the player's position. Used in WallSlide()
+    private Vector3 tmpPlayerPosition;		//Temporarily stores the player's position. Used in WallSlide()
     private readonly IntRef tmpBlockingBlockType;
-    public float[] WallSlide(float[] oldposition, float[] newposition, float modelheight)
+    public Vector3 WallSlide(Vector3 oldposition, Vector3 newposition, float modelheight)
     {
         bool high = false;
-        if (modelheight >= 2) { high = true; }	//Set high to true if player model is bigger than standard height
-        oldposition[1] += game.constWallDistance;		//Add walldistance temporarily for ground collisions
-        newposition[1] += game.constWallDistance;		//Add walldistance temporarily for ground collisions
+        if (modelheight >= 2) { high = true; }  // Set high to true if player model is bigger than standard height
+        oldposition.Y += game.constWallDistance;        // Add walldistance temporarily for ground collisions
+        newposition.Y += game.constWallDistance;        // Add walldistance temporarily for ground collisions
 
         game.reachedwall = false;
         game.reachedwall_1blockhigh = false;
         game.reachedHalfBlock = false;
 
-        tmpPlayerPosition[0] = oldposition[0];
-        tmpPlayerPosition[1] = oldposition[1];
-        tmpPlayerPosition[2] = oldposition[2];
+        tmpPlayerPosition.X = oldposition.X;
+        tmpPlayerPosition.Y = oldposition.Y;
+        tmpPlayerPosition.Z = oldposition.Z;
 
         tmpBlockingBlockType.value = 0;
 
         // X
-        if (IsEmptySpaceForPlayer(high, newposition[0], tmpPlayerPosition[1], tmpPlayerPosition[2], tmpBlockingBlockType))
+        if (IsEmptySpaceForPlayer(high, newposition.X, tmpPlayerPosition.Y, tmpPlayerPosition.Z, tmpBlockingBlockType))
         {
-            tmpPlayerPosition[0] = newposition[0];
+            tmpPlayerPosition.X = newposition.X;
         }
         else
         {
             // For autojump
             game.reachedwall = true;
-            if (IsEmptyPoint(newposition[0], tmpPlayerPosition[1] + 0.5f, tmpPlayerPosition[2], null))
+            if (IsEmptyPoint(newposition.X, tmpPlayerPosition.Y + 0.5f, tmpPlayerPosition.Z, null))
             {
                 game.reachedwall_1blockhigh = true;
                 if (game.blocktypes[tmpBlockingBlockType.value].DrawType == Packet_DrawTypeEnum.HalfHeight) { game.reachedHalfBlock = true; }
-                if (StandingOnHalfBlock(newposition[0], tmpPlayerPosition[1], tmpPlayerPosition[2])) { game.reachedHalfBlock = true; }
+                if (StandingOnHalfBlock(newposition.X, tmpPlayerPosition.Y, tmpPlayerPosition.Z)) { game.reachedHalfBlock = true; }
             }
         }
         // Y
-        if (IsEmptySpaceForPlayer(high, tmpPlayerPosition[0], newposition[1], tmpPlayerPosition[2], tmpBlockingBlockType))
+        if (IsEmptySpaceForPlayer(high, tmpPlayerPosition.X, newposition.Y, tmpPlayerPosition.Z, tmpBlockingBlockType))
         {
-            tmpPlayerPosition[1] = newposition[1];
+            tmpPlayerPosition.Y = newposition.Y;
         }
         // Z
-        if (IsEmptySpaceForPlayer(high, tmpPlayerPosition[0], tmpPlayerPosition[1], newposition[2], tmpBlockingBlockType))
+        if (IsEmptySpaceForPlayer(high, tmpPlayerPosition.X, tmpPlayerPosition.Y, newposition.Z, tmpBlockingBlockType))
         {
-            tmpPlayerPosition[2] = newposition[2];
+            tmpPlayerPosition.Z = newposition.Z;
         }
         else
         {
             // For autojump
             game.reachedwall = true;
-            if (IsEmptyPoint(tmpPlayerPosition[0], tmpPlayerPosition[1] + 0.5f, newposition[2], null))
+            if (IsEmptyPoint(tmpPlayerPosition.X, tmpPlayerPosition.Y + 0.5f, newposition.Z, null))
             {
                 game.reachedwall_1blockhigh = true;
                 if (game.blocktypes[tmpBlockingBlockType.value].DrawType == Packet_DrawTypeEnum.HalfHeight) { game.reachedHalfBlock = true; }
-                if (StandingOnHalfBlock(tmpPlayerPosition[0], tmpPlayerPosition[1], newposition[2])) { game.reachedHalfBlock = true; }
+                if (StandingOnHalfBlock(tmpPlayerPosition.X, tmpPlayerPosition.Y, newposition.Z)) { game.reachedHalfBlock = true; }
             }
         }
 
-        isplayeronground = (tmpPlayerPosition[1] == oldposition[1]) && (newposition[1] < oldposition[1]);
+        isplayeronground = (tmpPlayerPosition.Y == oldposition.Y) && (newposition.Y < oldposition.Y);
 
-        tmpPlayerPosition[1] -= game.constWallDistance;	//Remove the temporary walldistance again
-        return tmpPlayerPosition;	//Return valid position
+        tmpPlayerPosition.Y -= game.constWallDistance;  // Remove the temporary walldistance again
+        return tmpPlayerPosition;   // Return valid position
     }
 
     private bool StandingOnHalfBlock(float x, float y, float z)

@@ -23,7 +23,7 @@ public class ServerSystemNotifyMap : ServerSystem
                 }
                 Vector3i playerpos = Server.PlayerBlockPosition(k.Value);
 
-                NearestDirty(server, k.Key, playerpos.x, playerpos.y, playerpos.z, retNearest);
+                NearestDirty(server, k.Key, playerpos.X, playerpos.Y, playerpos.Z, retNearest);
 
                 if (retNearest[0] != -1)
                 {
@@ -104,8 +104,8 @@ public class ServerSystemNotifyMap : ServerSystem
     public static void SendChunk(Server server, int clientid, Vector3i globalpos, Vector3i chunkpos)
     {
         ClientOnServer c = server.clients[clientid];
-        ServerChunk chunk = server.d_Map.GetChunk(globalpos.x, globalpos.y, globalpos.z);
-        server.ClientSeenChunkSet(clientid, chunkpos.x, chunkpos.y, chunkpos.z, server.simulationcurrentframe);
+        ServerChunk chunk = server.d_Map.GetChunk(globalpos.X, globalpos.Y, globalpos.Z);
+        server.ClientSeenChunkSet(clientid, chunkpos.X, chunkpos.Y, chunkpos.Z, server.simulationcurrentframe);
         //sent++;
         byte[] compressedchunk;
         if (MapUtil.IsSolidChunk(chunk.data) && chunk.data[0] == 0)
@@ -120,18 +120,18 @@ public class ServerSystemNotifyMap : ServerSystem
             //commented because it was being sent too early, before full column was generated.
             //if (!c.heightmapchunksseen.ContainsKey(new Vector2i(v.x, v.y)))
             {
-                byte[] heightmapchunk = Misc.UshortArrayToByteArray(server.d_Map.GetHeightmapChunk(globalpos.x, globalpos.y));
+                byte[] heightmapchunk = Misc.UshortArrayToByteArray(server.d_Map.GetHeightmapChunk(globalpos.X, globalpos.Y));
                 byte[] compressedHeightmapChunk = server.d_NetworkCompression.Compress(heightmapchunk);
                 Packet_ServerHeightmapChunk p1 = new()
                 {
-                    X = globalpos.x,
-                    Y = globalpos.y,
+                    X = globalpos.X,
+                    Y = globalpos.Y,
                     SizeX = Server.chunksize,
                     SizeY = Server.chunksize,
                     CompressedHeightmap = compressedHeightmapChunk,
                 };
                 server.SendPacket(clientid, Server.Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.HeightmapChunk, HeightmapChunk = p1 }));
-                c.heightmapchunksseen[new Vector2i(globalpos.x, globalpos.y)] = server.simulationcurrentframe;
+                c.heightmapchunksseen[new Vector2i(globalpos.X, globalpos.Y)] = server.simulationcurrentframe;
             }
         }
         if (compressedchunk != null)
@@ -147,9 +147,9 @@ public class ServerSystemNotifyMap : ServerSystem
         }
         Packet_ServerChunk p = new()
         {
-            X = globalpos.x,
-            Y = globalpos.y,
-            Z = globalpos.z,
+            X = globalpos.X,
+            Y = globalpos.Y,
+            Z = globalpos.Z,
             SizeX = Server.chunksize,
             SizeY = Server.chunksize,
             SizeZ = Server.chunksize,

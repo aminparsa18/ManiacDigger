@@ -1,5 +1,6 @@
 ﻿using ProtoBuf;
 using ManicDigger;
+using OpenTK.Mathematics;
 
 //separate class because it's used by server and client.
 public class InventoryUtil

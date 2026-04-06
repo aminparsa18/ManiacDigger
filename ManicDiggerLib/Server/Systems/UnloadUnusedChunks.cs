@@ -1,4 +1,6 @@
 ﻿//Unload chunks currently not seen by players
+using OpenTK.Mathematics;
+
 public class ServerSystemUnloadUnusedChunks : ServerSystem
 {
     private readonly Vector3IntRef chunkpos;

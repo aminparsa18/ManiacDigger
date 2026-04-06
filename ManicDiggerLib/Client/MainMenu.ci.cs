@@ -1,4 +1,5 @@
-﻿using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
+﻿using OpenTK.Mathematics;
+using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 public class MainMenu
 {
@@ -265,15 +266,12 @@ public class MainMenu
     public void Draw2dQuad(int textureid, float dx, float dy, float dw, float dh)
     {
         Mat4.Identity_(mvMatrix);
-        Mat4.Translate(mvMatrix, mvMatrix, Vec3.FromValues(dx, dy, 0));
-        Mat4.Scale(mvMatrix, mvMatrix, Vec3.FromValues(dw, dh, 0));
-        Mat4.Scale(mvMatrix, mvMatrix, Vec3.FromValues(one / 2, one / 2, 0));
-        Mat4.Translate(mvMatrix, mvMatrix, Vec3.FromValues(one, one, 0));
+        Mat4.Translate(mvMatrix, mvMatrix, new Vector3(dx, dy, 0));
+        Mat4.Scale(mvMatrix, mvMatrix, new Vector3(dw, dh, 0));
+        Mat4.Scale(mvMatrix, mvMatrix, new Vector3(one / 2, one / 2, 0));
+        Mat4.Translate(mvMatrix, mvMatrix, new Vector3(one, one, 0));
         SetMatrixUniforms();
-        if (cubeModel == null)
-        {
-            cubeModel = p.CreateModel(QuadModelData.GetQuadModelData());
-        }
+        cubeModel ??= p.CreateModel(QuadModelData.GetQuadModelData());
         p.BindTexture2d(textureid);
         p.DrawModel(cubeModel);
     }
@@ -282,11 +280,6 @@ public class MainMenu
     {
         p.SetMatrixUniformProjection(pMatrix);
         p.SetMatrixUniformModelView(mvMatrix);
-    }
-
-    private static float degToRad(float degrees)
-    {
-        return degrees * GlMatrixMath.PI() / 180;
     }
 
     private float xRot;

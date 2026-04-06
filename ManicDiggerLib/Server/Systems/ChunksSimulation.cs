@@ -1,4 +1,6 @@
-﻿public class ServerSystemChunksSimulation : ServerSystem
+﻿using OpenTK.Mathematics;
+
+public class ServerSystemChunksSimulation : ServerSystem
 {
     private readonly int ChunksSimulated = 1;
     private int every = -1;
@@ -35,8 +37,8 @@
 
                 foreach (var p in ChunksAroundPlayer(server, pos))
                 {
-                    if (!MapUtil.IsValidPos(server.d_Map, p.x, p.y, p.z)) { continue; }
-                    ServerChunk c = server.d_Map.GetChunkValid(Server.invertChunk(p.x), Server.invertChunk(p.y), Server.invertChunk(p.z));
+                    if (!MapUtil.IsValidPos(server.d_Map, p.X, p.Y, p.Z)) { continue; }
+                    ServerChunk c = server.d_Map.GetChunkValid(Server.invertChunk(p.X), Server.invertChunk(p.Y), Server.invertChunk(p.Z));
                     //ServerChunk c = server.d_Map.GetChunkValid(p.x / Server.chunksize, p.y / Server.chunksize, p.z / Server.chunksize);
                     if (c == null)
                     {
@@ -61,7 +63,7 @@
                 if (server.simulationcurrentframe - oldesttime > Chunksimulation_every(server))
                 {
                     ChunkUpdate(server, oldestpos, oldesttime);
-                    ServerChunk c = server.d_Map.GetChunkValid(Server.invertChunk(oldestpos.x), Server.invertChunk(oldestpos.y), Server.invertChunk(oldestpos.z));
+                    ServerChunk c = server.d_Map.GetChunkValid(Server.invertChunk(oldestpos.X), Server.invertChunk(oldestpos.Y), Server.invertChunk(oldestpos.Z));
                     //ServerChunk c = server.d_Map.GetChunkValid(oldestpos.x / Server.chunksize, oldestpos.y / Server.chunksize, oldestpos.z / Server.chunksize);
                     c.LastUpdate = (int)server.simulationcurrentframe;
                     return;
@@ -75,9 +77,9 @@
         unchecked
         {
             var lst = server.modEventHandlers.populatechunk;
-            int x = (int)(p.x * Server.invertedChunkSize);
-            int y = (int)(p.y * Server.invertedChunkSize);
-            int z = (int)(p.z * Server.invertedChunkSize);
+            int x = (int)(p.X * Server.invertedChunkSize);
+            int y = (int)(p.Y * Server.invertedChunkSize);
+            int z = (int)(p.Z * Server.invertedChunkSize);
             for (int i = 0; i < lst.Count; i++)
             {
                 lst[i](x, y, z);
@@ -96,16 +98,16 @@
             }
             var bt = server.modEventHandlers.blockticks;
             var btCount = bt.Count;
-            ServerChunk chunk = server.d_Map.GetChunk(p.x, p.y, p.z);
+            ServerChunk chunk = server.d_Map.GetChunk(p.X, p.Y, p.Z);
             for (int xx = 0; xx < Server.chunksize; xx++)
             {
-                int px = xx + p.x;
+                int px = xx + p.X;
                 for (int yy = 0; yy < Server.chunksize; yy++)
                 {
-                    int py = yy + p.y;
+                    int py = yy + p.Y;
                     for (int zz = 0; zz < Server.chunksize; zz++)
                     {
-                        int pz = zz + p.z;
+                        int pz = zz + p.Z;
                         //int block = chunk.data[MapUtilCi.Index3d(xx, yy, zz, Server.chunksize, Server.chunksize)];
 
                         for (int i = 0; i < btCount; i++)
@@ -132,8 +134,8 @@
                 {
                     for (int z = 0; z < zDrawDistance; z++)
                     {
-                        var p = new Vector3i(playerpos.x + x * Server.chunksize, playerpos.y + y * Server.chunksize, z * Server.chunksize);
-                        if (MapUtil.IsValidPos(server.d_Map, p.x, p.y, p.z))
+                        var p = new Vector3i(playerpos.X + x * Server.chunksize, playerpos.Y + y * Server.chunksize, z * Server.chunksize);
+                        if (MapUtil.IsValidPos(server.d_Map, p.X, p.Y, p.Z))
                         {
                             yield return p;
                         }
@@ -148,16 +150,16 @@
 
     public void AddMonsters(Server server, Vector3i p)
     {
-        ServerChunk chunk = server.d_Map.GetChunkValid(p.x / Server.chunksize, p.y / Server.chunksize, p.z / Server.chunksize);
+        ServerChunk chunk = server.d_Map.GetChunkValid(p.X / Server.chunksize, p.Y / Server.chunksize, p.Z / Server.chunksize);
         int tries = 0;
         while (chunk.Monsters.Count < 1)
         {
             int xx = server.rnd.Next(Server.chunksize);
             int yy = server.rnd.Next(Server.chunksize);
             int zz = server.rnd.Next(Server.chunksize);
-            int px = p.x + xx;
-            int py = p.y + yy;
-            int pz = p.z + zz;
+            int px = p.X + xx;
+            int py = p.Y + yy;
+            int pz = p.Z + zz;
             if ((!MapUtil.IsValidPos(server.d_Map, px, py, pz))
                 || (!MapUtil.IsValidPos(server.d_Map, px, py, pz + 1))
                 || (!MapUtil.IsValidPos(server.d_Map, px, py, pz - 1)))

@@ -1,5 +1,7 @@
 ﻿//Based on http://csc.lsu.edu/~kooima/misc/cs594/final/index.html
 //But instead of pixel shader it uses vertex colors.
+using OpenTK.Mathematics;
+
 public class ModSkySphereAnimated : ClientMod
 {
     public ModSkySphereAnimated()
@@ -103,9 +105,9 @@ public class ModSkySphereAnimated : ClientMod
             {
                 float xFloat = x;
                 float theta = (xFloat / (segments - 1)) * 2 * Game.GetPi();
-                float vx = radius * Platform.Sin(phiFloat) * Platform.Cos(theta);
-                float vy = height * Platform.Cos(phiFloat);
-                float vz = radius * Platform.Sin(phiFloat) * Platform.Sin(theta);
+                float vx = radius * (float)MathHelper.Sin(phiFloat) * (float)MathHelper.Cos(theta);
+                float vy = height * (float)MathHelper.Cos(phiFloat);
+                float vz = radius * (float)MathHelper.Sin(phiFloat) * (float)MathHelper.Sin(theta);
                 float u = xFloat / (segments - 1);
                 float v = yFloat / (rings - 1);
                 data.xyz[i * 3 + 0] = vx;

@@ -1,5 +1,6 @@
 ﻿using PointG = System.Drawing.Point;
 using ProtoBuf;
+using OpenTK.Mathematics;
 
 public partial class Server
 {
@@ -10,7 +11,7 @@ public partial class Server
     // generates a new spawn near initial spawn if initial spawn is in water
     public Vector3i DontSpawnPlayerInWater(Vector3i initialSpawn)
     {
-        if (IsPlayerPositionDry(initialSpawn.x, initialSpawn.y, initialSpawn.z))
+        if (IsPlayerPositionDry(initialSpawn.X, initialSpawn.Y, initialSpawn.Z))
         {
             return initialSpawn;
         }
@@ -22,7 +23,7 @@ public partial class Server
         Vector3i pos = initialSpawn;
         for (int i = 0; i < playerareasize / 4 - 5; i++)
         {
-            if (IsPlayerPositionDry(pos.x, pos.y, pos.z))
+            if (IsPlayerPositionDry(pos.X, pos.Y, pos.Z))
             {
                 if (!bonusset)
                 {
@@ -34,9 +35,9 @@ public partial class Server
             {
                 break;
             }
-            pos.x++;
-            int newblockheight = MapUtil.blockheight(d_Map, 0, pos.x, pos.y);
-            pos.z = newblockheight + 1;
+            pos.X++;
+            int newblockheight = MapUtil.blockheight(d_Map, 0, pos.X, pos.Y);
+            pos.Z = newblockheight + 1;
         }
         return pos;
     }
@@ -75,7 +76,7 @@ public partial class Server
                 for (int z = 0; z < d_Map.MapSizeZ / chunksize; z++)
                 {
                     var v = new Vector3i(p.X + x * chunksize, p.Y + y * chunksize, z * chunksize);
-                    if (MapUtil.IsValidPos(d_Map, v.x, v.y, v.z))
+                    if (MapUtil.IsValidPos(d_Map, v.X, v.Y, v.Z))
                     {
                         yield return v;
                     }
@@ -227,11 +228,11 @@ public partial class Server
         List<Xyz> chunks = [];
         foreach (Vector3i pos in chunkPositions)
         {
-            if (MapUtil.IsValidPos(d_Map, pos.x, pos.y, pos.z))
+            if (MapUtil.IsValidPos(d_Map, pos.X, pos.Y, pos.Z))
             {
-                int x = pos.x / chunksize;
-                int y = pos.y / chunksize;
-                int z = pos.z / chunksize;
+                int x = pos.X / chunksize;
+                int y = pos.Y / chunksize;
+                int z = pos.Z / chunksize;
                 d_Map.SetChunkValid(x, y, z, null);
                 chunks.Add(new Xyz() { X = x, Y = y, Z = z });
             }
@@ -348,11 +349,11 @@ public partial class Server
         List<DbChunk> dbchunks = [];
         foreach (Vector3i pos in chunkPositions)
         {
-            int dx = pos.x / chunksize;
-            int dy = pos.y / chunksize;
-            int dz = pos.z / chunksize;
+            int dx = pos.X / chunksize;
+            int dy = pos.Y / chunksize;
+            int dz = pos.Z / chunksize;
 
-            ServerChunk cc = new() { data = this.GetChunk(pos.x, pos.y, pos.z) };
+            ServerChunk cc = new() { data = this.GetChunk(pos.X, pos.Y, pos.Z) };
             MemoryStream ms = new();
             Serializer.Serialize(ms, cc);
             dbchunks.Add(new DbChunk() { Position = new Xyz() { X = dx, Y = dy, Z = dz }, Chunk = ms.ToArray() });

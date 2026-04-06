@@ -1,4 +1,6 @@
-﻿public class ServerSystemNotifyEntities : ServerSystem
+﻿using OpenTK.Mathematics;
+
+public class ServerSystemNotifyEntities : ServerSystem
 {
     private readonly int PlayerPositionUpdatesPerSecond = 10;
     private readonly int EntityPositionUpdatesPerSecond = 10;

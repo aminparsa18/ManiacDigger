@@ -1,4 +1,6 @@
-﻿public class VectorTool
+﻿using OpenTK.Mathematics;
+
+public class VectorTool
 {
     public static void ToVectorInFixedSystem(float dx, float dy, float dz, float orientationx, float orientationy, Vector3Ref output)
     {
@@ -16,9 +18,9 @@
         float yRot = orientationy;//Math.toRadians(orientation.Y);
 
         //Calculate the formula
-        float x = (dx * Platform.Cos(yRot) + dy * Platform.Sin(xRot) * Platform.Sin(yRot) - dz * Platform.Cos(xRot) * Platform.Sin(yRot));
-        float y = (dy * Platform.Cos(xRot) + dz * Platform.Sin(xRot));
-        float z = (dx * Platform.Sin(yRot) - dy * Platform.Sin(xRot) * Platform.Cos(yRot) + dz * Platform.Cos(xRot) * Platform.Cos(yRot));
+        float x = (dx * (float)MathHelper.Cos(yRot) + dy * (float)MathHelper.Sin(xRot) * (float)MathHelper.Sin(yRot) - dz * (float)MathHelper.Cos(xRot) * (float)MathHelper.Sin(yRot));
+        float y = (dy * (float)MathHelper.Cos(xRot) + dz * (float)MathHelper.Sin(xRot));
+        float z = (dx * (float)MathHelper.Sin(yRot) - dy * (float)MathHelper.Sin(xRot) * (float)MathHelper.Cos(yRot) + dz * (float)MathHelper.Cos(xRot) * (float)MathHelper.Cos(yRot));
 
         //Return the vector expressed in the global axis system
         output.X = x;
@@ -261,7 +263,7 @@ public class MiscCi
 
     public static float Vec3Length(float x, float y, float z)
     {
-        return Platform.Sqrt(x * x + y * y + z * z);
+        return (float)MathHelper.Sqrt(x * x + y * y + z * z);
     }
 }
 
@@ -708,7 +710,7 @@ public class Vector3Ref
 
     internal float Length()
     {
-        return Platform.Sqrt(X * X + Y * Y + Z * Z);
+        return (float)MathHelper.Sqrt(X * X + Y * Y + Z * Z);
     }
 
     internal void Normalize()

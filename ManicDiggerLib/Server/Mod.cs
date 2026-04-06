@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using OpenTK.Mathematics;
+using System.Runtime.InteropServices;
 
 namespace ManicDigger;
 
@@ -713,12 +714,12 @@ public class ModManager1 : IModManager
     public float[] GetDefaultSpawnPosition(int player)
     {
         Vector3i pos = server.GetPlayerSpawnPositionMul32(player);
-        return [(float)pos.x / 32, (float)pos.z / 32, (float)pos.y / 32];
+        return [(float)pos.X / 32, (float)pos.Z / 32, (float)pos.Y / 32];
     }
 
     public int[] GetDefaultSpawnPosition()
     {
-        return [server.defaultPlayerSpawn.x, server.defaultPlayerSpawn.y, server.defaultPlayerSpawn.z];
+        return [server.defaultPlayerSpawn.X, server.defaultPlayerSpawn.Y, server.defaultPlayerSpawn.Z];
     }
 
     public void SetDefaultSpawnPosition(int x, int y, int z)
@@ -727,9 +728,9 @@ public class ModManager1 : IModManager
         {
             // Will fail for numbers it cannot parse. Should not happen due to previous check.
             server.serverClient.DefaultSpawn.Coords = string.Format("{0},{1},{2}", x, y, z);
-            server.defaultPlayerSpawn.x = x;
-            server.defaultPlayerSpawn.y = y;
-            server.defaultPlayerSpawn.z = z;
+            server.defaultPlayerSpawn.X = x;
+            server.defaultPlayerSpawn.Y = y;
+            server.defaultPlayerSpawn.Z = z;
             // Mark ServerClient as dirty for saving
             server.serverClientNeedsSaving = true;
         }
