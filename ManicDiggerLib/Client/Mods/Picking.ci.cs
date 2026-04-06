@@ -6,7 +6,7 @@ public class ModPicking : ClientMod
     {
         unproject = new Unproject();
         tempViewport = new int[4];
-        fillarea = new DictionaryVector3Float();
+        fillarea = new();
     }
 
     public override void OnNewFrameReadOnlyMainThread(Game game, float deltaTime)
@@ -569,17 +569,20 @@ public class ModPicking : ClientMod
                             int posy = newtileZ;
                             int posz = newtileY;
                             game.currentAttackedBlock = Vector3IntRef.Create(posx, posy, posz);
-                            if (!game.blockHealth.ContainsKey(posx, posy, posz))
+                            var key = (posx, posy, posz);
+
+                            if (!game.blockHealth.ContainsKey(key))
                             {
-                                game.blockHealth.Set(posx, posy, posz, game.GetCurrentBlockHealth(posx, posy, posz));
+                                game.blockHealth[key] = game.GetCurrentBlockHealth(posx, posy, posz);
                             }
-                            game.blockHealth.Set(posx, posy, posz, game.blockHealth.Get(posx, posy, posz) - game.WeaponAttackStrength());
+
+                            game.blockHealth[key] -= game.WeaponAttackStrength();
                             float health = game.GetCurrentBlockHealth(posx, posy, posz);
                             if (health <= 0)
                             {
                                 if (game.currentAttackedBlock != null)
                                 {
-                                    game.blockHealth.Remove(posx, posy, posz);
+                                    game.blockHealth.Remove((posx, posy, posz));
                                 }
                                 game.currentAttackedBlock = null;
                                 OnPick(game, game.platform.FloatToInt(newtileX), game.platform.FloatToInt(newtileZ), game.platform.FloatToInt(newtileY),
@@ -628,7 +631,7 @@ public class ModPicking : ClientMod
     }
 
     //value is original block.
-    internal DictionaryVector3Float fillarea;
+    internal Dictionary<(int x, int y, int z), float> fillarea;
     internal Vector3IntRef fillstart;
     internal Vector3IntRef fillend;
 
@@ -688,7 +691,7 @@ public class ModPicking : ClientMod
                         Vector3IntRef f = fillstart;
                         if (!game.IsFillBlock(game.map.GetBlock(f.X, f.Y, f.Z)))
                         {
-                            fillarea.Set(f.X, f.Y, f.Z, game.map.GetBlock(f.X, f.Y, f.Z));
+                            fillarea[(f.X, f.Y, f.Z)] = game.map.GetBlock(f.X, f.Y, f.Z);
                         }
                         game.SetBlock(f.X, f.Y, f.Z, game.d_Data.BlockIdFillStart());
 
@@ -697,7 +700,7 @@ public class ModPicking : ClientMod
                     }
                     if (!game.IsFillBlock(game.map.GetBlock(v.X, v.Y, v.Z)))
                     {
-                        fillarea.Set(v.X, v.Y, v.Z, game.map.GetBlock(v.X, v.Y, v.Z));
+                        fillarea[(v.X, v.Y, v.Z)] = game.map.GetBlock(v.X, v.Y, v.Z);
                     }
                     game.SetBlock(v.X, v.Y, v.Z, game.d_Data.BlockIdCuboid());
                     fillend = v;
@@ -709,7 +712,7 @@ public class ModPicking : ClientMod
                     ClearFillArea(game);
                     if (!game.IsFillBlock(game.map.GetBlock(v.X, v.Y, v.Z)))
                     {
-                        fillarea.Set(v.X, v.Y, v.Z, game.map.GetBlock(v.X, v.Y, v.Z));
+                        fillarea[(v.X, v.Y, v.Z)] = game.map.GetBlock(v.X, v.Y, v.Z);
                     }
                     game.SetBlock(v.X, v.Y, v.Z, game.d_Data.BlockIdFillStart());
                     fillstart = v;
@@ -717,7 +720,7 @@ public class ModPicking : ClientMod
                     game.RedrawBlock(v.X, v.Y, v.Z);
                     return;
                 }
-                if (fillarea.ContainsKey(v.X, v.Y, v.Z))// && fillarea[v])
+                if (fillarea.ContainsKey((v.X, v.Y, v.Z)))
                 {
                     game.SendFillArea(fillstart.X, fillstart.Y, fillstart.Z, fillend.X, fillend.Y, fillend.Z, activematerial);
                     ClearFillArea(game);
@@ -755,15 +758,10 @@ public class ModPicking : ClientMod
 
     internal void ClearFillArea(Game game)
     {
-        for (int i = 0; i < fillarea.itemsCount; i++)
+        foreach (var ((x, y, z), value) in fillarea)
         {
-            Vector3Float k = fillarea.items[i];
-            if (k == null)
-            {
-                continue;
-            }
-            game.SetBlock(k.x, k.y, k.z, game.platform.FloatToInt(k.value));
-            game.RedrawBlock(k.x, k.y, k.z);
+            game.SetBlock(x, y, z, game.platform.FloatToInt(value));
+            game.RedrawBlock(x, y, z);
         }
         fillarea.Clear();
     }
@@ -789,7 +787,7 @@ public class ModPicking : ClientMod
                     }
                     if (!game.IsFillBlock(game.map.GetBlock(x, y, z)))
                     {
-                        fillarea.Set(x, y, z, game.map.GetBlock(x, y, z));
+                        fillarea[(x, y, z)] = game.map.GetBlock(x, y, z);
                         game.SetBlock(x, y, z, game.d_Data.BlockIdFillArea());
                         game.RedrawBlock(x, y, z);
                     }

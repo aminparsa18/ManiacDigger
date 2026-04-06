@@ -1,4 +1,6 @@
-﻿public class ScreenMultiplayer : Screen
+﻿using OpenTK.Windowing.Common;
+
+public class ScreenMultiplayer : Screen
 {
     public ScreenMultiplayer()
     {
@@ -326,7 +328,7 @@
                         if (bmp != null)
                         {
                             int texture = menu.p.LoadTextureFromBitmap(bmp);
-                            menu.textures.Set(menu.p.StringFormat("serverlist_entry_{0}.png", server.hash), texture);
+                            menu.textures[menu.p.StringFormat("serverlist_entry_{0}.png", server.hash)] = texture;
                             menu.p.BitmapDelete(bmp);
                         }
                         server.thumbnailDownloading = false;
@@ -416,12 +418,12 @@
     public override void OnMouseWheel(MouseWheelEventArgs e)
     {
         //menu.p.MessageBoxShowError(menu.p.IntToString(e.GetDelta()), "Delta");
-        if (e.GetDelta() < 0)
+        if (e.OffsetX < 0)
         {
             //Mouse wheel turned down
             PageUp_();
         }
-        else if (e.GetDelta() > 0)
+        else if (e.OffsetX > 0)
         {
             //Mouse wheel turned up
             PageDown_();

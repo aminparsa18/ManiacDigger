@@ -544,11 +544,11 @@ public class GamePlatformNative : GamePlatform
             url = myuri.Url,
             ip = myuri.Ip,
             port = myuri.Port,
-            get = new DictionaryStringString()
+            get = []
         };
         foreach (var k in myuri.Get)
         {
-            ret.get.Set(k.Key, k.Value);
+            ret.get[k.Key] = k.Value;
         }
         return ret;
     }
@@ -831,16 +831,10 @@ public class GamePlatformNative : GamePlatform
 
     public override void SetPreferences(Preferences preferences)
     {
-        DictionaryStringString items = preferences.items;
+        var items = preferences.items;
         List<string> lines = [];
-        for (int i = 0; i < items.count; i++)
+        foreach (var (key, value) in items)
         {
-            if (items.items[i] == null)
-            {
-                continue;
-            }
-            string key = items.items[i].key;
-            string value = items.items[i].value;
             lines.Add($"{key}={value}");
         }
         try
@@ -2063,14 +2057,11 @@ public class GamePlatformNative : GamePlatform
         }
     }
 
-    private void Mouse_WheelChanged(OpenTK.Windowing.Common.MouseWheelEventArgs e)
+    private void Mouse_WheelChanged(MouseWheelEventArgs e)
     {
         foreach (MouseEventHandler h in mouseEventHandlers)
         {
-            MouseWheelEventArgs args = new();
-            args.SetDelta((int)e.OffsetX);
-            args.SetDeltaPrecise(e.OffsetY);
-            h.OnMouseWheel(args);
+            h.OnMouseWheel(e);
         }
     }
 

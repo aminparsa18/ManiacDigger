@@ -55,18 +55,14 @@ public class ModFpsHistoryGraph : ClientMod
             fpstext1 = StringTools.StringAppend(p, fpstext1, p.StringFormat(" (min: {0})", p.IntToString(p.FloatToInt(one / longestframedt))));
             longestframedt = 0;
             fpscount = 0;
-            m.GetPerformanceInfo().Set("fps", fpstext1);
+            m.GetPerformanceInfo()["fps"] = fpstext1;
 
             string s = "";
             string[] l = new string[64];
             int lCount = 0;
-            for (int i = 0; i < m.GetPerformanceInfo().count; i++)
+            foreach (string value in m.GetPerformanceInfo().Values)
             {
-                if (m.GetPerformanceInfo().items[i] == null)
-                {
-                    continue;
-                }
-                l[lCount++] = m.GetPerformanceInfo().items[i].value;
+                l[lCount++] = value;
             }
 
             int perline = 2;

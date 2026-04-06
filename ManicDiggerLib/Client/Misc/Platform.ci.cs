@@ -246,39 +246,29 @@ public class Preferences
 {
     public Preferences()
     {
-        items = new DictionaryStringString();
+        items = [];
     }
     internal GamePlatform platform;
-    internal DictionaryStringString items;
+    internal Dictionary<string, string> items;
 
     public string GetKey(int i)
     {
-        if (items.items[i] != null)
-        {
-            return items.items[i].key;
-        }
-        else
-        {
-            return null;
-        }
+        return items.Keys.ElementAtOrDefault(i);
     }
 
     public int GetKeysCount()
     {
-        return items.count;
+        return items.Count;
     }
 
     public string GetString(string key, string default_)
     {
-        if (!items.ContainsKey(key))
-        {
-            return default_;
-        }
-        return items.Get(key);
+        return items.TryGetValue(key, out string value) ? value : default_;
     }
+
     public void SetString(string key, string value)
     {
-        items.Set(key, value);
+        items[key] = value;
     }
 
     public bool GetBool(string key, bool default_)
@@ -334,11 +324,11 @@ public class UriCi
     internal string url;
     internal string ip;
     internal int port;
-    internal DictionaryStringString get;
+    internal Dictionary<string, string> get;
     public string GetUrl() { return url; }
     public string GetIp() { return ip; }
     public int GetPort() { return port; }
-    public DictionaryStringString GetGet() { return get; }
+    public Dictionary<string, string> GetGet() { return get; }
 }
 
 public class EnetHost
@@ -477,13 +467,7 @@ public class MouseEventArgs
     public void SetEmulated(bool value) { emulated = value; }
 }
 
-public class MouseWheelEventArgs
-{
-    private int delta;
-    private float deltaPrecise;
-    public int GetDelta() { return delta; } public void SetDelta(int value) { delta = value; }
-    public float GetDeltaPrecise() { return deltaPrecise; } public void SetDeltaPrecise(float value) { deltaPrecise = value; }
-}
+
 
 public class MouseButtonEnum
 {

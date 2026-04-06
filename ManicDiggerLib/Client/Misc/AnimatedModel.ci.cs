@@ -150,54 +150,54 @@ public class AnimatedModelBinding : TableBinding
         }
     }
 
-    public override void Get(string table, int index, DictionaryStringString items)
+    public override void Get(string table, int index, Dictionary<string, string> items)
     {
         if (table == "nodes")
         {
             Node k = m.nodes[index];
-            items.Set("name", k.name);
-            items.Set("paren", k.parentName);
-            items.Set("x", p.FloatToString(k.posx));
-            items.Set("y", p.FloatToString(k.posy));
-            items.Set("z", p.FloatToString(k.posz));
-            items.Set("rotx", p.FloatToString(k.rotatex));
-            items.Set("roty", p.FloatToString(k.rotatey));
-            items.Set("rotz", p.FloatToString(k.rotatez));
-            items.Set("sizex", p.FloatToString(k.sizex));
-            items.Set("sizey", p.FloatToString(k.sizey));
-            items.Set("sizez", p.FloatToString(k.sizez));
-            items.Set("u", p.FloatToString(k.u));
-            items.Set("v", p.FloatToString(k.v));
-            items.Set("pivx", p.FloatToString(k.pivotx));
-            items.Set("pivy", p.FloatToString(k.pivoty));
-            items.Set("pivz", p.FloatToString(k.pivotz));
-            items.Set("scalx", p.FloatToString(k.scalex));
-            items.Set("scaly", p.FloatToString(k.scaley));
-            items.Set("scalz", p.FloatToString(k.scalez));
-            items.Set("head", p.FloatToString(k.head));
+            items["name"] = k.name;
+            items["paren"] = k.parentName;
+            items["x"] = p.FloatToString(k.posx);
+            items["y"] = p.FloatToString(k.posy);
+            items["z"] = p.FloatToString(k.posz);
+            items["rotx"] = p.FloatToString(k.rotatex);
+            items["roty"] = p.FloatToString(k.rotatey);
+            items["rotz"] = p.FloatToString(k.rotatez);
+            items["sizex"] = p.FloatToString(k.sizex);
+            items["sizey"] = p.FloatToString(k.sizey);
+            items["sizez"] = p.FloatToString(k.sizez);
+            items["u"] = p.FloatToString(k.u);
+            items["v"] = p.FloatToString(k.v);
+            items["pivx"] = p.FloatToString(k.pivotx);
+            items["pivy"] = p.FloatToString(k.pivoty);
+            items["pivz"] = p.FloatToString(k.pivotz);
+            items["scalx"] = p.FloatToString(k.scalex);
+            items["scaly"] = p.FloatToString(k.scaley);
+            items["scalz"] = p.FloatToString(k.scalez);
+            items["head"] = p.FloatToString(k.head);
         }
         if (table == "keyframes")
         {
             Keyframe k = m.keyframes[index];
-            items.Set("anim", k.animationName);
-            items.Set("node", k.nodeName);
-            items.Set("frame", p.FloatToString(k.frame));
-            items.Set("type", KeyframeType.GetName(k.frame));
-            items.Set("x", p.FloatToString(k.x));
-            items.Set("y", p.FloatToString(k.y));
-            items.Set("z", p.FloatToString(k.z));
+            items["anim"] = k.animationName;
+            items["node"] = k.nodeName;
+            items["frame"] = p.FloatToString(k.frame);
+            items["type"] = KeyframeType.GetName(k.frame);
+            items["x"] = p.FloatToString(k.x);
+            items["y"] = p.FloatToString(k.y);
+            items["z"] = p.FloatToString(k.z);
         }
         if (table == "animations")
         {
             Animation k = m.animations[index];
-            items.Set("name", k.name);
-            items.Set("len", p.FloatToString(k.length));
+            items["name"] = k.name;
+            items["len"] = p.FloatToString(k.length);
         }
         if (table == "global")
         {
             AnimationGlobal global = m.global;
-            items.Set("texw", p.FloatToString(global.texw));
-            items.Set("texh", p.FloatToString(global.texh));
+            items["texw"] = p.FloatToString(global.texw);
+            items["texh"] = p.FloatToString(global.texh);
         }
     }
 
@@ -225,7 +225,7 @@ public class AnimatedModelBinding : TableBinding
 public abstract class TableBinding
 {
     public abstract void Set(string table, int index, string column, string value);
-    public abstract void Get(string table, int index, DictionaryStringString items);
+    public abstract void Get(string table, int index, Dictionary<string, string> items);
 }
 
 public class TableSerializer

@@ -1,4 +1,5 @@
-﻿using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
+﻿using OpenTK.Windowing.Common;
+using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 public class ModGuiInventory : ClientMod
 {
@@ -573,7 +574,7 @@ public class ModGuiInventory : ClientMod
 
     public override void OnMouseWheelChanged(Game game_, MouseWheelEventArgs args)
     {
-        float delta = args.GetDeltaPrecise();
+        float delta = args.OffsetY;
         if ((game_.guistate == GuiState.Normal || (game_.guistate == GuiState.Inventory && !IsMouseOverCells()))
             && (!game_.keyboardState[game_.GetKey(Keys.LeftShift)]))
         {

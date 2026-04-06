@@ -1,4 +1,5 @@
 ﻿using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
 using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 public class Game
@@ -7,7 +8,7 @@ public class Game
     {
         one = 1;
         map = new Map();
-        performanceinfo = new DictionaryStringString();
+        performanceinfo = new();
         AudioEnabled = true;
         AutoJumpEnabled = false;
         playerPositionSpawnX = 15 + one / 2;
@@ -41,7 +42,7 @@ public class Game
         ENABLE_DRAW2D = true;
         AllowFreemove = true;
         enableCameraControl = true;
-        textures = new DictionaryStringInt1024();
+        textures = [];
         ServerInfo = new ServerInformation();
         menustate = new MenuState();
         mouseleftclick = false;
@@ -69,7 +70,7 @@ public class Game
         LocalPlayerId = -1;
         dialogs = new VisibleDialog[512];
         dialogsCount = 512;
-        blockHealth = new DictionaryVector3Float();
+        blockHealth = new();
         playertexturedefault = -1;
         a = new AnimationState();
         constRotationSpeed = one * 180 / 20;
@@ -114,7 +115,6 @@ public class Game
         enable_move = true;
         handTexture = -1;
         modelViewInverted = new float[16];
-        GLScaleTempVec3 = Vector3.Zero;
         identityMatrix = Matrix4.Identity;
         Set3dProjectionTempMat4 = Matrix4.Identity;
         getAsset = new string[1024 * 2];
@@ -775,7 +775,6 @@ public class Game
         }
     }
 
-    private Vector3 GLScaleTempVec3;
     public void GLScale(float x, float y, float z)
     {
         Matrix4 m;
@@ -908,21 +907,20 @@ public class Game
         //GL.Enable(EnableCap.DepthTest);
     }
 
+    private int whitetexture;
     public int WhiteTexture()
     {
         if (this.whitetexture == -1)
         {
             BitmapCi bmp = platform.BitmapCreate(1, 1);
-            int[] pixels = new int[1];
-            pixels[0] = ColorFromArgb(255, 255, 255, 255);
+            int[] pixels = [ColorFromArgb(255, 255, 255, 255)];
             platform.BitmapSetPixelsArgb(bmp, pixels);
             this.whitetexture = platform.LoadTextureFromBitmap(bmp);
         }
         return this.whitetexture;
     }
-    private int whitetexture;
 
-    public float getblockheight(int x, int y, int z)
+    public float Getblockheight(int x, int y, int z)
     {
         float RailHeight = one * 3 / 10;
         if (!map.IsValidPos(x, y, z))
@@ -993,7 +991,7 @@ public class Game
         {
             return;
         }
-        if (color == null) { color = IntRef.Create(ColorFromArgb(255, 255, 255, 255)); }
+        color ??= IntRef.Create(ColorFromArgb(255, 255, 255, 255));
         Text_ t = new()
         {
             text = text,
@@ -1126,7 +1124,7 @@ public class Game
         SendPacketClient(ClientPackets.MoveToInventory(from));
     }
 
-    internal DictionaryStringString performanceinfo;
+    internal Dictionary<string, string> performanceinfo;
 
 
     internal Chatline[] ChatLines;
@@ -1272,35 +1270,31 @@ public class Game
     internal string invalidVersionDrawMessage;
     internal Packet_Server invalidVersionPacketIdentification;
 
-    private readonly DictionaryStringInt1024 textures;
+    private readonly Dictionary<string,int> textures;
     internal int GetTexture(string p)
     {
-        if (!textures.Contains(p))
+        if (!textures.ContainsKey(p))
         {
-            BoolRef found = new();
             BitmapCi bmp = platform.BitmapCreateFromPng(GetFile(p), GetFileLength(p));
-            int texture = platform.LoadTextureFromBitmap(bmp);
-            textures.Set(p, texture);
+            textures[p] = platform.LoadTextureFromBitmap(bmp);
             platform.BitmapDelete(bmp);
         }
-        return textures.Get(p);
+        return textures[p];
     }
 
     internal int GetTextureOrLoad(string name, BitmapCi bmp)
     {
-        if (!textures.Contains(name))
+        if (!textures.ContainsKey(name))
         {
-            BoolRef found = new();
-            textures.Set(name, platform.LoadTextureFromBitmap(bmp));
+            textures[name] = platform.LoadTextureFromBitmap(bmp);
         }
-        return textures.Get(name);
+        return textures[name];
     }
 
     internal bool DeleteTexture(string name)
     {
-        if (name != null && textures.Contains(name))
+        if (name != null && textures.TryGetValue(name, out int id))
         {
-            int id = textures.Get(name);
             textures.Remove(name);
             platform.GLDeleteTexture(id);
             return true;
@@ -1890,13 +1884,13 @@ public class Game
         return -1;
     }
 
-    internal DictionaryVector3Float blockHealth;
+    internal Dictionary<(int x, int y, int z), float> blockHealth = new();
 
     internal float GetCurrentBlockHealth(int x, int y, int z)
     {
-        if (blockHealth.ContainsKey(x, y, z))
+        if (blockHealth.TryGetValue((x, y, z), out float health))
         {
-            return blockHealth.Get(x, y, z);
+            return health;
         }
         int blocktype = map.GetBlock(x, y, z);
         return d_Data.Strength()[blocktype];
@@ -2505,7 +2499,7 @@ public class Game
     internal int TPP_CAMERA_DISTANCE_MAX;
     internal void MouseWheelChanged(MouseWheelEventArgs e)
     {
-        float eDeltaPrecise = e.GetDeltaPrecise();
+        float eDeltaPrecise = e.OffsetY;
         if (keyboardState[GetKey(Keys.LeftShift)])
         {
             if (cameratype == CameraType.Overhead)
@@ -3438,7 +3432,7 @@ public class Game
             if ((playerx >= 0 && playerx < map.MapSizeX)
                 && (playery >= 0 && playery < map.MapSizeY))
             {
-                performanceinfo.Set("height", platform.StringFormat("height:{0}", platform.IntToString(d_Heightmap.GetBlock(playerx, playery))));
+                performanceinfo["height"] = platform.StringFormat("height:{0}", platform.IntToString(d_Heightmap.GetBlock(playerx, playery)));
             }
             if (eKey == GetKey(Keys.F5))
             {
@@ -4025,13 +4019,9 @@ public class Game
             if (clientmods[i] == null) { continue; }
             clientmods[i].Dispose(this);
         }
-        for (int i = 0; i < textures.count; i++)
+        foreach (int id in textures.Values)
         {
-            if (textures.items[i] == null)
-            {
-                continue;
-            }
-            platform.GLDeleteTexture(textures.items[i].value);
+            platform.GLDeleteTexture(id);
         }
         for (int i = 0; i < cachedTextTexturesMax; i++)
         {

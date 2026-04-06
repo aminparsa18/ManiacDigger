@@ -1,4 +1,6 @@
-﻿public class ScreenGame : Screen
+﻿using OpenTK.Windowing.Common;
+
+public class ScreenGame : Screen
 {
     public ScreenGame()
     {

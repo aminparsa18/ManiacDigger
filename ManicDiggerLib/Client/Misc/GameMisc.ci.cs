@@ -1,4 +1,5 @@
 ﻿using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
 
 public class GameScreen : ClientMod
 {
@@ -450,7 +451,7 @@ public class GetBlockHeight_ : DelegateGetBlockHeight
     internal Game w;
     public override float GetBlockHeight(int x, int y, int z)
     {
-        return w.getblockheight(x, y, z);
+        return w.Getblockheight(x, y, z);
     }
 }
 
@@ -1458,7 +1459,7 @@ public abstract class ClientModManager
     public abstract void Draw2dText(string text, float x, float y, float fontsize);
     public abstract void OrthoMode();
     public abstract void PerspectiveMode();
-    public abstract DictionaryStringString GetPerformanceInfo();
+    public abstract Dictionary<string, string> GetPerformanceInfo();
 }
 
 public class ClientModManager1 : ClientModManager
@@ -1650,7 +1651,7 @@ public class ClientModManager1 : ClientModManager
         game.PerspectiveMode();
     }
 
-    public override DictionaryStringString GetPerformanceInfo()
+    public override Dictionary<string, string> GetPerformanceInfo()
     {
         return game.performanceinfo;
     }

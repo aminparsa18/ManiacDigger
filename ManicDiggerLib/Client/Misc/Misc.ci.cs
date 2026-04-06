@@ -256,18 +256,16 @@ public class ConnectData
         {
             c.Port = uri.GetPort();
         }
-        if (uri.GetGet().ContainsKey("user"))
-        {
-            c.Username = uri.GetGet().Get("user");
-        }
-        if (uri.GetGet().ContainsKey("auth"))
-        {
-            c.Auth = uri.GetGet().Get("auth");
-        }
-        if (uri.GetGet().ContainsKey("serverPassword"))
-        {
-            c.IsServePasswordProtected = MiscCi.ReadBool(uri.GetGet().Get("serverPassword"));
-        }
+        var get = uri.GetGet();
+
+        if (get.TryGetValue("user", out string user))
+            c.Username = user;
+
+        if (get.TryGetValue("auth", out string auth))
+            c.Auth = auth;
+
+        if (get.TryGetValue("serverPassword", out string serverPassword))
+            c.IsServePasswordProtected = MiscCi.ReadBool(serverPassword);
         return c;
     }
 

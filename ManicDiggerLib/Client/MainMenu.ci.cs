@@ -1,4 +1,5 @@
 ﻿using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
 using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 public class MainMenu
@@ -6,7 +7,7 @@ public class MainMenu
     public MainMenu()
     {
         one = 1;
-        textures = new DictionaryStringInt1024();
+        textures = [];
         textTextures = new TextTexture[256];
         textTexturesCount = 0;
         screen = new ScreenMain
@@ -215,18 +216,16 @@ public class MainMenu
         return textTexture;
     }
 
-    internal DictionaryStringInt1024 textures;
+    internal Dictionary<string,int> textures;
     internal int GetTexture(string name)
     {
-        if (!textures.Contains(name))
+        if (!textures.ContainsKey(name))
         {
-            BoolRef found = new();
             BitmapCi bmp = p.BitmapCreateFromPng(GetFile(name), GetFileLength(name));
-            int texture = p.LoadTextureFromBitmap(bmp);
-            textures.Set(name, texture);
+            textures[name] = p.LoadTextureFromBitmap(bmp);
             p.BitmapDelete(bmp);
         }
-        return textures.Get(name);
+        return textures[name];
     }
 
     internal byte[] GetFile(string name)
@@ -394,7 +393,7 @@ public class MainMenu
 
     public void HandleMouseWheel(MouseWheelEventArgs e)
     {
-        z += e.GetDeltaPrecise() / 5;
+        z += e.OffsetY / 5;
         screen.OnMouseWheel(e);
     }
 

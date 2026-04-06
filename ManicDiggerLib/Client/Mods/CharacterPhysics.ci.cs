@@ -381,7 +381,7 @@ public class ScriptCharacterPhysics : EntityScript
                         float minY = FloatToInt(y + yy - 1);
                         float minZ = FloatToInt(z + zz - 1);
                         float maxX = minX + 1;
-                        float maxY = minY + game.getblockheight(FloatToInt(x + xx - 1), FloatToInt(z + zz - 1), FloatToInt(y + yy - 1));
+                        float maxY = minY + game.Getblockheight(FloatToInt(x + xx - 1), FloatToInt(z + zz - 1), FloatToInt(y + yy - 1));
                         float maxZ = minZ + 1;
 
                         // Check if the block is too close

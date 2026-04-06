@@ -2,11 +2,11 @@
 {
     public ModAudio()
     {
-        audioData = new DictionaryStringAudioData();
+        audioData = new();
         wasLoaded = false;
     }
 
-    private readonly DictionaryStringAudioData audioData;
+    private readonly Dictionary<string, AudioData> audioData;
     private bool wasLoaded;
 
     public override void OnNewFrame(Game game, NewFrameEventArgs args)
@@ -104,12 +104,11 @@
 
     private AudioData GetAudioData(Game game, string sound)
     {
-        if (!audioData.Contains(sound))
+        if (!audioData.ContainsKey(sound))
         {
-            AudioData a = game.platform.AudioDataCreate(game.GetFile(sound), game.GetFileLength(sound));
-            audioData.Set(sound, a);
+            audioData[sound] = game.platform.AudioDataCreate(game.GetFile(sound), game.GetFileLength(sound));
         }
-        return audioData.GetById(audioData.GetId(sound));
+        return audioData[sound];
     }
 }
 
