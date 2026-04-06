@@ -3,7 +3,7 @@
     public EnetNetServer()
     {
         event_ = new EnetEventRef();
-        messages = new QueueNetIncomingMessage();
+        messages = new();
     }
     internal GamePlatform platform;
 
@@ -91,7 +91,7 @@
         return null;
     }
     private int clientid;
-    private readonly QueueNetIncomingMessage messages;
+    private readonly Queue<NetIncomingMessage> messages;
 
     private int Port;
 
@@ -133,8 +133,8 @@ public class EnetNetClient : NetClient
     {
         host = platform.EnetCreateHost();
         platform.EnetHostInitialize(host, null, 1, 0, 0, 0);
-        tosend = new QueueINetOutgoingMessage();
-        messages = new QueueNetIncomingMessage();
+        tosend = new();
+        messages = new();
     }
     private EnetHost host;
     private EnetPeer peer;
@@ -205,9 +205,9 @@ public class EnetNetClient : NetClient
         platform.EnetPeerSend(peer, 0, msg1.message, msg1.messageLength, EnetPacketFlags.Reliable);
     }
 
-    private QueueNetIncomingMessage messages;
+    private Queue<NetIncomingMessage> messages;
 
-    private QueueINetOutgoingMessage tosend;
+    private Queue<INetOutgoingMessage> tosend;
     public override void SendMessage(INetOutgoingMessage message, MyNetDeliveryMethod method)
     {
         INetOutgoingMessage msg = message;

@@ -9,7 +9,7 @@
     internal GamePlatform platform;
     public override void Start()
     {
-        tosend = new QueueINetOutgoingMessage();
+        tosend = new();
     }
 
     private readonly BoolRef connected;
@@ -117,7 +117,7 @@
         platform.TcpSend(packet, msg.messageLength + 4);
     }
 
-    private QueueINetOutgoingMessage tosend;
+    private Queue<INetOutgoingMessage> tosend;
     public override void SendMessage(INetOutgoingMessage message, MyNetDeliveryMethod method)
     {
         INetOutgoingMessage msg = message;

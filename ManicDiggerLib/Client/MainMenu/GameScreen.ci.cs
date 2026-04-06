@@ -53,7 +53,7 @@ public class ScreenGame : Screen
                     server = serverSimple
                 };
                 game.AddMod(serverSimpleMod);
-                platform.SinglePlayerServerGetNetwork().ServerReceiveBuffer.Enqueue(new ByteArray());
+                platform.SinglePlayerServerGetNetwork().ServerReceiveBuffer.Enqueue([]);
             }
 
             connectData = new ConnectData

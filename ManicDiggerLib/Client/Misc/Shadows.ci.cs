@@ -3,11 +3,10 @@ public class LightFlood
 {
     public LightFlood()
     {
-        q = new FastQueueInt();
-        q.Initialize(1024);
+        q = new Queue<int>(1024);
     }
 
-    private readonly FastQueueInt q;
+    private readonly Queue<int> q;
 
     private const int minlight = 0;
 
@@ -36,14 +35,14 @@ public class LightFlood
         }
 
         q.Clear();
-        q.Push(start);
+        q.Enqueue(start);
         for (; ; )
         {
             if (q.Count == 0)
             {
                 break;
             }
-            int vPos = q.Pop();
+            int vPos = q.Dequeue();
             int vLight = light[vPos];
             if (vLight == minlight)
             {
@@ -67,12 +66,12 @@ public class LightFlood
         }
     }
 
-    private static void Push(FastQueueInt q_, byte[] light, int vLight, int newPos)
+    private static void Push(Queue<int> q_, byte[] light, int vLight, int newPos)
     {
         if (light[newPos] < vLight - 1)
         {
             light[newPos] = Game.IntToByte(vLight - 1);
-            q_.Push(newPos);
+            q_.Enqueue(newPos);
         }
     }
 }

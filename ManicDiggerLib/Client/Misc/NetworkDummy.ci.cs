@@ -9,15 +9,15 @@
 
     public override NetIncomingMessage ReadMessage()
     {
-        NetIncomingMessage msg = null;
+        NetIncomingMessage? msg = null;
         platform.MonitorEnter(network.ClientReceiveBufferLock);
         {
-            if (network.ClientReceiveBuffer.Count() > 0)
+            if (network.ClientReceiveBuffer.Count > 0)
             {
                 msg = new NetIncomingMessage();
-                ByteArray b = network.ClientReceiveBuffer.Dequeue();
-                msg.message = b.data;
-                msg.messageLength = b.length;
+                var b = network.ClientReceiveBuffer.Dequeue();
+                msg.message = b;
+                msg.messageLength = b.Length;
             }
         }
         platform.MonitorExit(network.ClientReceiveBufferLock);
@@ -28,13 +28,7 @@
     {
         platform.MonitorEnter(network.ServerReceiveBufferLock);
         {
-            INetOutgoingMessage msg = message;
-            ByteArray b = new()
-            {
-                data = msg.message,
-                length = msg.messageLength
-            };
-            network.ServerReceiveBuffer.Enqueue(b);
+            network.ServerReceiveBuffer.Enqueue(message.message);
         }
         platform.MonitorExit(network.ServerReceiveBufferLock);
     }
@@ -61,13 +55,7 @@ public class DummyNetConnection : NetConnection
     {
         platform.MonitorEnter(network.ClientReceiveBufferLock);
         {
-            INetOutgoingMessage msg2 = msg;
-            ByteArray b = new()
-            {
-                data = msg2.message,
-                length = msg2.messageLength
-            };
-            network.ClientReceiveBuffer.Enqueue(b);
+            network.ClientReceiveBuffer.Enqueue(msg.message);
         }
         platform.MonitorExit(network.ClientReceiveBufferLock);
     }
@@ -130,9 +118,9 @@ public class DummyNetServer : NetServer
                 else
                 {
                     msg = new NetIncomingMessage();
-                    ByteArray b = network.ServerReceiveBuffer.Dequeue();
-                    msg.message = b.data;
-                    msg.messageLength = b.length;
+                    var b = network.ServerReceiveBuffer.Dequeue();
+                    msg.message = b;
+                    msg.messageLength = b.Length;
                     msg.SenderConnection = connectedClient;
                 }
             }
@@ -157,7 +145,6 @@ public class DummyNetServer : NetServer
 }
 
 
-
 public class DummyNetOutgoingMessage : INetOutgoingMessage
 {
 }
@@ -168,8 +155,8 @@ public class DummyNetwork
     {
         Clear();
     }
-    internal QueueByteArray ServerReceiveBuffer;
-    internal QueueByteArray ClientReceiveBuffer;
+    internal Queue<byte[]> ServerReceiveBuffer;
+    internal Queue<byte[]> ClientReceiveBuffer;
     internal MonitorObject ServerReceiveBufferLock;
     internal MonitorObject ClientReceiveBufferLock;
     public void Start(MonitorObject lock1, MonitorObject lock2)
@@ -180,8 +167,8 @@ public class DummyNetwork
 
     public void Clear()
     {
-        ServerReceiveBuffer = new QueueByteArray();
-        ClientReceiveBuffer = new QueueByteArray();
+        ServerReceiveBuffer = new();
+        ClientReceiveBuffer = new();
     }
 }
 

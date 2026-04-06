@@ -5,7 +5,7 @@ public class WebSocketNetServer : NetServer
 {
     public WebSocketNetServer()
     {
-        incoming = new QueueNetIncomingMessage();
+        incoming = new();
         singleton = this;
     }
 
@@ -38,7 +38,7 @@ public class WebSocketNetServer : NetServer
         return null;
     }
 
-    internal QueueNetIncomingMessage incoming;
+    internal Queue<NetIncomingMessage> incoming;
 
     private int Port;
 
