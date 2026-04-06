@@ -613,20 +613,11 @@
     }
 }
 
-public class TerrainRendererCommit : Action_
+public class TerrainRendererCommit 
 {
-    public static TerrainRendererCommit Create(ModDrawTerrain renderer)
+    public static Action Create(ModDrawTerrain renderer)
     {
-        TerrainRendererCommit c = new()
-        {
-            renderer = renderer
-        };
-        return c;
-    }
-    private ModDrawTerrain renderer;
-    public override void Run()
-    {
-        renderer.MainThreadCommit();
+        return renderer.MainThreadCommit;
     }
 }
 
@@ -645,6 +636,25 @@ public class ModUnloadRendererChunks : ClientMod
     }
 
     private Game game;
+
+    public static Action CreateUnloadRendererChunksCommit(Game game, int unloadChunkPos)
+    {
+        return () =>
+        {
+            if (unloadChunkPos != -1)
+            {
+                RenderedChunk c = game.map.chunks[unloadChunkPos].rendered;
+                for (int k = 0; k < c.idsCount; k++)
+                {
+                    game.d_Batcher.Remove(c.ids[k]);
+                }
+                c.ids = null;
+                c.dirty = true;
+                c.light = null;
+            }
+        };
+    }
+
     public override void OnReadOnlyBackgroundThread(Game game_, float dt)
     {
         game = game_;
@@ -715,13 +725,7 @@ public class ModUnloadRendererChunks : ClientMod
                 || x > endx || y > endy || z > endz)
             {
                 int unloadChunkPos = pos;
-
-                UnloadRendererChunksCommit commit = new()
-                {
-                    game = game,
-                    unloadChunkPos = unloadChunkPos
-                };
-                game.QueueActionCommit(commit);
+                game.QueueActionCommit(CreateUnloadRendererChunksCommit(game, unloadChunkPos));
             }
             unloaded = true;
             if (unloaded)
@@ -746,37 +750,6 @@ public class ModUnloadRendererChunks : ClientMod
     private int unloadIterationXy;
     private readonly Vector3IntRef unloadxyztemp;
 }
-
-public class UnloadRendererChunksCommit : Action_
-{
-    internal Game game;
-    internal int unloadChunkPos;
-    public override void Run()
-    {
-        if (unloadChunkPos != -1)
-        {
-#if !CITO
-            unchecked
-            {
-#endif
-            RenderedChunk c = game.map.chunks[unloadChunkPos].rendered;
-            for (int k = 0; k < c.idsCount; k++)
-            {
-                int loadedSubmesh = c.ids[k];
-                game.d_Batcher.Remove(loadedSubmesh);
-            }
-
-            c.ids = null;
-            c.dirty = true;
-            c.light = null;
-#if !CITO
-        }
-#endif
-            unloadChunkPos = -1;
-        }
-    }
-}
-
 
 public class HashSetVector3IntRef
 {

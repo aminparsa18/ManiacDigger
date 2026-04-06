@@ -549,8 +549,8 @@ public partial class Server : ICurrentTime, IDropItem
         this.LastMonsterId = save.LastMonsterId;
         this.moddata = save.moddata;
     }
-    public List<ManicDigger.Action> onload = new();
-    public List<ManicDigger.Action> onsave = new();
+    public List<Action> onload = new();
+    public List<Action> onsave = new();
     public int LastMonsterId;
     public Dictionary<string, PacketServerInventory> Inventory = new(StringComparer.InvariantCultureIgnoreCase);
     public Dictionary<string, PacketServerPlayerStats> PlayerStats = new(StringComparer.InvariantCultureIgnoreCase);
@@ -1265,7 +1265,7 @@ public partial class Server : ICurrentTime, IDropItem
                     // Assign group to new client
                     //Check if client is in ServerClient.txt and assign corresponding group.
                     bool exists = false;
-                    foreach (ManicDigger.Client client in serverClient.Clients)
+                    foreach (Client client in serverClient.Clients)
                     {
                         if (client.Name.Equals(username, StringComparison.InvariantCultureIgnoreCase))
                         {
@@ -2056,14 +2056,14 @@ public partial class Server : ICurrentTime, IDropItem
     public Vector3i GetPlayerSpawnPositionMul32(int clientid)
     {
         Vector3i position;
-        ManicDigger.Spawn playerSpawn = null;
+        Spawn playerSpawn = null;
         // Check if there is a spawn entry for his assign group
         if (clients[clientid].clientGroup.Spawn != null)
         {
             playerSpawn = clients[clientid].clientGroup.Spawn;
         }
         // Check if there is an entry in clients with spawn member (overrides group spawn).
-        foreach (ManicDigger.Client client in serverClient.Clients)
+        foreach (Client client in serverClient.Clients)
         {
             if (client.Name.Equals(clients[clientid].playername, StringComparison.InvariantCultureIgnoreCase))
             {
@@ -2483,7 +2483,7 @@ public partial class Server : ICurrentTime, IDropItem
         }
 
         // Check if there is an entry in clients with fill-limit member (overrides group fill-limit).
-        foreach (ManicDigger.Client clientConfig in serverClient.Clients)
+        foreach (Client clientConfig in serverClient.Clients)
         {
             if (clientConfig.Name.Equals(client.playername, StringComparison.InvariantCultureIgnoreCase))
             {
@@ -3577,7 +3577,7 @@ public partial class Server : ICurrentTime, IDropItem
         return GetClient(playerid).clientGroup.Name;
     }
 
-    internal void InstallHttpModule(string name, ManicDigger.Func<string> description, FragLabs.HTTP.IHttpModule module)
+    internal void InstallHttpModule(string name, Func<string> description, FragLabs.HTTP.IHttpModule module)
     {
         ActiveHttpModule m = new()
         {
@@ -4389,15 +4389,15 @@ public abstract class ServerSystem
 
 public abstract class ServerPlatform
 {
-    public abstract void QueueUserWorkItem(Action_ action);
+    public abstract void QueueUserWorkItem(Action action);
     public abstract int FloatToInt(float value);
 }
 
 public class ServerPlatformNative : ServerPlatform
 {
-    public override void QueueUserWorkItem(Action_ action)
+    public override void QueueUserWorkItem(Action action)
     {
-        ThreadPool.QueueUserWorkItem((a) => { action.Run(); });
+        ThreadPool.QueueUserWorkItem((a) => { action(); });
     }
 
     public override int FloatToInt(float value)

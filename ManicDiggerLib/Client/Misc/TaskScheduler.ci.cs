@@ -7,6 +7,15 @@
 
     private BackgroundAction[] actions;
 
+    public static Action CreateBackgroundAction(Game game, int i, float dt, Action onFinished)
+    {
+        return () =>
+        {
+            game.clientmods[i].OnReadOnlyBackgroundThread(game, dt);
+            onFinished();
+        };
+    }
+
     public void Update(Game game, float dt)
     {
         if (actions == null)
@@ -14,7 +23,8 @@
             actions = new BackgroundAction[game.clientmodsCount];
             for (int i = 0; i < game.clientmodsCount; i++)
             {
-                actions[i] = new BackgroundAction();
+                int captured = i;
+                actions[captured] = new BackgroundAction() { run = CreateBackgroundAction(game, captured, dt, () => { actions[captured].finished = true; }) };
             }
         }
 
@@ -40,20 +50,17 @@
                 {
                     game.clientmods[i].OnReadWriteMainThread(game, dt);
                 }
-                for (int i = 0; i < game.commitActions.count; i++)
+                foreach (Action action in game.commitActions)
                 {
-                    game.commitActions.items[i].Run();
+                    action();
                 }
                 game.commitActions.Clear();
                 for (int i = 0; i < game.clientmodsCount; i++)
                 {
-                    BackgroundAction a = actions[i];
-                    a.game = game;
-                    a.dt = dt;
-                    a.i = i;
-                    a.active = true;
-                    a.finished = false;
-                    game.platform.QueueUserWorkItem(a);
+                    int captured = i;
+                    actions[captured].active = true;
+                    actions[captured].finished = false;
+                    game.platform.QueueUserWorkItem(CreateBackgroundAction(game, captured, dt, () => actions[captured].finished = true));
                 }
             }
         }
@@ -74,34 +81,18 @@
                 game.clientmods[i].OnReadWriteMainThread(game, dt);
             }
 
-            for (int i = 0; i < game.commitActions.count; i++)
+            foreach (Action action in game.commitActions)
             {
-                game.commitActions.items[i].Run();
+                action();
             }
             game.commitActions.Clear();
         }
     }
 }
 
-public class BackgroundAction : Action_
+internal class BackgroundAction
 {
-    public BackgroundAction()
-    {
-        game = null;
-        i = -1;
-        dt = 1;
-        active = false;
-        finished = false;
-    }
-    internal Game game;
-    internal int i;
-    internal float dt;
     internal bool active;
     internal bool finished;
-
-    public override void Run()
-    {
-        game.clientmods[i].OnReadOnlyBackgroundThread(game, dt);
-        finished = true;
-    }
+    internal Action run;
 }

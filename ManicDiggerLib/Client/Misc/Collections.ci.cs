@@ -1,53 +1,6 @@
 ﻿
 
-public class ListAction
-{
-    public static ListAction Create(int max_)
-    {
-        ListAction l = new();
-        l.Start(max_);
-        return l;
-    }
 
-    public void Start(int max_)
-    {
-        max = max_;
-        items = new Action_[max_];
-        count = 0;
-    }
-
-    internal int max;
-    internal Action_[] items;
-    internal int count;
-
-    internal void Clear()
-    {
-        for (int i = 0; i < count; i++)
-        {
-            items[i] = null;
-        }
-        count = 0;
-    }
-
-    internal void RemoveAt(int index)
-    {
-        for (int i = index; i < count - 1; i++)
-        {
-            items[i] = items[i + 1];
-        }
-        count--;
-    }
-
-    internal int Count()
-    {
-        return count;
-    }
-
-    internal void Add(Action_ action)
-    {
-        items[count++] = action;
-    }
-}
 
 public class ListConnectedPlayer
 {
@@ -73,72 +26,6 @@ public class ListConnectedPlayer
         count--;
     }
 }
-
-public class QueueAction
-{
-    public QueueAction()
-    {
-        Start(128);
-    }
-    public static QueueAction Create(int max_)
-    {
-        QueueAction queue = new();
-        queue.Start(max_);
-        return queue;
-    }
-
-    private void Start(int max_)
-    {
-        max = max_;
-        items = new Action_[max_];
-        count = 0;
-    }
-
-    internal Action_[] items;
-    internal int start;
-    internal int count;
-    internal int max;
-
-    public void Enqueue(Action_ value)
-    {
-        if (count == max)
-        {
-            Resize(max * 2);
-        }
-        int pos = start + count;
-        pos = pos % max;
-        count++;
-        items[pos] = value;
-    }
-
-    private void Resize(int newSize)
-    {
-        Action_[] items2 = new Action_[newSize];
-        for (int i = 0; i < max; i++)
-        {
-            items2[i] = items[(start + i) % max];
-        }
-        items = items2;
-        start = 0;
-        max = newSize;
-    }
-
-    public Action_ Dequeue()
-    {
-        Action_ ret = items[start];
-        items[start] = null;
-        start++;
-        start = start % max;
-        count--;
-        return ret;
-    }
-
-    public int Count()
-    {
-        return count;
-    }
-}
-
 
 public class QueueNetIncomingMessage
 {

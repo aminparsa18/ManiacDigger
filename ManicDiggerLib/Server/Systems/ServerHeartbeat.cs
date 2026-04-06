@@ -13,6 +13,11 @@ public class ServerSystemHeartbeat : ServerSystem
         elapsed = 60;
     }
 
+    internal static Action CreateSendHeartbeatAction(ServerSystemHeartbeat s, Server server)
+    {
+        return async () => await s.SendHeartbeat(server);
+    }
+
     public override void Update(Server server, float dt)
     {
         elapsed += dt;
@@ -22,7 +27,7 @@ public class ServerSystemHeartbeat : ServerSystem
             if ((server.Public) && (server.config.Public))
             {
                 d_Heartbeat.GameMode = server.gameMode;
-                server.serverPlatform.QueueUserWorkItem(ActionSendHeartbeat.Create(this, server));
+                server.serverPlatform.QueueUserWorkItem(CreateSendHeartbeatAction(this, server));
             }
         }
     }
@@ -96,26 +101,6 @@ public class ServerSystemHeartbeat : ServerSystem
             return "";
         }
         return hash;
-    }
-}
-
-public class ActionSendHeartbeat : Action_
-{
-    public static ActionSendHeartbeat Create(ServerSystemHeartbeat s_, Server server_)
-    {
-        ActionSendHeartbeat a = new()
-        {
-            s = s_,
-            server = server_
-        };
-        return a;
-    }
-    private ServerSystemHeartbeat s;
-    private Server server;
-
-    public override async void Run()
-    {
-        await s.SendHeartbeat(server);
     }
 }
 

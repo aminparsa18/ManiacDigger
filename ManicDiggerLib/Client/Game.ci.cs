@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using ManicDigger.Mods;
+using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
@@ -142,7 +143,7 @@ public class Game
         controls = new Controls();
         movedz = 0;
         taskScheduler = new TaskScheduler();
-        commitActions = ListAction.Create(16 * 1024);
+        commitActions = new List<Action>();
         constWallDistance = 0.3f;
         mouseSmoothing = true;
     }
@@ -3988,8 +3989,8 @@ public class Game
         }
     }
 
-    internal ListAction commitActions;
-    public void QueueActionCommit(Action_ action)
+    internal List<Action> commitActions;
+    public void QueueActionCommit(Action action)
     {
         commitActions.Add(action);
     }

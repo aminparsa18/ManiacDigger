@@ -1,4 +1,6 @@
-﻿public class ServerSimple
+﻿using ManicDigger.Mods;
+
+public class ServerSimple
 {
     public ServerSimple()
     {
@@ -24,8 +26,8 @@
         MapSizeZ = 128;
         chunks = new ChunkSimple[(MapSizeX / ChunkSize) * (MapSizeY / ChunkSize)][];
         chunkdrawdistance = 4;
-        actions = new QueueAction();
-        mainThreadActions = new QueueAction();
+        actions = new();
+        mainThreadActions = new();
 
         spawnGlX = MapSizeX / 2;
         spawnGlY = MapSizeZ;
@@ -117,13 +119,129 @@
             }
             if (clients[i].notifyMapAction == null)
             {
-                NotifyMapAction notify = new()
+                clients[i].notifyMapAction = CreateNotifyMapAction(this, i);
+                platform.QueueUserWorkItem(clients[i].notifyMapAction);
+            }
+        }
+    }
+
+    internal Action CreateNotifyMapAction(ServerSimple server, int clientId)
+    {
+        return () =>
+        {
+            int[] nearest = new int[3];
+            ClientSimple client = clients[clientId];
+            int x = server.platform.FloatToInt(client.glX);
+            int y = server.platform.FloatToInt(client.glZ);
+            int z = server.platform.FloatToInt(client.glY);
+            server.NearestDirty(clientId, x, y, z, nearest);
+
+            if (nearest[0] != -1)
+            {
+                LoadAndSendChunk(nearest[0], nearest[1], nearest[2], clientId);
+            }
+
+            clients[clientId].notifyMapAction = null;
+        };
+    }
+
+    internal Action CreateSendPacketAction(ServerSimple server, int client, Packet_Server packet)
+    {
+        return () => server.SendPacket(client, packet);
+    }
+
+    private void LoadAndSendChunk(int x, int y, int z, int clientId)
+    {
+        ClientSimple c = clients[clientId];
+        int pos = MapUtilCi.Index2d(x, y, MapSizeX / ChunkSize);
+        if (c.chunksseen[pos] == null)
+        {
+            c.chunksseen[pos] = new bool[MapSizeZ / ChunkSize];
+        }
+        c.chunksseen[pos][z] = true;
+
+        int[] chunk = new int[32 * 32 * 32];
+
+        for (int i = 0; i < modsCount; i++)
+        {
+            mods[i].GenerateChunk(x, y, z, chunk);
+        }
+
+        byte[] chunkBytes = MiscCi.UshortArrayToByteArray(chunk, 32 * 32 * 32);
+        IntRef compressedLength = new();
+        byte[] chunkCompressed = platform.GzipCompress(chunkBytes, 32 * 32 * 32 * 2, compressedLength);
+
+
+        QueueMainThreadAction(CreateSendPacketAction(this, clientId, ServerPackets.ChunkPart(chunkCompressed)));
+        QueueMainThreadAction(CreateSendPacketAction(this, clientId, ServerPackets.Chunk_(x * ChunkSize, y * ChunkSize, z * ChunkSize, ChunkSize)));
+    }
+
+    private int mapAreaSize() { return chunkdrawdistance * ChunkSize * 2; }
+    private int mapAreaSizeZ() { return mapAreaSize(); }
+
+    private int mapsizexchunks() { return MapSizeX / ChunkSize; }
+    private int mapsizeychunks() { return MapSizeY / ChunkSize; }
+    private int mapsizezchunks() { return MapSizeZ / ChunkSize; }
+
+    private const int intMaxValue = 2147483647;
+    private void NearestDirty(int clientid, int playerx, int playery, int playerz, int[] retNearest)
+    {
+        int nearestdist = intMaxValue;
+        retNearest[0] = -1;
+        retNearest[1] = -1;
+        retNearest[2] = -1;
+        int px = (playerx) / ChunkSize;
+        int py = (playery) / ChunkSize;
+        int pz = (playerz) / ChunkSize;
+
+        int chunksxy = this.mapAreaSize() / ChunkSize / 2;
+        int chunksz = this.mapAreaSizeZ() / ChunkSize / 2;
+
+        int startx = px - chunksxy;
+        int endx = px + chunksxy;
+        int starty = py - chunksxy;
+        int endy = py + chunksxy;
+        int startz = pz - chunksz;
+        int endz = pz + chunksz;
+
+        if (startx < 0) { startx = 0; }
+        if (starty < 0) { starty = 0; }
+        if (startz < 0) { startz = 0; }
+        if (endx >= mapsizexchunks()) { endx = mapsizexchunks() - 1; }
+        if (endy >= mapsizeychunks()) { endy = mapsizeychunks() - 1; }
+        if (endz >= mapsizezchunks()) { endz = mapsizezchunks() - 1; }
+
+        ClientSimple client = clients[clientid];
+        for (int x = startx; x <= endx; x++)
+        {
+            for (int y = starty; y <= endy; y++)
+            {
+                int pos = MapUtilCi.Index2d(x, y, MapSizeX / ChunkSize);
+                if (client.chunksseen[pos] == null)
                 {
-                    server = this,
-                    clientId = i
-                };
-                clients[i].notifyMapAction = notify;
-                platform.QueueUserWorkItem(notify);
+                    client.chunksseen[pos] = new bool[MapSizeZ / ChunkSize];
+                }
+                for (int z = startz; z <= endz; z++)
+                {
+                    bool[] column = client.chunksseen[pos];
+                    if (column[z])
+                    {
+                        continue;
+                    }
+                    {
+                        int dx = px - x;
+                        int dy = py - y;
+                        int dz = pz - z;
+                        int dist = dx * dx + dy * dy + dz * dz;
+                        if (dist < nearestdist)
+                        {
+                            nearestdist = dist;
+                            retNearest[0] = x;
+                            retNearest[1] = y;
+                            retNearest[2] = z;
+                        }
+                    }
+                }
             }
         }
     }
@@ -298,178 +416,40 @@
     internal int blockTypesCount;
     
     internal ChunkSimple[][] chunks;
-    internal int MapSizeX;
-    internal int MapSizeY;
-    internal int MapSizeZ;
+    internal static int MapSizeX;
+    internal static int MapSizeY;
+    internal static int MapSizeZ;
     public const int ChunkSize = 32;
     internal int chunkdrawdistance;
 
-    public void QueueMainThreadAction(Action_ action)
+    public void QueueMainThreadAction(Action action)
     {
         platform.MonitorEnter(mainThreadActionsLock);
         mainThreadActions.Enqueue(action);
         platform.MonitorExit(mainThreadActionsLock);
     }
     private MonitorObject mainThreadActionsLock;
-    private readonly QueueAction mainThreadActions;
+    private readonly Queue<Action> mainThreadActions;
     private void ProcessActions()
     {
         Move(mainThreadActions, actions);
         while (actions.Count() > 0)
         {
-            Action_ a = actions.Dequeue();
-            a.Run();
+            Action a = actions.Dequeue();
+            a();
         }
     }
-    private readonly QueueAction actions;
-    private void Move(QueueAction from, QueueAction to)
+    private readonly Queue<Action> actions;
+    private void Move(Queue<Action> from, Queue<Action> to)
     {
         platform.MonitorEnter(mainThreadActionsLock);
-        int count = from.count;
+        int count = from.Count;
         for (int i = 0; i < count; i++)
         {
-            Action_ task = from.Dequeue();
+            Action task = from.Dequeue();
             to.Enqueue(task);
         }
         platform.MonitorExit(mainThreadActionsLock);
-    }
-}
-
-public class SendPacketAction : Action_
-{
-    public static SendPacketAction Create(ServerSimple server_, int client_, Packet_Server packet_)
-    {
-        SendPacketAction a = new()
-        {
-            server = server_,
-            client = client_,
-            packet = packet_
-        };
-        return a;
-    }
-    internal ServerSimple server;
-    internal int client;
-    internal Packet_Server packet;
-    public override void Run()
-    {
-        server.SendPacket(client, packet);
-    }
-}
-
-internal class NotifyMapAction : Action_
-{
-    internal ServerSimple server;
-    internal int clientId;
-    public override void Run()
-    {
-        int[] nearest = new int[3];
-        ClientSimple client = server.clients[clientId];
-        int x = server.platform.FloatToInt(client.glX);
-        int y = server.platform.FloatToInt(client.glZ);
-        int z = server.platform.FloatToInt(client.glY);
-        NearestDirty(clientId, x, y, z, nearest);
-
-        if (nearest[0] != -1)
-        {
-            LoadAndSendChunk(nearest[0], nearest[1], nearest[2]);
-        }
-
-        server.clients[clientId].notifyMapAction = null;
-    }
-
-    private void LoadAndSendChunk(int x, int y, int z)
-    {
-        ClientSimple c = server.clients[clientId];
-        int pos = MapUtilCi.Index2d(x, y, server.MapSizeX / ServerSimple.ChunkSize);
-        if (c.chunksseen[pos] == null)
-        {
-            c.chunksseen[pos] = new bool[server.MapSizeZ / ServerSimple.ChunkSize];
-        }
-        c.chunksseen[pos][z] = true;
-
-        int[] chunk = new int[32 * 32 * 32];
-
-        for (int i = 0; i < server.modsCount; i++)
-        {
-            server.mods[i].GenerateChunk(x, y, z, chunk);
-        }
-
-        byte[] chunkBytes = MiscCi.UshortArrayToByteArray(chunk, 32 * 32 * 32);
-        IntRef compressedLength = new();
-        byte[] chunkCompressed = server.platform.GzipCompress(chunkBytes, 32 * 32 * 32 * 2, compressedLength);
-        
-        server.QueueMainThreadAction(SendPacketAction.Create(server, clientId, ServerPackets.ChunkPart(chunkCompressed)));
-        server.QueueMainThreadAction(SendPacketAction.Create(server, clientId, ServerPackets.Chunk_(x * ServerSimple.ChunkSize, y * ServerSimple.ChunkSize, z * ServerSimple.ChunkSize, ServerSimple.ChunkSize)));
-    }
-
-    private int mapAreaSize() { return server.chunkdrawdistance * ServerSimple.ChunkSize * 2; }
-    private int mapAreaSizeZ() { return mapAreaSize(); }
-
-    private int mapsizexchunks() { return server.MapSizeX / ServerSimple.ChunkSize; }
-    private int mapsizeychunks() { return server.MapSizeY / ServerSimple.ChunkSize; }
-    private int mapsizezchunks() { return server.MapSizeZ / ServerSimple.ChunkSize; }
-
-    private const int intMaxValue = 2147483647;
-    private void NearestDirty(int clientid, int playerx, int playery, int playerz, int[] retNearest)
-    {
-        int nearestdist = intMaxValue;
-        retNearest[0] = -1;
-        retNearest[1] = -1;
-        retNearest[2] = -1;
-        int px = (playerx) / ServerSimple.ChunkSize;
-        int py = (playery) / ServerSimple.ChunkSize;
-        int pz = (playerz) / ServerSimple.ChunkSize;
-
-        int chunksxy = this.mapAreaSize() / ServerSimple.ChunkSize / 2;
-        int chunksz = this.mapAreaSizeZ() / ServerSimple.ChunkSize / 2;
-
-        int startx = px - chunksxy;
-        int endx = px + chunksxy;
-        int starty = py - chunksxy;
-        int endy = py + chunksxy;
-        int startz = pz - chunksz;
-        int endz = pz + chunksz;
-
-        if (startx < 0) { startx = 0; }
-        if (starty < 0) { starty = 0; }
-        if (startz < 0) { startz = 0; }
-        if (endx >= mapsizexchunks()) { endx = mapsizexchunks() - 1; }
-        if (endy >= mapsizeychunks()) { endy = mapsizeychunks() - 1; }
-        if (endz >= mapsizezchunks()) { endz = mapsizezchunks() - 1; }
-
-        ClientSimple client = server.clients[clientid];
-        for (int x = startx; x <= endx; x++)
-        {
-            for (int y = starty; y <= endy; y++)
-            {
-                int pos = MapUtilCi.Index2d(x, y, server.MapSizeX / ServerSimple.ChunkSize);
-                if (client.chunksseen[pos] == null)
-                {
-                    client.chunksseen[pos] = new bool[server.MapSizeZ / ServerSimple.ChunkSize];
-                }
-                for (int z = startz; z <= endz; z++)
-                {
-                    bool[] column = client.chunksseen[pos];
-                    if (column[z])
-                    {
-                        continue;
-                    }
-                    {
-                        int dx = px - x;
-                        int dy = py - y;
-                        int dz = pz - z;
-                        int dist = dx * dx + dy * dy + dz * dz;
-                        if (dist < nearestdist)
-                        {
-                            nearestdist = dist;
-                            retNearest[0] = x;
-                            retNearest[1] = y;
-                            retNearest[2] = z;
-                        }
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -708,7 +688,7 @@ public class ClientSimple
     internal NetConnection Connection;
     internal NetServer MainSocket;
     internal bool[][] chunksseen;
-    internal Action_ notifyMapAction;
+    internal Action notifyMapAction;
     internal float glX;
     internal float glY;
     internal float glZ;

@@ -853,9 +853,9 @@ public class GamePlatformNative : GamePlatform
         return true;
     }
 
-    public override void QueueUserWorkItem(Action_ action)
+    public override void QueueUserWorkItem(Action action)
     {
-        ThreadPool.QueueUserWorkItem((a) => { action.Run(); });
+        ThreadPool.QueueUserWorkItem((a) => { action(); });
     }
 
     private AssetLoader assetloader;

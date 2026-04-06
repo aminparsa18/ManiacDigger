@@ -110,7 +110,7 @@ public abstract class GamePlatform
     public abstract void RequestMousePointerLock();
     public abstract void ExitMousePointerLock();
     public abstract bool MultithreadingAvailable();
-    public abstract void QueueUserWorkItem(Action_ action);
+    public abstract void QueueUserWorkItem(Action action);
     public abstract void LoadAssetsAsyc(AssetList list, FloatRef progress);
     public abstract byte[] GzipCompress(byte[] data, int dataLength, IntRef retLength);
     public abstract bool IsDebuggerAttached();
@@ -549,19 +549,10 @@ public class IntRef
     public void SetValue(int value_) { value = value_; }
 }
 
-public class AudioSampleCi
-{
-}
-
 public abstract class AudioData
 {
 }
 
 public abstract class AudioCi
 {
-}
-
-public abstract class Action_
-{
-    public abstract void Run();
 }

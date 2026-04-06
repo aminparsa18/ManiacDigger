@@ -67,7 +67,7 @@ public class ServerSystemHttpServer : ServerSystem
 public class ActiveHttpModule
 {
     public string name;
-    public ManicDigger.Func<string> description;
+    public Func<string> description;
     public FragLabs.HTTP.IHttpModule module;
     public bool installed;
 }

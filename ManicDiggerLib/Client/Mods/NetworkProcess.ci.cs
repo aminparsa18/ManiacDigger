@@ -1,4 +1,6 @@
-﻿public class ModNetworkProcess : ClientMod
+﻿namespace ManicDigger.Mods;
+
+public class ModNetworkProcess : ClientMod
 {
     public ModNetworkProcess()
     {
@@ -21,7 +23,7 @@
     }
 #endif
 
-    private Game game;
+    private static Game game;
     public override void OnReadOnlyBackgroundThread(Game game_, float dt)
     {
         game = game_;
@@ -58,12 +60,7 @@
 
         ProcessInBackground(packet);
 
-        ProcessPacketTask task = new()
-        {
-            game = game,
-            packet_ = packet
-        };
-        game.QueueActionCommit(task);
+        game.QueueActionCommit(CreateProcessPacketTask(game, packet));
 
         game.LastReceivedMilliseconds = game.currentTimeMilliseconds;
         //return lengthPrefixLength + packetLength;
@@ -148,24 +145,15 @@
                 break;
         }
     }
-}
 
-public class ProcessPacketTask : Action_
-{
-    internal Game game;
-    internal Packet_Server packet_;
-
-    public override void Run()
+    public static Action CreateProcessPacketTask(Game game, Packet_Server packet_)
     {
-        ProcessPacket(packet_);
+        return () => ProcessPacket(packet_);
     }
 
-    internal void ProcessPacket(Packet_Server packet)
+    internal static void ProcessPacket(Packet_Server packet)
     {
-        if (game.packetHandlers[packet.Id] != null)
-        {
-            game.packetHandlers[packet.Id].Handle(game, packet);
-        }
+        game.packetHandlers[packet.Id]?.Handle(game, packet);
         switch (packet.Id)
         {
             case Packet_ServerIdEnum.ServerIdentification:
@@ -569,8 +557,7 @@ public class ProcessPacketTask : Action_
                 break;
         }
     }
-
-    private bool Contains(string[] arr, int arrLength, string value)
+    private static bool Contains(string[] arr, int arrLength, string value)
     {
         return IndexOf(arr, arrLength, value) != -1;
     }
