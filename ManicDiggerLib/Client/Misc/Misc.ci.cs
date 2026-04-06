@@ -25,7 +25,7 @@ public class Unproject
     {
         objPos = Vector3.Zero;
 
-        Matrix4.Mult(in proj, in model, out Matrix4 finalMatrix);
+        Matrix4.Mult(in model, in proj, out Matrix4 finalMatrix);
         finalMatrix.Invert();
 
         Vector4 inp;

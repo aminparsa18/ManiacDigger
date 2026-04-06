@@ -1,5 +1,4 @@
-﻿using Jint.Native;
-using OpenTK.Mathematics;
+﻿using OpenTK.Mathematics;
 
 public class ModPicking : ClientMod
 {
