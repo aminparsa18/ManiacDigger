@@ -1,137 +1,101 @@
-﻿//This is from Mark Morley's tutorial on frustum culling.
-//http://www.crownandcutlass.com/features/technicaldetails/frustum.html
-//"This page and its contents are Copyright 2000 by Mark Morley
-//Unless otherwise noted, you may use any and all code examples provided herein in any way you want.
-//All other content, including but not limited to text and images, may not be reproduced without consent.
-//This file was last edited on Wednesday, 24-Jan-2001 13:24:38 PST"
-using OpenTK.Mathematics;
+﻿using OpenTK.Mathematics;
 
+/// <summary>
+/// Performs frustum culling by extracting the 6 view frustum planes from
+/// the current modelview and projection matrices, then testing objects against them.
+/// Based on the article "Fast Extraction of Viewing Frustum Planes from the World-View-Projection Matrix (24-Jan-2001!)"
+/// </summary>
 public class FrustumCulling
 {
+    // Plane indices for clarity when accessing the frustum array.
+    private const int Right = 0;
+    private const int Left = 1;
+    private const int Bottom = 2;
+    private const int Top = 3;
+    private const int Far = 4;
+    private const int Near = 5;
+
+    /// <summary>Platform utilities for math operations such as square root.</summary>
     internal GamePlatform platform;
-    internal IGetCameraMatrix d_GetCameraMatrix;
-    private float frustum00;
-    private float frustum01;
-    private float frustum02;
-    private float frustum03;
 
-    private float frustum10;
-    private float frustum11;
-    private float frustum12;
-    private float frustum13;
+    /// <summary>Provides the current modelview and projection matrices from the camera.</summary>
+    internal ICameraMatrixProvider d_GetCameraMatrix;
 
-    private float frustum20;
-    private float frustum21;
-    private float frustum22;
-    private float frustum23;
+    /// <summary>
+    /// The 6 normalized frustum plane equations (A, B, C, D) where XYZ is the
+    /// plane normal and W is the plane distance. Ordered: right, left, bottom, top, far, near.
+    /// </summary>
+    private readonly Vector4[] frustumPlanes = new Vector4[6];
 
-    private float frustum30;
-    private float frustum31;
-    private float frustum32;
-    private float frustum33;
-
-    private float frustum40;
-    private float frustum41;
-    private float frustum42;
-    private float frustum43;
-
-    private float frustum50;
-    private float frustum51;
-    private float frustum52;
-    private float frustum53;
+    /// <summary>
+    /// Tests whether a sphere is at least partially inside the view frustum.
+    /// </summary>
+    /// <param name="x">World-space X coordinate of the sphere center.</param>
+    /// <param name="y">World-space Y coordinate of the sphere center.</param>
+    /// <param name="z">World-space Z coordinate of the sphere center.</param>
+    /// <param name="radius">Radius of the sphere.</param>
+    /// <returns>
+    /// <c>true</c> if the sphere intersects or is inside the frustum;
+    /// <c>false</c> if it is fully outside any frustum plane.
+    /// </returns>
     public bool SphereInFrustum(float x, float y, float z, float radius)
     {
-        float d = 0;
-
-        d = frustum00 * x + frustum01 * y + frustum02 * z + frustum03;
-        if (d <= -radius)
-            return false;
-        d = frustum10 * x + frustum11 * y + frustum12 * z + frustum13;
-        if (d <= -radius)
-            return false;
-        d = frustum20 * x + frustum21 * y + frustum22 * z + frustum23;
-        if (d <= -radius)
-            return false;
-        d = frustum30 * x + frustum31 * y + frustum32 * z + frustum33;
-        if (d <= -radius)
-            return false;
-        d = frustum40 * x + frustum41 * y + frustum42 * z + frustum43;
-        if (d <= -radius)
-            return false;
-        d = frustum50 * x + frustum51 * y + frustum52 * z + frustum53;
-        if (d <= -radius)
-            return false;
-
+        for (int i = 0; i < frustumPlanes.Length; i++)
+        {
+            float d = frustumPlanes[i].X * x
+                    + frustumPlanes[i].Y * y
+                    + frustumPlanes[i].Z * z
+                    + frustumPlanes[i].W;
+            if (d <= -radius) { return false; }
+        }
         return true;
     }
+
     /// <summary>
-    /// Calculating the frustum planes.
+    /// Recalculates the 6 frustum plane equations from the current modelview
+    /// and projection matrices. Must be called once per frame before any
+    /// <see cref="SphereInFrustum"/> calls.
     /// </summary>
     /// <remarks>
-    /// From the current OpenGL modelview and projection matrices,
-    /// calculate the frustum plane equations (Ax+By+Cz+D=0, n=(A,B,C))
-    /// The equations can then be used to see on which side points are.
+    /// Extracts plane equations of the form Ax+By+Cz+D=0 where (A,B,C) is the
+    /// plane normal. Each plane is normalized so that D represents the true
+    /// signed distance from the origin.
     /// </remarks>
     public void CalcFrustumEquations()
     {
-        float t;
-
         Matrix4 matModelView = d_GetCameraMatrix.GetModelViewMatrix();
         Matrix4 matProjection = d_GetCameraMatrix.GetProjectionMatrix();
-        Matrix4.Mult(in matModelView, in matProjection, out Matrix4 matFrustum);
+        Matrix4.Mult(in matModelView, in matProjection, out Matrix4 m);
 
-        // Extract the numbers for the RIGHT plane
-        frustum00 = matFrustum.Row0.W - matFrustum.Row0.X;
-        frustum01 = matFrustum.Row1.W - matFrustum.Row1.X;
-        frustum02 = matFrustum.Row2.W - matFrustum.Row2.X;
-        frustum03 = matFrustum.Row3.W - matFrustum.Row3.X;
-        t = platform.MathSqrt(frustum00 * frustum00 + frustum01 * frustum01 + frustum02 * frustum02);
-        frustum00 /= t; frustum01 /= t; frustum02 /= t; frustum03 /= t;
+        frustumPlanes[Right] = NormalizePlane(m.Row0.W - m.Row0.X, m.Row1.W - m.Row1.X, m.Row2.W - m.Row2.X, m.Row3.W - m.Row3.X);
+        frustumPlanes[Left] = NormalizePlane(m.Row0.W + m.Row0.X, m.Row1.W + m.Row1.X, m.Row2.W + m.Row2.X, m.Row3.W + m.Row3.X);
+        frustumPlanes[Bottom] = NormalizePlane(m.Row0.W + m.Row0.Y, m.Row1.W + m.Row1.Y, m.Row2.W + m.Row2.Y, m.Row3.W + m.Row3.Y);
+        frustumPlanes[Top] = NormalizePlane(m.Row0.W - m.Row0.Y, m.Row1.W - m.Row1.Y, m.Row2.W - m.Row2.Y, m.Row3.W - m.Row3.Y);
+        frustumPlanes[Far] = NormalizePlane(m.Row0.W - m.Row0.Z, m.Row1.W - m.Row1.Z, m.Row2.W - m.Row2.Z, m.Row3.W - m.Row3.Z);
+        frustumPlanes[Near] = NormalizePlane(m.Row0.W + m.Row0.Z, m.Row1.W + m.Row1.Z, m.Row2.W + m.Row2.Z, m.Row3.W + m.Row3.Z);
+    }
 
-        // Extract the numbers for the LEFT plane
-        frustum10 = matFrustum.Row0.W + matFrustum.Row0.X;
-        frustum11 = matFrustum.Row1.W + matFrustum.Row1.X;
-        frustum12 = matFrustum.Row2.W + matFrustum.Row2.X;
-        frustum13 = matFrustum.Row3.W + matFrustum.Row3.X;
-        t = platform.MathSqrt(frustum10 * frustum10 + frustum11 * frustum11 + frustum12 * frustum12);
-        frustum10 /= t; frustum11 /= t; frustum12 /= t; frustum13 /= t;
-
-        // Extract the BOTTOM plane
-        frustum20 = matFrustum.Row0.W + matFrustum.Row0.Y;
-        frustum21 = matFrustum.Row1.W + matFrustum.Row1.Y;
-        frustum22 = matFrustum.Row2.W + matFrustum.Row2.Y;
-        frustum23 = matFrustum.Row3.W + matFrustum.Row3.Y;
-        t = platform.MathSqrt(frustum20 * frustum20 + frustum21 * frustum21 + frustum22 * frustum22);
-        frustum20 /= t; frustum21 /= t; frustum22 /= t; frustum23 /= t;
-
-        // Extract the TOP plane
-        frustum30 = matFrustum.Row0.W - matFrustum.Row0.Y;
-        frustum31 = matFrustum.Row1.W - matFrustum.Row1.Y;
-        frustum32 = matFrustum.Row2.W - matFrustum.Row2.Y;
-        frustum33 = matFrustum.Row3.W - matFrustum.Row3.Y;
-        t = platform.MathSqrt(frustum30 * frustum30 + frustum31 * frustum31 + frustum32 * frustum32);
-        frustum30 /= t; frustum31 /= t; frustum32 /= t; frustum33 /= t;
-
-        // Extract the FAR plane
-        frustum40 = matFrustum.Row0.W - matFrustum.Row0.Z;
-        frustum41 = matFrustum.Row1.W - matFrustum.Row1.Z;
-        frustum42 = matFrustum.Row2.W - matFrustum.Row2.Z;
-        frustum43 = matFrustum.Row3.W - matFrustum.Row3.Z;
-        t = platform.MathSqrt(frustum40 * frustum40 + frustum41 * frustum41 + frustum42 * frustum42);
-        frustum40 /= t; frustum41 /= t; frustum42 /= t; frustum43 /= t;
-
-        // Extract the NEAR plane
-        frustum50 = matFrustum.Row0.W + matFrustum.Row0.Z;
-        frustum51 = matFrustum.Row1.W + matFrustum.Row1.Z;
-        frustum52 = matFrustum.Row2.W + matFrustum.Row2.Z;
-        frustum53 = matFrustum.Row3.W + matFrustum.Row3.Z;
-        t = platform.MathSqrt(frustum50 * frustum50 + frustum51 * frustum51 + frustum52 * frustum52);
-        frustum50 /= t; frustum51 /= t; frustum52 /= t; frustum53 /= t;
+    /// <summary>
+    /// Normalizes a plane equation (A, B, C, D) by dividing all components
+    /// by the magnitude of the normal (A, B, C), so that D represents the
+    /// true signed distance from the origin to the plane.
+    /// </summary>
+    private Vector4 NormalizePlane(float a, float b, float c, float d)
+    {
+        float magnitude = platform.MathSqrt(a * a + b * b + c * c);
+        return new Vector4(a / magnitude, b / magnitude, c / magnitude, d / magnitude);
     }
 }
 
-public abstract class IGetCameraMatrix
+/// <summary>
+/// Provides the current modelview and projection matrices from the camera,
+/// used by <see cref="FrustumCulling"/> to extract frustum planes.
+/// </summary>
+public interface ICameraMatrixProvider
 {
-    public abstract Matrix4 GetModelViewMatrix();
-    public abstract Matrix4 GetProjectionMatrix();
+    /// <summary>Returns the current modelview matrix.</summary>
+    Matrix4 GetModelViewMatrix();
+
+    /// <summary>Returns the current projection matrix.</summary>
+    Matrix4 GetProjectionMatrix();
 }

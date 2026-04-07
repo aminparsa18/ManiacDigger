@@ -56,8 +56,4 @@
 	<ItemGroup>
 		<RuntimeHostConfigurationOption Include="System.Runtime.InteropServices.NativeLibrary.AlwaysGenerateEvents" Value="true" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Client\Collisions\" />
-	</ItemGroup>
 </Project>

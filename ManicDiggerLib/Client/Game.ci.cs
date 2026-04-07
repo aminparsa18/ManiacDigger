@@ -55,7 +55,7 @@ public class Game
         wasmouseright = false;
         ENABLE_LAG = 0;
         znear = one / 10;
-        CameraMatrix = new GetCameraMatrix();
+        CameraMatrix = new CameraMatrixProvider();
         ENABLE_ZFAR = true;
         TotalAmmo = new int[GlobalVar.MAX_BLOCKTYPES];
         LoadedAmmo = new int[GlobalVar.MAX_BLOCKTYPES];
@@ -400,7 +400,7 @@ public class Game
         }
         GLMatrixModeModelView();
         GLLoadMatrix(camera);
-        CameraMatrix.lastmvmatrix = camera;
+        CameraMatrix.LastModelViewMatrix = camera;
 
         d_FrustumCulling.CalcFrustumEquations();
 
@@ -1343,14 +1343,14 @@ public class Game
 
     internal float znear;
 
-    internal GetCameraMatrix CameraMatrix;
+    internal CameraMatrixProvider CameraMatrix;
 
     private readonly Matrix4 Set3dProjectionTempMat4;
     public void Set3dProjection(float zfar, float fov)
     {
         float aspect_ratio = 1f * Width() / Height();
         Matrix4.CreatePerspectiveFieldOfView(fov, aspect_ratio, znear, zfar, out Matrix4 projection);
-        CameraMatrix.lastpmatrix = projection;
+        CameraMatrix.LastProjectionMatrix = projection;
         GLMatrixModeProjection();
         GLLoadMatrix(projection);
         SetMatrixUniformProjection();
