@@ -1194,7 +1194,7 @@ public class TerrainChunkTesselatorCi
 
     public bool isvalid(int tt)
     {
-        return game.blocktypes[tt].Name != null;
+        return game.blocktypes[tt]?.Name != null;
     }
 
     public static int getBestLadderWall(int x, int y, int z, int[] currentChunk)

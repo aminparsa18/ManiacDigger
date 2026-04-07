@@ -571,6 +571,10 @@ public class Game
     private void Draw2dTextureInAtlas(int textureid, float x1, float y1, float width, float height, int? inAtlasId, int atlastextures, int color, bool enabledepthtest)
     {
         RectangleF rect = new(0, 0, 1, 1);
+        if(inAtlasId == null)
+        {
+            return;
+        }
         TextureAtlasCi.TextureCoords2d(inAtlasId ?? 0, atlastextures, rect);
         platform.GlDisableCullFace();
         platform.GlEnableTexture2d();
