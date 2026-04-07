@@ -42,19 +42,19 @@ public class ModDrawMinecarts : ClientMod
         float pZ = positionZ;
         pY += -(one * 7 / 10);
         game.GLTranslate(pX, pY, pZ);
-        float currot = vehiclerotation(dir);
-        float lastrot = vehiclerotation(lastdir);
+        float currot = Vehiclerotation(dir);
+        float lastrot = Vehiclerotation(lastdir);
         //double rot = lastrot + (currot - lastrot) * progress;
         float rot = AngleInterpolation.InterpolateAngle360(game.platform, lastrot, currot, progress);
         game.GLRotate(-rot - 90, 0, 1, 0);
-        RectangleFloat[] cc = CuboidRenderer.CuboidNet(8, 8, 8, 0, 0);
+        RectangleF[] cc = CuboidRenderer.CuboidNet(8, 8, 8, 0, 0);
         CuboidRenderer.CuboidNetNormalize(cc, 32, 16);
         game.platform.BindTexture2d(minecarttexture);
         CuboidRenderer.DrawCuboid(game, -(one * 5 / 10), -(one * 3 / 10), -(one * 5 / 10), 1, 1, 1, cc, 1);
         game.GLPopMatrix();
     }
 
-    private static float vehiclerotation(VehicleDirection12 dir)
+    private static float Vehiclerotation(VehicleDirection12 dir)
     {
         switch (dir)
         {

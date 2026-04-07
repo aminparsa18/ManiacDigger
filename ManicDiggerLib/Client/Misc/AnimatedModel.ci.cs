@@ -375,7 +375,7 @@ public class AnimatedModelRenderer
                 continue;
             }
             game.GLPushMatrix();
-            RectangleFloat[] r = new RectangleFloat[6];
+            RectangleF[] r = new RectangleF[6];
             r = CuboidRenderer.CuboidNet(n.sizex, n.sizey, n.sizez, n.u, n.v);
             CuboidRenderer.CuboidNetNormalize(r, m.global.texw, m.global.texh);
             GetAnimation(n, tempVec3, KeyframeType.Scale);
@@ -603,22 +603,22 @@ public class CuboidRenderer
     //Arguments:
     // Size (in pixels) in 2d cuboid net.
     // Start position of 2d cuboid net in texture file.
-    public static RectangleFloat[] CuboidNet(float tsizex, float tsizey, float tsizez, float tstartx, float tstarty)
+    public static RectangleF[] CuboidNet(float tsizex, float tsizey, float tsizez, float tstartx, float tstarty)
     {
-        RectangleFloat[] coords = new RectangleFloat[6];
+        RectangleF[] coords = new RectangleF[6];
         {
-            coords[0] = RectangleFloat.Create(tsizez + tstartx, tsizez + tstarty, tsizex, tsizey);//front
-            coords[1] = RectangleFloat.Create(2 * tsizez + tsizex + tstartx, tsizez + tstarty, tsizex, tsizey);//back
-            coords[2] = RectangleFloat.Create(tstartx, tsizez + tstarty, tsizez, tsizey);//right
-            coords[3] = RectangleFloat.Create(tsizez + tsizex + tstartx, tsizez + tstarty, tsizez, tsizey);//left
-            coords[4] = RectangleFloat.Create(tsizez + tstartx, tstarty, tsizex, tsizez);//top
-            coords[5] = RectangleFloat.Create(tsizez + tsizex + tstartx, tstarty, tsizex, tsizez);//bottom
+            coords[0] = new RectangleF(tsizez + tstartx, tsizez + tstarty, tsizex, tsizey);//front
+            coords[1] = new RectangleF(2 * tsizez + tsizex + tstartx, tsizez + tstarty, tsizex, tsizey);//back
+            coords[2] = new RectangleF(tstartx, tsizez + tstarty, tsizez, tsizey);//right
+            coords[3] = new RectangleF(tsizez + tsizex + tstartx, tsizez + tstarty, tsizez, tsizey);//left
+            coords[4] = new RectangleF(tsizez + tstartx, tstarty, tsizex, tsizez);//top
+            coords[5] = new RectangleF(tsizez + tsizex + tstartx, tstarty, tsizex, tsizez);//bottom
         }
         return coords;
     }
 
     //Divides CuboidNet() result by texture size, to get relative coordinates. (0-1, not 0-32 pixels).
-    public static void CuboidNetNormalize(RectangleFloat[] coords, float texturewidth, float textureheight)
+    public static void CuboidNetNormalize(RectangleF[] coords, float texturewidth, float textureheight)
     {
         float AtiArtifactFix = 0.15f;
         for (int i = 0; i < 6; i++)
@@ -627,12 +627,12 @@ public class CuboidRenderer
             float y = ((coords[i].Y + AtiArtifactFix) / textureheight);
             float w = ((coords[i].X + coords[i].Width - AtiArtifactFix) / texturewidth) - x;
             float h = ((coords[i].Y + coords[i].Height - AtiArtifactFix) / textureheight) - y;
-            coords[i] = RectangleFloat.Create(x, y, w, h);
+            coords[i] = new RectangleF(x, y, w, h);
         }
     }
     public static void DrawCuboid(Game game, float posX, float posY, float posZ,
         float sizeX, float sizeY, float sizeZ,
-        RectangleFloat[] texturecoords, float light)
+        RectangleF[] texturecoords, float light)
     {
         ModelData data = new()
         {
@@ -643,47 +643,47 @@ public class CuboidRenderer
         int light255 = game.platform.FloatToInt(light * 255);
         int color = Game.ColorFromArgb(255, light255, light255, light255);
 
-        RectangleFloat rect;
+        RectangleF rect;
 
         //front
         rect = texturecoords[0];
-        AddVertex(data, posX, posY, posZ, rect.X, rect.Bottom(), color);
-        AddVertex(data, posX, posY, posZ + sizeZ, rect.X + rect.Width, rect.Bottom(), color);
+        AddVertex(data, posX, posY, posZ, rect.X, rect.Bottom, color);
+        AddVertex(data, posX, posY, posZ + sizeZ, rect.X + rect.Width, rect.Bottom, color);
         AddVertex(data, posX, posY + sizeY, posZ + sizeZ, rect.X + rect.Width, rect.Y, color);
         AddVertex(data, posX, posY + sizeY, posZ, rect.X, rect.Y, color);
 
         //back
         rect = texturecoords[1];
-        AddVertex(data, posX + sizeX, posY, posZ, rect.X, rect.Bottom(), color);
-        AddVertex(data, posX + sizeX, posY, posZ + sizeZ, rect.X + rect.Width, rect.Bottom(), color);
+        AddVertex(data, posX + sizeX, posY, posZ, rect.X, rect.Bottom, color);
+        AddVertex(data, posX + sizeX, posY, posZ + sizeZ, rect.X + rect.Width, rect.Bottom, color);
         AddVertex(data, posX + sizeX, posY + sizeY, posZ + sizeZ, rect.X + rect.Width, rect.Y, color);
         AddVertex(data, posX + sizeX, posY + sizeY, posZ, rect.X, rect.Y, color);
 
         //left
         rect = texturecoords[2];
-        AddVertex(data, posX + sizeX, posY, posZ, rect.X, rect.Bottom(), color);
-        AddVertex(data, posX, posY, posZ, rect.X + rect.Width, rect.Bottom(), color);
+        AddVertex(data, posX + sizeX, posY, posZ, rect.X, rect.Bottom, color);
+        AddVertex(data, posX, posY, posZ, rect.X + rect.Width, rect.Bottom, color);
         AddVertex(data, posX, posY + sizeY, posZ, rect.X + rect.Width, rect.Y, color);
         AddVertex(data, posX + sizeX, posY + sizeY, posZ, rect.X, rect.Y, color);
 
         //right
         rect = texturecoords[3];
-        AddVertex(data, posX + sizeX, posY, posZ + sizeZ, rect.X + rect.Width, rect.Bottom(), color);
-        AddVertex(data, posX, posY, posZ + sizeZ, rect.X, rect.Bottom(), color);
+        AddVertex(data, posX + sizeX, posY, posZ + sizeZ, rect.X + rect.Width, rect.Bottom, color);
+        AddVertex(data, posX, posY, posZ + sizeZ, rect.X, rect.Bottom, color);
         AddVertex(data, posX, posY + sizeY, posZ + sizeZ, rect.X, rect.Y, color);
         AddVertex(data, posX + sizeX, posY + sizeY, posZ + sizeZ, rect.X + rect.Width, rect.Y, color);
 
         //top
         rect = texturecoords[4];
-        AddVertex(data, posX, posY + sizeY, posZ, rect.X, rect.Bottom(), color);
-        AddVertex(data, posX, posY + sizeY, posZ + sizeZ, rect.X + rect.Width, rect.Bottom(), color);
+        AddVertex(data, posX, posY + sizeY, posZ, rect.X, rect.Bottom, color);
+        AddVertex(data, posX, posY + sizeY, posZ + sizeZ, rect.X + rect.Width, rect.Bottom, color);
         AddVertex(data, posX + sizeX, posY + sizeY, posZ + sizeZ, rect.X + rect.Width, rect.Y, color);
         AddVertex(data, posX + sizeX, posY + sizeY, posZ, rect.X, rect.Y, color);
 
         //bottom
         rect = texturecoords[5];
-        AddVertex(data, posX, posY, posZ, rect.X, rect.Bottom(), color);
-        AddVertex(data, posX, posY, posZ + sizeZ, rect.X + rect.Width, rect.Bottom(), color);
+        AddVertex(data, posX, posY, posZ, rect.X, rect.Bottom, color);
+        AddVertex(data, posX, posY, posZ + sizeZ, rect.X + rect.Width, rect.Bottom, color);
         AddVertex(data, posX + sizeX, posY, posZ + sizeZ, rect.X + rect.Width, rect.Y, color);
         AddVertex(data, posX + sizeX, posY, posZ, rect.X, rect.Y, color);
 
@@ -699,12 +699,11 @@ public class CuboidRenderer
         }
         data.indicesCount = 36;
 
-
-
         game.platform.GlDisableCullFace();
         game.DrawModelData(data);
         game.platform.GlEnableCullFace();
     }
+
     public static void AddVertex(ModelData model, float x, float y, float z, float u, float v, int color)
     {
         model.xyz[model.GetXyzCount() + 0] = x;
@@ -721,7 +720,7 @@ public class CuboidRenderer
 
     public static void DrawCuboid2(Game game, float posX, float posY, float posZ,
         float sizeX, float sizeY, float sizeZ,
-        RectangleFloat[] texturecoords, float light)
+        RectangleF[] texturecoords, float light)
     {
         ModelData data = new()
         {
@@ -732,48 +731,48 @@ public class CuboidRenderer
         int light255 = game.platform.FloatToInt(light * 255);
         int color = Game.ColorFromArgb(255, light255, light255, light255);
 
-        RectangleFloat rect;
+        RectangleF rect;
 
         //right
         rect = texturecoords[2];
-        AddVertex(data, posX, posY, posZ, rect.X, rect.Bottom(), color);
-        AddVertex(data, posX, posY, posZ + sizeZ, rect.X + rect.Width, rect.Bottom(), color);
+        AddVertex(data, posX, posY, posZ, rect.X, rect.Bottom , color);
+        AddVertex(data, posX, posY, posZ + sizeZ, rect.X + rect.Width, rect.Bottom, color);
         AddVertex(data, posX, posY + sizeY, posZ + sizeZ, rect.X + rect.Width, rect.Y, color);
         AddVertex(data, posX, posY + sizeY, posZ, rect.X, rect.Y, color);
 
         //left
         rect = texturecoords[3];
-        AddVertex(data, posX + sizeX, posY, posZ + sizeZ, rect.X, rect.Bottom(), color);
-        AddVertex(data, posX + sizeX, posY, posZ, rect.X + rect.Width, rect.Bottom(), color);
+        AddVertex(data, posX + sizeX, posY, posZ + sizeZ, rect.X, rect.Bottom, color);
+        AddVertex(data, posX + sizeX, posY, posZ, rect.X + rect.Width, rect.Bottom, color);
         AddVertex(data, posX + sizeX, posY + sizeY, posZ, rect.X + rect.Width, rect.Y, color);
         AddVertex(data, posX + sizeX, posY + sizeY, posZ + sizeZ, rect.X, rect.Y, color);
 
         //back
         rect = texturecoords[1];
-        AddVertex(data, posX + sizeX, posY, posZ, rect.X, rect.Bottom(), color);
-        AddVertex(data, posX, posY, posZ, rect.X + rect.Width, rect.Bottom(), color);
+        AddVertex(data, posX + sizeX, posY, posZ, rect.X, rect.Bottom, color);
+        AddVertex(data, posX, posY, posZ, rect.X + rect.Width, rect.Bottom, color);
         AddVertex(data, posX, posY + sizeY, posZ, rect.X + rect.Width, rect.Y, color);
         AddVertex(data, posX + sizeX, posY + sizeY, posZ, rect.X, rect.Y, color);
 
         //front
         rect = texturecoords[0];
-        AddVertex(data, posX + sizeX, posY, posZ + sizeZ, rect.X + rect.Width, rect.Bottom(), color);
-        AddVertex(data, posX, posY, posZ + sizeZ, rect.X, rect.Bottom(), color);
+        AddVertex(data, posX + sizeX, posY, posZ + sizeZ, rect.X + rect.Width, rect.Bottom, color);
+        AddVertex(data, posX, posY, posZ + sizeZ, rect.X, rect.Bottom, color);
         AddVertex(data, posX, posY + sizeY, posZ + sizeZ, rect.X, rect.Y, color);
         AddVertex(data, posX + sizeX, posY + sizeY, posZ + sizeZ, rect.X + rect.Width, rect.Y, color);
 
         //top
         rect = texturecoords[4];
         AddVertex(data, posX, posY + sizeY, posZ, rect.X, rect.Y, color);
-        AddVertex(data, posX, posY + sizeY, posZ + sizeZ, rect.X, rect.Bottom(), color);
-        AddVertex(data, posX + sizeX, posY + sizeY, posZ + sizeZ, rect.X + rect.Width, rect.Bottom(), color);
+        AddVertex(data, posX, posY + sizeY, posZ + sizeZ, rect.X, rect.Bottom, color);
+        AddVertex(data, posX + sizeX, posY + sizeY, posZ + sizeZ, rect.X + rect.Width, rect.Bottom, color);
         AddVertex(data, posX + sizeX, posY + sizeY, posZ, rect.X + rect.Width, rect.Y, color);
 
         //bottom
         rect = texturecoords[5];
         AddVertex(data, posX, posY, posZ, rect.X, rect.Y, color);
-        AddVertex(data, posX, posY, posZ + sizeZ, rect.X, rect.Bottom(), color);
-        AddVertex(data, posX + sizeX, posY, posZ + sizeZ, rect.X + rect.Width, rect.Bottom(), color);
+        AddVertex(data, posX, posY, posZ + sizeZ, rect.X, rect.Bottom, color);
+        AddVertex(data, posX + sizeX, posY, posZ + sizeZ, rect.X + rect.Width, rect.Bottom, color);
         AddVertex(data, posX + sizeX, posY, posZ, rect.X + rect.Width, rect.Y, color);
 
         data.indices = new int[6 * 6];
@@ -793,31 +792,6 @@ public class CuboidRenderer
         game.platform.GlDisableCullFace();
         game.DrawModelData(data);
         game.platform.GlEnableCullFace();
-    }
-}
-
-public class RectangleFloat
-{
-    internal float X;
-    internal float Y;
-    internal float Width;
-    internal float Height;
-
-    public float Bottom()
-    {
-        return Y + Height;
-    }
-
-    public static RectangleFloat Create(float x_, float y_, float width_, float height_)
-    {
-        RectangleFloat r = new()
-        {
-            X = x_,
-            Y = y_,
-            Width = width_,
-            Height = height_
-        };
-        return r;
     }
 }
 
