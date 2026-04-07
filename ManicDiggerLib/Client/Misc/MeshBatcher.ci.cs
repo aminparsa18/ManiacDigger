@@ -29,7 +29,7 @@ public class MeshBatcher
     private bool BindTexture;
 
     /// <summary>Flat array of all model slots. Index == model ID.</summary>
-    private readonly ListInfo[] _models;
+    private readonly BatchEntry[] _models;
 
     /// <summary>One-past-the-last used slot index; grows on <see cref="Add"/> when free-list is empty.</summary>
     private int _modelsCount;
@@ -54,9 +54,9 @@ public class MeshBatcher
     /// </summary>
     public MeshBatcher()
     {
-        _models = new ListInfo[ModelsMax];
+        _models = new BatchEntry[ModelsMax];
         for (int i = 0; i < ModelsMax; i++)
-            _models[i] = new ListInfo();
+            _models[i] = new BatchEntry();
 
         _modelsCount = 0;
         _freeSlots = new Stack<int>();
@@ -65,8 +65,8 @@ public class MeshBatcher
         tocallTransparent = new List<Model>[MaxTextures];
         for (int i = 0; i < MaxTextures; i++)
         {
-            tocallSolid[i] = new List<Model>();
-            tocallTransparent[i] = new List<Model>();
+            tocallSolid[i] = [];
+            tocallTransparent[i] = [];
         }
         BindTexture = true;
     }
@@ -94,17 +94,16 @@ public class MeshBatcher
 
         Model model = game.platform.CreateModel(modelData);
 
-        ListInfo slot = _models[id];
-        slot.indicescount = modelData.GetIndicesCount();
-        slot.centerX = centerX;
-        slot.centerY = centerY;
-        slot.centerZ = centerZ;
-        slot.radius = radius;
-        slot.transparent = transparent;
-        slot.empty = false;
-        slot.texture = GetTextureId(texture);
-        slot.model = model;
-        slot.render = true;
+        BatchEntry slot = _models[id];
+        slot.IndicesCount = modelData.GetIndicesCount();
+        slot.CenterX = centerX;
+        slot.CenterY = centerY;
+        slot.CenterZ = centerZ;
+        slot.Radius = radius;
+        slot.Transparent = transparent;
+        slot.Empty = false;
+        slot.Texture = GetTextureId(texture);
+        slot.Model = model;
 
         return id;
     }
@@ -116,8 +115,8 @@ public class MeshBatcher
     /// <param name="id">The slot ID previously returned by <see cref="Add"/>.</param>
     public void Remove(int id)
     {
-        game.platform.DeleteModel(_models[id].model);
-        _models[id].empty = true;
+        game.platform.DeleteModel(_models[id].Model);
+        _models[id].Empty = true;
         _freeSlots.Push(id);
     }
 
@@ -207,16 +206,16 @@ public class MeshBatcher
         // Bucket each active, visible model into the correct texture + pass list.
         for (int i = 0; i < _modelsCount; i++)
         {
-            ListInfo li = _models[i];
+            BatchEntry li = _models[i];
 
-            if (li.empty || !li.render)
+            if (li.Empty)
                 continue;
 
-            List<Model> bucket = li.transparent
-                ? tocallTransparent[li.texture]
-                : tocallSolid[li.texture];
+            List<Model> bucket = li.Transparent
+                ? tocallTransparent[li.Texture]
+                : tocallSolid[li.Texture];
 
-            bucket.Add(li.model);
+            bucket.Add(li.Model);
         }
     }
 
@@ -230,9 +229,9 @@ public class MeshBatcher
         int sum = 0;
         for (int i = 0; i < _modelsCount; i++)
         {
-            ListInfo li = _models[i];
-            if (!li.empty)
-                sum += li.indicescount;
+            BatchEntry li = _models[i];
+            if (!li.Empty)
+                sum += li.IndicesCount;
         }
         return sum / 3;
     }
@@ -245,26 +244,48 @@ public class MeshBatcher
     {
         for (int i = 0; i < _modelsCount; i++)
         {
-            if (!_models[i].empty)
+            if (!_models[i].Empty)
                 Remove(i);
         }
     }
 }
 
-public class ListInfo
+/// <summary>
+/// Represents a single occupied slot in a <see cref="MeshBatcher"/> pool,
+/// storing all data needed to cull and draw one model.
+/// </summary>
+internal class BatchEntry
 {
-    public ListInfo()
-    {
-        render = true;
-    }
-    internal bool empty;
-    internal int indicescount;
-    internal float centerX;
-    internal float centerY;
-    internal float centerZ;
-    internal float radius;
-    internal bool transparent;
-    internal bool render;
-    internal int texture;
-    internal Model model;
+    /// <summary>
+    /// Whether this slot is free and available for reuse.
+    /// <c>true</c> after <see cref="MeshBatcher.Remove"/> is called.
+    /// </summary>
+    internal bool Empty;
+
+    /// <summary>Total index count of the model's geometry (triangle count × 3).</summary>
+    internal int IndicesCount;
+
+    /// <summary>World-space X coordinate of the model's bounding sphere centre.</summary>
+    internal float CenterX;
+
+    /// <summary>World-space Y coordinate of the model's bounding sphere centre.</summary>
+    internal float CenterY;
+
+    /// <summary>World-space Z coordinate of the model's bounding sphere centre.</summary>
+    internal float CenterZ;
+
+    /// <summary>Radius of the model's bounding sphere, used for frustum culling.</summary>
+    internal float Radius;
+
+    /// <summary>
+    /// Whether this model belongs to the transparent render pass.
+    /// <c>false</c> = solid pass (drawn first); <c>true</c> = transparent pass.
+    /// </summary>
+    internal bool Transparent;
+
+    /// <summary>Index into the batcher's texture slot list (<c>_glTextures</c>).</summary>
+    internal int Texture;
+
+    /// <summary>The GPU model handle issued by the platform layer.</summary>
+    internal Model Model;
 }
