@@ -150,13 +150,13 @@
 
     public void LoadTranslations()
     {
-        string[] fileList = platform.DirectoryGetFiles(platform.PathCombine("data", "localization"), out int fileCount);
+        string[] fileList = FileHelper.DirectoryGetFiles(Path.Combine("data", "localization"));
         //Iterate over all files in the directory
-        for (int i = 0; i < fileCount; i++)
+        for (int i = 0; i < fileList.Length; i++)
         {
-            string[] lineList = platform.FileReadAllLines(fileList[i], out int lineCount);
+            string[] lineList = File.ReadAllLines(fileList[i]);
             //Iterate over each line in these files
-            for (int j = 1; j < lineCount; j++)
+            for (int j = 1; j < lineList.Length; j++)
             {
                 if (string.IsNullOrEmpty(lineList[j]))
                 {

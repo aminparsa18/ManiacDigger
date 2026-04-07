@@ -130,7 +130,7 @@
                         s = string.Format("{0},", s);
                     }
                 }
-                p.ClipboardSetText(s);
+                Clipboard.SetText(s);
                 m.DisplayNotification("Camera points copied to clipboard.");
             }
             if (arguments[0] == "load")

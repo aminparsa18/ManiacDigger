@@ -3288,7 +3288,7 @@ public class Game
             {
                 continue;
             }
-            BitmapCi bmp = platform.BitmapCreateFromPng(fileData, platform.ByteArrayLength(fileData));
+            BitmapCi bmp = platform.BitmapCreateFromPng(fileData, fileData.Length);
             if (platform.BitmapGetWidth(bmp) != tilesize)
             {
                 platform.BitmapDelete(bmp);

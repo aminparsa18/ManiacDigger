@@ -13,7 +13,7 @@
                 {
                     lasthandimage = img;
                     byte[] file = game.GetFile(img);
-                    BitmapCi bmp = game.platform.BitmapCreateFromPng(file, game.platform.ByteArrayLength(file));
+                    BitmapCi bmp = game.platform.BitmapCreateFromPng(file, file.Length);
                     if (bmp != null)
                     {
                         game.handTexture = game.platform.LoadTextureFromBitmap(bmp);

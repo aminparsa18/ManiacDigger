@@ -87,7 +87,7 @@ public class ModLoadPlayerTextures : ClientMod
                 e.drawModel.CurrentTexture = 0;
                 continue;
             }
-            BitmapCi bmp = game.platform.BitmapCreateFromPng(file, game.platform.ByteArrayLength(file));
+            BitmapCi bmp = game.platform.BitmapCreateFromPng(file, file.Length);
             if (bmp == null)
             {
                 e.drawModel.CurrentTexture = 0;

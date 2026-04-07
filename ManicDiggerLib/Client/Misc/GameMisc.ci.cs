@@ -52,9 +52,9 @@ public class GameScreen : ClientMod
                         }
                         if (e.GetKeyChar() == 22) //paste
                         {
-                            if (game.platform.ClipboardContainsText())
+                            if (Clipboard.ContainsText())
                             {
-                                w.text = StringTools.StringAppend(game.platform, w.text, game.platform.ClipboardGetText());
+                                w.text = StringTools.StringAppend(game.platform, w.text, Clipboard.GetText());
                             }
                             return;
                         }
@@ -317,8 +317,8 @@ public class LoginClientCi
                 {
                     loginResult.value = LoginResult.Failed;
                 }
-                string[] lines = platform.ReadAllLines(responseString, out int linesCount);
-                if (linesCount >= 3)
+                string[] lines = responseString.Split(Environment.NewLine);
+                if (lines.Length >= 3)
                 {
                     resultLoginData.AuthCode = lines[0];
                     resultLoginData.ServerAddress = lines[1];

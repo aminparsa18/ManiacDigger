@@ -533,7 +533,8 @@ public class MainMenu
 
     internal string[] GetSavegames(out int length)
     {
-        string[] files = p.DirectoryGetFiles(p.PathSavegames(), out length);
+        string[] files = FileHelper.DirectoryGetFiles(p.PathSavegames());
+        length = files.Length;
         string[] savegames = new string[length];
         int count = 0;
         for (int i = 0; i < length; i++)
@@ -688,9 +689,9 @@ public class Screen
                     // pasting text from clipboard
                     if (e.GetCtrlPressed() && key == (int)Keys.V)
                     {
-                        if (menu.p.ClipboardContainsText())
+                        if (Clipboard.ContainsText())
                         {
-                            w.text = StringTools.StringAppend(menu.p, w.text, menu.p.ClipboardGetText());
+                            w.text = StringTools.StringAppend(menu.p, w.text, Clipboard.GetText());
                         }
                         return;
                     }

@@ -213,9 +213,9 @@ public class ModGuiChat : ClientMod
             {
                 if (key == game.GetKey(Keys.V))
                 {
-                    if (game.platform.ClipboardContainsText())
+                    if (Clipboard.ContainsText())
                     {
-                        game.GuiTypingBuffer = StringTools.StringAppend(game.platform, game.GuiTypingBuffer, game.platform.ClipboardGetText());
+                        game.GuiTypingBuffer = StringTools.StringAppend(game.platform, game.GuiTypingBuffer, Clipboard.GetText());
                     }
                     args.SetHandled(true);
                     return;

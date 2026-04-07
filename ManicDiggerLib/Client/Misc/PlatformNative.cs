@@ -25,7 +25,6 @@ public class GamePlatformNative : GamePlatform
 {
 
     #region Misc
-
     public GamePlatformNative()
     {
         ThreadPool.SetMinThreads(32, 32);
@@ -41,11 +40,6 @@ public class GamePlatformNative : GamePlatform
     {
         string time = string.Format("{0:yyyy-MM-dd_HH-mm-ss}", DateTime.Now);
         return time;
-    }
-
-    public override void ClipboardSetText(string s)
-    {
-        Clipboard.SetText(s);
     }
 
     private readonly ManicDigger.Renderers.TextRenderer r = new();
@@ -82,30 +76,6 @@ public class GamePlatformNative : GamePlatform
     public override string PathSavegames()
     {
         return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-    }
-
-    public override string PathCombine(string part1, string part2)
-    {
-        return Path.Combine(part1, part2);
-    }
-
-    public override string[] DirectoryGetFiles(string path, out int length)
-    {
-        if (!Directory.Exists(path))
-        {
-            length = 0;
-            return [];
-        }
-        string[] files = Directory.GetFiles(path);
-        length = files.Length;
-        return files;
-    }
-
-    public override string[] FileReadAllLines(string path, out int length)
-    {
-        string[] lines = File.ReadAllLines(path);
-        length = lines.Length;
-        return lines;
     }
 
     public override void WebClientDownloadDataAsync(string url, HttpResponseCi response)
@@ -455,34 +425,6 @@ public class GamePlatformNative : GamePlatform
     public override void MessageBoxShowError(string text, string caption)
     {
         MessageBox.Show(text, caption, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-    }
-
-    public override int ByteArrayLength(byte[] arr)
-    {
-        return arr.Length;
-    }
-
-    public override string[] ReadAllLines(string p, out int retCount)
-    {
-        List<string> lines = new();
-        StringReader reader = new(p);
-        string line;
-        while ((line = reader.ReadLine()) != null)
-        {
-            lines.Add(line);
-        }
-        retCount = lines.Count;
-        return lines.ToArray();
-    }
-
-    public override bool ClipboardContainsText()
-    {
-        return Clipboard.ContainsText();
-    }
-
-    public override string ClipboardGetText()
-    {
-        return Clipboard.GetText();
     }
 
     public void SetExit(GameExit exit)

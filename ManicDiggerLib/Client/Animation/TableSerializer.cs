@@ -17,12 +17,12 @@ public class TableSerializer
     /// </exception>
     public static void Deserialize(GamePlatform p, string data, ITableBinding binding)
     {
-        string[] lines = p.ReadAllLines(data, out int linesCount);
+        string[] lines = data.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
         string[] header = null;
         string section = "";
         int rowIndex = 0;
 
-        for (int i = 0; i < linesCount; i++)
+        for (int i = 0; i < lines.Length ; i++)
         {
             string line = lines[i].Trim();
 
@@ -34,7 +34,7 @@ public class TableSerializer
             {
                 section = line.Replace(SectionPrefix, "");
 
-                if (i + 1 >= linesCount)
+                if (i + 1 >= lines.Length)
                 {
                     throw new FormatException($"Section '{section}' has no header row.");
                 }

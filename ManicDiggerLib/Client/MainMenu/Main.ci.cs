@@ -119,11 +119,11 @@
         if (e.GetKeyCode() == (int)Keys.F5)
         {
             menu.p.SinglePlayerServerDisable();
-            menu.StartGame(true, menu.p.PathCombine(menu.p.PathSavegames(), "Default.mdss"), null);
+            menu.StartGame(true, Path.Combine(menu.p.PathSavegames(), "Default.mdss"), null);
         }
         if (e.GetKeyCode() == (int)Keys.F6)
         {
-            menu.StartGame(true, menu.p.PathCombine(menu.p.PathSavegames(), "Default.mddbs"), null);
+            menu.StartGame(true, Path.Combine(menu.p.PathSavegames(), "Default.mddbs"), null);
         }
     }
 }

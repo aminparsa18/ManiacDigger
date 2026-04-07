@@ -72,8 +72,7 @@ public class ModNetworkProcess : ClientMod
         {
             case Packet_ServerIdEnum.ChunkPart:
                 byte[] arr = packet.ChunkPart.CompressedChunkPart;
-                int arrLength = game.platform.ByteArrayLength(arr); // todo
-                for (int i = 0; i < arrLength; i++)
+                for (int i = 0; i < arr.Length; i++)
                 {
                     CurrentChunk[CurrentChunkCount++] = arr[i];
                 }
@@ -131,7 +130,7 @@ public class ModNetworkProcess : ClientMod
             case Packet_ServerIdEnum.HeightmapChunk:
                 {
                     Packet_ServerHeightmapChunk p = packet.HeightmapChunk;
-                    game.platform.GzipDecompress(p.CompressedHeightmap, game.platform.ByteArrayLength(p.CompressedHeightmap), decompressedchunk);
+                    game.platform.GzipDecompress(p.CompressedHeightmap, p.CompressedHeightmap.Length, decompressedchunk);
                     int[] decompressedchunk1 = Game.ByteArrayToUshortArray(decompressedchunk, p.SizeX * p.SizeY * 2);
                     for (int xx = 0; xx < p.SizeX; xx++)
                     {
@@ -366,7 +365,7 @@ public class ModNetworkProcess : ClientMod
                 break;
             case Packet_ServerIdEnum.BlobPart:
                 {
-                    int length = game.platform.ByteArrayLength(packet.BlobPart.Data);
+                    int length = packet.BlobPart.Data.Length;
                     game.blobdownload.Write(packet.BlobPart.Data, 0, length);
                     game.ReceivedMapLength += length;
                 }

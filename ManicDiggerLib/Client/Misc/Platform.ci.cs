@@ -6,14 +6,10 @@ public abstract class GamePlatform
    
     // Misc
     public abstract string Timestamp();
-    public abstract void ClipboardSetText(string s);
     public abstract void TextSize(string text, float fontSize, out int outWidth, out int outHeight);
     public abstract void Exit();
     public abstract bool ExitAvailable();
     public abstract string PathSavegames();
-    public abstract string PathCombine(string part1, string part2);
-    public abstract string[] DirectoryGetFiles(string path, out int length);
-    public abstract string[] FileReadAllLines(string path, out int length);
     public abstract void WebClientDownloadDataAsync(string url, HttpResponseCi response);
     public abstract void ThumbnailDownloadAsync(string ip, int port, ThumbnailResponseCi response);
     public abstract string FileName(string fullpath);
@@ -49,12 +45,8 @@ public abstract class GamePlatform
     public abstract bool IsValidTypingChar(int c);
     public abstract void WindowExit();
     public abstract void MessageBoxShowError(string text, string caption);
-    public abstract int ByteArrayLength(byte[] arr);
     public abstract BitmapCi BitmapCreateFromPng(byte[] data, int dataLength);
     public abstract void BitmapGetPixelsArgb(BitmapCi bitmap, int[] bmpPixels);
-    public abstract string[] ReadAllLines(string p, out int retCount);
-    public abstract bool ClipboardContainsText();
-    public abstract string ClipboardGetText();
     public abstract void SetTitle(string applicationname);
     public abstract bool Focused();
     public abstract void AddOnCrash(OnCrashHandler handler);
