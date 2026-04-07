@@ -379,15 +379,22 @@ public class ModDrawHand3d : ClientMod
     }
     public static void AddVertex(ModelData model, float x, float y, float z, float u, float v, int color)
     {
-        model.xyz[model.GetXyzCount() + 0] = x;
-        model.xyz[model.GetXyzCount() + 1] = y;
-        model.xyz[model.GetXyzCount() + 2] = z;
-        model.uv[model.GetUvCount() + 0] = u;
-        model.uv[model.GetUvCount() + 1] = v;
-        model.rgba[model.GetRgbaCount() + 0] = Game.IntToByte(Game.ColorR(color));
-        model.rgba[model.GetRgbaCount() + 1] = Game.IntToByte(Game.ColorG(color));
-        model.rgba[model.GetRgbaCount() + 2] = Game.IntToByte(Game.ColorB(color));
-        model.rgba[model.GetRgbaCount() + 3] = Game.IntToByte(Game.ColorA(color));
+        int xyzOffset = model.GetXyzCount();
+        int uvOffset = model.GetUvCount();
+        int rgbaOffset = model.GetRgbaCount();
+
+        model.xyz[xyzOffset] = x;
+        model.xyz[xyzOffset + 1] = y;
+        model.xyz[xyzOffset + 2] = z;
+
+        model.uv[uvOffset] = u;
+        model.uv[uvOffset + 1] = v;
+
+        model.rgba[rgbaOffset] = (byte)Game.ColorR(color);
+        model.rgba[rgbaOffset + 1] = (byte)Game.ColorG(color);
+        model.rgba[rgbaOffset + 2] = (byte)Game.ColorB(color);
+        model.rgba[rgbaOffset + 3] = (byte)Game.ColorA(color);
+
         model.verticesCount++;
     }
     private readonly float zzzx;
@@ -562,17 +569,25 @@ public class BlockRendererTorch
             m.indices[m.indicesCount++] = (lastelement + 2);
         }
     }
+
     public static void AddVertex(ModelData model, float x, float y, float z, float u, float v, int color)
     {
-        model.xyz[model.GetXyzCount() + 0] = x;
-        model.xyz[model.GetXyzCount() + 1] = y;
-        model.xyz[model.GetXyzCount() + 2] = z;
-        model.uv[model.GetUvCount() + 0] = u;
-        model.uv[model.GetUvCount() + 1] = v;
-        model.rgba[model.GetRgbaCount() + 0] = Game.IntToByte(Game.ColorR(color));
-        model.rgba[model.GetRgbaCount() + 1] = Game.IntToByte(Game.ColorG(color));
-        model.rgba[model.GetRgbaCount() + 2] = Game.IntToByte(Game.ColorB(color));
-        model.rgba[model.GetRgbaCount() + 3] = Game.IntToByte(Game.ColorA(color));
+        int xyzOffset = model.GetXyzCount();
+        int uvOffset = model.GetUvCount();
+        int rgbaOffset = model.GetRgbaCount();
+
+        model.xyz[xyzOffset] = x;
+        model.xyz[xyzOffset + 1] = y;
+        model.xyz[xyzOffset + 2] = z;
+
+        model.uv[uvOffset] = u;
+        model.uv[uvOffset + 1] = v;
+
+        model.rgba[rgbaOffset] = (byte)Game.ColorR(color);
+        model.rgba[rgbaOffset + 1] = (byte)Game.ColorG(color);
+        model.rgba[rgbaOffset + 2] = (byte)Game.ColorB(color);
+        model.rgba[rgbaOffset + 3] = (byte)Game.ColorA(color);
+
         model.verticesCount++;
     }
 }

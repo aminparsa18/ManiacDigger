@@ -256,10 +256,10 @@ public static class CuboidRenderer
         model.uv[uvOffset + 0] = u;
         model.uv[uvOffset + 1] = v;
 
-        model.rgba[rgbaOffset + 0] = Game.IntToByte(Game.ColorR(color));
-        model.rgba[rgbaOffset + 1] = Game.IntToByte(Game.ColorG(color));
-        model.rgba[rgbaOffset + 2] = Game.IntToByte(Game.ColorB(color));
-        model.rgba[rgbaOffset + 3] = Game.IntToByte(Game.ColorA(color));
+        model.rgba[rgbaOffset + 0] = (byte)Game.ColorR(color);
+        model.rgba[rgbaOffset + 1] = (byte)Game.ColorG(color);
+        model.rgba[rgbaOffset + 2] = (byte)Game.ColorB(color);
+        model.rgba[rgbaOffset + 3] = (byte)Game.ColorA(color);
 
         model.verticesCount++;
     }

@@ -554,7 +554,7 @@ public class MainMenu
     public string CharToString(int a)
     {
         int[] arr = [a];
-        return StringTools.CharArrayToString(arr, 1);
+        return StringUtils.CharArrayToString(arr, 1);
     }
 
     public string CharRepeat(int c, int length)
@@ -564,7 +564,7 @@ public class MainMenu
         {
             charArray[i] = c;
         }
-        return StringTools.CharArrayToString(charArray, length);
+        return StringUtils.CharArrayToString(charArray, length);
     }
     
     internal static void StartNewWorld()
@@ -1109,10 +1109,10 @@ public class ModelDataTool
         model.xyz[model.GetXyzCount() + 2] = z;
         model.uv[model.GetUvCount() + 0] = u;
         model.uv[model.GetUvCount() + 1] = v;
-        model.rgba[model.GetRgbaCount() + 0] = Game.IntToByte(Game.ColorR(color));
-        model.rgba[model.GetRgbaCount() + 1] = Game.IntToByte(Game.ColorG(color));
-        model.rgba[model.GetRgbaCount() + 2] = Game.IntToByte(Game.ColorB(color));
-        model.rgba[model.GetRgbaCount() + 3] = Game.IntToByte(Game.ColorA(color));
+        model.rgba[model.GetRgbaCount() + 0] = (byte)(Game.ColorR(color));
+        model.rgba[model.GetRgbaCount() + 1] = (byte)(Game.ColorG(color));
+        model.rgba[model.GetRgbaCount() + 2] = (byte)(Game.ColorB(color));
+        model.rgba[model.GetRgbaCount() + 3] = (byte)(Game.ColorA(color));
         model.verticesCount++;
     }
 

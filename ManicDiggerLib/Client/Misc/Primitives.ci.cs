@@ -327,18 +327,18 @@ public class WireframeCube
         int uvOffset = m.GetUvCount();
         int rgbaOffset = m.GetRgbaCount();
 
-        m.xyz[xyzOffset + 0] = x;
+        m.xyz[xyzOffset] = x;
         m.xyz[xyzOffset + 1] = y;
         m.xyz[xyzOffset + 2] = z;
 
         // UV is always (0,0) for wireframe — no texture sampling needed.
-        m.uv[uvOffset + 0] = 0f;
+        m.uv[uvOffset] = 0f;
         m.uv[uvOffset + 1] = 0f;
 
-        m.rgba[rgbaOffset + 0] = Game.IntToByte(Game.ColorR(White));
-        m.rgba[rgbaOffset + 1] = Game.IntToByte(Game.ColorG(White));
-        m.rgba[rgbaOffset + 2] = Game.IntToByte(Game.ColorB(White));
-        m.rgba[rgbaOffset + 3] = Game.IntToByte(Game.ColorA(White));
+        m.rgba[rgbaOffset] = (byte)Game.ColorR(White);
+        m.rgba[rgbaOffset + 1] = (byte)Game.ColorG(White);
+        m.rgba[rgbaOffset + 2] = (byte)Game.ColorB(White);
+        m.rgba[rgbaOffset + 3] = (byte)Game.ColorA(White);
 
         m.verticesCount++;
     }

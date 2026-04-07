@@ -104,7 +104,7 @@ public class LightFlood
     {
         if (light[newPos] < vLight - 1)
         {
-            light[newPos] = Game.IntToByte(vLight - 1);
+            light[newPos] = (byte)(vLight - 1);
             _q.Enqueue(newPos);
         }
     }

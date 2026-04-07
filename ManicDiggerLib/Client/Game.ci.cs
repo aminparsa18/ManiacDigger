@@ -449,44 +449,16 @@ public class Game
         return 0;
     }
 
-    public static byte IntToByte(int a)
-    {
-#if CITO
-        return a.LowByte;
-#else
-        return (byte)a;
-#endif
-    }
-
     public static int ColorFromArgb(int a, int r, int g, int b)
     {
         int iCol = (a << 24) | (r << 16) | (g << 8) | b;
         return iCol;
     }
 
-    public static int ColorA(int color)
-    {
-        byte a = IntToByte(color >> 24);
-        return a;
-    }
-
-    public static int ColorR(int color)
-    {
-        byte r = IntToByte(color >> 16);
-        return r;
-    }
-
-    public static int ColorG(int color)
-    {
-        byte g = IntToByte(color >> 8);
-        return g;
-    }
-
-    public static int ColorB(int color)
-    {
-        byte b = IntToByte(color);
-        return b;
-    }
+    public static int ColorA(int color) => (color >> 24) & 0xFF;
+    public static int ColorR(int color) => (color >> 16) & 0xFF;
+    public static int ColorG(int color) => (color >> 8) & 0xFF;
+    public static int ColorB(int color) => color & 0xFF;
 
     public static float GetPi()
     {
@@ -578,7 +550,7 @@ public class Game
             platform.GlDisableDepthTest();
         }
         ModelData data = QuadModelData.GetColoredQuadModelData(rect.X, rect.Y, rect.Width, rect.Height,
-            x1, y1, width, height, IntToByte(ColorR(color)), IntToByte(ColorG(color)), IntToByte(ColorB(color)), IntToByte(ColorA(color)));
+            x1, y1, width, height, (byte)(ColorR(color)), (byte)(ColorG(color)), (byte)(ColorB(color)), (byte)(ColorA(color)));
         DrawModelData(data);
         if (!enabledepthtest)
         {
@@ -600,7 +572,7 @@ public class Game
             platform.GlDisableDepthTest();
         }
         ModelData data = QuadModelData.GetColoredQuadModelData(rect.X, rect.Y, rect.Width, rect.Height,
-            dstx, dsty, dstwidth, dstheight, IntToByte(ColorR(color)), IntToByte(ColorG(color)), IntToByte(ColorB(color)), IntToByte(ColorA(color)));
+            dstx, dsty, dstwidth, dstheight, (byte)(ColorR(color)), (byte)(ColorG(color)), (byte)(ColorB(color)), (byte)(ColorA(color)));
         DrawModelData(data);
         if (!enabledepthtest)
         {
@@ -675,7 +647,7 @@ public class Game
 
             ModelData modelData =
                 QuadModelData.GetColoredQuadModelData(rect.X, rect.Y, rect.Width, rect.Height,
-                x1, y1, width, height, IntToByte(ColorR(color)), IntToByte(ColorG(color)), IntToByte(ColorB(color)), IntToByte(ColorA(color)));
+                x1, y1, width, height, (byte)(ColorR(color)), (byte)(ColorG(color)), (byte)(ColorB(color)), (byte)(ColorA(color)));
             modelDatas[modelDatasCount++] = modelData;
         }
 
@@ -1972,16 +1944,13 @@ public class Game
         return rnd.Next() * (max - min) + min;
     }
 
-    public byte HeadingByte(float orientationX, float orientationY, float orientationZ)
-    {
-        return IntToByte((int)((((orientationY) % (2 * GetPi())) / (2 * GetPi())) * 256));
-    }
+    public byte HeadingByte(float orientationX, float orientationY, float orientationZ) =>
+     (byte)(int)((orientationY % (2 * MathF.PI)) / (2 * MathF.PI) * 256);
 
     public byte PitchByte(float orientationX, float orientationY, float orientationZ)
     {
-        float xx = (orientationX + GetPi()) % (2 * GetPi());
-        xx = xx / (2 * GetPi());
-        return IntToByte((int)(xx * 256));
+        float xx = (orientationX + MathF.PI) % (2 * MathF.PI);
+        return (byte)(int)(xx / (2 * MathF.PI) * 256);
     }
 
     public void PlaySoundAt(string name, float x, float y, float z)
@@ -2701,7 +2670,7 @@ public class Game
     public string CharToString(int c)
     {
         int[] arr = [c];
-        return StringTools.CharArrayToString(arr, 1);
+        return StringUtils.CharArrayToString(arr, 1);
     }
 
     internal Speculative[] speculative;

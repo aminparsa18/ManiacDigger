@@ -161,10 +161,10 @@ public class ModSkySphereAnimated : ClientMod
                 if (colorB > 1) { colorB = 1; }
                 if (colorA > 1) { colorA = 1; }
 
-                data.rgba[i * 4 + 0] = Game.IntToByte((int)(colorR * 255));
-                data.rgba[i * 4 + 1] = Game.IntToByte((int)(colorG * 255));
-                data.rgba[i * 4 + 2] = Game.IntToByte((int)(colorB * 255));
-                data.rgba[i * 4 + 3] = Game.IntToByte((int)(colorA * 255));
+                data.rgba[i * 4] = (byte)(colorR * 255);
+                data.rgba[i * 4 + 1] = (byte)(colorG * 255);
+                data.rgba[i * 4 + 2] = (byte)(colorB * 255);
+                data.rgba[i * 4 + 3] = (byte)(colorA * 255);
                 i++;
             }
         }

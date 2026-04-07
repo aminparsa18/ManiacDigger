@@ -115,7 +115,7 @@ public class LightBase
                 // Fill all blocks from the entry point upward with full sunlight.
                 for (int zz = z; zz < ChunkSize; zz++)
                 {
-                    workLight[pos] = Game.IntToByte(sunlight);
+                    workLight[pos] = (byte)(sunlight);
                     pos += LightFlood.ZPlus;
                 }
             }
@@ -228,7 +228,7 @@ public class LightBase
             int yy = MapUtilCi.PosY(pos, ChunkSize, ChunkSize);
             int zz = MapUtilCi.PosZ(pos, ChunkSize, ChunkSize);
 
-            workLight[pos] = Game.IntToByte(Math.Max(emitRadius, workLight[pos]));
+            workLight[pos] = (byte)(Math.Max(emitRadius, workLight[pos]));
             _flood.FloodLight(workData, workLight, xx, yy, zz, dataLightRadius, dataTransparent);
         }
     }

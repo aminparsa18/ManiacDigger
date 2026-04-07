@@ -34,7 +34,7 @@ public class AnimatedModelRenderer
     /// Keyframes pre-grouped by (animationName, nodeName, type) to avoid
     /// linear scans during rendering. Built once when the model is assigned.
     /// </summary>
-    private Dictionary<(string anim, string node, KeyframeType type), List<Keyframe>> keyframeCache;
+    private readonly Dictionary<(string anim, string node, KeyframeType type), List<Keyframe>> keyframeCache;
 
     /// <summary>
     /// Initializes a new <see cref="AnimatedModelRenderer"/> for the given

@@ -257,7 +257,7 @@ public class LightBetweenChunks
         if (targetLight >= sourceLight - 1)
             return;
 
-        dstLight[dstIndex] = Game.IntToByte(sourceLight - 1);
+        dstLight[dstIndex] = (byte)(sourceLight - 1);
         _flood.FloodLight(
             _chunksData[Index3d(dcx, dcy, dcz, NeighbourhoodSize, NeighbourhoodSize)],
             dstLight, dxx, dyy, dzz, dataLightRadius, dataTransparent);

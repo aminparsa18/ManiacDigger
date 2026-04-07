@@ -350,7 +350,7 @@ public class TerrainChunkTesselatorCi
                     }
 
                     //Store drawing flags
-                    currentChunkDraw16[Index3d(xx - 1, yy - 1, zz - 1, chunksize, chunksize)] = Game.IntToByte(draw);
+                    currentChunkDraw16[Index3d(xx - 1, yy - 1, zz - 1, chunksize, chunksize)] = (byte)(draw);
                 }
             }
         }
@@ -531,7 +531,7 @@ public class TerrainChunkTesselatorCi
                 if (shadowratio != shadowratio2) { break; }
                 if ((currentChunkDraw16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)] & dirflags) == 0) { break; } // fixes water and rail problem (chunk-long stripes)
                 currentChunkDrawCount16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)][dir] = 0;
-                currentChunkDraw16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)] &= Game.IntToByte(~dirflags);
+                currentChunkDraw16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)] &= (byte)(~dirflags);
                 newxx++;
             }
             return newxx - xx;
@@ -548,7 +548,7 @@ public class TerrainChunkTesselatorCi
                 if (shadowratio != shadowratio2) { break; }
                 if ((currentChunkDraw16[Index3d(xx - 1, newyy - 1, zz - 1, chunksize, chunksize)] & dirflags) == 0) { break; } // fixes water and rail problem (chunk-long stripes)
                 currentChunkDrawCount16[Index3d(xx - 1, newyy - 1, zz - 1, chunksize, chunksize)][dir] = 0;
-                currentChunkDraw16[Index3d(xx - 1, newyy - 1, zz - 1, chunksize, chunksize)] &= Game.IntToByte(~dirflags);
+                currentChunkDraw16[Index3d(xx - 1, newyy - 1, zz - 1, chunksize, chunksize)] &= (byte)(~dirflags);
                 newyy++;
             }
             return newyy - yy;
@@ -565,7 +565,7 @@ public class TerrainChunkTesselatorCi
                 if (shadowratio != shadowratio2) { break; }
                 if ((currentChunkDraw16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)] & dirflags) == 0) { break; } // fixes water and rail problem (chunk-long stripes)
                 currentChunkDrawCount16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)][dir] = 0;
-                currentChunkDraw16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)] &= Game.IntToByte(~dirflags);
+                currentChunkDraw16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)] &= (byte)(~dirflags);
                 newxx++;
             }
             return newxx - xx;
@@ -1110,28 +1110,23 @@ public class TerrainChunkTesselatorCi
 
     public static void AddVertex(ModelData model, float x, float y, float z, float u, float v, int color)
     {
-        model.xyz[model.GetXyzCount() + 0] = x;
-        model.xyz[model.GetXyzCount() + 1] = y;
-        model.xyz[model.GetXyzCount() + 2] = z;
-        model.uv[model.GetUvCount() + 0] = u;
-        model.uv[model.GetUvCount() + 1] = v;
-        model.rgba[model.GetRgbaCount() + 0] = Game.IntToByte(Game.ColorR(color));
-        model.rgba[model.GetRgbaCount() + 1] = Game.IntToByte(Game.ColorG(color));
-        model.rgba[model.GetRgbaCount() + 2] = Game.IntToByte(Game.ColorB(color));
-        model.rgba[model.GetRgbaCount() + 3] = Game.IntToByte(Game.ColorA(color));
-        model.verticesCount++;
-    }
+        int xyzOffset = model.GetXyzCount();
+        int uvOffset = model.GetUvCount();
+        int rgbaOffset = model.GetRgbaCount();
 
-    private static float Min(float a, float b)
-    {
-        if (a < b)
-        {
-            return a;
-        }
-        else
-        {
-            return b;
-        }
+        model.xyz[xyzOffset] = x;
+        model.xyz[xyzOffset + 1] = y;
+        model.xyz[xyzOffset + 2] = z;
+
+        model.uv[uvOffset] = u;
+        model.uv[uvOffset + 1] = v;
+
+        model.rgba[rgbaOffset] = (byte)Game.ColorR(color);
+        model.rgba[rgbaOffset + 1] = (byte)Game.ColorG(color);
+        model.rgba[rgbaOffset + 2] = (byte)Game.ColorB(color);
+        model.rgba[rgbaOffset + 3] = (byte)Game.ColorA(color);
+
+        model.verticesCount++;
     }
 
     internal int TorchTopTexture;

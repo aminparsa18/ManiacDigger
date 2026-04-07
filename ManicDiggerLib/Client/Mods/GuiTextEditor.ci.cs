@@ -43,7 +43,7 @@ public class ModGuiTextEditor : GameScreen
             spaces[i] = 32;
         }
         spaces[cursorColumn] = 95; //_
-        string spacesString = StringTools.CharArrayToString(spaces, cursorColumn + 1);
+        string spacesString = StringUtils.CharArrayToString(spaces, cursorColumn + 1);
         game.Draw2dText(spacesString, font, startX, startY + cursorLine * charSize, null, false);
     }
     private readonly int[][] buffer;
@@ -123,7 +123,7 @@ public class ModGuiTextEditor : GameScreen
         {
             return "";
         }
-        return StringTools.CharArrayToString(line, LineLength(line));
+        return StringUtils.CharArrayToString(line, LineLength(line));
     }
     private static int LineLength(int[] line)
     {

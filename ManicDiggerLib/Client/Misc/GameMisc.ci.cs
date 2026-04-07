@@ -223,7 +223,7 @@ public class GameScreen : ClientMod
     public string CharToString(int a)
     {
         int[] arr = [a];
-        return StringTools.CharArrayToString(arr, 1);
+        return StringUtils.CharArrayToString(arr, 1);
     }
 
     public string CharRepeat(int c, int length)
@@ -233,7 +233,7 @@ public class GameScreen : ClientMod
         {
             charArray[i] = c;
         }
-        return StringTools.CharArrayToString(charArray, length);
+        return StringUtils.CharArrayToString(charArray, length);
     }
     internal int screenx;
     internal int screeny;
@@ -1143,7 +1143,7 @@ public class Chunk
         {
             if (block < 255)
             {
-                data[pos] = Game.IntToByte(block);
+                data[pos] = (byte)(block);
             }
             else
             {
@@ -1796,7 +1796,7 @@ public class TextColorRenderer
                         {
                             TextPart part = new()
                             {
-                                text = StringTools.CharArrayToString(currenttext, currenttextLength),
+                                text = StringUtils.CharArrayToString(currenttext, currenttextLength),
                                 color = currentcolor
                             };
                             parts[partsCount++] = part;
@@ -1826,7 +1826,7 @@ public class TextColorRenderer
         {
             TextPart part = new()
             {
-                text = StringTools.CharArrayToString(currenttext, currenttextLength),
+                text = StringUtils.CharArrayToString(currenttext, currenttextLength),
                 color = currentcolor
             };
             parts[partsCount++] = part;

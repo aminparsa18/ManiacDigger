@@ -87,14 +87,10 @@
 
     private static void WriteInt(byte[] writeBuf, int writePos, int n)
     {
-        int a = (n >> 24) & 0xFF;
-        int b = (n >> 16) & 0xFF;
-        int c = (n >> 8) & 0xFF;
-        int d = n & 0xFF;
-        writeBuf[writePos] = Game.IntToByte(a);
-        writeBuf[writePos + 1] = Game.IntToByte(b);
-        writeBuf[writePos + 2] = Game.IntToByte(c);
-        writeBuf[writePos + 3] = Game.IntToByte(d);
+        writeBuf[writePos] = (byte)((n >> 24) & 0xFF);
+        writeBuf[writePos + 1] = (byte)((n >> 16) & 0xFF);
+        writeBuf[writePos + 2] = (byte)((n >> 8) & 0xFF);
+        writeBuf[writePos + 3] = (byte)(n & 0xFF);
     }
 
     private static int ReadInt(byte[] readBuf, int readPos)

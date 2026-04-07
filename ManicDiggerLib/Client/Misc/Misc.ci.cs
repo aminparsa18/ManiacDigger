@@ -79,12 +79,6 @@ public class InterpolationCi
     }
 }
 
-public class StringTools
-{
-    public static string CharArrayToString(int[] charArray, int length)
-        => new(Array.ConvertAll(charArray, c => (char)c), 0, length);
-}
-
 public class MiscCi
 {
     public static bool ReadBool(string str)
@@ -107,8 +101,8 @@ public class MiscCi
         byte[] output = new byte[outputLength];
         for (int i = 0; i < inputLength; i++)
         {
-            output[i * 2] = Game.IntToByte(input[i] & 255);
-            output[i * 2 + 1] = Game.IntToByte((input[i] >> 8) & 255);
+            output[i * 2] = (byte)(input[i] & 255);
+            output[i * 2 + 1] = (byte)((input[i] >> 8) & 255);
         }
         return output;
     }
