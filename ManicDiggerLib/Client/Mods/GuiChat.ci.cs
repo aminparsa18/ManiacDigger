@@ -122,7 +122,7 @@ public class ModGuiChat : ClientMod
         }
         if (ChatPageScroll != 0)
         {
-            game.Draw2dText(game.platform.StringFormat("&7Page: {0}", game.platform.IntToString(ChatPageScroll)), font, dx * game.Scale(), (90 + (-1) * 25) * game.Scale(), null, false);
+            game.Draw2dText(string.Format("&7Page: {0}", ChatPageScroll.ToString()), font, dx * game.Scale(), (90 + (-1) * 25) * game.Scale(), null, false);
         }
     }
     private readonly FontCi font;
@@ -132,15 +132,15 @@ public class ModGuiChat : ClientMod
         string s = game.GuiTypingBuffer;
         if (game.IsTeamchat)
         {
-            s = game.platform.StringFormat("To team: {0}", s);
+            s = string.Format("To team: {0}", s);
         }
         if (game.platform.IsSmallScreen())
         {
-            game.Draw2dText(game.platform.StringFormat("{0}_", s), font, 50 * game.Scale(), (game.platform.GetCanvasHeight() / 2) - 100 * game.Scale(), null, true);
+            game.Draw2dText(string.Format("{0}_", s), font, 50 * game.Scale(), (game.platform.GetCanvasHeight() / 2) - 100 * game.Scale(), null, true);
         }
         else
         {
-            game.Draw2dText(game.platform.StringFormat("{0}_", s), font, 50 * game.Scale(), game.platform.GetCanvasHeight() - 100 * game.Scale(), null, true);
+            game.Draw2dText(string.Format("{0}_", s), font, 50 * game.Scale(), game.platform.GetCanvasHeight() - 100 * game.Scale(), null, true);
         }
     }
 
@@ -202,9 +202,9 @@ public class ModGuiChat : ClientMod
             int key = eKey;
             if (key == game.GetKey(Keys.Backspace))
             {
-                if (StringTools.StringLength(game.platform, game.GuiTypingBuffer) > 0)
+                if (game.GuiTypingBuffer.Length > 0)
                 {
-                    game.GuiTypingBuffer = StringTools.StringSubstring(game.platform, game.GuiTypingBuffer, 0, StringTools.StringLength(game.platform, game.GuiTypingBuffer) - 1);
+                    game.GuiTypingBuffer = StringTools.StringSubstring(game.platform, game.GuiTypingBuffer, 0, game.GuiTypingBuffer.Length - 1);
                 }
                 args.SetHandled(true);
                 return;

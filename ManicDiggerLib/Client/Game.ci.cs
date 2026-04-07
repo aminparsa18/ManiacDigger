@@ -1047,11 +1047,11 @@ public class Game
     {
         if (a >= 0)
         {
-            return platform.FloatToInt(a);
+            return (int)(a);
         }
         else
         {
-            return platform.FloatToInt(a) - 1;
+            return (int)(a) - 1;
         }
     }
 
@@ -1304,12 +1304,12 @@ public class Game
 
     internal int xcenter(float width)
     {
-        return platform.FloatToInt((platform.GetCanvasWidth() / 2 - width / 2));
+        return platform.GetCanvasWidth() / 2 - (int)width / 2;
     }
 
     internal int ycenter(float height)
     {
-        return platform.FloatToInt((platform.GetCanvasHeight() / 2 - height / 2));
+        return platform.GetCanvasHeight() / 2 - (int)height / 2;
     }
 
     internal ServerInformation ServerInfo;
@@ -1425,15 +1425,15 @@ public class Game
 
     internal int BlockUnderPlayer()
     {
-        if (!map.IsValidPos(platform.FloatToInt(player.position.x),
-            platform.FloatToInt(player.position.z),
-            platform.FloatToInt(player.position.y) - 1))
+        if (!map.IsValidPos((int)player.position.x,
+            (int)player.position.z,
+            (int)player.position.y - 1))
         {
             return -1;
         }
-        int blockunderplayer = map.GetBlock(platform.FloatToInt(player.position.x),
-            platform.FloatToInt(player.position.z),
-            platform.FloatToInt(player.position.y) - 1);
+        int blockunderplayer = map.GetBlock((int)player.position.x,
+            (int)(player.position.z),
+            (int)(player.position.y) - 1);
         return blockunderplayer;
     }
 
@@ -1628,7 +1628,7 @@ public class Game
 
         if (GetFileLength(file_) == 0)
         {
-            platform.ConsoleWriteLine(platform.StringFormat("File not found: {0}", file));
+            platform.ConsoleWriteLine(string.Format("File not found: {0}", file));
             return;
         }
 
@@ -1657,7 +1657,7 @@ public class Game
 
         if (GetFileLength(file_) == 0)
         {
-            platform.ConsoleWriteLine(platform.StringFormat("File not found: {0}", file));
+            platform.ConsoleWriteLine(string.Format("File not found: {0}", file));
             return;
         }
 
@@ -1768,26 +1768,26 @@ public class Game
 
     public int GetPlayerEyesBlockX()
     {
-        return platform.FloatToInt(MathFloor(player.position.x));
+        return (int)(MathFloor(player.position.x));
     }
     public int GetPlayerEyesBlockY()
     {
-        return platform.FloatToInt(MathFloor(player.position.z));
+        return (int)(MathFloor(player.position.z));
     }
     public int GetPlayerEyesBlockZ()
     {
-        return platform.FloatToInt(MathFloor(player.position.y + entities[LocalPlayerId].drawModel.eyeHeight));
+        return (int)(MathFloor(player.position.y + entities[LocalPlayerId].drawModel.eyeHeight));
     }
 
     public int MathFloor(float a)
     {
         if (a >= 0)
         {
-            return platform.FloatToInt(a);
+            return (int)(a);
         }
         else
         {
-            return platform.FloatToInt(a) - 1;
+            return (int)(a) - 1;
         }
     }
 
@@ -1912,7 +1912,7 @@ public class Game
 
     private void InvalidPlayerWarning(int playerid)
     {
-        platform.ConsoleWriteLine(platform.StringFormat("Position update of nonexistent player {0}.", platform.IntToString(playerid)));
+        platform.ConsoleWriteLine(string.Format("Position update of nonexistent player {0}.", playerid.ToString()));
     }
 
     internal static bool EnablePlayerUpdatePosition(int kKey)
@@ -1958,7 +1958,7 @@ public class Game
 
     public int SerializeFloat(float p)
     {
-        return platform.FloatToInt(p * 32);
+        return (int)(p * 32);
     }
 
     public float WeaponAttackStrength()
@@ -1973,14 +1973,14 @@ public class Game
 
     public byte HeadingByte(float orientationX, float orientationY, float orientationZ)
     {
-        return IntToByte(platform.FloatToInt((((orientationY) % (2 * GetPi())) / (2 * GetPi())) * 256));
+        return IntToByte((int)((((orientationY) % (2 * GetPi())) / (2 * GetPi())) * 256));
     }
 
     public byte PitchByte(float orientationX, float orientationY, float orientationZ)
     {
         float xx = (orientationX + GetPi()) % (2 * GetPi());
         xx = xx / (2 * GetPi());
-        return IntToByte(platform.FloatToInt(xx * 256));
+        return IntToByte((int)(xx * 256));
     }
 
     public void PlaySoundAt(string name, float x, float y, float z)
@@ -2165,7 +2165,7 @@ public class Game
         float dx = x2 - x1;
         float dy = y2 - y1;
         float dz = z2 - z1;
-        return platform.MathSqrt(dx * dx + dy * dy + dz * dz);
+        return MathF.Sqrt(dx * dx + dy * dy + dz * dz);
     }
 
     internal bool IsValid(int blocktype)
@@ -2213,8 +2213,8 @@ public class Game
         for (int i = 0; i < n; i++)
         {
             angle = (i * 2 * GetPi() / n);
-            circleModelData.xyz[i * 3 + 0] = x + (platform.MathCos(angle) * radius);
-            circleModelData.xyz[i * 3 + 1] = y + (platform.MathSin(angle) * radius);
+            circleModelData.xyz[i * 3 + 0] = x + (MathF.Cos(angle) * radius);
+            circleModelData.xyz[i * 3 + 1] = y + (MathF.Sin(angle) * radius);
             circleModelData.xyz[i * 3 + 2] = 0;
         }
         for (int i = 0; i < 4 * n; i++)
@@ -2301,7 +2301,7 @@ public class Game
 
     internal bool SwimmingBody()
     {
-        int block = map.GetBlock(platform.FloatToInt(player.position.x), platform.FloatToInt(player.position.z), platform.FloatToInt(player.position.y + 1));
+        int block = map.GetBlock((int)(player.position.x), (int)(player.position.z), (int)(player.position.y + 1));
         if (block == -1) { return true; }
         return d_Data.WalkableType1()[block] == Packet_WalkableTypeEnum.Fluid;
     }
@@ -2450,12 +2450,12 @@ public class Game
 
     internal float VectorAngleGet(float qX, float qY, float qZ)
     {
-        return (platform.MathAcos(qX / Length(qX, qY, qZ)) * Math.Sign(qZ));
+        return (MathF.Acos(qX / Length(qX, qY, qZ)) * Math.Sign(qZ));
     }
 
     internal float Length(float x, float y, float z)
     {
-        return platform.MathSqrt(x * x + y * y + z * z);
+        return MathF.Sqrt(x * x + y * y + z * z);
     }
 
     internal void HandleMaterialKeys(int eKey)
@@ -2623,7 +2623,7 @@ public class Game
     {
         if (!platform.ChatLog(this.ServerInfo.ServerName, p))
         {
-            platform.ConsoleWriteLine(platform.StringFormat(language.CannotWriteChatLog(), this.ServerInfo.ServerName));
+            platform.ConsoleWriteLine(string.Format(language.CannotWriteChatLog(), this.ServerInfo.ServerName));
         }
     }
 
@@ -2860,7 +2860,7 @@ public class Game
                     if (entity == null) { continue; }
                     if (entity.drawName == null) { continue; }
                     if (!entity.drawName.ClientAutoComplete) { continue; }
-                    Log(platform.StringFormat2("{0} {1}", platform.IntToString(i), entities[i].drawName.Name));
+                    Log(string.Format("{0} {1}", i.ToString(), entities[i].drawName.Name));
                 }
             }
             else if (cmd == "reconnect")
@@ -2904,7 +2904,7 @@ public class Game
                 if (cmd == "fog")
                 {
                     int foglevel;
-                    foglevel = platform.IntParse(arguments);
+                    foglevel = int.Parse(arguments);
                     {
                         int foglevel2 = foglevel;
                         if (foglevel2 > 1024)
@@ -2921,7 +2921,7 @@ public class Game
                 }
                 else if (cmd == "fov")
                 {
-                    int arg = platform.IntParse(arguments);
+                    int arg = int.Parse(arguments);
                     int minfov = 1;
                     int maxfov = 179;
                     if (!issingleplayer)
@@ -2930,7 +2930,7 @@ public class Game
                     }
                     if (arg < minfov || arg > maxfov)
                     {
-                        Log(platform.StringFormat2("Valid field of view: {0}-{1}", platform.IntToString(minfov), platform.IntToString(maxfov)));
+                        Log(string.Format("Valid field of view: {0}-{1}", minfov.ToString(), maxfov.ToString()));
                     }
                     else
                     {
@@ -2943,10 +2943,10 @@ public class Game
                 {
                     if (this.AllowFreemove)
                     {
-                        if (platform.FloatParse(arguments) <= 500)
+                        if (float.Parse(arguments) <= 500)
                         {
-                            movespeed = basemovespeed * platform.FloatParse(arguments);
-                            AddChatline(platform.StringFormat("Movespeed: {0}x", arguments));
+                            movespeed = basemovespeed * float.Parse(arguments);
+                            AddChatline(string.Format("Movespeed: {0}x", arguments));
                         }
                         else
                         {
@@ -2967,21 +2967,21 @@ public class Game
                     {
                         QueryClient qClient = new();
                         qClient.SetPlatform(platform);
-                        qClient.PerformQuery(split[0], platform.IntParse(split[1]));
+                        qClient.PerformQuery(split[0], int.Parse(split[1]));
                         if (qClient.querySuccess)
                         {
                             //Received result
                             QueryResult r = qClient.GetResult();
                             AddChatline(r.GameMode);
-                            AddChatline(platform.IntToString(r.MapSizeX));
-                            AddChatline(platform.IntToString(r.MapSizeY));
-                            AddChatline(platform.IntToString(r.MapSizeZ));
-                            AddChatline(platform.IntToString(r.MaxPlayers));
+                            AddChatline(r.MapSizeX.ToString());
+                            AddChatline(r.MapSizeY.ToString());
+                            AddChatline(r.MapSizeZ.ToString());
+                            AddChatline(r.MaxPlayers.ToString());
                             AddChatline(r.MOTD);
                             AddChatline(r.Name);
-                            AddChatline(platform.IntToString(r.PlayerCount));
+                            AddChatline(r.PlayerCount.ToString());
                             AddChatline(r.PlayerList);
-                            AddChatline(platform.IntToString(r.Port));
+                            AddChatline(r.Port.ToString());
                             AddChatline(r.PublicHash);
                             AddChatline(r.ServerVersion);
                         }
@@ -3009,7 +3009,7 @@ public class Game
         else
         {
             //Regular chat message or server command. Send to server
-            string chatline = StringTools.StringSubstring(platform, GuiTypingBuffer, 0, Math.Min(StringTools.StringLength(platform, GuiTypingBuffer), 4096));
+            string chatline = StringTools.StringSubstring(platform, GuiTypingBuffer, 0, Math.Min(GuiTypingBuffer.Length, 4096));
             SendChat(chatline);
         }
     }
@@ -3035,7 +3035,7 @@ public class Game
         int getCount = 0;
         if (requiredMd5 != null)
         {
-            ChatLog(platform.StringFormat("[GAME] Server has {0} assets", platform.IntToString(requiredMd5.ItemsCount)));
+            ChatLog(string.Format("[GAME] Server has {0} assets", requiredMd5.ItemsCount.ToString()));
             for (int i = 0; i < requiredMd5.ItemsCount; i++)
             {
                 string md5 = requiredMd5.Items[i];
@@ -3075,7 +3075,7 @@ public class Game
                     }
                 }
             }
-            ChatLog(platform.StringFormat("[GAME] Will download {0} missing assets", platform.IntToString(getCount)));
+            ChatLog(string.Format("[GAME] Will download {0} missing assets", getCount.ToString()));
         }
         SendGameResolution();
         ChatLog("[GAME] Sent window resolution to server");
@@ -3392,7 +3392,7 @@ public class Game
                     return;
                 }
                 movespeed = basemovespeed * 10;
-                Log(platform.StringFormat(language.MoveSpeed(), platform.IntToString(10)));
+                Log(string.Format(language.MoveSpeed(), "10"));
             }
             if (eKey == GetKey(Keys.F3))
             {
@@ -3423,12 +3423,12 @@ public class Game
             {
                 drawblockinfo = !drawblockinfo;
             }
-            int playerx = platform.FloatToInt(player.position.x);
-            int playery = platform.FloatToInt(player.position.z);
+            int playerx = (int)(player.position.x);
+            int playery = (int)(player.position.z);
             if ((playerx >= 0 && playerx < map.MapSizeX)
                 && (playery >= 0 && playery < map.MapSizeY))
             {
-                performanceinfo["height"] = platform.StringFormat("height:{0}", platform.IntToString(d_Heightmap.GetBlock(playerx, playery)));
+                performanceinfo["height"] = string.Format("height:{0}", d_Heightmap.GetBlock(playerx, playery).ToString());
             }
             if (eKey == GetKey(Keys.F5))
             {
@@ -3533,14 +3533,14 @@ public class Game
                 playerPositionSpawnY = player.position.y;
                 playerPositionSpawnZ = player.position.z;
 
-                player.position.x = platform.FloatToInt(player.position.x) + one / 2;
+                player.position.x = (int)(player.position.x) + one / 2;
                 //player.playerposition.Y = player.playerposition.Y;
-                player.position.z = platform.FloatToInt(player.position.z) + one / 2;
+                player.position.z = (int)(player.position.z) + one / 2;
             }
             if (eKey == GetKey(Keys.F))
             {
                 ToggleFog();
-                Log(platform.StringFormat(language.FogDistance(), platform.IntToString(platform.FloatToInt(d_Config3d.viewdistance))));
+                Log(string.Format(language.FogDistance(), ((int)d_Config3d.viewdistance).ToString()));
                 OnResize();
             }
             if (eKey == GetKey(Keys.B))
@@ -3689,9 +3689,9 @@ public class Game
 
         if (guistate == GuiState.MapLoading) { return; }
 
-        float orientationX = platform.MathSin(player.position.roty);
+        float orientationX = MathF.Sin(player.position.roty);
         float orientationY = 0;
-        float orientationZ = -platform.MathCos(player.position.roty);
+        float orientationZ = -MathF.Cos(player.position.roty);
         platform.AudioUpdateListener(EyesPosX(), EyesPosY(), EyesPosZ(), orientationX, orientationY, orientationZ);
 
         playervelocity.X = player.position.x - lastplayerpositionX;
@@ -3720,17 +3720,17 @@ public class Game
 
     public ArraySegment<BlockPosSide> Pick(BlockOctreeSearcher s_, Line3D line, out int retCount)
     {
-        int minX = platform.FloatToInt(Math.Min(line.Start[0], line.End[0]));
-        int minY = platform.FloatToInt(Math.Min(line.Start[1], line.End[1]));
-        int minZ = platform.FloatToInt(Math.Min(line.Start[2], line.End[2]));
+        int minX = (int)(Math.Min(line.Start[0], line.End[0]));
+        int minY = (int)(Math.Min(line.Start[1], line.End[1]));
+        int minZ = (int)(Math.Min(line.Start[2], line.End[2]));
 
         if (minX < 0) { minX = 0; }
         if (minY < 0) { minY = 0; }
         if (minZ < 0) { minZ = 0; }
 
-        int maxX = platform.FloatToInt(Math.Max(line.Start[0], line.End[0]));
-        int maxY = platform.FloatToInt(Math.Max(line.Start[1], line.End[1]));
-        int maxZ = platform.FloatToInt(Math.Max(line.Start[2], line.End[2]));
+        int maxX = (int)(Math.Max(line.Start[0], line.End[0]));
+        int maxY = (int)(Math.Max(line.Start[1], line.End[1]));
+        int maxZ = (int)(Math.Max(line.Start[2], line.End[2]));
 
         if (maxX > map.MapSizeX) { maxX = map.MapSizeX; }
         if (maxY > map.MapSizeZ) { maxY = map.MapSizeZ; }

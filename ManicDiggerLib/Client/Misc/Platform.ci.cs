@@ -4,23 +4,6 @@ using OpenTK.Windowing.Common;
 public abstract class GamePlatform
 {
     // Primitive
-    public abstract int FloatToInt(float value);
-    public abstract float MathSin(float a);
-    public abstract float MathCos(float a);
-    public abstract float MathSqrt(float value);
-    public abstract float MathAcos(float p);
-    public abstract float MathTan(float p);
-    public abstract float FloatModulo(float a, int b);
-
-    public abstract int IntParse(string value);
-    public abstract float FloatParse(string value);
-    public abstract string IntToString(int value);
-    public abstract string FloatToString(float value);
-    public abstract bool FloatTryParse(string s, out float ret);
-    public abstract string StringFormat(string format, string arg0);
-    public abstract string StringFormat2(string format, string arg0, string arg1);
-    public abstract string StringFormat3(string format, string arg0, string arg1, string arg2);
-    public abstract string StringFormat4(string format, string arg0, string arg1, string arg2, string arg3);
     public abstract int[] StringToCharArray(string s, out int length);
     public abstract string CharArrayToString(int[] charArray, int length);
     public abstract bool StringEmpty(string data);
@@ -287,9 +270,9 @@ public class Preferences
         {
             return default_;
         }
-        if (platform.FloatTryParse(GetString(key, null), out float ret))
+        if (float.TryParse(GetString(key, null), out float ret))
         {
-            return platform.FloatToInt(ret);
+            return (int)(ret);
         }
         return default_;
     }
@@ -301,7 +284,7 @@ public class Preferences
 
     public void SetInt(string key, int value)
     {
-        SetString(key, platform.IntToString(value));
+        SetString(key, value.ToString());
     }
 
     internal void Remove(string key)

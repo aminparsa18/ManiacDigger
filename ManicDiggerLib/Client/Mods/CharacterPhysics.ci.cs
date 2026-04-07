@@ -119,9 +119,9 @@ public class ScriptCharacterPhysics : EntityScript
         diff1.Z += push.Z * dt;
 
         bool loaded = false;
-        int cx = game.platform.FloatToInt(game.player.position.x / Game.chunksize);
-        int cy = game.platform.FloatToInt(game.player.position.z / Game.chunksize);
-        int cz = game.platform.FloatToInt(game.player.position.y / Game.chunksize);
+        int cx = (int)(game.player.position.x / Game.chunksize);
+        int cy = (int)(game.player.position.z / Game.chunksize);
+        int cz = (int)(game.player.position.y / Game.chunksize);
         if (game.map.IsValidChunkPos(cx, cy, cz))
         {
             if (game.map.chunks[MapUtilCi.Index3d(cx, cy, cz,
@@ -345,9 +345,9 @@ public class ScriptCharacterPhysics : EntityScript
 
     private bool StandingOnHalfBlock(float x, float y, float z)
     {
-        int under = game.map.GetBlock(game.platform.FloatToInt(x),
-            game.platform.FloatToInt(z),
-            game.platform.FloatToInt(y));
+        int under = game.map.GetBlock((int)(x),
+            (int)(z),
+            (int)(y));
         return game.blocktypes[under].DrawType == Packet_DrawTypeEnum.HalfHeight;
     }
 
@@ -432,7 +432,7 @@ public class ScriptCharacterPhysics : EntityScript
 
     private int FloatToInt(float value)
     {
-        return game.platform.FloatToInt(value);
+        return (int)(value);
     }
 }
 

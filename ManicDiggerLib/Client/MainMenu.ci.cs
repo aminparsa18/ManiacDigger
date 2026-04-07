@@ -200,8 +200,8 @@ public class MainMenu
         p.TextSize(text, fontSize, out int textWidth, out int textHeight);
 
         textTexture.texture = texture;
-        textTexture.texturewidth = p.FloatToInt(p.BitmapGetWidth(textBitmap));
-        textTexture.textureheight = p.FloatToInt(p.BitmapGetHeight(textBitmap));
+        textTexture.texturewidth = (int)(p.BitmapGetWidth(textBitmap));
+        textTexture.textureheight = (int)(p.BitmapGetHeight(textBitmap));
         textTexture.text = text;
         textTexture.size = fontSize;
         textTexture.textwidth = textWidth;
@@ -485,8 +485,8 @@ public class MainMenu
         windowX = p.GetCanvasWidth();
         windowY = p.GetCanvasHeight();
         //Background tiling
-        int countX = p.FloatToInt((windowX + (2 * overlap)) / backgroundW) + 1;
-        int countY = p.FloatToInt((windowY + (2 * overlap)) / backgroundH) + 1;
+        int countX = (int)((windowX + (2 * overlap)) / backgroundW) + 1;
+        int countY = (int)((windowY + (2 * overlap)) / backgroundH) + 1;
         for (int x = 0; x < countX; x++)
         {
             for (int y = 0; y < countY; y++)
@@ -548,14 +548,9 @@ public class MainMenu
 
     public bool StringEndsWith(string s, string value)
     {
-        return StringTools.StringSubstring(p, s, StringLength(s) - StringLength(value), StringLength(value)) == value;
+        return StringTools.StringSubstring(p, s, s.Length - value.Length, value.Length) == value;
     }
 
-    public int StringLength(string a)
-    {
-        p.StringToCharArray(a, out int length);
-        return length;
-    }
 
     public string CharToString(int a)
     {
@@ -701,9 +696,9 @@ public class Screen
                     // deleting characters using backspace
                     if (key == (int)Keys.Backspace)
                     {
-                        if (menu.StringLength(w.text) > 0)
+                        if (w.text.Length > 0)
                         {
-                            w.text = StringTools.StringSubstring(menu.p, w.text, 0, menu.StringLength(w.text) - 1);
+                            w.text = StringTools.StringSubstring(menu.p, w.text, 0, w.text.Length - 1);
                         }
                         return;
                     }
@@ -893,7 +888,7 @@ public class Screen
                 {
                     if (w.password)
                     {
-                        text = menu.CharRepeat(42, menu.StringLength(w.text)); // '*'
+                        text = menu.CharRepeat(42, w.text.Length); // '*'
                     }
                     if (w.editing)
                     {

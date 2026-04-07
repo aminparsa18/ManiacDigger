@@ -67,7 +67,7 @@
                     return;
                 }
                 lastfalldamagetimeMilliseconds = game.platform.TimeMillisecondsFromStart();
-                game.ApplyDamageToPlayer(game.platform.FloatToInt(severity * game.PlayerStats.MaxHealth), Packet_DeathReasonEnum.FallDamage, 0);	//Maybe give ID of last player touched?
+                game.ApplyDamageToPlayer((int)(severity * game.PlayerStats.MaxHealth), Packet_DeathReasonEnum.FallDamage, 0);	//Maybe give ID of last player touched?
             }
         }
     }

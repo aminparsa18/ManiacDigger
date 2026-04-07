@@ -76,7 +76,7 @@ public class ModDrawHand3d : ClientMod
         float posx = game.player.position.x;
         float posy = game.player.position.y;
         float posz = game.player.position.z;
-        int light = game.GetLight(game.platform.FloatToInt(posx), game.platform.FloatToInt(posz), game.platform.FloatToInt(posy));
+        int light = game.GetLight((int)(posx), (int)(posz), (int)(posy));
         return (one * light) / maxlight;
     }
     public bool IsTorch()
@@ -130,7 +130,7 @@ public class ModDrawHand3d : ClientMod
         }
         else
         {
-            light = game.platform.FloatToInt(Light() * 256);
+            light = (int)(Light() * 256);
             if (light > 255) { light = 255; }
             if (light < 0) { light = 0; }
         }
@@ -267,11 +267,11 @@ public class ModDrawHand3d : ClientMod
     private float t_;
     private float Rot(float t)
     {
-        return game.platform.MathSin(t * 2 * speed) * range;
+        return MathF.Sin(t * 2 * speed) * range;
     }
     private float Rot2(float t)
     {
-        return game.platform.MathSin((t + Game.GetPi()) * speed) * range;
+        return MathF.Sin((t + Game.GetPi()) * speed) * range;
     }
     private void DrawCube(ModelData m, int x, int y, int z, int c)
     {

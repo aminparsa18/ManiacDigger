@@ -131,9 +131,9 @@ public class ServerSimple
         {
             int[] nearest = new int[3];
             ClientSimple client = clients[clientId];
-            int x = server.platform.FloatToInt(client.glX);
-            int y = server.platform.FloatToInt(client.glZ);
-            int z = server.platform.FloatToInt(client.glY);
+            int x = (int)(client.glX);
+            int y = (int)(client.glZ);
+            int z = (int)(client.glY);
             server.NearestDirty(clientId, x, y, z, nearest);
 
             if (nearest[0] != -1)
@@ -323,9 +323,9 @@ public class ServerSimple
                         clients[i].glZ = spawnGlZ;
                         Packet_PositionAndOrientation pos = new()
                         {
-                            X = platform.FloatToInt(32 * clients[i].glX),
-                            Y = platform.FloatToInt(32 * clients[i].glY),
-                            Z = platform.FloatToInt(32 * clients[i].glZ),
+                            X = (int)(32 * clients[i].glX),
+                            Y = (int)(32 * clients[i].glY),
+                            Z = (int)(32 * clients[i].glZ),
                             Pitch = 255 / 2
                         };
                         //SendPacket(client, ServerPackets.Spawn(i, clients[i].Name, pos));
@@ -334,8 +334,8 @@ public class ServerSimple
                             DrawModel = new Packet_ServerEntityAnimatedModel
                             {
                                 Model_ = "player.txt",
-                                ModelHeight = platform.FloatToInt((one * 17 / 10) * 32),
-                                EyeHeight = platform.FloatToInt((one * 15 / 10) * 32)
+                                ModelHeight = (int)((one * 17 / 10) * 32),
+                                EyeHeight = (int)((one * 15 / 10) * 32)
                             },
                             Position = pos
                         };
@@ -351,7 +351,7 @@ public class ServerSimple
                 break;
             case Packet_ClientIdEnum.Message:
                 {
-                    SendPacketToAll(ServerPackets.Message(platform.StringFormat2("{0}: &f{1}", clients[client].Name, packet.Message.Message)));
+                    SendPacketToAll(ServerPackets.Message(string.Format("{0}: &f{1}", clients[client].Name, packet.Message.Message)));
                 }
                 break;
             case Packet_ClientIdEnum.SetBlock:

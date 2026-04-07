@@ -136,9 +136,9 @@
         if (w == buttonConnect)
         {
             if (!Game.StringEquals(textboxIp.text, "")
-                && menu.p.FloatTryParse(textboxPort.text, out _))
+                && float.TryParse(textboxPort.text, out _))
             {
-                menu.StartLogin(null, textboxIp.text, menu.p.IntParse(textboxPort.text));
+                menu.StartLogin(null, textboxIp.text, int.Parse(textboxPort.text));
             }
         }
         if (w == back)

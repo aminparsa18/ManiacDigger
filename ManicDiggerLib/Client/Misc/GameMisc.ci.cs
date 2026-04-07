@@ -39,9 +39,9 @@ public class GameScreen : ClientMod
                         string s = CharToString(e.GetKeyChar());
                         if (e.GetKeyChar() == 8) // backspace
                         {
-                            if (StringTools.StringLength(game.platform, w.text) > 0)
+                            if (w.text.Length > 0)
                             {
-                                w.text = StringTools.StringSubstring(game.platform, w.text, 0, StringTools.StringLength(game.platform, w.text) - 1);
+                                w.text = StringTools.StringSubstring(game.platform, w.text, 0, w.text.Length - 1);
                             }
                             return;
                         }
@@ -186,14 +186,14 @@ public class GameScreen : ClientMod
                         {
                             game.Draw2dTexture(game.WhiteTexture(), screenx + w.x, screeny + w.y, w.sizex, w.sizey, null, 0, w.color, false);
                         }
-                        game.Draw2dText1(text, screenx + game.platform.FloatToInt(w.x), screeny + game.platform.FloatToInt(w.y + w.sizey / 2), game.platform.FloatToInt(w.fontSize), null, false);
+                        game.Draw2dText1(text, screenx + (int)(w.x), screeny + (int)(w.y + w.sizey / 2), (int)(w.fontSize), null, false);
                     }
                 }
                 if (w.type == WidgetType.Textbox)
                 {
                     if (w.password)
                     {
-                        text = CharRepeat(42, StringTools.StringLength(game.platform, w.text)); // '*'
+                        text = CharRepeat(42, w.text.Length); // '*'
                     }
                     if (w.editing)
                     {
@@ -297,7 +297,7 @@ public class LoginClientCi
             if (shouldLogin)
             {
                 shouldLogin = false;
-                string requestString = platform.StringFormat4("username={0}&password={1}&server={2}&token={3}"
+                string requestString = string.Format("username={0}&password={1}&server={2}&token={3}"
                     , LoginUser, LoginPassword, LoginPublicServerKey, LoginToken);
                 byte[] byteArray = platform.StringToUtf8ByteArray(requestString, out int byteArrayLength);
                 loginResponse = new HttpResponseCi();
@@ -321,7 +321,7 @@ public class LoginClientCi
                 {
                     resultLoginData.AuthCode = lines[0];
                     resultLoginData.ServerAddress = lines[1];
-                    resultLoginData.Port = platform.IntParse(lines[2]);
+                    resultLoginData.Port = int.Parse(lines[2]);
                     resultLoginData.Token = lines[3];
                 }
                 loginResponse = null;
@@ -1504,8 +1504,8 @@ public class ClientModManager1 : ClientModManager
         int r = Game.ColorR(color);
         int g = Game.ColorG(color);
         int b = Game.ColorB(color);
-        game.Draw2dTexture(textureid, game.platform.FloatToInt(x1), game.platform.FloatToInt(y1),
-            game.platform.FloatToInt(width), game.platform.FloatToInt(height),
+        game.Draw2dTexture(textureid, (int)(x1), (int)(y1),
+            (int)(width), (int)(height),
              inAtlasId, 0, Game.ColorFromArgb(a, r, g, b), false);
     }
 
@@ -1721,8 +1721,8 @@ public class TextColorRenderer
             totalheight = Math.Max(totalheight, outHeight);
         }
 
-        int size2X = NextPowerOfTwo(platform.FloatToInt(totalwidth) + 1);
-        int size2Y = NextPowerOfTwo(platform.FloatToInt(totalheight) + 1);
+        int size2X = NextPowerOfTwo((int)(totalwidth) + 1);
+        int size2Y = NextPowerOfTwo((int)(totalheight) + 1);
         BitmapCi bmp2 = platform.BitmapCreate(size2X, size2Y);
         int[] bmp2Pixels = new int[size2X * size2Y];
 
@@ -1744,8 +1744,8 @@ public class TextColorRenderer
                 fontfamily = t.fontfamily
             };
             BitmapCi partBmp = platform.CreateTextTexture(partText);
-            int partWidth = platform.FloatToInt(platform.BitmapGetWidth(partBmp));
-            int partHeight = platform.FloatToInt(platform.BitmapGetHeight(partBmp));
+            int partWidth = (int)(platform.BitmapGetWidth(partBmp));
+            int partHeight = (int)(platform.BitmapGetHeight(partBmp));
             int[] partBmpPixels = new int[partWidth * partHeight];
             platform.BitmapGetPixelsArgb(partBmp, partBmpPixels);
             for (int x = 0; x < partWidth; x++)
@@ -1757,7 +1757,7 @@ public class TextColorRenderer
                     int c = partBmpPixels[MapUtilCi.Index2d(x, y, partWidth)];
                     if (Game.ColorA(c) > 0)
                     {
-                        bmp2Pixels[MapUtilCi.Index2d(platform.FloatToInt(currentwidth) + x, y, size2X)] = c;
+                        bmp2Pixels[MapUtilCi.Index2d((int)(currentwidth) + x, y, size2X)] = c;
                     }
                 }
             }
@@ -1776,15 +1776,14 @@ public class TextColorRenderer
         int[] currenttext = new int[256];
         int currenttextLength = 0;
 
-        int[] sChars = platform.StringToCharArray(s, out int sLength);
 
-        for (int i = 0; i < sLength; i++)
+        for (int i = 0; i < s.Length; i++)
         {
-            if (sChars[i] == '&')
+            if (s[i] == '&')
             {
-                if (i + 1 < sLength)
+                if (i + 1 < s.Length)
                 {
-                    int color = HexToInt(sChars[i + 1]);
+                    int color = HexToInt(s[i + 1]);
                     if (color != -1)
                     {
                         if (currenttextLength != 0)
@@ -1803,17 +1802,17 @@ public class TextColorRenderer
                     }
                     else
                     {
-                        currenttext[currenttextLength++] = sChars[i];
+                        currenttext[currenttextLength++] = s[i];
                     }
                 }
                 else
                 {
-                    currenttext[currenttextLength++] = sChars[i];
+                    currenttext[currenttextLength++] = s[i];
                 }
             }
             else
             {
-                currenttext[currenttextLength++] = sChars[i];
+                currenttext[currenttextLength++] = s[i];
             }
         }
 
@@ -1918,8 +1917,8 @@ public class Kamera
     private readonly float one;
     public void GetPosition(GamePlatform platform, ref Vector3 ret)
     {
-        float cx = platform.MathCos(tt * one / 2) * GetFlatDistance(platform) + Center.X;
-        float cy = platform.MathSin(tt * one / 2) * GetFlatDistance(platform) + Center.Z;
+        float cx = MathF.Cos(tt * one / 2) * GetFlatDistance(platform) + Center.X;
+        float cy = MathF.Sin(tt * one / 2) * GetFlatDistance(platform) + Center.Z;
         ret.X = cx;
         ret.Y = Center.Y + GetCameraHeightFromCenter(platform);
         ret.Z = cy;
@@ -1938,11 +1937,11 @@ public class Kamera
     internal float MinimumDistance;
     private float GetCameraHeightFromCenter(GamePlatform platform)
     {
-        return platform.MathSin(Angle * Game.GetPi() / 180) * distance;
+        return MathF.Sin(Angle * Game.GetPi() / 180) * distance;
     }
     private float GetFlatDistance(GamePlatform platform)
     {
-        return platform.MathCos(Angle * Game.GetPi() / 180) * distance;
+        return MathF.Cos(Angle * Game.GetPi() / 180) * distance;
     }
     internal Vector3 Center;
     internal float tt;

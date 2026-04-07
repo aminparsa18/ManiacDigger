@@ -63,7 +63,7 @@ public class InterpolationCi
     public static int InterpolateColor(GamePlatform platform, float progress, int[] colors, int colorsLength)
     {
         float one = 1;
-        int colora = platform.FloatToInt((colorsLength - 1) * progress);
+        int colora = (int)((colorsLength - 1) * progress);
         if (colora < 0) { colora = 0; }
         if (colora >= colorsLength) { colora = colorsLength - 1; }
         int colorb = colora + 1;
@@ -71,10 +71,10 @@ public class InterpolationCi
         int a = colors[colora];
         int b = colors[colorb];
         float p = (progress - (one * colora) / (colorsLength - 1)) * (colorsLength - 1);
-        int A = platform.FloatToInt(Game.ColorA(a) + (Game.ColorA(b) - Game.ColorA(a)) * p);
-        int R = platform.FloatToInt(Game.ColorR(a) + (Game.ColorR(b) - Game.ColorR(a)) * p);
-        int G = platform.FloatToInt(Game.ColorG(a) + (Game.ColorG(b) - Game.ColorG(a)) * p);
-        int B = platform.FloatToInt(Game.ColorB(a) + (Game.ColorB(b) - Game.ColorB(a)) * p);
+        int A = (int)(Game.ColorA(a) + (Game.ColorA(b) - Game.ColorA(a)) * p);
+        int R = (int)(Game.ColorR(a) + (Game.ColorR(b) - Game.ColorR(a)) * p);
+        int G = (int)(Game.ColorG(a) + (Game.ColorG(b) - Game.ColorG(a)) * p);
+        int B = (int)(Game.ColorB(a) + (Game.ColorB(b) - Game.ColorB(a)) * p);
         return Game.ColorFromArgb(A, R, G, B);
     }
 }
@@ -83,48 +83,22 @@ public class StringTools
 {
     public static string StringAppend(GamePlatform p, string a, string b)
     {
-        int[] aChars = p.StringToCharArray(a, out int aLength);
-
-        int[] bChars = p.StringToCharArray(b, out int bLength);
-
-        int[] cChars = new int[aLength + bLength];
-        for (int i = 0; i < aLength; i++)
-        {
-            cChars[i] = aChars[i];
-        }
-        for (int i = 0; i < bLength; i++)
-        {
-            cChars[i + aLength] = bChars[i];
-        }
-        return p.CharArrayToString(cChars, aLength + bLength);
+        return string.Concat(a, b);
     }
 
     public static string StringSubstring(GamePlatform p, string a, int start, int count)
     {
-        int[] aChars = p.StringToCharArray(a, out _);
-
-        int[] bChars = new int[count];
-        for (int i = 0; i < count; i++)
-        {
-            bChars[i] = aChars[start + i];
-        }
-        return p.CharArrayToString(bChars, count);
+        return a[start..(start + count)];
     }
 
     public static string StringSubstringToEnd(GamePlatform p, string a, int start)
     {
-        return StringSubstring(p, a, start, StringLength(p, a) - start);
-    }
-
-    public static int StringLength(GamePlatform p, string a)
-    {
-        _ = p.StringToCharArray(a, out int aLength);
-        return aLength;
+        return StringSubstring(p, a, start, a.Length - start);
     }
 
     public static bool StringStartsWith(GamePlatform p, string s, string b)
     {
-        return StringSubstring(p, s, 0, StringLength(p, b)) == b;
+        return StringSubstring(p, s, 0, b.Length) == b;
     }
 }
 
@@ -324,8 +298,8 @@ public class BitmapData_
     {
         BitmapData_ b = new()
         {
-            width = p.FloatToInt(p.BitmapGetWidth(atlas2d_)),
-            height = p.FloatToInt(p.BitmapGetHeight(atlas2d_))
+            width = (int)(p.BitmapGetWidth(atlas2d_)),
+            height = (int)(p.BitmapGetHeight(atlas2d_))
         };
         b.argb = new int[b.width * b.height];
         p.BitmapGetPixelsArgb(atlas2d_, b.argb);
@@ -439,10 +413,9 @@ public class GameVersionHelper
 
     private static bool IsVersionDate(GamePlatform platform, string version)
     {
-        int[] versionChars = platform.StringToCharArray(version, out int versionCharsCount);
-        if (versionCharsCount >= 10)
+        if (version.Length >= 10)
         {
-            if (versionChars[4] == 45 && versionChars[7] == 45) // '-'
+            if (version[4] == 45 && version[7] == 45) // '-'
             {
                 return true;
             }
@@ -457,15 +430,15 @@ public class GameVersionHelper
         {
             return max;
         }
-        if (platform.FloatTryParse(StringTools.StringSubstring(platform, version, 0, 4), out float year))
+        if (float.TryParse(StringTools.StringSubstring(platform, version, 0, 4), out float year))
         {
-            if (platform.FloatTryParse(StringTools.StringSubstring(platform, version, 5, 2), out float month))
+            if (float.TryParse(StringTools.StringSubstring(platform, version, 5, 2), out float month))
             {
-                if (platform.FloatTryParse(StringTools.StringSubstring(platform, version, 8, 2), out float day))
+                if (float.TryParse(StringTools.StringSubstring(platform, version, 8, 2), out float day))
                 {
-                    int year_ = platform.FloatToInt(year);
-                    int month_ = platform.FloatToInt(month);
-                    int day_ = platform.FloatToInt(day);
+                    int year_ = (int)(year);
+                    int month_ = (int)(month);
+                    int day_ = (int)(day);
                     return year_ * 10000 + month_ * 100 + day_;
                 }
             }

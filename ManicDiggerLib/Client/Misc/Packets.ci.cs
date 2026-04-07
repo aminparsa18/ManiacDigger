@@ -354,11 +354,11 @@
         Packet_ClientPositionAndOrientation p = new();
         {
             p.PlayerId = playerId;
-            p.X = game.platform.FloatToInt(positionX * 32);
-            p.Y = game.platform.FloatToInt(positionY * 32);
-            p.Z = game.platform.FloatToInt(positionZ * 32);
-            p.Heading = game.platform.FloatToInt(Game.RadToAngle256(orientationY));
-            p.Pitch = game.platform.FloatToInt(Game.RadToAngle256(orientationX));
+            p.X = (int)(positionX * 32);
+            p.Y = (int)(positionY * 32);
+            p.Z = (int)(positionZ * 32);
+            p.Heading = (int)(Game.RadToAngle256(orientationY));
+            p.Pitch = (int)(Game.RadToAngle256(orientationX));
             p.Stance = stance;
         }
         Packet_Client pp = new()

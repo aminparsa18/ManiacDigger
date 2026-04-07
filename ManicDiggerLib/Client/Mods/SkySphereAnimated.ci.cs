@@ -105,9 +105,9 @@ public class ModSkySphereAnimated : ClientMod
             {
                 float xFloat = x;
                 float theta = (xFloat / (segments - 1)) * 2 * Game.GetPi();
-                float vx = radius * (float)MathHelper.Sin(phiFloat) * (float)MathHelper.Cos(theta);
-                float vy = height * (float)MathHelper.Cos(phiFloat);
-                float vz = radius * (float)MathHelper.Sin(phiFloat) * (float)MathHelper.Sin(theta);
+                float vx = radius * MathF.Sin(phiFloat) * MathF.Cos(theta);
+                float vy = height * MathF.Cos(phiFloat);
+                float vz = radius * MathF.Sin(phiFloat) * MathF.Sin(theta);
                 float u = xFloat / (segments - 1);
                 float v = yFloat / (rings - 1);
                 data.xyz[i * 3 + 0] = vx;
@@ -116,12 +116,12 @@ public class ModSkySphereAnimated : ClientMod
                 data.uv[i * 2 + 0] = u;
                 data.uv[i * 2 + 1] = v;
 
-                float vertexLength = platform.MathSqrt(vx * vx + vy * vy + vz * vz);
+                float vertexLength = MathF.Sqrt(vx * vx + vy * vy + vz * vz);
                 float vertexXNormalized = vx / vertexLength;
                 float vertexYNormalized = vy / vertexLength;
                 float vertexZNormalized = vz / vertexLength;
 
-                float sunLength = platform.MathSqrt(sunX * sunX + sunY * sunY + sunZ * sunZ);
+                float sunLength = MathF.Sqrt(sunX * sunX + sunY * sunY + sunZ * sunZ);
                 if (sunLength == 0) { sunLength = 1; }
                 float sunXNormalized = sunX / sunLength;
                 float sunYNormalized = sunY / sunLength;
@@ -132,7 +132,7 @@ public class ModSkySphereAnimated : ClientMod
                 float dx = vertexXNormalized - sunXNormalized;
                 float dy = vertexYNormalized - sunYNormalized;
                 float dz = vertexZNormalized - sunZNormalized;
-                float proximityToSun = 1 - (platform.MathSqrt(dx * dx + dy * dy + dz * dz) / 2);
+                float proximityToSun = 1 - (MathF.Sqrt(dx * dx + dy * dy + dz * dz) / 2);
 
                 // Look up the sky color and glow colors.
                 float one = 1;
@@ -161,10 +161,10 @@ public class ModSkySphereAnimated : ClientMod
                 if (colorB > 1) { colorB = 1; }
                 if (colorA > 1) { colorA = 1; }
 
-                data.rgba[i * 4 + 0] = Game.IntToByte(platform.FloatToInt(colorR * 255));
-                data.rgba[i * 4 + 1] = Game.IntToByte(platform.FloatToInt(colorG * 255));
-                data.rgba[i * 4 + 2] = Game.IntToByte(platform.FloatToInt(colorB * 255));
-                data.rgba[i * 4 + 3] = Game.IntToByte(platform.FloatToInt(colorA * 255));
+                data.rgba[i * 4 + 0] = Game.IntToByte((int)(colorR * 255));
+                data.rgba[i * 4 + 1] = Game.IntToByte((int)(colorG * 255));
+                data.rgba[i * 4 + 2] = Game.IntToByte((int)(colorB * 255));
+                data.rgba[i * 4 + 3] = Game.IntToByte((int)(colorA * 255));
                 i++;
             }
         }
@@ -210,8 +210,8 @@ public class ModSkySphereAnimated : ClientMod
 
     private static int Texture2d(GamePlatform platform, int[] pixelsArgb, float x, float y)
     {
-        int px = platform.FloatToInt(x * (textureSize - 1));
-        int py = platform.FloatToInt(y * (textureSize - 1));
+        int px = (int)(x * (textureSize - 1));
+        int py = (int)(y * (textureSize - 1));
         px = positive_modulo(px, (textureSize - 1));
         py = positive_modulo(py, (textureSize - 1));
         return pixelsArgb[MapUtilCi.Index2d(px, py, textureSize)];

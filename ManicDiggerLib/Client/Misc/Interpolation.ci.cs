@@ -115,7 +115,7 @@ public class AngleInterpolation
             {
                 diff -= CircleFull256;
             }
-            a += platform.FloatToInt(progress * diff);
+            a += (int)(progress * diff);
         }
         return NormalizeAngle256(a);
     }
@@ -143,6 +143,6 @@ public class AngleInterpolation
     private const int shortMaxValue = 32767;
     private static float NormalizeAngle360(GamePlatform platform, float v)
     {
-        return platform.FloatModulo(v + ((shortMaxValue / 2) / 360) * 360, 360);
+        return (v + ((shortMaxValue / 2) / 360) * 360 % 360);
     }
 }

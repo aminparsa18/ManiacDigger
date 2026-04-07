@@ -69,15 +69,15 @@
                     if (argumentsLength >= 3)
                     {
                         // video time
-                        totalRecTime = p.FloatParse(arguments[2]);
+                        totalRecTime = float.Parse(arguments[2]);
                     }
                     avi = m.AviWriterCreate();
-                    avi.Open(p.StringFormat("{0}.avi", p.Timestamp()), framerate, m.GetWindowWidth(), m.GetWindowHeight());
+                    avi.Open(string.Format("{0}.avi", p.Timestamp()), framerate, m.GetWindowWidth(), m.GetWindowHeight());
                 }
                 if (argumentsLength >= 2)
                 {
                     // play time
-                    float totalTime = p.FloatParse(arguments[1]);
+                    float totalTime = float.Parse(arguments[1]);
                     playingSpeed = TotalDistance() / totalTime;
 
                     if (totalRecTime == -1)
@@ -119,15 +119,15 @@
                 for (int i = 0; i < cameraPointsCount; i++)
                 {
                     CameraPoint point = cameraPoints[i];
-                    s = p.StringFormat2("{0}{1},", s, p.IntToString(p.FloatToInt(point.positionGlX * 100)));
-                    s = p.StringFormat2("{0}{1},", s, p.IntToString(p.FloatToInt(point.positionGlY * 100)));
-                    s = p.StringFormat2("{0}{1},", s, p.IntToString(p.FloatToInt(point.positionGlZ * 100)));
-                    s = p.StringFormat2("{0}{1},", s, p.IntToString(p.FloatToInt(point.orientationGlX * 1000)));
-                    s = p.StringFormat2("{0}{1},", s, p.IntToString(p.FloatToInt(point.orientationGlY * 1000)));
-                    s = p.StringFormat2("{0}{1}", s, p.IntToString(p.FloatToInt(point.orientationGlZ * 1000)));
+                    s = string.Format("{0}{1},", s, ((int)(point.positionGlX * 100)).ToString());
+                    s = string.Format("{0}{1},", s, ((int)(point.positionGlY * 100)).ToString());
+                    s = string.Format("{0}{1},", s, ((int)(point.positionGlZ * 100)).ToString());
+                    s = string.Format("{0}{1},", s, ((int)(point.orientationGlX * 1000)).ToString());
+                    s = string.Format("{0}{1},", s, ((int)(point.orientationGlY * 1000)).ToString());
+                    s = string.Format("{0}{1}", s, ((int)(point.orientationGlZ * 1000)).ToString());
                     if (i != cameraPointsCount - 1)
                     {
-                        s = p.StringFormat("{0},", s);
+                        s = string.Format("{0},", s);
                     }
                 }
                 p.ClipboardSetText(s);
@@ -142,16 +142,16 @@
                 {
                     CameraPoint point = new()
                     {
-                        positionGlX = one * p.IntParse(points[1 + i * 6 + 0]) / 100,
-                        positionGlY = one * p.IntParse(points[1 + i * 6 + 1]) / 100,
-                        positionGlZ = one * p.IntParse(points[1 + i * 6 + 2]) / 100,
-                        orientationGlX = one * p.IntParse(points[1 + i * 6 + 3]) / 1000,
-                        orientationGlY = one * p.IntParse(points[1 + i * 6 + 4]) / 1000,
-                        orientationGlZ = one * p.IntParse(points[1 + i * 6 + 5]) / 1000
+                        positionGlX = one * int.Parse(points[1 + i * 6 + 0]) / 100,
+                        positionGlY = one * int.Parse(points[1 + i * 6 + 1]) / 100,
+                        positionGlZ = one * int.Parse(points[1 + i * 6 + 2]) / 100,
+                        orientationGlX = one * int.Parse(points[1 + i * 6 + 3]) / 1000,
+                        orientationGlY = one * int.Parse(points[1 + i * 6 + 4]) / 1000,
+                        orientationGlZ = one * int.Parse(points[1 + i * 6 + 5]) / 1000
                     };
                     cameraPoints[cameraPointsCount++] = point;
                 }
-                m.DisplayNotification(p.StringFormat("Camera points loaded: {0}", p.IntToString(n)));
+                m.DisplayNotification(string.Format("Camera points loaded: {0}", n.ToString()));
             }
             return true;
         }
@@ -307,7 +307,7 @@
         float dx = a.positionGlX - b.positionGlX;
         float dy = a.positionGlY - b.positionGlY;
         float dz = a.positionGlZ - b.positionGlZ;
-        return p.MathSqrt(dx * dx + dy * dy + dz * dz);
+        return MathF.Sqrt(dx * dx + dy * dy + dz * dz);
     }
 }
 

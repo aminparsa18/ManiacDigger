@@ -277,9 +277,9 @@ public class ServerSystemNotifyEntities : ServerSystem
     {
         Packet_PositionAndOrientation p = new()
         {
-            X = platform.FloatToInt(position.x * 32),
-            Y = platform.FloatToInt(position.y * 32),
-            Z = platform.FloatToInt(position.z * 32),
+            X = (int)(position.x * 32),
+            Y = (int)(position.y * 32),
+            Z = (int)(position.z * 32),
             Heading = position.heading,
             Pitch = position.pitch,
             Stance = position.stance
@@ -298,9 +298,9 @@ public class ServerSystemNotifyEntities : ServerSystem
         {
             p.DrawModel = new Packet_ServerEntityAnimatedModel
             {
-                EyeHeight = platform.FloatToInt(entity.drawModel.eyeHeight * 32),
+                EyeHeight = (int)(entity.drawModel.eyeHeight * 32),
                 Model_ = entity.drawModel.model,
-                ModelHeight = platform.FloatToInt(entity.drawModel.modelHeight * 32),
+                ModelHeight = (int)(entity.drawModel.modelHeight * 32),
                 Texture_ = entity.drawModel.texture,
                 DownloadSkin = entity.drawModel.downloadSkin ? 1 : 0
             };
@@ -319,12 +319,12 @@ public class ServerSystemNotifyEntities : ServerSystem
         {
             p.DrawText = new Packet_ServerEntityDrawText
             {
-                Dx = platform.FloatToInt(entity.drawText.dx * 32),
-                Dy = platform.FloatToInt(entity.drawText.dy * 32),
-                Dz = platform.FloatToInt(entity.drawText.dz * 32),
-                Rotx = platform.FloatToInt(entity.drawText.rotx),
-                Roty = platform.FloatToInt(entity.drawText.roty),
-                Rotz = platform.FloatToInt(entity.drawText.rotz),
+                Dx = (int)(entity.drawText.dx * 32),
+                Dy = (int)(entity.drawText.dy * 32),
+                Dz = (int)(entity.drawText.dz * 32),
+                Rotx = (int)(entity.drawText.rotx),
+                Roty = (int)(entity.drawText.roty),
+                Rotz = (int)(entity.drawText.rotz),
                 Text = entity.drawText.text
             };
         }
@@ -332,7 +332,7 @@ public class ServerSystemNotifyEntities : ServerSystem
         {
             p.Push = new Packet_ServerEntityPush
             {
-                RangeFloat = platform.FloatToInt(entity.push.range * 32)
+                RangeFloat = (int)(entity.push.range * 32)
             };
         }
         p.Usable = entity.usable;

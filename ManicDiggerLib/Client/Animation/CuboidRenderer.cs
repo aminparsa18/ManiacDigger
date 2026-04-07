@@ -109,7 +109,7 @@ public static class CuboidRenderer
     /// <param name="color">The packed ARGB color encoding the light intensity.</param>
     private static ModelData CreateCuboidBuffer(Game game, float light, out int color)
     {
-        int light255 = game.platform.FloatToInt(light * 255);
+        int light255 = (int)light * 255;
         color = Game.ColorFromArgb(255, light255, light255, light255);
         return new ModelData
         {

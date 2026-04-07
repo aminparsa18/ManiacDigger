@@ -49,8 +49,8 @@
         platform.TextSize(connecting, 14, out int connectingWidth, out int connectingHeight);
         game.Draw2dText(connecting, game.fontMapLoading, game.xcenter(connectingWidth), Height / 2 - 50, null, false);
 
-        string progress = platform.StringFormat(game.language.ConnectingProgressPercent(), platform.IntToString(game.maploadingprogress.ProgressPercent));
-        string progress1 = platform.StringFormat(game.language.ConnectingProgressKilobytes(), platform.IntToString(game.maploadingprogress.ProgressBytes / 1024));
+        string progress = string.Format(game.language.ConnectingProgressPercent(), game.maploadingprogress.ProgressPercent.ToString());
+        string progress1 = string.Format(game.language.ConnectingProgressKilobytes(), (game.maploadingprogress.ProgressBytes / 1024).ToString());
 
         if (game.maploadingprogress.ProgressPercent > 0)
         {
@@ -81,8 +81,8 @@
         backgroundW = 512;
         backgroundH = 512;
         //Background tiling
-        int countX = game.platform.FloatToInt(Width / backgroundW) + 1;
-        int countY = game.platform.FloatToInt(Height / backgroundH) + 1;
+        int countX = (int)(Width / backgroundW) + 1;
+        int countY = (int)(Height / backgroundH) + 1;
         for (int x = 0; x < countX; x++)
         {
             for (int y = 0; y < countY; y++)

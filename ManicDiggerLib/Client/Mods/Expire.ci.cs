@@ -75,7 +75,7 @@
         float dmg = (1 - dist / game.DeserializeFloat(game.blocktypes[grenade.block].ExplosionRangeFloat)) * game.DeserializeFloat(game.blocktypes[grenade.block].DamageBodyFloat);
         if (dmg > 0)
         {
-            game.ApplyDamageToPlayer(game.platform.FloatToInt(dmg), Packet_DeathReasonEnum.Explosion, grenade.sourcePlayer);
+            game.ApplyDamageToPlayer((int)(dmg), Packet_DeathReasonEnum.Explosion, grenade.sourcePlayer);
         }
     }
 }

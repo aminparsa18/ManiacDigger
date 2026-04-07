@@ -19,9 +19,9 @@
             }
             int kKey = i;
             EntityDrawText p = game.entities[i].drawText;
-            float posX = - game.platform.MathSin(e.position.roty) * p.dx + e.position.x;
+            float posX = - MathF.Sin(e.position.roty) * p.dx + e.position.x;
             float posY = p.dy + e.position.y;
-            float posZ = game.platform.MathCos(e.position.roty) * p.dz + e.position.z;
+            float posZ = MathF.Cos(e.position.roty) * p.dz + e.position.z;
             //todo if picking
             if ((game.Dist(game.player.position.x, game.player.position.y, game.player.position.z, posX, posY, posZ) < 20)
                 || game.keyboardState[Game.KeyAltLeft] || game.keyboardState[Game.KeyAltRight])
@@ -29,7 +29,7 @@
                 string text = p.text;
                 {
 
-                    float shadow = (game.one * game.GetLight(game.platform.FloatToInt(posX), game.platform.FloatToInt(posZ), game.platform.FloatToInt(posY))) / Game.maxlight;
+                    float shadow = (game.one * game.GetLight((int)(posX), (int)(posZ), (int)(posY))) / Game.maxlight;
 
                     game.GLPushMatrix();
                     game.GLTranslate(posX, posY, posZ);

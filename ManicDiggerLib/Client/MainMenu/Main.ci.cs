@@ -29,7 +29,7 @@
 
         if (menu.assetsLoadProgress != 1)
         {
-            string s = menu.p.StringFormat(menu.lang.Get("MainMenu_AssetsLoadProgress"), menu.p.FloatToString(menu.p.FloatToInt(menu.assetsLoadProgress * 100)));
+            string s = string.Format(menu.lang.Get("MainMenu_AssetsLoadProgress"), ((int)(menu.assetsLoadProgress * 100)).ToString());
             menu.DrawText(s, 20 * scale, windowX / 2, windowY / 2, TextAlign.Center, TextBaseline.Middle);
             return;
         }
@@ -82,9 +82,9 @@
         string ip = menu.p.QueryStringValue("ip");
         string port = menu.p.QueryStringValue("port");
         int portInt = 25565;
-        if (port != null && menu.p.FloatTryParse(port, out _))
+        if (port != null && float.TryParse(port, out _))
         {
-            portInt = menu.p.IntParse(port);
+            portInt = int.Parse(port);
         }
         if (ip != null)
         {

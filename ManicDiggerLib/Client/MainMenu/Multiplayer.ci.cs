@@ -148,11 +148,11 @@ public class ScreenMultiplayer : Screen
                     hash = ss[0],
                     name = menu.p.DecodeHTMLEntities(ss[1]),
                     motd = menu.p.DecodeHTMLEntities(ss[2]),
-                    port = menu.p.IntParse(ss[3]),
+                    port = int.Parse(ss[3]),
                     ip = ss[4],
                     version = ss[5],
-                    users = menu.p.IntParse(ss[6]),
-                    max = menu.p.IntParse(ss[7]),
+                    users = int.Parse(ss[6]),
+                    max = int.Parse(ss[7]),
                     gamemode = ss[8],
                     players = ss[9]
                 };
@@ -223,7 +223,7 @@ public class ScreenMultiplayer : Screen
 
         menu.DrawBackground();
         menu.DrawText(title, 20 * scale, p.GetCanvasWidth() / 2, 10, TextAlign.Center, TextBaseline.Top);
-        menu.DrawText(p.IntToString(page + 1), 14 * scale, p.GetCanvasWidth() - 68 * scale, p.GetCanvasHeight() / 2, TextAlign.Center, TextBaseline.Middle);
+        menu.DrawText((page + 1).ToString(), 14 * scale, p.GetCanvasWidth() - 68 * scale, p.GetCanvasHeight() / 2, TextAlign.Center, TextBaseline.Middle);
 
         if (loading)
         {
@@ -236,7 +236,7 @@ public class ScreenMultiplayer : Screen
             serverButtons[i].visible = false;
         }
 
-        serversPerPage = menu.p.FloatToInt((menu.p.GetCanvasHeight() - (2 * 100 * scale)) / 70 * scale);
+        serversPerPage = (int)((menu.p.GetCanvasHeight() - (2 * 100 * scale)) / 70 * scale);
         if (serversPerPage <= 0)
         {
             // Do not let this get negative
@@ -256,12 +256,12 @@ public class ScreenMultiplayer : Screen
             {
                 continue;
             }
-            string t = menu.p.StringFormat2("{1}", menu.p.IntToString(index), s.name);
-            t = menu.p.StringFormat2("{0}\n{1}", t, s.motd);
-            t = menu.p.StringFormat2("{0}\n{1}", t, s.gamemode);
-            t = menu.p.StringFormat2("{0}\n{1}", t, menu.p.IntToString(s.users));
-            t = menu.p.StringFormat2("{0}/{1}", t, menu.p.IntToString(s.max));
-            t = menu.p.StringFormat2("{0}\n{1}", t, s.version);
+            string t = string.Format("{1}", index.ToString(), s.name);
+            t = string.Format("{0}\n{1}", t, s.motd);
+            t = string.Format("{0}\n{1}", t, s.gamemode);
+            t = string.Format("{0}\n{1}", t, s.users.ToString());
+            t = string.Format("{0}/{1}", t, s.max.ToString());
+            t = string.Format("{0}\n{1}", t, s.version);
 
             serverButtons[i].text = t;
             serverButtons[i].x = 100 * scale;
@@ -281,7 +281,7 @@ public class ScreenMultiplayer : Screen
             }
             if (s.thumbnailFetched && !s.thumbnailError)
             {
-                serverButtons[i].image = menu.p.StringFormat("serverlist_entry_{0}.png", s.hash);
+                serverButtons[i].image = string.Format("serverlist_entry_{0}.png", s.hash);
             }
             else
             {
@@ -326,7 +326,7 @@ public class ScreenMultiplayer : Screen
                         if (bmp != null)
                         {
                             int texture = menu.p.LoadTextureFromBitmap(bmp);
-                            menu.textures[menu.p.StringFormat("serverlist_entry_{0}.png", server.hash)] = texture;
+                            menu.textures[string.Format("serverlist_entry_{0}.png", server.hash)] = texture;
                             menu.p.BitmapDelete(bmp);
                         }
                         server.thumbnailDownloading = false;

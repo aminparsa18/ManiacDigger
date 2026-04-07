@@ -29,7 +29,7 @@
                     int x = game.SelectedBlockPositionX;
                     int y = game.SelectedBlockPositionY;
                     int z = game.SelectedBlockPositionZ;
-                    float pickcubeheight = game.Getblockheight(game.platform.FloatToInt(x), game.platform.FloatToInt(z), game.platform.FloatToInt(y));
+                    float pickcubeheight = game.Getblockheight((int)(x), (int)(z), (int)(y));
                     float posx = x + one / 2;
                     float posy = y + pickcubeheight * one / 2;
                     float posz = z + one / 2;

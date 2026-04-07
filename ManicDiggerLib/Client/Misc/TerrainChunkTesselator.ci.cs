@@ -622,9 +622,9 @@ public class TerrainChunkTesselatorCi
     private int ColorMultiply(int color, float fValue)
     {
         return Game.ColorFromArgb(Game.ColorA(color),
-            game.platform.FloatToInt(Game.ColorR(color) * fValue),
-            game.platform.FloatToInt(Game.ColorG(color) * fValue),
-            game.platform.FloatToInt(Game.ColorB(color) * fValue));
+            (int)(Game.ColorR(color) * fValue),
+            (int)(Game.ColorG(color) * fValue),
+            (int)(Game.ColorB(color) * fValue));
     }
 
     internal float occ;

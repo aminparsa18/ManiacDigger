@@ -99,9 +99,9 @@ public class ModRail : ClientMod
                 else
                 {
                     currentdirection = newdir;
-                    currentrailblockX = game.platform.FloatToInt(newenter.BlockPositionX);
-                    currentrailblockY = game.platform.FloatToInt(newenter.BlockPositionY);
-                    currentrailblockZ = game.platform.FloatToInt(newenter.BlockPositionZ);
+                    currentrailblockX = (int)(newenter.BlockPositionX);
+                    currentrailblockY = (int)(newenter.BlockPositionY);
+                    currentrailblockZ = (int)(newenter.BlockPositionZ);
                 }
             }
         }
@@ -125,9 +125,9 @@ public class ModRail : ClientMod
         }
         if (!wasepressed && game.keyboardState[game.GetKey(Keys.E)] && !railriding && !game.controls.freemove && game.GuiTyping != TypingState.Typing)
         {
-            currentrailblockX = game.platform.FloatToInt(game.player.position.x);
-            currentrailblockY = game.platform.FloatToInt(game.player.position.z);
-            currentrailblockZ = game.platform.FloatToInt(game.player.position.y) - 1;
+            currentrailblockX = (int)(game.player.position.x);
+            currentrailblockY = (int)(game.player.position.z);
+            currentrailblockZ = (int)(game.player.position.y) - 1;
             if (!game.map.IsValidPos(currentrailblockX, currentrailblockY, currentrailblockZ))
             {
                 ExitVehicle(game);
@@ -374,7 +374,7 @@ public class ModRail : ClientMod
         }
         if ((game.platform.TimeMillisecondsFromStart() - lastrailsoundtimeMilliseconds) > 1000 / railsoundpersecond)
         {
-            game.AudioPlay(game.platform.StringFormat("rail{0}.wav", game.platform.IntToString(lastrailsound + 1)));
+            game.AudioPlay(string.Format("rail{0}.wav", (lastrailsound + 1).ToString()));
             lastrailsoundtimeMilliseconds = game.platform.TimeMillisecondsFromStart();
             lastrailsound++;
             if (lastrailsound >= 4)

@@ -131,35 +131,35 @@ public class ModGuiEscapeMenu : ClientMod
         Language language = game.language;
         graphicsOptionSmoothShadows = new Button
         {
-            Text = game.platform.StringFormat(language.OptionSmoothShadows(), options.Smoothshadows ? language.On() : language.Off())
+            Text = string.Format(language.OptionSmoothShadows(), options.Smoothshadows ? language.On() : language.Off())
         };
         graphicsOptionDarkenSides = new Button
         {
-            Text = game.platform.StringFormat(language.Get("OptionDarkenSides"), options.EnableBlockShadow ? language.On() : language.Off())
+            Text = string.Format(language.Get("OptionDarkenSides"), options.EnableBlockShadow ? language.On() : language.Off())
         };
         graphicsViewDistanceOption = new Button
         {
-            Text = game.platform.StringFormat(language.ViewDistanceOption(), game.platform.IntToString(game.platform.FloatToInt(game.d_Config3d.viewdistance)))
+            Text = string.Format(language.ViewDistanceOption(), ((int)(game.d_Config3d.viewdistance)).ToString())
         };
         graphicsOptionFramerate = new Button
         {
-            Text = game.platform.StringFormat(language.OptionFramerate(), (VsyncString()))
+            Text = string.Format(language.OptionFramerate(), (VsyncString()))
         };
         graphicsOptionResolution = new Button
         {
-            Text = game.platform.StringFormat(language.OptionResolution(), (ResolutionString()))
+            Text = string.Format(language.OptionResolution(), (ResolutionString()))
         };
         graphicsOptionFullscreen = new Button
         {
-            Text = game.platform.StringFormat(language.OptionFullscreen(), options.Fullscreen ? language.On() : language.Off())
+            Text = string.Format(language.OptionFullscreen(), options.Fullscreen ? language.On() : language.Off())
         };
         graphicsUseServerTexturesOption = new Button
         {
-            Text = game.platform.StringFormat(language.UseServerTexturesOption(), (options.UseServerTextures ? language.On() : language.Off()))
+            Text = string.Format(language.UseServerTexturesOption(), (options.UseServerTextures ? language.On() : language.Off()))
         };
         graphicsFontOption = new Button
         {
-            Text = game.platform.StringFormat(language.FontOption(), (FontString()))
+            Text = string.Format(language.FontOption(), (FontString()))
         };
         graphicsReturnToOptionsMenu = new Button
         {
@@ -244,15 +244,15 @@ public class ModGuiEscapeMenu : ClientMod
 
         otherSoundOption = new Button
         {
-            Text = game.platform.StringFormat(language.SoundOption(), (game.AudioEnabled ? language.On() : language.Off()))
+            Text = string.Format(language.SoundOption(), (game.AudioEnabled ? language.On() : language.Off()))
         };
         otherAutoJumpOption = new Button
         {
-            Text = game.platform.StringFormat(language.AutoJumpOption(), (game.AutoJumpEnabled ? language.On() : language.Off()))
+            Text = string.Format(language.AutoJumpOption(), (game.AutoJumpEnabled ? language.On() : language.Off()))
         };
         otherLanguageSetting = new Button
         {
-            Text = game.platform.StringFormat(language.ClientLanguageOption(), language.GetUsedLanguage())
+            Text = string.Format(language.ClientLanguageOption(), language.GetUsedLanguage())
         };
         otherReturnToOptionsMenu = new Button
         {
@@ -318,7 +318,7 @@ public class ModGuiEscapeMenu : ClientMod
             }
             keyButtons[i] = new Button
             {
-                Text = game.platform.StringFormat2(language.KeyChange(), helps[i].Text, KeyName(key))
+                Text = string.Format(language.KeyChange(), helps[i].Text, KeyName(key))
             };
             AddWidget(keyButtons[i]);
 
@@ -465,11 +465,11 @@ public class ModGuiEscapeMenu : ClientMod
     private string ResolutionString()
     {
         DisplayResolutionCi res = game.platform.GetDisplayResolutions(out int resolutionsCount)[game.options.Resolution];
-        return game.platform.StringFormat4("{0}x{1}, {2}, {3} Hz",
-            game.platform.IntToString(res.Width),
-            game.platform.IntToString(res.Height),
-            game.platform.IntToString(res.BitsPerPixel),
-            game.platform.IntToString(game.platform.FloatToInt(res.RefreshRate)));
+        return string.Format("{0}x{1}, {2}, {3} Hz",
+            res.Width.ToString(),
+            res.Height.ToString(),
+            res.BitsPerPixel.ToString(),
+            ((int)(res.RefreshRate)).ToString());
     }
 
     private void ToggleResolution()
@@ -561,8 +561,8 @@ public class ModGuiEscapeMenu : ClientMod
             string s = widgets[i].Text;
             float sizeWidth = game.TextSizeWidth(s, fontsize);
             float sizeHeight = game.TextSizeHeight(s, fontsize);
-            int Width = game.platform.FloatToInt(sizeWidth) + 10;
-            int Height = game.platform.FloatToInt(sizeHeight);
+            int Width = (int)(sizeWidth) + 10;
+            int Height = (int)(sizeHeight);
             int X = game.xcenter(sizeWidth);
             int Y = starty + textheight * i;
             widgets[i].x = X;
@@ -624,8 +624,8 @@ public class ModGuiEscapeMenu : ClientMod
         helps[count++] = KeyHelpCreate(language.KeyRespawn(), Keys.O);
         helps[count++] = KeyHelpCreate(language.KeyReloadWeapon(), Keys.R);
         helps[count++] = KeyHelpCreate(language.KeyToggleFogDistance(), Keys.F);
-        helps[count++] = KeyHelpCreate(game.platform.StringFormat(language.KeyMoveSpeed(), "1"), Keys.F1);
-        helps[count++] = KeyHelpCreate(game.platform.StringFormat(language.KeyMoveSpeed(), "10"), Keys.F2);
+        helps[count++] = KeyHelpCreate(string.Format(language.KeyMoveSpeed(), "1"), Keys.F1);
+        helps[count++] = KeyHelpCreate(string.Format(language.KeyMoveSpeed(), "10"), Keys.F2);
         helps[count++] = KeyHelpCreate(language.KeyFreeMove(), Keys.F3);
         helps[count++] = KeyHelpCreate(language.KeyThirdPersonCamera(), Keys.F5);
         helps[count++] = KeyHelpCreate(language.KeyTextEditor(), Keys.F9);
@@ -752,7 +752,7 @@ public class ModGuiEscapeMenu : ClientMod
 
         for (int i = 0; i < 256; i++)
         {
-            string preferencesKey = StringTools.StringAppend(game.platform, "Key", game.platform.IntToString(i));
+            string preferencesKey = StringTools.StringAppend(game.platform, "Key", i.ToString());
             int value = preferences.GetInt(preferencesKey, 0);
             if (value != 0)
             {
@@ -769,7 +769,7 @@ public class ModGuiEscapeMenu : ClientMod
 
         options.Font = game.Font;
         options.Shadows = true; // game.d_CurrentShadows.ShadowsFull;
-        options.DrawDistance = game.platform.FloatToInt(game.d_Config3d.viewdistance);
+        options.DrawDistance = (int)(game.d_Config3d.viewdistance);
         options.EnableSound = game.AudioEnabled;
         options.EnableAutoJump = game.AutoJumpEnabled;
         if (game.language.OverrideLanguage != null)
@@ -802,12 +802,12 @@ public class ModGuiEscapeMenu : ClientMod
         preferences.SetInt("Resolution", options.Resolution);
         preferences.SetBool("Fullscreen", options.Fullscreen);
         preferences.SetBool("Smoothshadows", options.Smoothshadows);
-        preferences.SetInt("BlockShadowSave", game.platform.FloatToInt(options.BlockShadowSave * 100));
+        preferences.SetInt("BlockShadowSave", (int)(options.BlockShadowSave * 100));
         preferences.SetBool("EnableBlockShadow", options.EnableBlockShadow);
 
         for (int i = 0; i < 256; i++)
         {
-            int value = options.Keys[i];string preferencesKey = StringTools.StringAppend(game.platform, "Key", game.platform.IntToString(i));
+            int value = options.Keys[i];string preferencesKey = StringTools.StringAppend(game.platform, "Key", i.ToString());
             if (value != 0)
             {
                 preferences.SetInt(preferencesKey, value);

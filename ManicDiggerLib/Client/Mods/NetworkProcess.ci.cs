@@ -164,7 +164,7 @@ public class ModNetworkProcess : ClientMod
                     if (game.serverGameVersion != game.platform.GetGameVersion())
                     {
                         game.ChatLog("[GAME] Different game versions");
-                        string q = game.platform.StringFormat2(invalidversionstr, game.platform.GetGameVersion(), game.serverGameVersion);
+                        string q = string.Format(invalidversionstr, game.platform.GetGameVersion(), game.serverGameVersion);
                         game.invalidVersionDrawMessage = q;
                         game.invalidVersionPacketIdentification = packet;
                     }
@@ -289,7 +289,7 @@ public class ModNetworkProcess : ClientMod
                     game.playerPositionSpawnX = x;
                     game.playerPositionSpawnY = z;
                     game.playerPositionSpawnZ = y;
-                    game.Log(game.platform.StringFormat(game.language.SpawnPositionSetTo(), game.platform.StringFormat3("{0},{1},{2}", game.platform.IntToString(x), game.platform.IntToString(y), game.platform.IntToString(z))));
+                    game.Log(string.Format(game.language.SpawnPositionSetTo(), string.Format("{0},{1},{2}", x.ToString(), y.ToString(), z.ToString())));
                 }
                 break;
             case Packet_ServerIdEnum.Message:
@@ -300,7 +300,7 @@ public class ModNetworkProcess : ClientMod
                 break;
             case Packet_ServerIdEnum.DisconnectPlayer:
                 {
-                    game.ChatLog(game.platform.StringFormat("[GAME] Disconnected by the server ({0})", packet.DisconnectPlayer.DisconnectReason));
+                    game.ChatLog(string.Format("[GAME] Disconnected by the server ({0})", packet.DisconnectPlayer.DisconnectReason));
                     //Exit mouse pointer lock if necessary
                     if (game.platform.IsMousePointerLocked())
                     {

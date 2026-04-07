@@ -82,7 +82,7 @@ public class FrustumCulling
     /// </summary>
     private Vector4 NormalizePlane(float a, float b, float c, float d)
     {
-        float magnitude = platform.MathSqrt(a * a + b * b + c * c);
+        float magnitude = MathF.Sqrt(a * a + b * b + c * c);
         return new Vector4(a / magnitude, b / magnitude, c / magnitude, d / magnitude);
     }
 }

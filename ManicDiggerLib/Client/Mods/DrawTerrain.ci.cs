@@ -66,9 +66,9 @@ public class ModDrawTerrain : ClientMod
         {
             lastPerformanceInfoupdateMilliseconds = game.platform.TimeMillisecondsFromStart();
             int chunkupdates_ = ChunkUpdates();
-            game.performanceinfo["chunk updates"] = game.platform.StringFormat(game.language.ChunkUpdates(), game.platform.IntToString(chunkupdates_ - lastchunkupdates));
+            game.performanceinfo["chunk updates"] = string.Format(game.language.ChunkUpdates(), (chunkupdates_ - lastchunkupdates).ToString());
             lastchunkupdates = ChunkUpdates();
-            game.performanceinfo["triangles"] = game.platform.StringFormat(game.language.Triangles(), game.platform.IntToString(triangles));
+            game.performanceinfo["triangles"] = string.Format(game.language.Triangles(), triangles.ToString());
         }
     }
 
@@ -79,7 +79,7 @@ public class ModDrawTerrain : ClientMod
 
     public void StartTerrain()
     {
-        sqrt3half = game.platform.MathSqrt(3) * 0.5f;
+        sqrt3half = MathF.Sqrt(3) * 0.5f;
         game.d_TerrainChunkTesselator.Start();
         terrainRendererStarted = true;
         chunksize = Game.chunksize;
@@ -95,11 +95,11 @@ public class ModDrawTerrain : ClientMod
 #if !CITO
     internal int invertChunk(int num)
     {
-        return game.platform.FloatToInt(num * invertedChunkSize);
+        return (int)(num * invertedChunkSize);
     }
 #endif
-    private int mapAreaSize() { return game.platform.FloatToInt(game.d_Config3d.viewdistance) * 2; }
-    private int centerAreaSize() { return game.platform.FloatToInt(game.d_Config3d.viewdistance * 0.5f); }
+    private int mapAreaSize() { return (int)(game.d_Config3d.viewdistance) * 2; }
+    private int centerAreaSize() { return (int)(game.d_Config3d.viewdistance * 0.5f); }
     private int mapAreaSizeZ() { return mapAreaSize(); }
 
     private int mapsizexchunks() { return game.map.Mapsizexchunks; }
@@ -246,16 +246,16 @@ public class ModDrawTerrain : ClientMod
             nearestpos[1] = -1;
             nearestpos[2] = -1;
 #if CITO
-        int px = game.platform.FloatToInt(game.player.position.x) / chunksize;
-        int py = game.platform.FloatToInt(game.player.position.z) / chunksize;
-        int pz = game.platform.FloatToInt(game.player.position.y) / chunksize;
+        int px = (int)(game.player.position.x) / chunksize;
+        int py = (int)(game.player.position.z) / chunksize;
+        int pz = (int)(game.player.position.y) / chunksize;
 
         int chunksxy = this.mapAreaSize()/ chunksize /2;
         int chunksz = this.mapAreaSizeZ()/ chunksize /2;
 #else
-            int px = invertChunk(game.platform.FloatToInt(game.player.position.x));
-            int py = invertChunk(game.platform.FloatToInt(game.player.position.z));
-            int pz = invertChunk(game.platform.FloatToInt(game.player.position.y));
+            int px = invertChunk((int)(game.player.position.x));
+            int py = invertChunk((int)(game.player.position.z));
+            int pz = invertChunk((int)(game.player.position.y));
 
             int chunksxy = invertChunk(this.mapAreaSize()) / 2;
             int chunksz = invertChunk(this.mapAreaSizeZ()) / 2;
@@ -659,16 +659,16 @@ public class ModUnloadRendererChunks : ClientMod
 
         chunksize = Game.chunksize;
         invertedChunk = 1.0f / chunksize;
-        mapsizexchunks = game.platform.FloatToInt(game.map.MapSizeX * invertedChunk);
-        mapsizeychunks = game.platform.FloatToInt(game.map.MapSizeY * invertedChunk);
-        mapsizezchunks = game.platform.FloatToInt(game.map.MapSizeZ * invertedChunk);
+        mapsizexchunks = (int)(game.map.MapSizeX * invertedChunk);
+        mapsizeychunks = (int)(game.map.MapSizeY * invertedChunk);
+        mapsizezchunks = (int)(game.map.MapSizeZ * invertedChunk);
 
-        int px = game.platform.FloatToInt(game.player.position.x * invertedChunk);
-        int py = game.platform.FloatToInt(game.player.position.z * invertedChunk);
-        int pz = game.platform.FloatToInt(game.player.position.y * invertedChunk);
+        int px = (int)(game.player.position.x * invertedChunk);
+        int py = (int)(game.player.position.z * invertedChunk);
+        int pz = (int)(game.player.position.y * invertedChunk);
 
-        int chunksxy = game.platform.FloatToInt(this.mapAreaSize() * invertedChunk * 0.5f);
-        int chunksz = game.platform.FloatToInt(this.mapAreaSizeZ() * invertedChunk * 0.5f);
+        int chunksxy = (int)(this.mapAreaSize() * invertedChunk * 0.5f);
+        int chunksz = (int)(this.mapAreaSizeZ() * invertedChunk * 0.5f);
 
         int startx = px - chunksxy;
         int endx = px + chunksxy;
@@ -733,8 +733,8 @@ public class ModUnloadRendererChunks : ClientMod
         }
     }
 
-    private int mapAreaSize() { return game.platform.FloatToInt(game.d_Config3d.viewdistance) * 2; }
-    private int centerAreaSize() { return game.platform.FloatToInt(game.d_Config3d.viewdistance * 0.5f); }
+    private int mapAreaSize() { return (int)(game.d_Config3d.viewdistance) * 2; }
+    private int centerAreaSize() { return (int)(game.d_Config3d.viewdistance * 0.5f); }
     private int mapAreaSizeZ() { return mapAreaSize(); }
 
     private int mapsizexchunks;

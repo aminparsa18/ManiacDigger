@@ -118,7 +118,7 @@ public class ModDraw2dMisc : ClientMod
         game.Draw2dText(name, font, game.xcenter(w), 40, null, false);
         if (useInfo)
         {
-            name = game.platform.StringFormat(game.language.PressToUse(), "E");
+            name = string.Format(game.language.PressToUse(), "E");
             game.platform.TextSize(name, 10, out w, out h);
             FontCi font2 = new()
             {
@@ -155,7 +155,7 @@ public class ModDraw2dMisc : ClientMod
             {
                 int loaded = game.LoadedAmmo[item.BlockId];
                 int total = game.TotalAmmo[item.BlockId];
-                string s = game.platform.StringFormat2("{0}/{1}", game.platform.IntToString(loaded), game.platform.IntToString(total - loaded));
+                string s = string.Format("{0}/{1}", loaded.ToString(), (total - loaded).ToString());
                 FontCi font = new()
                 {
                     family = "Arial",
@@ -182,15 +182,15 @@ public class ModDraw2dMisc : ClientMod
         {
             float heading = one * game.HeadingByte(game.player.position.rotx, game.player.position.roty, game.player.position.rotz);
             float pitch = one * game.PitchByte(game.player.position.rotx, game.player.position.roty, game.player.position.rotz);
-            string postext = game.platform.StringFormat("X: {0}", game.platform.IntToString(game.MathFloor(game.player.position.x)));
+            string postext = string.Format("X: {0}", game.MathFloor(game.player.position.x).ToString());
             postext = StringTools.StringAppend(game.platform, postext, ",\tY: ");
-            postext = StringTools.StringAppend(game.platform, postext, game.platform.IntToString(game.MathFloor(game.player.position.z)));
+            postext = StringTools.StringAppend(game.platform, postext, game.MathFloor(game.player.position.z).ToString());
             postext = StringTools.StringAppend(game.platform, postext, ",\tZ: ");
-            postext = StringTools.StringAppend(game.platform, postext, game.platform.IntToString(game.MathFloor(game.player.position.y)));
+            postext = StringTools.StringAppend(game.platform, postext, game.MathFloor(game.player.position.y).ToString());
             postext = StringTools.StringAppend(game.platform, postext, "\nHeading: ");
-            postext = StringTools.StringAppend(game.platform, postext, game.platform.IntToString(game.MathFloor(heading)));
+            postext = StringTools.StringAppend(game.platform, postext, game.MathFloor(heading).ToString());
             postext = StringTools.StringAppend(game.platform, postext, "\nPitch: ");
-            postext = StringTools.StringAppend(game.platform, postext, game.platform.IntToString(game.MathFloor(pitch)));
+            postext = StringTools.StringAppend(game.platform, postext, game.MathFloor(pitch).ToString());
             FontCi font = new()
             {
                 family = "Arial",
@@ -213,7 +213,7 @@ public class ModDraw2dMisc : ClientMod
                 family = "Arial",
                 size = 12
             };
-            game.Draw2dText(game.platform.IntToString(game.platform.FloatToInt(lagSeconds)), font, game.Width() - 100, 50 + 50 + 10, null, false);
+            game.Draw2dText(((int)(lagSeconds)).ToString(), font, game.Width() - 100, 50 + 50 + 10, null, false);
             game.Draw2dText("Press F6 to reconnect", font, game.Width() / 2 - 200 / 2, 50, null, false);
         }
     }

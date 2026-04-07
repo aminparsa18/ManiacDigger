@@ -69,11 +69,11 @@
     {
         t += dt * 2 * Game.GetPi() / day_length_in_seconds;
         game.isNight = (t + 2 * Game.GetPi()) % (2 * Game.GetPi()) > Game.GetPi();
-        game.sunPositionX = game.platform.MathCos(t) * 20;
-        game.sunPositionY = game.platform.MathSin(t) * 20;
-        game.sunPositionZ = game.platform.MathSin(t) * 20;
-        game.moonPositionX = game.platform.MathCos(-t) * 20;
-        game.moonPositionY = game.platform.MathSin(-t) * 20;
-        game.moonPositionZ = game.platform.MathSin(t) * 20;
+        game.sunPositionX = MathF.Cos(t) * 20;
+        game.sunPositionY = MathF.Sin(t) * 20;
+        game.sunPositionZ = MathF.Sin(t) * 20;
+        game.moonPositionX = MathF.Cos(-t) * 20;
+        game.moonPositionY = MathF.Sin(-t) * 20;
+        game.moonPositionZ = MathF.Sin(t) * 20;
     }
 }

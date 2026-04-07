@@ -119,7 +119,7 @@ public class WaterSimple : IMod
         float dx = a.X - b.X;
         float dy = a.Y - b.Y;
         float dz = a.Z - b.Z;
-        return (float)Math.Sqrt(dx * dx + dy * dy + dz * dz);
+        return MathF.Sqrt(dx * dx + dy * dy + dz * dz);
     }
 
     private bool IsWater(int block)

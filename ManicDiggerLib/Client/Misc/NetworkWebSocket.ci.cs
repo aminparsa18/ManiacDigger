@@ -13,7 +13,7 @@
     public override NetConnection Connect(string ip, int port)
     {
         p.WebSocketConnect(ip, port);
-        c.address = p.StringFormat2("{0}:{1}", ip, p.IntToString(port));
+        c.address = string.Format("{0}:{1}", ip, port.ToString());
         c.platform = p;
         return c;
     }

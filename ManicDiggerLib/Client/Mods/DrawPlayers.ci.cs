@@ -43,9 +43,9 @@ public class ModDrawPlayers : ClientMod
             {
                 continue;
             }
-            int cx = game.platform.FloatToInt(p_.position.x) / Game.chunksize;
-            int cy = game.platform.FloatToInt(p_.position.z) / Game.chunksize;
-            int cz = game.platform.FloatToInt(p_.position.y) / Game.chunksize;
+            int cx = (int)(p_.position.x) / Game.chunksize;
+            int cy = (int)(p_.position.z) / Game.chunksize;
+            int cz = (int)(p_.position.y) / Game.chunksize;
             if (game.map.IsValidChunkPos(cx, cy, cz))
             {
                 if (!game.map.IsChunkRendered(cx, cy, cz))
@@ -53,7 +53,7 @@ public class ModDrawPlayers : ClientMod
                     continue;
                 }
             }
-            float shadow = (one * game.GetLight(game.platform.FloatToInt(p_.position.x), game.platform.FloatToInt(p_.position.z), game.platform.FloatToInt(p_.position.y))) / Game.maxlight;
+            float shadow = (one * game.GetLight((int)(p_.position.x), (int)(p_.position.z), (int)(p_.position.y))) / Game.maxlight;
             if (p_.playerDrawInfo == null)
             {
                 p_.playerDrawInfo = new PlayerDrawInfo();

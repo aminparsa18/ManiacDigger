@@ -95,7 +95,7 @@ public class ModPicking : ClientMod
             {
                 if (game.blocktypes[item.BlockId].Sounds.ShootCount > 0)
                 {
-                    game.AudioPlay(game.platform.StringFormat("{0}.ogg", game.blocktypes[item.BlockId].Sounds.Shoot[0]));
+                    game.AudioPlay(string.Format("{0}.ogg", game.blocktypes[item.BlockId].Sounds.Shoot[0]));
                 }
             }
         }
@@ -155,22 +155,22 @@ public class ModPicking : ClientMod
             }
         }
         bool playertileempty = game.IsTileEmptyForPhysics(
-                  game.platform.FloatToInt(game.player.position.x),
-                  game.platform.FloatToInt(game.player.position.z),
-                  game.platform.FloatToInt(game.player.position.y + (one / 2)));
+                  (int)(game.player.position.x),
+                  (int)(game.player.position.z),
+                  (int)(game.player.position.y + (one / 2)));
         bool playertileemptyclose = game.IsTileEmptyForPhysicsClose(
-                  game.platform.FloatToInt(game.player.position.x),
-                  game.platform.FloatToInt(game.player.position.z),
-                  game.platform.FloatToInt(game.player.position.y + (one / 2)));
+                  (int)(game.player.position.x),
+                  (int)(game.player.position.z),
+                  (int)(game.player.position.y + (one / 2)));
         BlockPosSide pick0 = new();
         if (pick2count > 0 &&
             ((pickdistanceok && (playertileempty || (playertileemptyclose)))
             || game.overheadcamera)
             )
         {
-            game.SelectedBlockPositionX = game.platform.FloatToInt(pick2[0].Current()[0]);
-            game.SelectedBlockPositionY = game.platform.FloatToInt(pick2[0].Current()[1]);
-            game.SelectedBlockPositionZ = game.platform.FloatToInt(pick2[0].Current()[2]);
+            game.SelectedBlockPositionX = (int)(pick2[0].Current()[0]);
+            game.SelectedBlockPositionY = (int)(pick2[0].Current()[1]);
+            game.SelectedBlockPositionZ = (int)(pick2[0].Current()[2]);
             pick0 = pick2[0];
         }
         else
@@ -186,9 +186,9 @@ public class ModPicking : ClientMod
         PickEntity(game, pick, pick2, pick2count);
         if (game.cameratype == CameraType.Fpp || game.cameratype == CameraType.Tpp)
         {
-            int ntileX = game.platform.FloatToInt(pick0.Current()[0]);
-            int ntileY = game.platform.FloatToInt(pick0.Current()[1]);
-            int ntileZ = game.platform.FloatToInt(pick0.Current()[2]);
+            int ntileX = (int)(pick0.Current()[0]);
+            int ntileY = (int)(pick0.Current()[1]);
+            int ntileZ = (int)(pick0.Current()[2]);
             if (game.IsUsableBlock(game.map.GetBlock(ntileX, ntileZ, ntileY)))
             {
                 game.currentAttackedBlock = new Vector3i(ntileX, ntileZ, ntileY);
@@ -208,7 +208,7 @@ public class ModPicking : ClientMod
         {
             if (left && game.d_Inventory.RightHand[game.ActiveMaterial] == null)
             {
-                game.SendPacketClient(ClientPackets.MonsterHit(game.platform.FloatToInt(2 + game.rnd.Next() * 4)));
+                game.SendPacketClient(ClientPackets.MonsterHit((int)(2 + game.rnd.Next() * 4)));
             }
             if (left && !fastclicking)
             {
@@ -422,7 +422,7 @@ public class ModPicking : ClientMod
                 if (game.blocktypes[item.BlockId].Sounds.ShootEndCount > 0)
                 {
                     game.pistolcycle = game.rnd.Next() % game.blocktypes[item.BlockId].Sounds.ShootEndCount;
-                    game.AudioPlay(game.platform.StringFormat("{0}.ogg", game.blocktypes[item.BlockId].Sounds.ShootEnd[game.pistolcycle]));
+                    game.AudioPlay(string.Format("{0}.ogg", game.blocktypes[item.BlockId].Sounds.ShootEnd[game.pistolcycle]));
                 }
 
                 bulletsshot++;
@@ -447,9 +447,9 @@ public class ModPicking : ClientMod
             {
                 if (middle)
                 {
-                    int newtileX = game.platform.FloatToInt(pick0.Current()[0]);
-                    int newtileY = game.platform.FloatToInt(pick0.Current()[1]);
-                    int newtileZ = game.platform.FloatToInt(pick0.Current()[2]);
+                    int newtileX = (int)(pick0.Current()[0]);
+                    int newtileY = (int)(pick0.Current()[1]);
+                    int newtileZ = (int)(pick0.Current()[2]);
                     if (game.map.IsValidPos(newtileX, newtileZ, newtileY))
                     {
                         int clonesource = game.map.GetBlock(newtileX, newtileZ, newtileY);
@@ -516,15 +516,15 @@ public class ModPicking : ClientMod
                     int newtileZ;
                     if (right)
                     {
-                        newtileX = game.platform.FloatToInt(tile.Translated()[0]);
-                        newtileY = game.platform.FloatToInt(tile.Translated()[1]);
-                        newtileZ = game.platform.FloatToInt(tile.Translated()[2]);
+                        newtileX = (int)(tile.Translated()[0]);
+                        newtileY = (int)(tile.Translated()[1]);
+                        newtileZ = (int)(tile.Translated()[2]);
                     }
                     else
                     {
-                        newtileX = game.platform.FloatToInt(tile.Current()[0]);
-                        newtileY = game.platform.FloatToInt(tile.Current()[1]);
-                        newtileZ = game.platform.FloatToInt(tile.Current()[2]);
+                        newtileX = (int)(tile.Current()[0]);
+                        newtileY = (int)(tile.Current()[1]);
+                        newtileZ = (int)(tile.Current()[2]);
                     }
                     if (game.map.IsValidPos(newtileX, newtileZ, newtileY))
                     {
@@ -571,8 +571,8 @@ public class ModPicking : ClientMod
                                     game.blockHealth.Remove((posx, posy, posz));
                                 }
                                 game.currentAttackedBlock = null;
-                                OnPick(game, game.platform.FloatToInt(newtileX), game.platform.FloatToInt(newtileZ), game.platform.FloatToInt(newtileY),
-                                    game.platform.FloatToInt(tile.Current()[0]), game.platform.FloatToInt(tile.Current()[2]), game.platform.FloatToInt(tile.Current()[1]),
+                                OnPick(game, (int)(newtileX), (int)(newtileZ), (int)(newtileY),
+                                    (int)(tile.Current()[0]), (int)(tile.Current()[2]), (int)(tile.Current()[1]),
                                     tile.collisionPos,
                                     right);
                             }
@@ -587,8 +587,8 @@ public class ModPicking : ClientMod
                         {
                             game.platform.ThrowException("Error in picking - NextBullet()");
                         }
-                        OnPick(game, game.platform.FloatToInt(newtileX), game.platform.FloatToInt(newtileZ), game.platform.FloatToInt(newtileY),
-                            game.platform.FloatToInt(tile.Current()[0]), game.platform.FloatToInt(tile.Current()[2]), game.platform.FloatToInt(tile.Current()[1]),
+                        OnPick(game, (int)(newtileX), (int)(newtileZ), (int)(newtileY),
+                            (int)(tile.Current()[0]), (int)(tile.Current()[2]), (int)(tile.Current()[1]),
                             tile.collisionPos,
                             right);
                         //network.SendSetBlock(new Vector3((int)newtile.X, (int)newtile.Z, (int)newtile.Y),
@@ -648,9 +648,9 @@ public class ModPicking : ClientMod
             }
             activematerial = railstart + (dir | DirectionUtils.ToRailDirectionFlags(dirnew));
         }
-        int x = game.platform.FloatToInt(blockposX);
-        int y = game.platform.FloatToInt(blockposY);
-        int z = game.platform.FloatToInt(blockposZ);
+        int x = (int)(blockposX);
+        int y = (int)(blockposY);
+        int z = (int)(blockposZ);
         int mode = right ? Packet_BlockSetModeEnum.Create : Packet_BlockSetModeEnum.Destroy;
         {
             if (game.IsAnyPlayerInPos(x, y, z) || activematerial == 151) // Compass
@@ -746,7 +746,7 @@ public class ModPicking : ClientMod
     {
         foreach (var ((x, y, z), value) in fillarea)
         {
-            game.SetBlock(x, y, z, game.platform.FloatToInt(value));
+            game.SetBlock(x, y, z, (int)(value));
             game.RedrawBlock(x, y, z);
         }
         fillarea.Clear();
@@ -949,8 +949,8 @@ public class ModPicking : ClientMod
         PointF aim = GetAim(game);
         if (ispistolshoot && (aim.X != 0 || aim.Y != 0))
         {
-            mouseX += game.platform.FloatToInt(aim.X);
-            mouseY += game.platform.FloatToInt(aim.Y);
+            mouseX += (int)(aim.X);
+            mouseY += (int)(aim.Y);
         }
 
         tempViewport[0] = 0;
@@ -992,7 +992,7 @@ public class ModPicking : ClientMod
         {
             x = (game.rnd.Next() - half) * game.CurrentAimRadius() * 2;
             y = (game.rnd.Next() - half) * game.CurrentAimRadius() * 2;
-            float dist1 = game.platform.MathSqrt(x * x + y * y);
+            float dist1 = MathF.Sqrt(x * x + y * y);
             if (dist1 <= game.CurrentAimRadius())
             {
                 break;

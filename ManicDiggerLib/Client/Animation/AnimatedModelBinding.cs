@@ -76,46 +76,46 @@ public class AnimatedModelBinding : ITableBinding
             Node k = m.nodes[index];
             items["name"] = k.Name;
             items["paren"] = k.ParentName;
-            items["x"] = p.FloatToString(k.PosX);
-            items["y"] = p.FloatToString(k.PosY);
-            items["z"] = p.FloatToString(k.PosZ);
-            items["rotx"] = p.FloatToString(k.RotateX);
-            items["roty"] = p.FloatToString(k.RotateY);
-            items["rotz"] = p.FloatToString(k.RotateZ);
-            items["sizex"] = p.FloatToString(k.SizeX);
-            items["sizey"] = p.FloatToString(k.SizeY);
-            items["sizez"] = p.FloatToString(k.SizeZ);
-            items["u"] = p.FloatToString(k.U);
-            items["v"] = p.FloatToString(k.V);
-            items["pivx"] = p.FloatToString(k.PivotX);
-            items["pivy"] = p.FloatToString(k.PivotY);
-            items["pivz"] = p.FloatToString(k.PivotZ);
-            items["scalx"] = p.FloatToString(k.ScaleX);
-            items["scaly"] = p.FloatToString(k.ScaleY);
-            items["scalz"] = p.FloatToString(k.ScaleZ);
-            items["head"] = p.FloatToString(k.Head);
+            items["x"] = k.PosX.ToString();
+            items["y"] = k.PosY.ToString();
+            items["z"] = k.PosZ.ToString();
+            items["rotx"] = k.RotateX.ToString();
+            items["roty"] = k.RotateY.ToString();
+            items["rotz"] = k.RotateZ.ToString();
+            items["sizex"] = k.SizeX.ToString();
+            items["sizey"] = k.SizeY.ToString();
+            items["sizez"] = k.SizeZ.ToString();
+            items["u"] = k.U.ToString();
+            items["v"] = k.V.ToString();
+            items["pivx"] = k.PivotX.ToString();
+            items["pivy"] = k.PivotY.ToString();
+            items["pivz"] = k.PivotZ.ToString();
+            items["scalx"] = k.ScaleX.ToString();
+            items["scaly"] = k.ScaleY.ToString();
+            items["scalz"] = k.ScaleZ.ToString();
+            items["head"] = k.Head.ToString();
         }
         if (table == "keyframes")
         {
             Keyframe k = m.Keyframes[index];
             items["anim"] = k.AnimationName;
             items["node"] = k.NodeName;
-            items["frame"] = p.IntToString(k.Frame);
+            items["frame"] = k.Frame.ToString();
             items["type"] = k.Type.ToSerializedName(); // was k.Type.ToString() — would break round-trip
-            items["x"] = p.FloatToString(k.X);
-            items["y"] = p.FloatToString(k.Y);
-            items["z"] = p.FloatToString(k.Z);
+            items["x"] = k.X.ToString();
+            items["y"] = k.Y.ToString();
+            items["z"] = k.Z.ToString();
         }
         if (table == "animations")
         {
             Animation k = m.Animations[index];
             items["name"] = k.Name;
-            items["len"] = p.IntToString(k.Length);
+            items["len"] = k.Length.ToString();
         }
         if (table == "global")
         {
-            items["texw"] = p.IntToString(m.Global.TexW);
-            items["texh"] = p.IntToString(m.Global.TexH);
+            items["texw"] = m.Global.TexW.ToString();
+            items["texh"] = m.Global.TexH.ToString();
         }
     }
 
@@ -129,8 +129,12 @@ public class AnimatedModelBinding : ITableBinding
     }
 
     /// <summary>Parses a string to int via float intermediary, as required by <see cref="GamePlatform"/>.</summary>
-    private int IntParse(string s) => p.FloatToInt(FloatParse(s));
+    private int IntParse(string s) => (int)(FloatParse(s));
 
     /// <summary>Parses a string to float using <see cref="GamePlatform"/>, returning 0 on failure.</summary>
-    private float FloatParse(string s) { p.FloatTryParse(s, out float ret); return ret; }
+    private static float FloatParse(string s)
+    {
+        _ = float.TryParse(s, out float ret);
+        return ret;
+    }
 }

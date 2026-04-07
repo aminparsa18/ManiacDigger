@@ -87,7 +87,7 @@ public class ClientPacketHandlerEntitySpawn : ClientPacketHandler
             old.drawName = new DrawName();
             if (entity.DrawName_.Color != null)
             {
-               old.drawName.Name = game.platform.StringFormat2("{0}{1}", entity.DrawName_.Color, entity.DrawName_.Name);
+               old.drawName.Name = string.Format("{0}{1}", entity.DrawName_.Color, entity.DrawName_.Name);
             }
             else
             {
@@ -95,7 +95,7 @@ public class ClientPacketHandlerEntitySpawn : ClientPacketHandler
             }
             if (!game.platform.StringStartsWithIgnoreCase(old.drawName.Name, "&"))
             {
-                old.drawName.Name = game.platform.StringFormat("&f{0}", old.drawName.Name);
+                old.drawName.Name = string.Format("&f{0}", old.drawName.Name);
             }
             old.drawName.OnlyWhenSelected = entity.DrawName_.OnlyWhenSelected;
             old.drawName.ClientAutoComplete = entity.DrawName_.ClientAutoComplete;

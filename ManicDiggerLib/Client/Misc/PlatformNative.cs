@@ -24,74 +24,6 @@ using Vector3 = OpenTK.Mathematics.Vector3;
 public class GamePlatformNative : GamePlatform
 {
     #region Primitive
-    public override int FloatToInt(float value)
-    {
-        return (int)value;
-    }
-
-    public override float MathSin(float a)
-    {
-        return (float)Math.Sin(a);
-    }
-
-    public override float MathCos(float a)
-    {
-        return (float)Math.Cos(a);
-    }
-
-    public override float MathSqrt(float value)
-    {
-        return (float)Math.Sqrt(value);
-    }
-
-    public override float MathAcos(float p)
-    {
-        return (float)Math.Acos(p);
-    }
-
-    public override float MathTan(float p)
-    {
-        return (float)Math.Tan(p);
-    }
-
-    public override float FloatModulo(float a, int b)
-    {
-        return a % b;
-    }
-
-    public override int IntParse(string value)
-    {
-        return int.Parse(value);
-    }
-
-    public override float FloatParse(string value)
-    {
-        return float.Parse(value);
-    }
-
-    public override bool FloatTryParse(string s, out float ret)
-    {
-        if (float.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out float f))
-        {
-            ret = f;
-            return true;
-        }
-        else
-        {
-            ret = 0;
-            return false;
-        }
-    }
-
-    public override string IntToString(int value)
-    {
-        return value.ToString();
-    }
-
-    public override string FloatToString(float value)
-    {
-        return value.ToString(CultureInfo.InvariantCulture);
-    }
 
     public override string StringToLower(string p)
     {
@@ -149,25 +81,6 @@ public class GamePlatformNative : GamePlatform
         return value.Trim();
     }
 
-    public override string StringFormat(string format, string arg0)
-    {
-        return string.Format(format, arg0);
-    }
-
-    public override string StringFormat2(string format, string arg0, string arg1)
-    {
-        return string.Format(format, arg0, arg1);
-    }
-
-    public override string StringFormat3(string format, string arg0, string arg1, string arg2)
-    {
-        return string.Format(format, arg0, arg1, arg2);
-    }
-
-    public override string StringFormat4(string format, string arg0, string arg1, string arg2, string arg3)
-    {
-        return string.Format(format, arg0, arg1, arg2, arg3);
-    }
 
     public override byte[] StringToUtf8ByteArray(string s, out int retLength)
     {

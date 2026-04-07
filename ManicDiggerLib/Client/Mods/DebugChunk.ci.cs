@@ -23,9 +23,9 @@
     {
         if (draw)
         {
-            lines.DrawWireframeCube_(game, game.platform.FloatToInt(game.player.position.x / Game.chunksize) * Game.chunksize + 8,
-                game.platform.FloatToInt(game.player.position.y / Game.chunksize) * Game.chunksize + Game.chunksize / 2,
-                game.platform.FloatToInt(game.player.position.z / Game.chunksize) * Game.chunksize + Game.chunksize / 2, Game.chunksize, Game.chunksize, Game.chunksize);
+            lines.DrawWireframeCube_(game, (int)(game.player.position.x / Game.chunksize) * Game.chunksize + 8,
+                (int)(game.player.position.y / Game.chunksize) * Game.chunksize + Game.chunksize / 2,
+                (int)(game.player.position.z / Game.chunksize) * Game.chunksize + Game.chunksize / 2, Game.chunksize, Game.chunksize, Game.chunksize);
         }
     }
 }

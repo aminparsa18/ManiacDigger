@@ -661,7 +661,7 @@ public class War : IMod
             float dx = x1 - x2;
             float dy = y1 - y2;
             float dz = z1 - z2;
-            float dist = (float)Math.Sqrt(dx * dx + dy * dy + dz * dz);
+            float dist = MathF.Sqrt(dx * dx + dy * dy + dz * dz);
             dx = (dx / dist) * 0.1f;
             dy = (dy / dist) * 0.1f;
             dz = (dz / dist) * 0.1f;

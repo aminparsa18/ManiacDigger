@@ -131,9 +131,9 @@ public class BlockOctreeSearcher
         for (int i = 0; i < candidates.Count; i++)
         {
             Box3 node = candidates[i];
-            int bx = platform.FloatToInt(node.Min.X);
-            int by = platform.FloatToInt(node.Min.Z); // note: Y/Z are swapped in world space
-            int bz = platform.FloatToInt(node.Min.Y);
+            int bx = (int)node.Min.X;
+            int by = (int)node.Min.Z; // note: Y/Z are swapped in world space
+            int bz = (int)node.Min.Y;
 
             if (isEmpty(bx, by, bz)) { continue; }
 

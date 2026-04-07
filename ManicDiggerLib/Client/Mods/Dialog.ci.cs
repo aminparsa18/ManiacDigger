@@ -245,7 +245,7 @@ public class ClientPacketHandlerDialog : ClientPacketHandler
             }
             if (b.text != null)
             {
-                b.text = game.platform.StringReplace(b.text, "!SERVER_PORT!", game.platform.IntToString(game.ServerInfo.connectdata.Port));
+                b.text = game.platform.StringReplace(b.text, "!SERVER_PORT!", game.ServerInfo.connectdata.Port.ToString());
             }
             b.color = a.Color;
             if (a.Font != null)

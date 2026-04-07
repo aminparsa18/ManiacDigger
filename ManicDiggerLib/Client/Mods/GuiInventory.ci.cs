@@ -44,16 +44,16 @@ public class ModGuiInventory : ClientMod
     public int InventoryStartY() { return game.Height() / 2 - 600 / 2; }
     public int CellsStartX() { return 33 + InventoryStartX(); }
     public int CellsStartY() { return 180 + InventoryStartY(); }
-    private int MaterialSelectorStartX() { return game.platform.FloatToInt(MaterialSelectorBackgroundStartX() + 17 * game.Scale()); }
-    private int MaterialSelectorStartY() { return game.platform.FloatToInt(MaterialSelectorBackgroundStartY() + 17 * game.Scale()); }
-    private int MaterialSelectorBackgroundStartX() { return game.platform.FloatToInt(game.Width() / 2 - (512 / 2) * game.Scale()); }
-    private int MaterialSelectorBackgroundStartY() { return game.platform.FloatToInt(game.Height() - 90 * game.Scale()); }
+    private int MaterialSelectorStartX() { return (int)(MaterialSelectorBackgroundStartX() + 17 * game.Scale()); }
+    private int MaterialSelectorStartY() { return (int)(MaterialSelectorBackgroundStartY() + 17 * game.Scale()); }
+    private int MaterialSelectorBackgroundStartX() { return (int)(game.Width() / 2 - (512 / 2) * game.Scale()); }
+    private int MaterialSelectorBackgroundStartY() { return (int)(game.Height() - 90 * game.Scale()); }
     private readonly int CellCountInPageX;
     private readonly int CellCountInPageY;
     private readonly int CellCountTotalX;
     private readonly int CellCountTotalY;
 
-    public int ActiveMaterialCellSize() { return game.platform.FloatToInt(48 * game.Scale()); }
+    public int ActiveMaterialCellSize() { return (int)(48 * game.Scale()); }
 
     public override void OnKeyPress(Game game_, KeyPressEventArgs args)
     {
@@ -453,7 +453,7 @@ public class ModGuiInventory : ClientMod
 
     public void DrawMaterialSelector()
     {
-        game.Draw2dBitmapFile("materials.png", MaterialSelectorBackgroundStartX(), MaterialSelectorBackgroundStartY(), game.platform.FloatToInt(1024 * game.Scale()), game.platform.FloatToInt(128 * game.Scale()));
+        game.Draw2dBitmapFile("materials.png", MaterialSelectorBackgroundStartX(), MaterialSelectorBackgroundStartY(), (int)(1024 * game.Scale()), (int)(128 * game.Scale()));
         int materialSelectorStartX_ = MaterialSelectorStartX();
         int materialSelectorStartY_ = MaterialSelectorStartY();
         for (int i = 0; i < 10; i++)
@@ -522,7 +522,7 @@ public class ModGuiInventory : ClientMod
                     size = 8,
                     family = "Arial"
                 };
-                game.Draw2dText(game.platform.IntToString(item.BlockCount), font, screenposX, screenposY, null, false);
+                game.Draw2dText(item.BlockCount.ToString(), font, screenposX, screenposY, null, false);
             }
         }
         else
@@ -540,8 +540,8 @@ public class ModGuiInventory : ClientMod
         game.platform.TextSize(dataItems.ItemInfo(item), 11 + one / 2, out int tw, out int th);
         tw += 6;
         th += 4;
-        int w = game.platform.FloatToInt(tw + CellDrawSize * sizex);
-        int h = game.platform.FloatToInt(th < CellDrawSize * sizey ? CellDrawSize * sizey + 4 : th);
+        int w = (int)(tw + CellDrawSize * sizex);
+        int h = (int)(th < CellDrawSize * sizey ? CellDrawSize * sizey + 4 : th);
         if (screenposX < w + 20) { screenposX = w + 20; }
         if (screenposY < h + 20) { screenposY = h + 20; }
         if (screenposX > game.Width() - (w + 20)) { screenposX = game.Width() - (w + 20); }
@@ -567,7 +567,7 @@ public class ModGuiInventory : ClientMod
         if ((game_.guistate == GuiState.Normal || (game_.guistate == GuiState.Inventory && !IsMouseOverCells()))
             && (!game_.keyboardState[game_.GetKey(Keys.LeftShift)]))
         {
-            game_.ActiveMaterial -= game_.platform.FloatToInt(delta);
+            game_.ActiveMaterial -= (int)(delta);
             game_.ActiveMaterial = game_.ActiveMaterial % 10;
             while (game_.ActiveMaterial < 0)
             {

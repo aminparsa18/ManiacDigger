@@ -74,8 +74,8 @@
         {
             if (game.cameratype == CameraType.Fpp || game.cameratype == CameraType.Tpp)
             {
-                game.Draw2dText1("Move", game.Width() * 5 / 100, game.Height() * 85 / 100, game.platform.FloatToInt(Scale() * 50), null, false);
-                game.Draw2dText1("Look", game.Width() * 80 / 100, game.Height() * 85 / 100, game.platform.FloatToInt(Scale() * 50), null, false);
+                game.Draw2dText1("Move", game.Width() * 5 / 100, game.Height() * 85 / 100, (int)(Scale() * 50), null, false);
+                game.Draw2dText1("Look", game.Width() * 80 / 100, game.Height() * 85 / 100, (int)(Scale() * 50), null, false);
             }
             DrawWidgets();
         }
