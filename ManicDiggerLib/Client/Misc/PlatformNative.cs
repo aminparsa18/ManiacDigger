@@ -2260,7 +2260,7 @@ public class AssetLoader
         }
     }
 
-    private readonly MD5CryptoServiceProvider sha1 = new();
+    private readonly MD5 sha1 = MD5.Create();
     private string Md5(byte[] data)
     {
         string hash = ToHex(sha1.ComputeHash(data), false);
