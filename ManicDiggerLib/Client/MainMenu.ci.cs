@@ -539,7 +539,7 @@ public class MainMenu
         int count = 0;
         for (int i = 0; i < length; i++)
         {
-            if(StringEndsWith(files[i], ".mddbs"))
+            if(files[i].EndsWith(".mddbs"))
             {
                 savegames[count++] = files[i];
             }
@@ -548,10 +548,7 @@ public class MainMenu
         return savegames;
     }
 
-    public bool StringEndsWith(string s, string value)
-    {
-        return StringTools.StringSubstring(p, s, s.Length - value.Length, value.Length) == value;
-    }
+
 
 
     public string CharToString(int a)
@@ -700,7 +697,7 @@ public class Screen
                     {
                         if (w.text.Length > 0)
                         {
-                            w.text = StringTools.StringSubstring(menu.p, w.text, 0, w.text.Length - 1);
+                            w.text = w.text[..^1];
                         }
                         return;
                     }

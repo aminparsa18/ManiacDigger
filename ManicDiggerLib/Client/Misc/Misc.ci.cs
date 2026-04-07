@@ -83,21 +83,6 @@ public class StringTools
 {
     public static string CharArrayToString(int[] charArray, int length)
         => new(Array.ConvertAll(charArray, c => (char)c), 0, length);
-
-    public static string StringSubstring(GamePlatform p, string a, int start, int count)
-    {
-        return a[start..(start + count)];
-    }
-
-    public static string StringSubstringToEnd(GamePlatform p, string a, int start)
-    {
-        return StringSubstring(p, a, start, a.Length - start);
-    }
-
-    public static bool StringStartsWith(GamePlatform p, string s, string b)
-    {
-        return StringSubstring(p, s, 0, b.Length) == b;
-    }
 }
 
 public class MiscCi
@@ -428,18 +413,9 @@ public class GameVersionHelper
         {
             return max;
         }
-        if (float.TryParse(StringTools.StringSubstring(platform, version, 0, 4), out float year))
+        if (DateTime.TryParseExact(version[..10], "yyyy.MM.dd", null, System.Globalization.DateTimeStyles.None, out DateTime date))
         {
-            if (float.TryParse(StringTools.StringSubstring(platform, version, 5, 2), out float month))
-            {
-                if (float.TryParse(StringTools.StringSubstring(platform, version, 8, 2), out float day))
-                {
-                    int year_ = (int)(year);
-                    int month_ = (int)(month);
-                    int day_ = (int)(day);
-                    return year_ * 10000 + month_ * 100 + day_;
-                }
-            }
+            return date.Year * 10000 + date.Month * 100 + date.Day;
         }
         return max;
     }

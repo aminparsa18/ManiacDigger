@@ -1185,10 +1185,11 @@ public class Game
                 {
                     displayLength = s.Length - (i * ChatLineLength);
                 }
+                string chunk = s.Substring(i * ChatLineLength, displayLength);
                 if (containsLink)
-                    ChatLinesAdd(Chatline.CreateClickable(StringTools.StringSubstring(game.platform, s, i * ChatLineLength, displayLength), now, linkTarget));
+                    ChatLinesAdd(Chatline.CreateClickable(chunk, now, linkTarget));
                 else
-                    ChatLinesAdd(Chatline.Create(StringTools.StringSubstring(game.platform, s, i * ChatLineLength, displayLength), now));
+                    ChatLinesAdd(Chatline.Create(chunk, now));
             }
         }
         else
@@ -2834,11 +2835,10 @@ public class Game
         }
 
         string[] ss = s_.Split(' ');
-        if (StringTools.StringStartsWith(platform, s_, "."))
+        if (s_.StartsWith("."))
         {
-            //Client command starting with a "."
             string strFreemoveNotAllowed = language.FreemoveNotAllowed();
-            string cmd = StringTools.StringSubstringToEnd(platform, ss[0], 1);
+            string cmd = ss[0][1..];
             string arguments;
             if (!s_.Contains(" ", StringComparison.InvariantCultureIgnoreCase))
             {
@@ -2846,7 +2846,7 @@ public class Game
             }
             else
             {
-                arguments = StringTools.StringSubstringToEnd(platform, s_, s_.IndexOf(" ", StringComparison.InvariantCultureIgnoreCase));
+                arguments = s_[s_.IndexOf(" ", StringComparison.InvariantCultureIgnoreCase)..];
             }
             arguments = arguments.Trim();
 
@@ -2992,7 +2992,7 @@ public class Game
             else
             {
                 //Send client command to server if none matches
-                string chatline = StringTools.StringSubstring(platform, GuiTypingBuffer, 0, Math.Min(GuiTypingBuffer.Length, 256));
+                string chatline = GuiTypingBuffer[..Math.Min(GuiTypingBuffer.Length, 256)];
                 SendChat(chatline);
             }
             //Process clientside mod commands anyway
@@ -3009,7 +3009,7 @@ public class Game
         else
         {
             //Regular chat message or server command. Send to server
-            string chatline = StringTools.StringSubstring(platform, GuiTypingBuffer, 0, Math.Min(GuiTypingBuffer.Length, 4096));
+            string chatline = GuiTypingBuffer[..Math.Min(GuiTypingBuffer.Length, 4096)];
             SendChat(chatline);
         }
     }

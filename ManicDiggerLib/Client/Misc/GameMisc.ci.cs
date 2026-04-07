@@ -42,7 +42,7 @@ public class GameScreen : ClientMod
                         {
                             if (w.text.Length > 0)
                             {
-                                w.text = StringTools.StringSubstring(game.platform, w.text, 0, w.text.Length - 1);
+                                w.text = w.text[..^1];
                             }
                             return;
                         }

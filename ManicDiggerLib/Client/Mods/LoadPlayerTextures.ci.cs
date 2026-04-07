@@ -54,7 +54,7 @@ public class ModLoadPlayerTextures : ClientMod
                 if (e.drawModel.SkinDownloadResponse == null)
                 {
                     e.drawModel.SkinDownloadResponse = new HttpResponseCi();
-                    string url = string.Concat(skinserver, StringTools.StringSubstringToEnd(game.platform, e.drawName.Name, 2));
+                    string url = string.Concat(skinserver, e.drawName.Name[2..]);
                     url = string.Concat(url, ".png");
                     game.platform.WebClientDownloadDataAsync(url, e.drawModel.SkinDownloadResponse);
                     continue;

@@ -204,7 +204,7 @@ public class ModGuiChat : ClientMod
             {
                 if (game.GuiTypingBuffer.Length > 0)
                 {
-                    game.GuiTypingBuffer = StringTools.StringSubstring(game.platform, game.GuiTypingBuffer, 0, game.GuiTypingBuffer.Length - 1);
+                    game.GuiTypingBuffer = game.GuiTypingBuffer[..^1];
                 }
                 args.SetHandled(true);
                 return;
@@ -323,9 +323,9 @@ public class ModGuiChat : ClientMod
                 if (!entity.drawName.ClientAutoComplete) { continue; }
                 DrawName p = entity.drawName;
                 //Use substring here because player names are internally in format &xNAME (so we need to cut first 2 characters)
-                if (StringTools.StringSubstringToEnd(game.platform, p.Name, 2).StartsWith(text, StringComparison.InvariantCultureIgnoreCase))
+                if (p.Name[2..].StartsWith(text, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    return StringTools.StringSubstringToEnd(game.platform, p.Name, 2);
+                    return p.Name[2..];
                 }
             }
         }
