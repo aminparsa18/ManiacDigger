@@ -46,7 +46,7 @@ public class InventoryUtils
 
         if (item.ItemClass == Packet_ItemClassEnum.Block)
         {
-            string key = StringTools.StringAppend(_game.platform, "Block_", _game.blocktypes[item.BlockId].Name);
+            string key = string.Concat("Block_", _game.blocktypes[item.BlockId].Name);
             return _game.language.Get(key);
         }
 

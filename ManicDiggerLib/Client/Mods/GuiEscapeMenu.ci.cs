@@ -752,7 +752,7 @@ public class ModGuiEscapeMenu : ClientMod
 
         for (int i = 0; i < 256; i++)
         {
-            string preferencesKey = StringTools.StringAppend(game.platform, "Key", i.ToString());
+            string preferencesKey = string.Concat("Key", i.ToString());
             int value = preferences.GetInt(preferencesKey, 0);
             if (value != 0)
             {
@@ -807,7 +807,7 @@ public class ModGuiEscapeMenu : ClientMod
 
         for (int i = 0; i < 256; i++)
         {
-            int value = options.Keys[i];string preferencesKey = StringTools.StringAppend(game.platform, "Key", i.ToString());
+            int value = options.Keys[i];string preferencesKey = string.Concat(game.platform, "Key", i.ToString());
             if (value != 0)
             {
                 preferences.SetInt(preferencesKey, value);

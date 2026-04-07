@@ -691,7 +691,7 @@ public class Screen
                     {
                         if (Clipboard.ContainsText())
                         {
-                            w.text = StringTools.StringAppend(menu.p, w.text, Clipboard.GetText());
+                            w.text = string.Concat(w.text, Clipboard.GetText());
                         }
                         return;
                     }
@@ -722,7 +722,7 @@ public class Screen
                     {
                         if (menu.p.IsValidTypingChar(e.GetKeyChar()))
                         {
-                            w.text = StringTools.StringAppend(menu.p, w.text, menu.CharToString(e.GetKeyChar()));
+                            w.text = string.Concat(w.text, menu.CharToString(e.GetKeyChar()));
                         }
                     }
                 }
@@ -842,7 +842,7 @@ public class Screen
                 string text = w.text;
                 if (w.selected)
                 {
-                    text = StringTools.StringAppend(menu.p, "&2", text);
+                    text = string.Concat("&2", text);
                 }
                 if (w.type == WidgetType.Button)
                 {
@@ -868,10 +868,10 @@ public class Screen
                         if (w.selected)
                         {
                             //Highlight text if selected
-                            strings[0] = StringTools.StringAppend(menu.p, "&2", strings[0]);
-                            strings[1] = StringTools.StringAppend(menu.p, "&2", strings[1]);
-                            strings[2] = StringTools.StringAppend(menu.p, "&2", strings[2]);
-                            strings[3] = StringTools.StringAppend(menu.p, "&2", strings[3]);
+                            strings[0] = string.Concat("&2", strings[0]);
+                            strings[1] = string.Concat("&2", strings[1]);
+                            strings[2] = string.Concat("&2", strings[2]);
+                            strings[3] = string.Concat("&2", strings[3]);
                         }
                         menu.DrawServerButton(strings[0], strings[1], strings[2], strings[3], w.x, w.y, w.sizex, w.sizey, w.image);
                         if (w.description != null)
@@ -894,7 +894,7 @@ public class Screen
                     }
                     if (w.editing)
                     {
-                        text = StringTools.StringAppend(menu.p, text, "_");
+                        text = string.Concat(text, "_");
                     }
                     if (w.buttonStyle == ButtonStyle.Text)
                     {

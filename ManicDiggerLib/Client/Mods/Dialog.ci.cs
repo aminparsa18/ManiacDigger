@@ -265,7 +265,7 @@ public class ClientPacketHandlerDialog : ClientPacketHandler
             }
             else if (a.Image != null)
             {
-                b.image = StringTools.StringAppend(game.platform, a.Image, ".png");
+                b.image = string.Concat(a.Image, ".png");
             }
             s.widgets[i] = b;
         }

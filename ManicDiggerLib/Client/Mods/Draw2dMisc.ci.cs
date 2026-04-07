@@ -66,9 +66,9 @@ public class ModDraw2dMisc : ClientMod
             float progress = health / game.d_Data.Strength()[blocktype];
             if (game.IsUsableBlock(blocktype))
             {
-                DrawEnemyHealthUseInfo(game, game.language.Get(StringTools.StringAppend(game.platform, "Block_", game.blocktypes[blocktype].Name)), progress, true);
+                DrawEnemyHealthUseInfo(game, game.language.Get(string.Concat("Block_", game.blocktypes[blocktype].Name)), progress, true);
             }
-            DrawEnemyHealthCommon(game, game.language.Get(StringTools.StringAppend(game.platform, "Block_", game.blocktypes[blocktype].Name)), progress);
+            DrawEnemyHealthCommon(game, game.language.Get(string.Concat("Block_", game.blocktypes[blocktype].Name)), progress);
         }
         if (game.currentlyAttackedEntity != -1)
         {
@@ -183,14 +183,14 @@ public class ModDraw2dMisc : ClientMod
             float heading = one * game.HeadingByte(game.player.position.rotx, game.player.position.roty, game.player.position.rotz);
             float pitch = one * game.PitchByte(game.player.position.rotx, game.player.position.roty, game.player.position.rotz);
             string postext = string.Format("X: {0}", game.MathFloor(game.player.position.x).ToString());
-            postext = StringTools.StringAppend(game.platform, postext, ",\tY: ");
-            postext = StringTools.StringAppend(game.platform, postext, game.MathFloor(game.player.position.z).ToString());
-            postext = StringTools.StringAppend(game.platform, postext, ",\tZ: ");
-            postext = StringTools.StringAppend(game.platform, postext, game.MathFloor(game.player.position.y).ToString());
-            postext = StringTools.StringAppend(game.platform, postext, "\nHeading: ");
-            postext = StringTools.StringAppend(game.platform, postext, game.MathFloor(heading).ToString());
-            postext = StringTools.StringAppend(game.platform, postext, "\nPitch: ");
-            postext = StringTools.StringAppend(game.platform, postext, game.MathFloor(pitch).ToString());
+            postext = string.Concat(postext, ",\tY: ");
+            postext = string.Concat(postext, game.MathFloor(game.player.position.z).ToString());
+            postext = string.Concat(postext, ",\tZ: ");
+            postext = string.Concat(postext, game.MathFloor(game.player.position.y).ToString());
+            postext = string.Concat(postext, "\nHeading: ");
+            postext = string.Concat(postext, game.MathFloor(heading).ToString());
+            postext = string.Concat(postext, "\nPitch: ");
+            postext = string.Concat(postext, game.MathFloor(pitch).ToString());
             FontCi font = new()
             {
                 family = "Arial",

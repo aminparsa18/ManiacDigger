@@ -84,11 +84,6 @@ public class StringTools
     public static string CharArrayToString(int[] charArray, int length)
         => new(Array.ConvertAll(charArray, c => (char)c), 0, length);
 
-    public static string StringAppend(GamePlatform p, string a, string b)
-    {
-        return string.Concat(a, b);
-    }
-
     public static string StringSubstring(GamePlatform p, string a, int start, int count)
     {
         return a[start..(start + count)];

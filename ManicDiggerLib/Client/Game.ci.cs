@@ -3282,7 +3282,7 @@ public class Game
             {
                 continue;
             }
-            byte[] fileData = GetFile(StringTools.StringAppend(platform, textureIds[i], ".png"));
+            byte[] fileData = GetFile(string.Concat(textureIds[i], ".png"));
             fileData ??= GetFile("Unknown.png");
             if (fileData == null)
             {

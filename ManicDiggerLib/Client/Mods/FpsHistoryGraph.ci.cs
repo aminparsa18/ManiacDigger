@@ -51,8 +51,8 @@ public class ModFpsHistoryGraph : ClientMod
         {
             string fpstext1 = "";
             lasttitleupdateMilliseconds = p.TimeMillisecondsFromStart();
-            fpstext1 = StringTools.StringAppend(p, fpstext1, string.Format("FPS: {0}", ((int)((one * fpscount) / elapsed)).ToString()));
-            fpstext1 = StringTools.StringAppend(p, fpstext1, string.Format(" (min: {0})", ((int)(one / longestframedt)).ToString()));
+            fpstext1 = string.Concat( fpstext1, string.Format("FPS: {0}", ((int)((one * fpscount) / elapsed)).ToString()));
+            fpstext1 = string.Concat(fpstext1, string.Format(" (min: {0})", ((int)(one / longestframedt)).ToString()));
             longestframedt = 0;
             fpscount = 0;
             m.GetPerformanceInfo()["fps"] = fpstext1;
@@ -68,14 +68,14 @@ public class ModFpsHistoryGraph : ClientMod
             int perline = 2;
             for (int i = 0; i < lCount; i++)
             {
-                s = StringTools.StringAppend(p, s, l[i]);
+                s = string.Concat(s, l[i]);
                 if ((i % perline == 0) && (i != lCount - 1))
                 {
-                    s = StringTools.StringAppend(p, s, ", ");
+                    s = string.Concat(s, ", ");
                 }
                 if (i % perline != 0)
                 {
-                    s = StringTools.StringAppend(p, s, "\n");
+                    s = string.Concat(s, "\n");
                 }
             }
             fpstext = s;

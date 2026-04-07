@@ -215,7 +215,7 @@ public class ModGuiChat : ClientMod
                 {
                     if (Clipboard.ContainsText())
                     {
-                        game.GuiTypingBuffer = StringTools.StringAppend(game.platform, game.GuiTypingBuffer, Clipboard.GetText());
+                        game.GuiTypingBuffer = string.Concat(game.GuiTypingBuffer, Clipboard.GetText());
                     }
                     args.SetHandled(true);
                     return;
@@ -259,13 +259,13 @@ public class ModGuiChat : ClientMod
                 else if (parts.Length == 1)
                 {
                     //Part is first word. Format as "<name>: "
-                    game.GuiTypingBuffer = StringTools.StringAppend(game.platform, completed, ": ");
+                    game.GuiTypingBuffer = string.Concat(completed, ": ");
                 }
                 else
                 {
                     //Part is not first. Just complete "<name> "
                     parts[parts.Length - 1] = completed;
-                    game.GuiTypingBuffer = StringTools.StringAppend(game.platform, string.Join(" ", parts), " ");
+                    game.GuiTypingBuffer = string.Concat(string.Join(" ", parts), " ");
                 }
                 args.SetHandled(true);
                 return;
@@ -306,7 +306,7 @@ public class ModGuiChat : ClientMod
             int c = eKeyChar;
             if (game.platform.IsValidTypingChar(c))
             {
-                game.GuiTypingBuffer = StringTools.StringAppend(game.platform, game.GuiTypingBuffer, game.CharToString(c));
+                game.GuiTypingBuffer = string.Concat(game.GuiTypingBuffer, game.CharToString(c));
             }
         }
     }

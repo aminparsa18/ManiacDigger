@@ -54,13 +54,13 @@ public class GameScreen : ClientMod
                         {
                             if (Clipboard.ContainsText())
                             {
-                                w.text = StringTools.StringAppend(game.platform, w.text, Clipboard.GetText());
+                                w.text = string.Concat(w.text, Clipboard.GetText());
                             }
                             return;
                         }
                         if (game.platform.IsValidTypingChar(e.GetKeyChar()))
                         {
-                            w.text = StringTools.StringAppend(game.platform, w.text, s);
+                            w.text = string.Concat(w.text, s);
                         }
                     }
                 }
@@ -169,7 +169,7 @@ public class GameScreen : ClientMod
                 string text = w.text;
                 if (w.selected)
                 {
-                    text = StringTools.StringAppend(game.platform, "&2", text);
+                    text = string.Concat(game.platform, "&2", text);
                 }
                 if (w.type == WidgetType.Button)
                 {
@@ -198,7 +198,7 @@ public class GameScreen : ClientMod
                     }
                     if (w.editing)
                     {
-                        text = StringTools.StringAppend(game.platform, text, "_");
+                        text = string.Concat(game.platform, text, "_");
                     }
                     //if (w.buttonStyle == ButtonStyle.Text)
                     {
@@ -2382,19 +2382,19 @@ public class GameData
         {
             for (int i = 0; i < b.Sounds.WalkCount; i++)
             {
-                WalkSound()[id][i] = StringTools.StringAppend(platform, b.Sounds.Walk[i], ".wav");
+                WalkSound()[id][i] = string.Concat(platform, b.Sounds.Walk[i], ".wav");
             }
             for (int i = 0; i < b.Sounds.Break1Count; i++)
             {
-                BreakSound()[id][i] = StringTools.StringAppend(platform, b.Sounds.Break1[i], ".wav");
+                BreakSound()[id][i] = string.Concat(platform, b.Sounds.Break1[i], ".wav");
             }
             for (int i = 0; i < b.Sounds.BuildCount; i++)
             {
-                BuildSound()[id][i] = StringTools.StringAppend(platform, b.Sounds.Build[i], ".wav");
+                BuildSound()[id][i] = string.Concat(platform, b.Sounds.Build[i], ".wav");
             }
             for (int i = 0; i < b.Sounds.CloneCount; i++)
             {
-                CloneSound()[id][i] = StringTools.StringAppend(platform, b.Sounds.Clone[i], ".wav");
+                CloneSound()[id][i] = string.Concat(platform, b.Sounds.Clone[i], ".wav");
             }
         }
         LightRadius()[id] = b.LightRadius;
