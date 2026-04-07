@@ -51,18 +51,18 @@ public class ModDrawHand3d : ClientMod
 
     public int terrainTexture() { return game.terrainTexture; }
     public int texturesPacked() { return Game.texturesPacked(); }
-    public int GetWeaponTextureId(int side)
+    public int GetWeaponTextureId(TileSide side)
     {
         Packet_Item item = game.d_Inventory.RightHand[game.ActiveMaterial];
         if (item == null || IsCompass() || (item != null && item.BlockId == 0))
         {
             //empty hand
-            if (side == TileSide.Top) { return game.TextureId[game.d_Data.BlockIdEmptyHand()][TileSide.Top]; }
-            return game.TextureId[game.d_Data.BlockIdEmptyHand()][TileSide.Front];
+            if (side == TileSide.Top) { return game.TextureId[game.d_Data.BlockIdEmptyHand()][(int)TileSide.Top]; }
+            return game.TextureId[game.d_Data.BlockIdEmptyHand()][(int)TileSide.Front];
         }
         if (item.ItemClass == Packet_ItemClassEnum.Block)
         {
-            return game.TextureId[item.BlockId][side];
+            return game.TextureId[item.BlockId][(int)side];
         }
         else
         {
