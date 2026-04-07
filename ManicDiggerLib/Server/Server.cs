@@ -1658,32 +1658,19 @@ public partial class Server : ICurrentTime, IDropItem
 
                     Vector3 feetpos = new((float)k.Value.PositionMul32GlX / 32, (float)k.Value.PositionMul32GlY / 32, (float)k.Value.PositionMul32GlZ / 32);
                     //var p = PlayerPositionSpawn;
-                    Box3D bodybox = new();
                     float headsize = (k.Value.ModelHeight - k.Value.EyeHeight) * 2; //0.4f;
                     float h = k.Value.ModelHeight - headsize;
                     float r = 0.35f;
 
-                    bodybox.AddPoint(feetpos.X - r, feetpos.Y + 0, feetpos.Z - r);
-                    bodybox.AddPoint(feetpos.X - r, feetpos.Y + 0, feetpos.Z + r);
-                    bodybox.AddPoint(feetpos.X + r, feetpos.Y + 0, feetpos.Z - r);
-                    bodybox.AddPoint(feetpos.X + r, feetpos.Y + 0, feetpos.Z + r);
+                    Box3 bodybox = new Box3(
+                        new Vector3(feetpos.X - r, feetpos.Y, feetpos.Z - r),
+                        new Vector3(feetpos.X + r, feetpos.Y + h, feetpos.Z + r)
+                    );
 
-                    bodybox.AddPoint(feetpos.X - r, feetpos.Y + h, feetpos.Z - r);
-                    bodybox.AddPoint(feetpos.X - r, feetpos.Y + h, feetpos.Z + r);
-                    bodybox.AddPoint(feetpos.X + r, feetpos.Y + h, feetpos.Z - r);
-                    bodybox.AddPoint(feetpos.X + r, feetpos.Y + h, feetpos.Z + r);
-
-                    Box3D headbox = new();
-
-                    headbox.AddPoint(feetpos.X - r, feetpos.Y + h, feetpos.Z - r);
-                    headbox.AddPoint(feetpos.X - r, feetpos.Y + h, feetpos.Z + r);
-                    headbox.AddPoint(feetpos.X + r, feetpos.Y + h, feetpos.Z - r);
-                    headbox.AddPoint(feetpos.X + r, feetpos.Y + h, feetpos.Z + r);
-
-                    headbox.AddPoint(feetpos.X - r, feetpos.Y + h + headsize, feetpos.Z - r);
-                    headbox.AddPoint(feetpos.X - r, feetpos.Y + h + headsize, feetpos.Z + r);
-                    headbox.AddPoint(feetpos.X + r, feetpos.Y + h + headsize, feetpos.Z - r);
-                    headbox.AddPoint(feetpos.X + r, feetpos.Y + h + headsize, feetpos.Z + r);
+                    Box3 headbox = new Box3(
+                        new Vector3(feetpos.X - r, feetpos.Y + h, feetpos.Z - r),
+                        new Vector3(feetpos.X + r, feetpos.Y + h + headsize, feetpos.Z + r)
+                    );
 
                     if (Intersection.CheckLineBoxExact(pick, headbox) != null)
                     {

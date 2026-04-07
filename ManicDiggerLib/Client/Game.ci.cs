@@ -3750,7 +3750,7 @@ public class Game
             (uint)Math.Max(sizex, Math.Max(sizey, sizez))
         );
 
-        s_.StartBox = Box3D.Create(minX, minY, minZ, size);
+        s_.StartBox = new Box3(new Vector3(minX, minY, minZ), new Vector3(minX + size, minY + size, minZ + size));
 
         BlockPosSide[] pick2 = s_.LineIntersection(
             IsBlockEmpty_.Create(this),

@@ -6,66 +6,13 @@ public class Line3D
     internal Vector3 End;
 }
 
-public class Box3D
-{
-    public void Set(float x, float y, float z, float size)
-    {
-        if (MinEdge == null)
-        {
-            MinEdge = Vector3.Zero;
-            MaxEdge = Vector3.Zero;
-        }
-        MinEdge[0] = x;
-        MinEdge[1] = y;
-        MinEdge[2] = z;
-        MaxEdge[0] = x + size;
-        MaxEdge[1] = y + size;
-        MaxEdge[2] = z + size;
-    }
-    internal new Vector3 MinEdge;
-    internal new Vector3 MaxEdge;
-    //public Vector3 MaxEdge { get { return new Vector3(MinEdge.X + size, MinEdge.Y + size, MinEdge.Z + size); } }
-    //float size;
-    public float LengthX() { return MaxEdge[0] - MinEdge[0]; }
-    public float LengthY() { return MaxEdge[1] - MinEdge[1]; }
-    public float LengthZ() { return MaxEdge[2] - MinEdge[2]; }
-    public void AddPoint(float x, float y, float z)
-    {
-        //if is empty
-        if (MinEdge == null || MaxEdge == null ||
-            (MinEdge[0] == 0 && MinEdge[1] == 0 && MinEdge[2] == 0
-            && MaxEdge[0] == 0 && MaxEdge[1] == 0 && MaxEdge[2] == 0))
-        {
-            MinEdge = new Vector3(x, y, z);
-            MaxEdge = new Vector3(x, y, z);
-        }
-        MinEdge[0] = Math.Min(MinEdge[0], x);
-        MinEdge[1] = Math.Min(MinEdge[1], y);
-        MinEdge[2] = Math.Min(MinEdge[2], z);
-        MaxEdge[0] = Math.Min(MaxEdge[0], x);
-        MaxEdge[1] = Math.Min(MaxEdge[1], y);
-        MaxEdge[2] = Math.Min(MaxEdge[2], z);
-    }
-    public static float[] Center()
-    {
-        return null;
-    }
-
-    internal static Box3D Create(int x, int y, int z, int size)
-    {
-        Box3D b = new();
-        b.Set(x, y, z, size);
-        return b;
-    }
-}
-
 public abstract class PredicateBox3D
 {
-    public abstract bool Hit(Box3D o);
+    public abstract bool Hit(Box3 o);
 }
 public class ListBox3d
 {
-    internal Box3D[] arr;
+    internal Box3[] arr;
     internal int count;
 }
 
@@ -127,37 +74,37 @@ public class BlockOctreeSearcher
     public BlockOctreeSearcher()
     {
         intersection = new Intersection();
-        pool = new Box3D[10000];
+        pool = new Box3[10000];
         for (int i = 0; i < 10000; i++)
         {
-            pool[i] = new Box3D();
+            pool[i] = new Box3();
         }
         listpool = new ListBox3d[50];
         for (int i = 0; i < 50; i++)
         {
             listpool[i] = new ListBox3d
             {
-                arr = new Box3D[1000]
+                arr = new Box3[1000]
             };
         }
         l = new BlockPosSide[1024];
         lCount = 0;
         currentHit = Vector3.Zero;
     }
-    internal Box3D StartBox;
+    internal Box3 StartBox;
     private ListBox3d Search(PredicateBox3D query)
     {
         pool_i = 0;
         listpool_i = 0;
-        if (StartBox.LengthX() == 0 && StartBox.LengthY() == 0 && StartBox.LengthZ() == 0)
+        if (StartBox.Size.X == 0 && StartBox.Size.Y == 0 && StartBox.Size.Z == 0)
         {
             return new ListBox3d();
         }
         return SearchPrivate(query, StartBox);
     }
-    private ListBox3d SearchPrivate(PredicateBox3D query, Box3D box)
+    private ListBox3d SearchPrivate(PredicateBox3D query, Box3 box)
     {
-        if (box.LengthX() == 1)
+        if (box.Size.X == 1)
         {
             ListBox3d l1 = newListBox3d();
             l1.count = 1;
@@ -169,13 +116,13 @@ public class BlockOctreeSearcher
         ListBox3d children = Children(box);
         for (int k = 0; k < children.count; k++)
         {
-            Box3D child = children.arr[k];
+            Box3 child = children.arr[k];
             if (query.Hit(child))
             {
                 ListBox3d l2 = SearchPrivate(query, child);
                 for (int i = 0; i < l2.count; i++)
                 {
-                    Box3D n = l2.arr[i];
+                    Box3 n = l2.arr[i];
                     l.arr[l.count++] = n;
                 }
                 recycleListBox3d(l2);
@@ -184,15 +131,15 @@ public class BlockOctreeSearcher
         recycleListBox3d(children);
         return l;
     }
-    private readonly Box3D[] pool;
+    private readonly Box3[] pool;
     private int pool_i;
     private readonly ListBox3d[] listpool;
     private int listpool_i;
-    private Box3D newBox3d()
+    private Box3 newBox3d()
     {
         return pool[pool_i++];
     }
-    private void recycleBox3d(Box3D l)
+    private void recycleBox3d(Box3 l)
     {
         pool_i--;
         pool[pool_i] = l;
@@ -208,32 +155,33 @@ public class BlockOctreeSearcher
         listpool_i--;
         listpool[listpool_i] = l;
     }
-    private ListBox3d Children(Box3D box)
+    private ListBox3d Children(Box3 box)
     {
         ListBox3d l = newListBox3d();
         l.count = 8;
-        Box3D[] c = l.arr;
+        Box3[] c = l.arr;
         for (int i = 0; i < 8; i++)
         {
             c[i] = newBox3d();
         }
-        float x = box.MinEdge[0];
-        float y = box.MinEdge[1];
-        float z = box.MinEdge[2];
-        float size = box.LengthX() / 2;
-        c[0].Set(x, y, z, size);
-        c[1].Set(x + size, y, z, size);
-        c[2].Set(x, y, z + size, size);
-        c[3].Set(x + size, y, z + size, size);
+        float x = box.Min[0];
+        float y = box.Min[1];
+        float z = box.Min[2];
+        float size = box.Size.X / 2;
+        Vector3 s = new Vector3(size, size, size);
 
-        c[4].Set(x, y + size, z, size);
-        c[5].Set(x + size, y + size, z, size);
-        c[6].Set(x, y + size, z + size, size);
-        c[7].Set(x + size, y + size, z + size, size);
+        c[0] = new Box3(new Vector3(x, y, z), new Vector3(x, y, z) + s);
+        c[1] = new Box3(new Vector3(x + size, y, z), new Vector3(x + size, y, z) + s);
+        c[2] = new Box3(new Vector3(x, y, z + size), new Vector3(x, y, z + size) + s);
+        c[3] = new Box3(new Vector3(x + size, y, z + size), new Vector3(x + size, y, z + size) + s);
+        c[4] = new Box3(new Vector3(x, y + size, z), new Vector3(x, y + size, z) + s);
+        c[5] = new Box3(new Vector3(x + size, y + size, z), new Vector3(x + size, y + size, z) + s);
+        c[6] = new Box3(new Vector3(x, y + size, z + size), new Vector3(x, y + size, z + size) + s);
+        c[7] = new Box3(new Vector3(x + size, y + size, z + size), new Vector3(x + size, y + size, z + size) + s);
         return l;
     }
 
-    public bool BoxHit(Box3D box)
+    public bool BoxHit(Box3 box)
     {
         currentHit = Vector3.Zero;
         return Intersection.CheckLineBox(box, currentLine, out currentHit);
@@ -254,23 +202,22 @@ public class BlockOctreeSearcher
         ListBox3d l1 = Search(PredicateBox3DHit.Create(this));
         for (int i = 0; i < l1.count; i++)
         {
-            Box3D node = l1.arr[i];
+            Box3 node = l1.arr[i];
             var hit = currentHit;
-            float x = node.MinEdge[0];
-            float y = node.MinEdge[2];
-            float z = node.MinEdge[1];
+            float x = node.Min[0];
+            float y = node.Min[2];
+            float z = node.Min[1];
             if (!isEmpty.IsBlockEmpty(platform.FloatToInt(x),platform.FloatToInt(y),platform.FloatToInt( z)))
             {
-                Box3D node2 = new()
-                {
-                    MinEdge = node.MinEdge,
-                    MaxEdge = node.MaxEdge
-                };
-                node2.MaxEdge[1] = node2.MinEdge[1] + getBlockHeight.GetBlockHeight(platform.FloatToInt(x),platform.FloatToInt(y),platform.FloatToInt(z));
+                Box3 node2 = new(node.Min, new Vector3(
+                    node.Max.X,
+                    node.Min.Y + getBlockHeight.GetBlockHeight(platform.FloatToInt(x), platform.FloatToInt(y), platform.FloatToInt(z)),
+                    node.Max.Z
+                ));
 
                 BlockPosSide b = new();
                 float[] dir = [line.End[0] - line.Start[0], line.End[1] - line.Start[1], line.End[2] - line.Start[2]];
-                bool ishit = Intersection.HitBoundingBox(node2.MinEdge, node2.MaxEdge, line.Start, dir, out Vector3 hit2);
+                bool ishit = Intersection.HitBoundingBox(node2.Min, node2.Max, line.Start, dir, out Vector3 hit2);
                 if (ishit)
                 {
                     //hit2.pos = Vec3.FromValues(x, z, y);
@@ -301,7 +248,7 @@ public class PredicateBox3DHit : PredicateBox3D
         return p;
     }
     private BlockOctreeSearcher s;
-    public override bool Hit(Box3D o)
+    public override bool Hit(Box3 o)
     {
         return s.BoxHit(o);
     }
@@ -446,16 +393,16 @@ public class Intersection
     /// <param name="line"></param>
     /// <param name="hit"></param>
     /// <returns></returns>
-    public static bool CheckLineBox(Box3D box, Line3D line, out Vector3 hit)
+    public static bool CheckLineBox(Box3 box, Line3D line, out Vector3 hit)
     {
-        return CheckLineBox1(box.MinEdge, box.MaxEdge, line.Start, line.End, out hit);
+        return CheckLineBox1(box.Min, box.Max, line.Start, line.End, out hit);
     }
 
 
-    public static Vector3? CheckLineBoxExact(Line3D line, Box3D box)
+    public static Vector3? CheckLineBoxExact(Line3D line, Box3 box)
     {
         float[] dir_ = [line.End[0] - line.Start[0], line.End[1] - line.Start[1], line.End[2] - line.Start[2]];
-        if (!HitBoundingBox(box.MinEdge, box.MaxEdge, line.Start, dir_, out Vector3 hit))
+        if (!HitBoundingBox(box.Min, box.Max, line.Start, dir_, out Vector3 hit))
         {
             return null;
         }

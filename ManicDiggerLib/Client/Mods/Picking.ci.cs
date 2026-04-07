@@ -284,32 +284,19 @@ public class ModPicking : ClientMod
                     float feetposY = p_.position.y;
                     float feetposZ = p_.position.z;
                     //var p = PlayerPositionSpawn;
-                    Box3D bodybox = new();
-                    float headsize = (p_.drawModel.ModelHeight - p_.drawModel.eyeHeight) * 2; //0.4f;
+                    float headsize = (p_.drawModel.ModelHeight - p_.drawModel.eyeHeight) * 2;
                     float h = p_.drawModel.ModelHeight - headsize;
                     float r = one * 35 / 100;
 
-                    bodybox.AddPoint(feetposX - r, feetposY + 0, feetposZ - r);
-                    bodybox.AddPoint(feetposX - r, feetposY + 0, feetposZ + r);
-                    bodybox.AddPoint(feetposX + r, feetposY + 0, feetposZ - r);
-                    bodybox.AddPoint(feetposX + r, feetposY + 0, feetposZ + r);
+                    Box3 bodybox = new Box3(
+                        new Vector3(feetposX - r, feetposY, feetposZ - r),
+                        new Vector3(feetposX + r, feetposY + h, feetposZ + r)
+                    );
 
-                    bodybox.AddPoint(feetposX - r, feetposY + h, feetposZ - r);
-                    bodybox.AddPoint(feetposX - r, feetposY + h, feetposZ + r);
-                    bodybox.AddPoint(feetposX + r, feetposY + h, feetposZ - r);
-                    bodybox.AddPoint(feetposX + r, feetposY + h, feetposZ + r);
-
-                    Box3D headbox = new();
-
-                    headbox.AddPoint(feetposX - r, feetposY + h, feetposZ - r);
-                    headbox.AddPoint(feetposX - r, feetposY + h, feetposZ + r);
-                    headbox.AddPoint(feetposX + r, feetposY + h, feetposZ - r);
-                    headbox.AddPoint(feetposX + r, feetposY + h, feetposZ + r);
-
-                    headbox.AddPoint(feetposX - r, feetposY + h + headsize, feetposZ - r);
-                    headbox.AddPoint(feetposX - r, feetposY + h + headsize, feetposZ + r);
-                    headbox.AddPoint(feetposX + r, feetposY + h + headsize, feetposZ - r);
-                    headbox.AddPoint(feetposX + r, feetposY + h + headsize, feetposZ + r);
+                    Box3 headbox = new(
+                        new Vector3(feetposX - r, feetposY + h, feetposZ - r),
+                        new Vector3(feetposX + r, feetposY + h + headsize, feetposZ + r)
+                    );
 
                     Vector3? p;
                     float localeyeposX = game.EyesPosX();
@@ -876,19 +863,13 @@ public class ModPicking : ClientMod
             }
 
             //var p = PlayerPositionSpawn;
-            Box3D bodybox = new();
             float h = p_.drawModel.ModelHeight;
             float r = one * 35 / 100;
 
-            bodybox.AddPoint(feetposX - r, feetposY + 0, feetposZ - r);
-            bodybox.AddPoint(feetposX - r, feetposY + 0, feetposZ + r);
-            bodybox.AddPoint(feetposX + r, feetposY + 0, feetposZ - r);
-            bodybox.AddPoint(feetposX + r, feetposY + 0, feetposZ + r);
-
-            bodybox.AddPoint(feetposX - r, feetposY + h, feetposZ - r);
-            bodybox.AddPoint(feetposX - r, feetposY + h, feetposZ + r);
-            bodybox.AddPoint(feetposX + r, feetposY + h, feetposZ - r);
-            bodybox.AddPoint(feetposX + r, feetposY + h, feetposZ + r);
+            Box3 bodybox = new(
+                new Vector3(feetposX - r, feetposY, feetposZ - r),
+                new Vector3(feetposX + r, feetposY + h, feetposZ + r)
+            );
 
             Vector3? p;
             float localeyeposX = game.EyesPosX();
