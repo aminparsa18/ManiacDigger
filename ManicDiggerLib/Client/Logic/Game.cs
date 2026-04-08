@@ -283,16 +283,6 @@ public partial class Game
 
     internal BlockOctreeSearcher s;
 
-    internal void ChatLog(string p)
-    {
-        if (!platform.ChatLog(this.ServerInfo.ServerName, p))
-        {
-            platform.ConsoleWriteLine(string.Format(language.CannotWriteChatLog(), this.ServerInfo.ServerName));
-        }
-    }
-
-    
-
     internal void UseInventory(Packet_Inventory packet_Inventory)
     {
         d_Inventory = packet_Inventory;
@@ -311,116 +301,6 @@ public partial class Game
 
     private bool sendResize;
 
-    internal Packet_ServerRedirect redirectTo;
-    internal void ExitAndSwitchServer(Packet_ServerRedirect newServer)
-    {
-        if (issingleplayer)
-        {
-            platform.SinglePlayerServerExit();
-        }
-        redirectTo = newServer;
-        exitToMainMenu = true;
-    }
-
-    internal Packet_ServerRedirect GetRedirect()
-    {
-        return redirectTo;
-    }
-
-    internal void ExitToMainMenu_()
-    {
-        if (issingleplayer)
-        {
-            platform.SinglePlayerServerExit();
-        }
-        redirectTo = null;
-        exitToMainMenu = true;
-    }
-
-    internal void ProcessServerIdentification(Packet_Server packet)
-    {
-        this.LocalPlayerId = packet.Identification.AssignedClientId;
-        this.ServerInfo.connectdata = this.connectdata;
-        this.ServerInfo.ServerName = packet.Identification.ServerName;
-        this.ServerInfo.ServerMotd = packet.Identification.ServerMotd;
-        this.d_TerrainChunkTesselator.ENABLE_TEXTURE_TILING = packet.Identification.RenderHint_ == RenderHintEnum.Fast;
-        Packet_StringList requiredMd5 = packet.Identification.RequiredBlobMd5;
-        Packet_StringList requiredName = packet.Identification.RequiredBlobName;
-        ChatLog("[GAME] Processed server identification");
-        int getCount = 0;
-        if (requiredMd5 != null)
-        {
-            ChatLog(string.Format("[GAME] Server has {0} assets", requiredMd5.ItemsCount.ToString()));
-            for (int i = 0; i < requiredMd5.ItemsCount; i++)
-            {
-                string md5 = requiredMd5.Items[i];
-
-                //check if file with that content is already in cache
-                if (platform.IsCached(md5))
-                {
-                    //File has been cached. load cached version.
-                    Asset cachedAsset = platform.LoadAssetFromCache(md5);
-                    string name;
-                    if (requiredName != null)
-                    {
-                        name = requiredName.Items[i];
-                    }
-                    else // server older than 2014-07-13.
-                    {
-                        name = cachedAsset.name;
-                    }
-                    SetFile(name, cachedAsset.md5, cachedAsset.data, cachedAsset.dataLength);
-                }
-                else
-                {
-                    //Asset not present in cache
-                    if (requiredName != null)
-                    {
-                        //If list of names is given (server > 2014-07-13) lookup if asset is already loaded
-                        if (!HasAsset(md5, requiredName.Items[i]))
-                        {
-                            //Request asset from server if not already loaded
-                            getAsset[getCount++] = md5;
-                        }
-                    }
-                    else
-                    {
-                        //Server didn't send list of required asset names
-                        getAsset[getCount++] = md5;
-                    }
-                }
-            }
-            ChatLog(string.Format("[GAME] Will download {0} missing assets", getCount.ToString()));
-        }
-        SendGameResolution();
-        ChatLog("[GAME] Sent window resolution to server");
-        sendResize = true;
-        SendRequestBlob(getAsset, getCount);
-        ChatLog("[GAME] Sent BLOB request");
-        if (packet.Identification.MapSizeX != map.MapSizeX
-            || packet.Identification.MapSizeY != map.MapSizeY
-            || packet.Identification.MapSizeZ != map.MapSizeZ)
-        {
-            map.Reset(packet.Identification.MapSizeX,
-                packet.Identification.MapSizeY,
-                packet.Identification.MapSizeZ);
-            d_Heightmap.Restart();
-        }
-        shadowssimple = packet.Identification.DisableShadows == 1 ? true : false;
-        maxdrawdistance = 256;
-        ChatLog("[GAME] Map initialized");
-    }
-
-    internal void InvalidVersionAllow()
-    {
-        if (invalidVersionDrawMessage != null)
-        {
-            invalidVersionDrawMessage = null;
-            ProcessServerIdentification(invalidVersionPacketIdentification);
-            invalidVersionPacketIdentification = null;
-        }
-    }
-   
     public void EscapeMenuStart()
     {
         guistate = GuiState.EscapeMenu;
