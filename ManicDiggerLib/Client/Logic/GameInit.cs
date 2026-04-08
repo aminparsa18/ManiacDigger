@@ -235,6 +235,7 @@ public partial class Game
         taskScheduler = new TaskScheduler();
         commitActions = new List<Action>();
         modmanager = new ClientModManager1();
+        language = new Language();
 
         InitMap();
         InitTextures();
