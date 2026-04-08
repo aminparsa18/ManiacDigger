@@ -103,36 +103,26 @@ public class GamePlatformNative : IGamePlatform
         }
     }
 
-    public  void ThumbnailDownloadAsync(string ip, int port, ThumbnailResponseCi response)
+    public void ThumbnailDownloadAsync(string ip, int port, ThumbnailResponseCi response)
     {
-        ThumbnailDownloadArgs args = new()
-        {
-            ip = ip,
-            port = port,
-            response = response
-        };
-        ThreadPool.QueueUserWorkItem(DownloadServerThumbnail, args);
+        ThumbnailDownloadArgs args = new() { ip = ip, port = port, response = response };
+        _ = Task.Run(() => DownloadServerThumbnailAsync(args));
     }
 
-    private void DownloadServerThumbnail(object o)
+    private async Task DownloadServerThumbnailAsync(ThumbnailDownloadArgs args)
     {
-        ThumbnailDownloadArgs args = (ThumbnailDownloadArgs)o;
-        //Fetch server info from given adress
-        QueryClient qClient = new();
-        qClient.SetPlatform(this);
-        qClient.PerformQuery(args.ip, args.port);
-        if (qClient.querySuccess)
+        var (result, message) = await new QueryClient(this).QueryAsync(args.ip, args.port);
+
+        if (result != null)
         {
-            //Received a result
-            QueryResult r = qClient.GetResult();
-            args.response.data = r.ServerThumbnail;
-            args.response.dataLength = r.ServerThumbnail.Length;
-            args.response.serverMessage = qClient.GetServerMessage();
+            args.response.data = result.ServerThumbnail;
+            args.response.dataLength = result.ServerThumbnail.Length;
+            args.response.serverMessage = message;
             args.response.done = true;
         }
         else
         {
-            //Did not receive a response
+            args.response.serverMessage = message;
             args.response.error = true;
         }
     }
@@ -770,285 +760,132 @@ public class GamePlatformNative : IGamePlatform
 
     #endregion
 
-    #region Tcp
+    #region ENet
     public  bool TcpAvailable()
     {
         return true;
     }
 
-    public  void TcpConnect(string ip, int port, bool connected)
+    public bool EnetAvailable() => true;
+
+    public EnetHost EnetCreateHost() => new EnetHostWrapper(new Host());
+
+    public void EnetHostInitialize(EnetHost host, IPEndPointCi? address, int peerLimit,
+        int channelLimit, int incomingBandwidth, int outgoingBandwidth)
     {
-        this.connected = connected;
-        sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
-        {
-            NoDelay = true
-        };
-        sock.BeginConnect(ip, port, OnConnect, sock);
+        // Client hosts always pass null address.
+        if (address != null)
+            throw new ArgumentException("Client ENet host must have a null address.");
+
+        ((EnetHostWrapper)host).Host.Create(peerLimit, channelLimit,
+            (uint)incomingBandwidth, (uint)outgoingBandwidth);
     }
 
-    private Socket sock;
-    private bool connected;
-    private Connection c;
-    private void OnConnect(IAsyncResult result)
+    public void EnetHostInitializeServer(EnetHost host, int port, int peerLimit)
     {
-        Socket sock = (Socket)result.AsyncState;
-        c = new Connection(sock);
-        c.ReceivedData += new EventHandler<MessageEventArgs>(c_ReceivedData);
-        if (tosend.Count > 0)
-        {
-            c.Send(tosend.ToArray());
-            tosend.Clear();
-        }
-        connected = true;
+        ((EnetHostWrapper)host).Host.Create(port, peerLimit);
     }
 
-    private void c_ReceivedData(object sender, MessageEventArgs e)
+    public EnetEvent? EnetHostService(EnetHost host, int timeout)
     {
-        lock (received)
-        {
-            for (int i = 0; i < e.data.Length; i++)
-            {
-                received.Enqueue(e.data[i]);
-            }
-        }
-    }
-    private readonly Queue<byte> tosend = new();
-    public  void TcpSend(byte[] data, int length)
-    {
-        if (c == null)
-        {
-            for (int i = 0; i < length; i++)
-            {
-                tosend.Enqueue(data[i]);
-            }
-        }
-        else
-        {
-            byte[] data1 = new byte[length];
-            for (int i = 0; i < length; i++)
-            {
-                data1[i] = data[i];
-            }
-            c.Send(data1);
-        }
-    }
-    private readonly Queue<byte> received = new();
-    public  int TcpReceive(byte[] data, int dataLength)
-    {
-        if (c == null)
-        {
-            return 0;
-        }
-        int total = 0;
-        lock (received)
-        {
-            for (int i = 0; i < dataLength; i++)
-            {
-                if (received.Count == 0)
-                {
-                    break;
-                }
-                data[i] = received.Dequeue();
-                total++;
-            }
-        }
-        return total;
+        int ret = ((EnetHostWrapper)host).Host.Service(timeout, out Event e);
+        return ret > 0 ? new EnetEventWrapper(e) : null;
     }
 
-    public class Connection
+    public EnetEvent? EnetHostCheckEvents(EnetHost host)
     {
-        public Socket sock;
-        public string address;
-
-        private readonly Encoding encoding = Encoding.UTF8;
-
-        public Connection(Socket s)
-        {
-            this.sock = s;
-            address = s.RemoteEndPoint.ToString();
-            this.BeginReceive();
-        }
-        private readonly Stopwatch st = new();
-        private void BeginReceive()
-        {
-            this.sock.BeginReceive(
-                    this.dataRcvBuf, 0,
-                    this.dataRcvBuf.Length,
-                    SocketFlags.None,
-                    new AsyncCallback(this.OnBytesReceived),
-                    this);
-        }
-        private readonly byte[] dataRcvBuf = new byte[1024 * 8];
-        protected void OnBytesReceived(IAsyncResult result)
-        {
-            int nBytesRec;
-            try
-            {
-                nBytesRec = this.sock.EndReceive(result);
-            }
-            catch
-            {
-                try
-                {
-                    this.sock.Close();
-                }
-                catch
-                {
-                }
-                Disconnected?.Invoke(null, new ConnectionEventArgs() { });
-                return;
-            }
-            if (nBytesRec <= 0)
-            {
-                try
-                {
-                    this.sock.Close();
-                }
-                catch
-                {
-                }
-                Disconnected?.Invoke(null, new ConnectionEventArgs() { });
-                return;
-            }
-
-            byte[] receivedBytes = new byte[nBytesRec];
-            for (int i = 0; i < nBytesRec; i++)
-            {
-                receivedBytes[i] = dataRcvBuf[i];
-            }
-
-            if (nBytesRec > 0)
-            {
-                ReceivedData.Invoke(this, new MessageEventArgs() { data = receivedBytes });
-            }
-
-            st.Reset();
-            st.Start();
-
-            this.sock.BeginReceive(
-                this.dataRcvBuf, 0,
-                this.dataRcvBuf.Length,
-                SocketFlags.None,
-                new AsyncCallback(this.OnBytesReceived),
-                this);
-        }
-        public void Send(byte[] data)
-        {
-            try
-            {
-                sock.BeginSend(data, 0, data.Length, SocketFlags.None, new AsyncCallback(OnSend), null);
-            }
-            catch (Exception e)
-            {
-            }
-        }
-        private void OnSend(IAsyncResult result)
-        {
-            sock.EndSend(result);
-        }
-        public event EventHandler<MessageEventArgs> ReceivedData;
-        public event EventHandler<ConnectionEventArgs> Disconnected;
-
-        public  string ToString()
-        {
-            if (address != null)
-            {
-                return address.ToString();
-            }
-            return base.ToString();
-        }
-    }
-    #endregion
-
-    #region Enet
-    public  bool EnetAvailable()
-    {
-        return true;
+        int ret = ((EnetHostWrapper)host).Host.CheckEvents(out Event e);
+        return ret > 0 ? new EnetEventWrapper(e) : null;
     }
 
-    public  EnetHost EnetCreateHost()
+    public EnetPeer EnetHostConnect(EnetHost host, string hostName, int port, int channelCount, int data)
     {
-        return new EnetHostNative() { host = new Host() };
-    }
-
-    public  void EnetHostInitializeServer(EnetHost host, int port, int peerLimit)
-    {
-        EnetHostNative host_ = (EnetHostNative)host;
-        host_.host.Create(port, peerLimit);
-    }
-
-    public  bool EnetHostService(EnetHost host, int timeout, EnetEventRef enetEvent)
-    {
-        EnetHostNative host_ = (EnetHostNative)host;
-        int ret = host_.host.Service(timeout, out Event e);
-        EnetEventNative ee = new()
-        {
-            e = e
-        };
-        enetEvent.e = ee;
-        return ret > 0;
-    }
-
-    public  bool EnetHostCheckEvents(EnetHost host, EnetEventRef event_)
-    {
-        EnetHostNative host_ = (EnetHostNative)host;
-        int ret = host_.host.CheckEvents(out Event e);
-        EnetEventNative ee = new()
-        {
-            e = e
-        };
-        event_.e = ee;
-        return ret > 0;
-    }
-
-    public  EnetPeer EnetHostConnect(EnetHost host, string hostName, int port, int data, int channelLimit)
-    {
-        EnetHostNative host_ = (EnetHostNative)host;
-
-        Address address = new()
-        {
-            Port = (ushort)port
-        };
+        Address address = new() { Port = (ushort)port };
         address.SetHost(hostName);
-
-        Peer peer = host_.host.Connect(address, channelLimit, (uint)data);
-        EnetPeerNative peer_ = new()
-        {
-            peer = peer
-        };
-        return peer_;
+        Peer peer = ((EnetHostWrapper)host).Host.Connect(address, channelCount, (uint)data);
+        return new EnetPeerWrapper(peer);
     }
 
-    public  void EnetPeerSend(EnetPeer peer, byte channelID, byte[] data, int dataLength, int flags)
+    public void EnetPeerSend(EnetPeer peer, int channelId, ReadOnlyMemory<byte> payload, int flags)
     {
         try
         {
-            EnetPeerNative peer_ = (EnetPeerNative)peer;
-
             Packet packet = default;
-            packet.Create(data, dataLength, (PacketFlags)flags);
-
-            peer_.peer.Send(channelID, ref packet);
+            packet.Create(payload.ToArray(), payload.Length, (PacketFlags)flags);
+            ((EnetPeerWrapper)peer).Peer.Send((byte)channelId, ref packet);
         }
-        catch
+        catch (Exception ex)
         {
         }
     }
 
-    public  void EnetHostInitialize(EnetHost host, IPEndPointCi address, int peerLimit, int channelLimit, int incomingBandwidth, int outgoingBandwidth)
+    // ---------------------------------------------------------------------------
+    // Native wrappers — thin shells that satisfy our abstract types.
+    // All live in the platform assembly, not in game logic.
+    // ---------------------------------------------------------------------------
+
+    /// <summary>Wraps ENet-CSharp's Host struct.</summary>
+    internal sealed class EnetHostWrapper : EnetHost
     {
-        if (address != null)
+        internal readonly Host Host;
+        internal EnetHostWrapper(Host host) => Host = host;
+    }
+
+    /// <summary>Wraps ENet-CSharp's Peer struct.</summary>
+    internal sealed class EnetPeerWrapper : EnetPeer
+    {
+        internal Peer Peer; // Not readonly — Peer is a struct, SetUserData must mutate it in place
+        internal EnetPeerWrapper(Peer peer) => Peer = peer;
+
+        public override int UserData() => (int)Peer.Data;
+        public override void SetUserData(int value) => Peer.Data = value;
+        public override IPEndPointCi GetRemoteAddress() =>
+            IPEndPointCiDefault.Create(Peer.IP);
+    }
+
+    /// <summary>
+    /// Wraps ENet-CSharp's Event struct.
+    /// Only allocated when an event actually occurred (ret > 0 from Service/CheckEvents).
+    /// </summary>
+    internal sealed class EnetEventWrapper : EnetEvent
+    {
+        private readonly Event _e;
+        internal EnetEventWrapper(Event e) => _e = e;
+
+        public override EnetEventType Type() => _e.Type switch
         {
-            throw new Exception();
+            EventType.Connect => EnetEventType.Connect,
+            EventType.Disconnect => EnetEventType.Disconnect,
+            EventType.Receive => EnetEventType.Receive,
+            EventType.Timeout => EnetEventType.Disconnect, // treat timeout as disconnect
+            _ => EnetEventType.None,
+        };
+
+        public override EnetPeer Peer() => new EnetPeerWrapper(_e.Peer);
+
+        public override EnetPacket Packet() => new EnetPacketWrapper(_e.Packet);
+    }
+
+    /// <summary>Wraps ENet-CSharp's Packet struct.</summary>
+    internal sealed class EnetPacketWrapper : EnetPacket
+    {
+        private readonly Packet _p;
+        internal EnetPacketWrapper(Packet p) => _p = p;
+
+        public override int GetBytesCount() => _p.Length;
+        public override byte[] GetBytes()
+        {
+            byte[] buffer = new byte[_p.Length];
+            _p.CopyTo(buffer);
+            return buffer;
         }
-        EnetHostNative host_ = (EnetHostNative)host;
-        host_.host.Create(peerLimit, channelLimit, (uint)incomingBandwidth, (uint)outgoingBandwidth);
+        public override void Dispose() => _p.Dispose();
     }
     #endregion
 
     #region WebSocket
 
-    public  bool WebSocketAvailable()
+    public bool WebSocketAvailable()
     {
         return false;
     }
@@ -1979,80 +1816,6 @@ public class AviWriterCiCs : AviWriterCi
     public override void Close()
     {
         avi.Close();
-    }
-}
-
-public class EnetHostNative : EnetHost
-{
-    public Host host;
-}
-
-public class EnetEventNative : EnetEvent
-{
-    public Event e;
-    public override EnetEventType Type()
-    {
-        return (EnetEventType)e.Type;
-    }
-
-    public override EnetPeer Peer()
-    {
-        EnetPeerNative peer = new()
-        {
-            peer = e.Peer
-        };
-        return peer;
-    }
-
-    public override EnetPacket Packet()
-    {
-        EnetPacketNative packet = new()
-        {
-            packet = e.Packet
-        };
-        return packet;
-    }
-}
-
-public class EnetPacketNative : EnetPacket
-{
-    internal Packet packet;
-    public override int GetBytesCount()
-    {
-        return packet.Length;
-    }
-
-    public override byte[] GetBytes()
-    {
-        // GetBytes() is gone, manually copy from native pointer
-        byte[] bytes = new byte[packet.Length];
-        System.Runtime.InteropServices.Marshal.Copy(packet.Data, bytes, 0, packet.Length);
-        return bytes;
-    }
-
-    public override void Dispose()
-    {
-        packet.Dispose();
-    }
-}
-
-public class EnetPeerNative : EnetPeer
-{
-    public Peer peer;
-    public override int UserData()
-    {
-        return peer.Data.ToInt32();
-    }
-
-    public override void SetUserData(int value)
-    {
-        peer.Data = new IntPtr(value);
-    }
-
-    public override IPEndPointCi GetRemoteAddress()
-    {
-        // GetRemoteAddress() -> separate IP and Port properties
-        return IPEndPointCiDefault.Create(peer.IP);
     }
 }
 

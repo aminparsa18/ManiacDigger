@@ -286,8 +286,7 @@ public partial class Game
     // a legacy Cito transpiler artifact where float literals needed to go through a variable.
     internal float one;
 
-    internal ModBase[] clientmods;
-    internal int clientmodsCount;
+    internal List<ModBase> clientmods;
 
     internal IGamePlatform platform;
     internal Language language;

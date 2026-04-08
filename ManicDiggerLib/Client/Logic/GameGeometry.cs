@@ -173,7 +173,7 @@
 
         OrthoMode(Width(), Height());
 
-        for (int i = 0; i < clientmodsCount; i++)
+        for (int i = 0; i < clientmods.Count; i++)
         {
             if (clientmods[i] == null)
                 continue;

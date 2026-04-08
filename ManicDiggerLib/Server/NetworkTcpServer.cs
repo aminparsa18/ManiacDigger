@@ -1,392 +1,172 @@
-﻿using System.Net.Sockets;
-using System.Net;
+﻿// TCP Server implementation of the abstract network layer.
+//
+// Framing protocol: every message is prefixed with a 4-byte big-endian length.
+//   [4 bytes length][N bytes payload]
+//
+// Receiving runs on a dedicated async loop started at connect time.
+// The game loop calls ReadMessage() which drains an in-memory queue — no I/O
+// on the calling thread, no sends hidden inside reads.
 
-public class TcpNetServer : NetServer
+using System.Buffers.Binary;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading.Channels;
+
+public sealed class TcpNetServer : NetServer
 {
-    public TcpNetServer()
-    {
-        messages = new Queue<NetIncomingMessage>();
-        server = new ServerManager();
-    }
+    private readonly Channel<NetIncomingMessage> _inbox =
+        Channel.CreateUnbounded<NetIncomingMessage>(
+            new UnboundedChannelOptions { SingleReader = true });
+
+    // Connections keyed by remote address — same pattern as EnetNetServer,
+    // so Connect/Data/Disconnect events always return the same object for a peer.
+    private readonly Dictionary<string, TcpServerConnection> _connections = new();
+    private readonly object _connectionsLock = new();
+
+    private TcpListener? _listener;
+    private int _port;
+    private CancellationTokenSource? _cts;
+
+    public override void SetPort(int port) => _port = port;
 
     public override void Start()
     {
-        server.StartServer(Port);
-        server.Connected += new EventHandler<ConnectionEventArgs>(ServerConnected);
-        server.ReceivedMessage += new EventHandler<MessageEventArgs>(ServerReceivedMessage);
-        server.Disconnected += new EventHandler<ConnectionEventArgs>(ServerDisconnected);
+        _cts = new CancellationTokenSource();
+        _listener = new TcpListener(IPAddress.Any, _port);
+        _listener.Server.NoDelay = true;
+        _listener.Start();
+        _ = AcceptLoopAsync(_cts.Token);
     }
 
-    private void ServerConnected(object? sender, ConnectionEventArgs e)
+    public override NetIncomingMessage? ReadMessage()
     {
-        NetIncomingMessage msg = new()
+        _inbox.Reader.TryRead(out NetIncomingMessage? msg);
+        return msg;
+    }
+
+    public void Stop() => _cts?.Cancel();
+
+    private async Task AcceptLoopAsync(CancellationToken ct)
+    {
+        try
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                TcpClient tcp = await _listener!.AcceptTcpClientAsync(ct);
+                tcp.NoDelay = true;
+                _ = HandleClientAsync(tcp, ct);
+            }
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex)
+        {
+        }
+        finally
+        {
+            _listener?.Stop();
+        }
+    }
+
+    private async Task HandleClientAsync(TcpClient tcp, CancellationToken ct)
+    {
+        string address = tcp.Client.RemoteEndPoint?.ToString() ?? "unknown";
+        TcpServerConnection conn = new(address);
+
+        lock (_connectionsLock)
+            _connections[address] = conn;
+
+        await _inbox.Writer.WriteAsync(new NetIncomingMessage
         {
             Type = NetworkMessageType.Connect,
-            SenderConnection = new TcpNetConnection() { peer = e.ClientId }
-        };
-        lock (messages)
-        {
-            messages.Enqueue(msg);
-        }
-    }
+            SenderConnection = conn,
+        }, ct);
 
-    private void ServerDisconnected(object? sender, ConnectionEventArgs e)
-    {
-        NetIncomingMessage msg = new()
+        try
         {
-            Type = NetworkMessageType.Disconnect,
-            SenderConnection = new TcpNetConnection() { peer = e.ClientId }
-        };
-        lock (messages)
-        {
-            messages.Enqueue(msg);
-        }
-    }
+            NetworkStream stream = tcp.GetStream();
+            byte[] lenBuf = new byte[4];
 
-    private void ServerReceivedMessage(object? sender, MessageEventArgs e)
-    {
-        NetIncomingMessage msg = new()
-        {
-            Type = NetworkMessageType.Data,
-            message = e.data,
-            messageLength = e.data.Length,
-            SenderConnection = new TcpNetConnection() { peer = e.ClientId }
-        };
-        lock (messages)
-        {
-            messages.Enqueue(msg);
-        }
-    }
+            _ = conn.SendLoopAsync(stream, ct);
 
-    private readonly ServerManager server;
-
-    public override NetIncomingMessage ReadMessage()
-    {
-        lock (messages)
-        {
-            if (messages.Count > 0)
+            while (!ct.IsCancellationRequested)
             {
-                return messages.Dequeue();
-            }
-        }
+                await stream.ReadExactlyAsync(lenBuf, ct);
+                int length = BinaryPrimitives.ReadInt32BigEndian(lenBuf);
 
-        return null;
-    }
-    private readonly Queue<NetIncomingMessage> messages;
+                byte[] payload = new byte[length];
+                await stream.ReadExactlyAsync(payload, ct);
 
-    private int Port;
-
-    public override void SetPort(int port)
-    {
-        Port = port;
-    }
-}
-
-public class TcpNetConnection : NetConnection
-{
-    public TcpConnection peer;
-
-    public override IPEndPointCi RemoteEndPoint()
-    {
-        return IPEndPointCiDefault.Create(peer.address);
-    }
-
-    public override void SendMessage(INetOutgoingMessage msg, MyNetDeliveryMethod method, int sequenceChannel)
-    {
-        INetOutgoingMessage msg1 = (INetOutgoingMessage)msg;
-        byte[] data = new byte[msg1.messageLength];
-        for (int i = 0; i < msg1.messageLength; i++)
-        {
-            data[i] = msg1.message[i];
-        }
-        peer.Send(data);
-    }
-
-    public override void Update()
-    {
-    }
-
-    public override bool EqualsConnection(NetConnection connection)
-    {
-        return peer.sock == ((TcpNetConnection)connection).peer.sock;
-    }
-}
-
-public class ServerManager
-{
-    private Socket sock;
-    private readonly IPAddress addr = IPAddress.Any;
-    public void StartServer(int port)
-    {
-        this.sock = new Socket(
-            addr.AddressFamily,
-            SocketType.Stream,
-            ProtocolType.Tcp);
-        sock.NoDelay = true;
-        sock.Bind(new IPEndPoint(this.addr, port));
-        this.sock.Listen(10);
-        this.sock.BeginAccept(this.OnConnectRequest, sock);
-    }
-
-    private void OnConnectRequest(IAsyncResult result)
-    {
-        try
-        {
-            Socket sock = (Socket)result.AsyncState;
-
-            TcpConnection newConn = new(sock.EndAccept(result));
-            newConn.ReceivedMessage += new EventHandler<MessageEventArgs>(NewConnReceivedMessage);
-            newConn.Disconnected += new EventHandler<ConnectionEventArgs>(NewConnDisconnected);
-            sock.BeginAccept(this.OnConnectRequest, sock);
-        }
-        catch
-        {
-        }
-    }
-
-    private void NewConnDisconnected(object sender, ConnectionEventArgs e)
-    {
-        try
-        {
-            Disconnected(sender, e);
-        }
-        catch //(Exception ex)
-        {
-            // Console.WriteLine(ex.ToString());
-        }
-    }
-
-    private void NewConnReceivedMessage(object sender, MessageEventArgs e)
-    {
-        try
-        {
-            if (Connected != null)
-            {
-                TcpConnection sender_ = (TcpConnection)sender;
-                if (!sender_.connected)
+                await _inbox.Writer.WriteAsync(new NetIncomingMessage
                 {
-                    sender_.connected = true;
-                    Connected(this, new ConnectionEventArgs() { ClientId = sender_ });
-                }
+                    Type = NetworkMessageType.Data,
+                    Payload = payload,
+                    SenderConnection = conn,
+                }, ct);
             }
-            ReceivedMessage(sender, e);
         }
-        catch //(Exception ex)
+        catch (OperationCanceledException) { }
+        catch (Exception ex)
         {
-            // Console.WriteLine(ex.ToString());
         }
-    }
+        finally
+        {
+            tcp.Close();
+            lock (_connectionsLock)
+                _connections.Remove(address);
 
-    public event EventHandler<ConnectionEventArgs>? Connected;
-    public event EventHandler<MessageEventArgs>? ReceivedMessage;
-    public event EventHandler<ConnectionEventArgs>? Disconnected;
-
-    public static void Send(object sender, byte[] data)
-    {
-        try
-        {
-            ((TcpConnection)sender).Send(data);
-        }
-        catch
-        {
+            // Always deliver disconnect even if ct is cancelled.
+            await _inbox.Writer.WriteAsync(new NetIncomingMessage
+            {
+                Type = NetworkMessageType.Disconnect,
+                SenderConnection = conn,
+            }, CancellationToken.None);
         }
     }
 }
 
-public class TcpConnection
+// ---------------------------------------------------------------------------
+// Server-side connection handle (one per connected client)
+// ---------------------------------------------------------------------------
+
+public sealed class TcpServerConnection : NetConnection
 {
-    public Socket sock;
-    public string address;
+    private readonly string _address;
+    private readonly Channel<ReadOnlyMemory<byte>> _sendQueue =
+        Channel.CreateUnbounded<ReadOnlyMemory<byte>>();
 
-    public TcpConnection(Socket s)
+    internal TcpServerConnection(string address)
     {
-        this.sock = s;
-        address = s.RemoteEndPoint.ToString();
-        this.BeginReceive();
+        _address = address;
     }
 
-    private void BeginReceive()
+    public override IPEndPointCi RemoteEndPoint() =>
+        IPEndPointCiDefault.Create(_address);
+
+    public override void Update() { }
+
+    public override bool EqualsConnection(NetConnection other) =>
+        other is TcpServerConnection t && t._address == _address;
+
+    public override void SendMessage(ReadOnlyMemory<byte> payload, MyNetDeliveryMethod method, int sequenceChannel = 0)
     {
-        try
-        {
-            this.sock.BeginReceive(
-                    this.dataRcvBuf, 0,
-                    this.dataRcvBuf.Length,
-                    SocketFlags.None,
-                    new AsyncCallback(this.OnBytesReceived),
-                    this);
-        }
-        catch
-        {
-            InvokeDisconnected();
-        }
+        _sendQueue.Writer.TryWrite(payload);
     }
 
-    public bool connected;
-    private readonly byte[] dataRcvBuf = new byte[1024 * 8];
-    protected void OnBytesReceived(IAsyncResult result)
+    internal async Task SendLoopAsync(NetworkStream stream, CancellationToken ct)
     {
         try
         {
-            int nBytesRec;
-            try
+            byte[] lenBuf = new byte[4];
+            await foreach (ReadOnlyMemory<byte> payload in _sendQueue.Reader.ReadAllAsync(ct))
             {
-                nBytesRec = this.sock.EndReceive(result);
-            }
-            catch
-            {
-                try
-                {
-                    this.sock.Close();
-                }
-                catch
-                {
-                }
-                InvokeDisconnected();
-                return;
-            }
-            if (nBytesRec <= 0)
-            {
-                try
-                {
-                    this.sock.Close();
-                }
-                catch
-                {
-                }
-                InvokeDisconnected();
-                return;
-            }
-
-            for (int i = 0; i < nBytesRec; i++)
-            {
-                receivedBytes.Add(dataRcvBuf[i]);
-            }
-
-            //packetize
-            while (receivedBytes.Count >= 4)
-            {
-                byte[] receivedBytesArray = receivedBytes.ToArray();
-                int packetLength = ReadInt(receivedBytesArray, 0);
-                if (receivedBytes.Count >= 4 + packetLength)
-                {
-                    //read packet
-                    byte[] packet = new byte[packetLength];
-                    for (int i = 0; i < packetLength; i++)
-                    {
-                        packet[i] = receivedBytesArray[4 + i];
-                    }
-                    receivedBytes.RemoveRange(0, 4 + packetLength);
-                    ReceivedMessage.Invoke(this, new MessageEventArgs() { ClientId = this, data = packet });
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            this.sock.BeginReceive(
-                this.dataRcvBuf, 0,
-                this.dataRcvBuf.Length,
-                SocketFlags.None,
-                new AsyncCallback(this.OnBytesReceived),
-                this);
-        }
-        catch
-        {
-            InvokeDisconnected();
-        }
-    }
-
-    private void InvokeDisconnected()
-    {
-        if (Disconnected != null)
-        {
-            if (sock != null)
-            {
-                sock.Close();
-                sock = null;
-                if (connected)
-                {
-                    Disconnected(null, new ConnectionEventArgs() { ClientId = this });
-                }
+                BinaryPrimitives.WriteInt32BigEndian(lenBuf, payload.Length);
+                await stream.WriteAsync(lenBuf, ct);
+                await stream.WriteAsync(payload, ct);
             }
         }
-    }
-
-    public void Send(byte[] data)
-    {
-        try
+        catch (OperationCanceledException) { }
+        catch (Exception ex)
         {
-            int length = data.Length;
-            byte[] data2 = new byte[length + 4];
-            WriteInt(data2, 0, length);
-            for (int i = 0; i < length; i++)
-            {
-                data2[4 + i] = data[i];
-            }
-            sock.BeginSend(data2, 0, data2.Length, SocketFlags.None, new AsyncCallback(OnSend), null);
-        }
-        catch
-        {
-            InvokeDisconnected();
         }
     }
-
-    private void OnSend(IAsyncResult result)
-    {
-        try
-        {
-            sock.EndSend(result);
-        }
-        catch
-        {
-            InvokeDisconnected();
-        }
-    }
-
-    private readonly List<byte> receivedBytes = [];
-    public event EventHandler<MessageEventArgs> ReceivedMessage;
-    public event EventHandler<ConnectionEventArgs> Disconnected;
-
-    private static void WriteInt(byte[] writeBuf, int writePos, int n)
-    {
-        int a = (n >> 24) & 0xFF;
-        int b = (n >> 16) & 0xFF;
-        int c = (n >> 8) & 0xFF;
-        int d = n & 0xFF;
-        writeBuf[writePos] = (byte)(a);
-        writeBuf[writePos + 1] = (byte)(b);
-        writeBuf[writePos + 2] = (byte)(c);
-        writeBuf[writePos + 3] = (byte)(d);
-    }
-
-    private static int ReadInt(byte[] readBuf, int readPos)
-    {
-        int n = readBuf[readPos] << 24;
-        n |= readBuf[readPos + 1] << 16;
-        n |= readBuf[readPos + 2] << 8;
-        n |= readBuf[readPos + 3];
-        return n;
-    }
-
-    public override string ToString()
-    {
-        if (address != null)
-        {
-            return address.ToString();
-        }
-        return base.ToString();
-    }
-}
-
-public class ConnectionEventArgs : EventArgs
-{
-    public TcpConnection? ClientId;
-}
-
-public class MessageEventArgs : EventArgs
-{
-    public TcpConnection? ClientId;
-    public byte[]? data;
 }

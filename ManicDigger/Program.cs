@@ -3,18 +3,28 @@ using System.Diagnostics;
 
 public class Program
 {
+
     [STAThread]
     public static void Main(string[] args)
     {
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+       File.WriteAllText("crash.txt", e.ExceptionObject.ToString());
+
         CrashReporter.DefaultFileName = "ManicDiggerClientCrash.txt";
         CrashReporter.EnableGlobalExceptionHandling(isConsole: false);
-        _ = new Program(args);
+        try
+        {
+            _ = new Program(args);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
     }
 
     public Program(string[] args)
     {
         dummyNetwork = new DummyNetwork();
-        dummyNetwork.Start(new MonitorObject(), new MonitorObject());
         Start(args);
     }
 
@@ -78,9 +88,7 @@ public class Program
         Log.Debug("Single-player server thread started");
         try
         {
-            DummyNetServer netServer = new();
-            netServer.SetPlatform(new GamePlatformNative());
-            netServer.SetNetwork(dummyNetwork);
+            DummyNetServer netServer = new(dummyNetwork);
 
             Server server = new()
             {

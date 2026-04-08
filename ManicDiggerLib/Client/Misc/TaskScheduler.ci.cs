@@ -25,8 +25,8 @@ public class TaskScheduler
     /// <param name="game">The active game instance.</param>
     public void Initialise(Game game)
     {
-        _actions = new BackgroundAction[game.clientmodsCount];
-        for (int i = 0; i < game.clientmodsCount; i++)
+        _actions = new BackgroundAction[game.clientmods.Count];
+        for (int i = 0; i < game.clientmods.Count; i++)
             _actions[i] = new BackgroundAction();
     }
 
@@ -76,7 +76,7 @@ public class TaskScheduler
     {
         RunReadOnlyMainThread(game, dt);
 
-        for (int i = 0; i < game.clientmodsCount; i++)
+        for (int i = 0; i < game.clientmods.Count; i++)
             game.clientmods[i].OnReadOnlyBackgroundThread(game, dt);
 
         RunReadWriteMainThread(game, dt);
@@ -88,7 +88,7 @@ public class TaskScheduler
     /// </summary>
     private bool AllBackgroundTasksFinished(Game game)
     {
-        for (int i = 0; i < game.clientmodsCount; i++)
+        for (int i = 0; i < game.clientmods.Count; i++)
         {
             BackgroundAction action = _actions[i];
             if (action.Active && !action.Finished)
@@ -102,7 +102,7 @@ public class TaskScheduler
     /// </summary>
     private void DispatchBackgroundTasks(Game game, float dt)
     {
-        for (int i = 0; i < game.clientmodsCount; i++)
+        for (int i = 0; i < game.clientmods.Count; i++)
         {
             int captured = i;
             _actions[captured].Active = true;
@@ -115,14 +115,14 @@ public class TaskScheduler
     /// <summary>Calls <c>OnReadOnlyMainThread</c> on every registered client mod.</summary>
     private static void RunReadOnlyMainThread(Game game, float dt)
     {
-        for (int i = 0; i < game.clientmodsCount; i++)
+        for (int i = 0; i < game.clientmods.Count; i++)
             game.clientmods[i].OnReadOnlyMainThread(game, dt);
     }
 
     /// <summary>Calls <c>OnReadWriteMainThread</c> on every registered client mod.</summary>
     private static void RunReadWriteMainThread(Game game, float dt)
     {
-        for (int i = 0; i < game.clientmodsCount; i++)
+        for (int i = 0; i < game.clientmods.Count; i++)
             game.clientmods[i].OnReadWriteMainThread(game, dt);
     }
 

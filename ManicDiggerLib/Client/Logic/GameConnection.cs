@@ -19,9 +19,7 @@
 
     public void SendPacket(byte[] packet, int packetLength)
     {
-        INetOutgoingMessage msg = new();
-        msg.Write(packet, packetLength);
-        main.SendMessage(msg, MyNetDeliveryMethod.ReliableOrdered);
+        main.SendMessage(packet.AsMemory(0, packetLength), MyNetDeliveryMethod.ReliableOrdered);
     }
 
     public void SendPacketClient(Packet_Client packetClient)

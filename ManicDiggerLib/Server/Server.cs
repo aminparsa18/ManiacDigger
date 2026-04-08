@@ -368,7 +368,7 @@ public partial class Server : ICurrentTime, IDropItem
         {
             server.mainSockets = new NetServer[3];
             server.mainSocketsCount = 3;
-            mainSockets[0] = new EnetNetServer() { platform = gameplatform };
+            mainSockets[0] = new EnetNetServer(gameplatform);
             if (mainSockets[1] == null)
             {
                 mainSockets[1] = new WebSocketNetServer();
@@ -757,8 +757,8 @@ public partial class Server : ICurrentTime, IDropItem
                 // process packet
                 try
                 {
-                    TotalReceivedBytes += msg.messageLength;
-                    TryReadPacket(clientid, msg.message);
+                    TotalReceivedBytes += msg.Payload.Length;
+                    TryReadPacket(clientid, msg.Payload.ToArray());
                 }
                 catch (Exception e)
                 {
@@ -2885,9 +2885,7 @@ public partial class Server : ICurrentTime, IDropItem
         TotalSentBytes += packet.Length;
         try
         {
-            INetOutgoingMessage msg = new();
-            msg.Write(packet, packet.Length);
-            clients[clientid].socket.SendMessage(msg, MyNetDeliveryMethod.ReliableOrdered, 0);
+            clients[clientid].socket.SendMessage(packet.AsMemory(), MyNetDeliveryMethod.ReliableOrdered);
         }
         catch (Exception)
         {

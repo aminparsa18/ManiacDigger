@@ -821,8 +821,8 @@ public class ModManager1 : IModManager
         };
         server.clients[id] = c;
         c.state = ClientStateOnServer.Playing;
-        DummyNetwork network = new() { ClientReceiveBufferLock = new MonitorObject(), ServerReceiveBufferLock = new MonitorObject() };
-        c.socket = new DummyNetConnection() { network = network, platform = new GamePlatformNative() };
+        DummyNetwork network = new();
+        c.socket = new DummyNetConnection(network);
         c.Ping.SetTimeoutValue(int.MaxValue);
         c.chunksseen = new bool[server.d_Map.MapSizeX / Server.chunksize
                                 * server.d_Map.MapSizeY / Server.chunksize * server.d_Map.MapSizeZ / Server.chunksize];

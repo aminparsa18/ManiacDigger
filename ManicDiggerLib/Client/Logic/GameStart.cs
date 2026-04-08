@@ -84,8 +84,7 @@ public partial class Game
 
     private void InitMods()
     {
-        clientmods = new ModBase[128];
-        clientmodsCount = 0;
+        clientmods = [];
         modmanager.game = this;
 
         // Core loop
@@ -184,7 +183,7 @@ public partial class Game
 
     public void AddMod(ModBase mod)
     {
-        clientmods[clientmodsCount++] = mod;
+        clientmods.Add(mod);
         mod.Start(modmanager);
     }
 }

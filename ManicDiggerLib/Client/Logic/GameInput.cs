@@ -15,7 +15,7 @@ public partial class Game
         if (btn == MouseButtonEnum.Middle) mouseMiddle = true;
         if (btn == MouseButtonEnum.Right) { mouseRight = true; mouserightclick = true; }
 
-        for (int i = 0; i < clientmodsCount; i++)
+        for (int i = 0; i < clientmods.Count; i++)
         {
             if (clientmods[i] == null) continue;
             clientmods[i].OnMouseDown(this, args);
@@ -39,7 +39,7 @@ public partial class Game
         if (btn == MouseButtonEnum.Middle) mouseMiddle = false;
         if (btn == MouseButtonEnum.Right) { mouseRight = false; mouserightdeclick = true; }
 
-        for (int i = 0; i < clientmodsCount; i++)
+        for (int i = 0; i < clientmods.Count; i++)
         {
             if (clientmods[i] == null) continue;
             clientmods[i].OnMouseUp(this, args);
@@ -65,7 +65,7 @@ public partial class Game
             mouseDeltaY += e.GetMovementY();
         }
 
-        for (int i = 0; i < clientmodsCount; i++)
+        for (int i = 0; i < clientmods.Count; i++)
         {
             if (clientmods[i] == null) continue;
             clientmods[i].OnMouseMove(this, e);
@@ -85,7 +85,7 @@ public partial class Game
                 tppcameradistance = Math.Clamp(tppcameradistance - delta, TPP_CAMERA_DISTANCE_MIN, TPP_CAMERA_DISTANCE_MAX);
         }
 
-        for (int i = 0; i < clientmodsCount; i++)
+        for (int i = 0; i < clientmods.Count; i++)
         {
             if (clientmods[i] == null) continue;
             clientmods[i].OnMouseWheelChanged(this, e);
@@ -166,7 +166,7 @@ public partial class Game
         mouseCurrentY = e.GetY();
         mouseleftclick = true;
 
-        for (int i = 0; i < clientmodsCount; i++)
+        for (int i = 0; i < clientmods.Count; i++)
         {
             if (clientmods[i] == null) continue;
             clientmods[i].OnTouchStart(this, e);
@@ -176,7 +176,7 @@ public partial class Game
 
     public void OnTouchMove(TouchEventArgs e)
     {
-        for (int i = 0; i < clientmodsCount; i++)
+        for (int i = 0; i < clientmods.Count; i++)
         {
             if (clientmods[i] == null) continue;
             clientmods[i].OnTouchMove(this, e);
@@ -189,7 +189,7 @@ public partial class Game
         mouseCurrentX = 0;
         mouseCurrentY = 0;
 
-        for (int i = 0; i < clientmodsCount; i++)
+        for (int i = 0; i < clientmods.Count; i++)
         {
             if (clientmods[i] == null) continue;
             clientmods[i].OnTouchEnd(this, e);
@@ -207,7 +207,7 @@ public partial class Game
     {
         keyboardStateRaw[eKey.KeyChar] = false;
 
-        for (int i = 0; i < clientmodsCount; i++)
+        for (int i = 0; i < clientmods.Count; i++)
         {
             clientmods[i].OnKeyUp(this, eKey);
             if (eKey.Handled) return;
@@ -221,7 +221,7 @@ public partial class Game
 
     internal void KeyPress(KeyPressEventArgs eKeyChar)
     {
-        for (int i = 0; i < clientmodsCount; i++)
+        for (int i = 0; i < clientmods.Count; i++)
         {
             if (clientmods[i] == null) continue;
             clientmods[i].OnKeyPress(this, eKeyChar);
@@ -235,7 +235,7 @@ public partial class Game
 
         if (guistate != GuiState.MapLoading)
         {
-            for (int i = 0; i < clientmodsCount; i++)
+            for (int i = 0; i < clientmods.Count; i++)
             {
                 clientmods[i].OnKeyDown(this, eKey);
                 if (eKey.Handled) return;
@@ -259,20 +259,20 @@ public partial class Game
         if (guistate == GuiState.Normal)
             KeyDownNormal(eKey.KeyChar);
 
-        if (guistate == GuiState.Inventory)
+        else if (guistate == GuiState.Inventory)
         {
             if (eKey.KeyChar == GetKey(Keys.B) || eKey.KeyChar == GetKey(Keys.Escape))
                 GuiStateBackToGame();
             return;
         }
 
-        if (guistate == GuiState.MapLoading)
+        else if (guistate == GuiState.MapLoading)
         {
             if (eKey.KeyChar == GetKey(Keys.Escape))
                 ExitToMainMenu_();
         }
 
-        if (guistate == GuiState.CraftingRecipes)
+        else if (guistate == GuiState.CraftingRecipes)
         {
             if (eKey.KeyChar == GetKey(Keys.Escape))
                 GuiStateBackToGame();
@@ -427,7 +427,7 @@ public partial class Game
         if (currentlyAttackedEntity != -1 && entities[currentlyAttackedEntity].usable)
         {
             OnUseEntityArgs args = new() { entityId = currentlyAttackedEntity };
-            for (int i = 0; i < clientmodsCount; i++)
+            for (int i = 0; i < clientmods.Count; i++)
             {
                 if (clientmods[i] == null) continue;
                 clientmods[i].OnUseEntity(this, args);

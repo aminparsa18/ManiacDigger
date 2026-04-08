@@ -168,7 +168,7 @@
         }
 
         // Always dispatch to client mods regardless of whether a command matched.
-        for (int i = 0; i < clientmodsCount; i++)
+        for (int i = 0; i < clientmods.Count; i++)
         {
             ClientCommandArgs args = new() { arguments = arguments, command = cmd };
             clientmods[i].OnClientCommand(this, args);
@@ -216,26 +216,24 @@
                 string[] split = arguments.Split(':');
                 if (split.Length == 2)
                 {
-                    QueryClient qClient = new();
-                    qClient.SetPlatform(platform);
-                    qClient.PerformQuery(split[0], int.Parse(split[1]));
-                    if (qClient.querySuccess)
+                    var (result, message) = Task.Run(() => new QueryClient(platform).QueryAsync(split[0], int.Parse(split[1]))).GetAwaiter().GetResult();
+
+                    if (result != null)
                     {
-                        QueryResult r = qClient.GetResult();
-                        AddChatline(r.GameMode);
-                        AddChatline(r.MapSizeX.ToString());
-                        AddChatline(r.MapSizeY.ToString());
-                        AddChatline(r.MapSizeZ.ToString());
-                        AddChatline(r.MaxPlayers.ToString());
-                        AddChatline(r.MOTD);
-                        AddChatline(r.Name);
-                        AddChatline(r.PlayerCount.ToString());
-                        AddChatline(r.PlayerList);
-                        AddChatline(r.Port.ToString());
-                        AddChatline(r.PublicHash);
-                        AddChatline(r.ServerVersion);
+                        AddChatline(result.GameMode);
+                        AddChatline(result.MapSizeX.ToString());
+                        AddChatline(result.MapSizeY.ToString());
+                        AddChatline(result.MapSizeZ.ToString());
+                        AddChatline(result.MaxPlayers.ToString());
+                        AddChatline(result.Motd);
+                        AddChatline(result.Name);
+                        AddChatline(result.PlayerCount.ToString());
+                        AddChatline(result.PlayerList);
+                        AddChatline(result.Port.ToString());
+                        AddChatline(result.PublicHash);
+                        AddChatline(result.ServerVersion);
                     }
-                    AddChatline(qClient.GetServerMessage());
+                    AddChatline(message);
                 }
                 break;
         }

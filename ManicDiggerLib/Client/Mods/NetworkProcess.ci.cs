@@ -51,7 +51,7 @@ public class ModNetworkProcess : ModBase
             {
                 break;
             }
-            TryReadPacket(msg.message, msg.messageLength);
+            TryReadPacket(msg.Payload.ToArray(), msg.Payload.Length);
         }
     }
 

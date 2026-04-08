@@ -123,21 +123,16 @@ public interface IPlatformAudio
 
 public interface IPlatformNetwork
 {
-    // TCP
     bool TcpAvailable();
-    void TcpConnect(string ip, int port, bool connected);
-    void TcpSend(byte[] data, int length);
-    int TcpReceive(byte[] data, int dataLength);
-
     // ENet
     bool EnetAvailable();
     EnetHost EnetCreateHost();
+    void EnetHostInitialize(EnetHost host, IPEndPointCi? address, int peerLimit, int channelLimit, int incomingBandwidth, int outgoingBandwidth);
     void EnetHostInitializeServer(EnetHost host, int port, int peerLimit);
-    bool EnetHostService(EnetHost host, int timeout, EnetEventRef enetEvent);
-    bool EnetHostCheckEvents(EnetHost host, EnetEventRef event_);
-    EnetPeer EnetHostConnect(EnetHost host, string hostName, int port, int data, int channelLimit);
-    void EnetPeerSend(EnetPeer peer, byte channelID, byte[] data, int dataLength, int flags);
-    void EnetHostInitialize(EnetHost host, IPEndPointCi address, int peerLimit, int channelLimit, int incomingBandwidth, int outgoingBandwidth);
+    EnetEvent? EnetHostService(EnetHost host, int timeout);
+    EnetEvent? EnetHostCheckEvents(EnetHost host);
+    EnetPeer EnetHostConnect(EnetHost host, string hostName, int port, int channelCount, int data);
+    void EnetPeerSend(EnetPeer peer, int channelId, ReadOnlyMemory<byte> payload, int flags);
 
     // WebSocket
     bool WebSocketAvailable();
@@ -276,53 +271,6 @@ public class Preferences
     public string GetKey(int i) => items.Keys.ElementAtOrDefault(i);
 
     internal void Remove(string key) => items.Remove(key);
-}
-
-public class EnetHost
-{
-}
-
-public abstract class EnetEvent
-{
-    public abstract EnetEventType Type();
-    public abstract EnetPeer Peer();
-    public abstract EnetPacket Packet();
-}
-
-public class EnetEventRef
-{
-    internal EnetEvent e;
-}
-
-public enum EnetEventType
-{
-    None,
-    Connect,
-    Disconnect,
-    Receive
-}
-
-public class EnetPacketFlags
-{
-    public const int None = 0;
-    public const int Reliable = 1;
-    public const int Unsequenced = 2;
-    public const int NoAllocate = 4;
-    public const int UnreliableFragment = 8;
-}
-
-public abstract class EnetPeer
-{
-    public abstract int UserData();
-    public abstract void SetUserData(int value);
-    public abstract IPEndPointCi GetRemoteAddress();
-}
-
-public abstract class EnetPacket
-{
-    public abstract int GetBytesCount();
-    public abstract byte[] GetBytes();
-    public abstract void Dispose();
 }
 
 public class MonitorObject

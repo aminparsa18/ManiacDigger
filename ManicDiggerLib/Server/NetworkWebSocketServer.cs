@@ -1,62 +1,116 @@
-﻿using WebSocketSharp;
+﻿using Serilog;
+using System.Threading.Channels;
+using WebSocketSharp;
 using WebSocketSharp.Server;
+using ErrorEventArgs = WebSocketSharp.ErrorEventArgs;
 
-public class WebSocketNetServer : NetServer
+public sealed class WebSocketNetServer : NetServer
 {
-    public WebSocketNetServer()
-    {
-        incoming = new();
-        singleton = this;
-    }
+    private readonly Channel<NetIncomingMessage> _inbox =
+        Channel.CreateUnbounded<NetIncomingMessage>();
 
-    private WebSocketServer server;
+    private WebSocketServer? _server;
+    private int _port;
 
-    public static WebSocketNetServer singleton;
+    public override void SetPort(int port) => _port = port;
 
     public override void Start()
     {
-        server = new WebSocketServer(Port);
-        server.AddWebSocketService<WebSocketGameServer>("/Game");
-        server.Start();
-        if (server.IsListening)
-        {
-            Console.WriteLine("Listening on port {0}, and providing WebSocket services:", server.Port);
-            foreach (var path in server.WebSocketServices.Paths)
-                Console.WriteLine("- {0}", path);
-        }
+        _server = new WebSocketServer(_port);
+
+        // Pass the inbox writer into the behavior factory so there is no singleton.
+        ChannelWriter<NetIncomingMessage> writer = _inbox.Writer;
+        _server.AddWebSocketService("/Game", () => new WebSocketSession(writer));
+        _server.Start();
+
+        if (_server.IsListening)
+            Log.Information("WebSocket server listening on port {Port}.", _port);
     }
 
-    public override NetIncomingMessage ReadMessage()
+    public override NetIncomingMessage? ReadMessage()
     {
-        lock (incoming)
-        {
-            if (incoming.Count() != 0)
-            {
-                return incoming.Dequeue();
-            }
-        }
-        return null;
+        _inbox.Reader.TryRead(out NetIncomingMessage? msg);
+        return msg;
     }
 
-    internal Queue<NetIncomingMessage> incoming;
+    public void Stop() => _server?.Stop();
+}
 
-    private int Port;
+internal sealed class WebSocketSession : WebSocketBehavior
+{
+    private readonly ChannelWriter<NetIncomingMessage> _inbox;
+    private WebSocketConnection? _connection;
 
-    public override void SetPort(int port)
+    internal WebSocketSession(ChannelWriter<NetIncomingMessage> inbox)
     {
-        Port = port;
+        IgnoreExtensions = true;
+        _inbox = inbox;
+    }
+
+    protected override void OnOpen()
+    {
+        _connection = new WebSocketConnection(this);
+        _inbox.TryWrite(new NetIncomingMessage
+        {
+            Type = NetworkMessageType.Connect,
+            SenderConnection = _connection,
+        });
+    }
+
+    protected override void OnMessage(MessageEventArgs e)
+    {
+        _inbox.TryWrite(new NetIncomingMessage
+        {
+            Type = NetworkMessageType.Data,
+            Payload = e.RawData,
+            SenderConnection = _connection,
+        });
+    }
+
+    protected override void OnClose(CloseEventArgs e)
+    {
+        _inbox.TryWrite(new NetIncomingMessage
+        {
+            Type = NetworkMessageType.Disconnect,
+            SenderConnection = _connection,
+        });
+    }
+
+    protected override void OnError(ErrorEventArgs e)
+    {
+        Log.Warn($"WebSocket session error: {e.Message}");
+    }
+
+    internal void Send(ReadOnlyMemory<byte> payload)
+    {
+        // websocket-sharp's SendAsync handles its own internal send queue.
+        SendAsync(payload.ToArray(), completed =>
+        {
+            if (!completed)
+                Log.Warn("WebSocket server send did not complete.");
+        });
     }
 }
 
-public class WebSocketConnection : NetConnection
+// ---------------------------------------------------------------------------
+// Server-side connection handle
+// ---------------------------------------------------------------------------
+
+public sealed class WebSocketConnection : NetConnection
 {
-    internal WebSocketGameServer? server;
+    private readonly WebSocketSession _session;
+
+    internal WebSocketConnection(WebSocketSession session)
+    {
+        _session = session;
+    }
 
     public override IPEndPointCi RemoteEndPoint()
     {
         try
         {
-            return IPEndPointCiDefault.Create(server.Context.UserEndPoint.Address.ToString());
+            return IPEndPointCiDefault.Create(
+                _session.Context.UserEndPoint.Address.ToString());
         }
         catch
         {
@@ -64,112 +118,13 @@ public class WebSocketConnection : NetConnection
         }
     }
 
-    public override void SendMessage(INetOutgoingMessage msg, MyNetDeliveryMethod method, int sequenceChannel)
+    public override void SendMessage(ReadOnlyMemory<byte> payload, MyNetDeliveryMethod method, int sequenceChannel = 0)
     {
-        byte[] message = new byte[msg.messageLength];
-        for (int i = 0; i < msg.messageLength; i++)
-        {
-            message[i] = msg.message[i];
-        }
-        server.Send1(message);
+        _session.Send(payload);
     }
 
-    public override void Update()
-    {
-    }
+    public override void Update() { }
 
-    public override bool EqualsConnection(NetConnection connection)
-    {
-        var a = this;
-        var b = (WebSocketConnection)connection;
-        return a.server == b.server;
-    }
-}
-
-public class WebSocketGameServer : WebSocketBehavior
-{
-    public WebSocketGameServer()
-    {
-        IgnoreExtensions = true;
-        connection = new WebSocketConnection
-        {
-            server = this
-        };
-    }
-    private readonly WebSocketConnection connection;
-
-    protected override void OnOpen()
-    {
-        NetIncomingMessage m = new()
-        {
-            Type = NetworkMessageType.Connect,
-            SenderConnection = connection
-        };
-        Enqueue(m);
-    }
-
-    protected override void OnMessage(WebSocketSharp.MessageEventArgs e)
-    {
-        NetIncomingMessage m = new()
-        {
-            message = e.RawData,
-            messageLength = e.RawData.Length,
-            Type = NetworkMessageType.Data,
-            SenderConnection = connection
-        };
-        Enqueue(m);
-    }
-
-    protected override void OnClose(CloseEventArgs e)
-    {
-        NetIncomingMessage m = new()
-        {
-            Type = NetworkMessageType.Disconnect,
-            SenderConnection = connection
-        };
-        Enqueue(m);
-    }
-
-    private static void Enqueue(NetIncomingMessage m)
-    {
-        lock (WebSocketNetServer.singleton.incoming)
-        {
-            WebSocketNetServer.singleton.incoming.Enqueue(m);
-        }
-    }
-
-    private readonly Queue<byte[]> toSend = new();
-    private bool isSending;
-    private readonly object sendLock = new();
-    public void Send1(byte[] data)
-    {
-        lock (sendLock)
-        {
-            if (isSending)
-            {
-                toSend.Enqueue(data);
-            }
-            else
-            {
-                isSending = true;
-                SendAsync(data, F);
-            }
-        }
-    }
-
-    private void F(bool completed)
-    {
-        lock (sendLock)
-        {
-            if (toSend.Count > 0)
-            {
-                byte[] data = toSend.Dequeue();
-                SendAsync(data, F);
-            }
-            else
-            {
-                isSending = false;
-            }
-        }
-    }
+    public override bool EqualsConnection(NetConnection other) =>
+        other is WebSocketConnection w && w._session == _session;
 }

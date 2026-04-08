@@ -310,7 +310,7 @@ public partial class Game
 
     public void Update(float dt)
     {
-        for (int i = 0; i < clientmodsCount; i++)
+        for (int i = 0; i < clientmods.Count; i++)
         {
             if (clientmods[i] == null) { continue; }
             clientmods[i].OnNewFrameReadOnlyMainThread(this, dt);
@@ -429,7 +429,7 @@ public partial class Game
 
     public void Dispose()
     {
-        for (int i = 0; i < clientmodsCount; i++)
+        for (int i = 0; i < clientmods.Count; i++)
         {
             if (clientmods[i] == null) { continue; }
             clientmods[i].Dispose(this);

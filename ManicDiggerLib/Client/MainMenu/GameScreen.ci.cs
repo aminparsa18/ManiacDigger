@@ -31,68 +31,50 @@ public class ScreenGame : Screen
     {
         if (singleplayer)
         {
+            DummyNetwork network = platform.SinglePlayerServerGetNetwork();
+
             if (platform.SinglePlayerServerAvailable())
             {
                 platform.SinglePlayerServerStart(singleplayerSavePath);
             }
             else
             {
-                serverSimple = new ServerSimple();
-                DummyNetwork network = platform.SinglePlayerServerGetNetwork();
-                network.Start(platform.MonitorCreate(), platform.MonitorCreate());
-                DummyNetServer server = new()
-                {
-                    network = network,
-                    platform = platform
-                };
+                DummyNetServer server = new(network);
                 server.Start();
+
+                serverSimple = new ServerSimple();
                 serverSimple.Start(server, singleplayerSavePath, platform);
 
-                serverSimpleMod = new ModServerSimple
-                {
-                    server = serverSimple
-                };
+                serverSimpleMod = new ModServerSimple { server = serverSimple };
                 game.AddMod(serverSimpleMod);
-                platform.SinglePlayerServerGetNetwork().ServerReceiveBuffer.Enqueue([]);
             }
 
-            connectData = new ConnectData
-            {
-                Username = "Local"
-            };
-            game.connectdata = connectData;
+            network.ServerInbox.Enqueue([]);
+            game.main = new DummyNetClient(network);
 
-            DummyNetClient netclient = new();
-            netclient.SetPlatform(platform);
-            netclient.SetNetwork(platform.SinglePlayerServerGetNetwork());
-            game.main = netclient;
+            connectData = new ConnectData { Username = "Local" };
+            game.connectdata = connectData;
         }
         else
         {
             game.connectdata = connectData;
-            if (platform.EnetAvailable())
-            {
-                EnetNetClient client = new();
-                client.SetPlatform(platform);
-                game.main = client;
-            }
-            else if (platform.TcpAvailable())
-            {
-                TcpNetClient client = new();
-                client.SetPlatform(platform);
-                game.main = client;
-            }
-            else if (platform.WebSocketAvailable())
-            {
-                WebSocketClient client = new();
-                client.SetPlatform(platform);
-                game.main = client;
-            }
-            else
-            {
-                platform.ThrowException("Network not implemented");
-            }
+            game.main = CreateNetClient(platform)
+                ?? throw new InvalidOperationException("No network transport available.");
         }
+    }
+
+    private static NetClient? CreateNetClient(IGamePlatform platform)
+    {
+        if (platform.TcpAvailable())
+            return new TcpNetClient();
+
+        if (platform.EnetAvailable())
+            return new EnetNetClient(platform);
+
+        if (platform.WebSocketAvailable())
+            return new WebSocketNetClient();
+
+        return null;
     }
 
     private IGamePlatform platform;
@@ -113,19 +95,15 @@ public class ScreenGame : Screen
             game.Dispose();
             if (game.GetRedirect() != null)
             {
-                //Query new server for public key
-                QueryClient qclient = new();
-                qclient.SetPlatform(platform);
-                qclient.PerformQuery(game.GetRedirect().GetIP(), game.GetRedirect().GetPort());
-                if (qclient.queryPerformed && !qclient.querySuccess)
+                var (qresult, message) = Task.Run(() => new QueryClient(platform).QueryAsync(game.GetRedirect().GetIP(), game.GetRedirect().GetPort())).GetAwaiter().GetResult();
+
+                if (qresult == null)
                 {
-                    //Query did not succeed. Back to main menu
-                    platform.MessageBoxShowError(qclient.GetServerMessage(), "Redirection error");
+                    platform.MessageBoxShowError(message, "Redirection error");
                     menu.StartMainMenu();
                     return;
                 }
-                QueryResult qresult = qclient.GetResult();
-                //Get auth hash for new server
+
                 LoginClientCi lic = new();
                 LoginData lidata = new();
                 string token = qresult.PublicHash.Split('=')[1];

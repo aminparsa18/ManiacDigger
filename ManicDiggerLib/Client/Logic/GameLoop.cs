@@ -40,7 +40,7 @@
         platform.GlClearColorBufferAndDepthBuffer();
         platform.BindTexture2d(d_TerrainTextures.TerrainTexture);
 
-        for (int i = 0; i < clientmodsCount; i++)
+        for (int i = 0; i < clientmods.Count; i++)
         {
             if (clientmods[i] == null) continue;
             clientmods[i].OnBeforeNewFrameDraw3d(this, deltaTime);
@@ -52,7 +52,7 @@
         d_FrustumCulling.CalcFrustumEquations();
 
         platform.GlEnableDepthTest();
-        for (int i = 0; i < clientmodsCount; i++)
+        for (int i = 0; i < clientmods.Count; i++)
         {
             if (clientmods[i] == null) continue;
             clientmods[i].OnNewFrameDraw3d(this, deltaTime);
@@ -67,7 +67,7 @@
 
     internal void FrameTick(float dt)
     {
-        for (int i = 0; i < clientmodsCount; i++)
+        for (int i = 0; i < clientmods.Count; i++)
             clientmods[i].OnNewFrameFixed(this, dt);
 
         for (int i = 0; i < entities.Count; i++)
@@ -104,7 +104,7 @@
         SetAmbientLight(ColorFromArgb(255, 255, 255, 255));
         Draw2d(dt);
 
-        for (int i = 0; i < clientmodsCount; i++)
+        for (int i = 0; i < clientmods.Count; i++)
             clientmods[i].OnNewFrame(this, dt);
 
         mouseleftclick = mouserightclick = false;
