@@ -250,7 +250,6 @@ public partial class Game
         //InitUi();       // UI, menus, dialogs, chat — see GameUi.cs
         //InitEntities(); // Entity pool — see GameEntities.cs
        // InitOptions();  // Game options and settings — see GameOptions.cs
-        InitMods();     // Mod manager, particle effects — see GameMods.cs
     }
 
     // -------------------------------------------------------------------------
