@@ -148,7 +148,7 @@ public partial class Game
         {
             return null;
         }
-        for (int i = 0; i < entitiesCount; i++)
+        for (int i = 0; i < entities.Count; i++)
         {
             if (entities[i] == null)
             {
@@ -181,15 +181,7 @@ public partial class Game
 
     internal void EntityAddLocal(Entity entity)
     {
-        for (int i = entityLocalIdStart; i < entitiesCount; i++)
-        {
-            if (entities[i] == null)
-            {
-                entities[i] = entity;
-                return;
-            }
-        }
-        entities[entitiesCount++] = entity;
+        entities.Add(entity);
     }
 
     internal static Entity CreateBulletEntity(float fromX, float fromY, float fromZ, float toX, float toY, float toZ, float speed)

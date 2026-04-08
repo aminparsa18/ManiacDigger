@@ -21,7 +21,7 @@ public class ModDrawMinecarts : ModBase
 
     public override void OnNewFrameDraw3d(Game game, float deltaTime)
     {
-        for (int i = 0; i < game.entitiesCount; i++)
+        for (int i = 0; i < game.entities.Count; i++)
         {
             Minecart m = game.entities[i]?.minecart;
             if (m == null || !m.enabled) continue;

@@ -70,7 +70,7 @@
         for (int i = 0; i < clientmodsCount; i++)
             clientmods[i].OnNewFrameFixed(this, dt);
 
-        for (int i = 0; i < entitiesCount; i++)
+        for (int i = 0; i < entities.Count; i++)
         {
             Entity e = entities[i];
             if (e == null) continue;

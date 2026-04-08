@@ -16,7 +16,7 @@ public class ModPush : ModBase
         float pY = game.player.position.y;
         float pZ = game.player.position.z;
 
-        for (int i = 0; i < game.entitiesCount; i++)
+        for (int i = 0; i < game.entities.Count; i++)
         {
             Entity entity = game.entities[i];
             if (entity?.push == null) continue;

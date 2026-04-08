@@ -9,7 +9,7 @@ public class ModDrawArea : ModBase
     {
         if (!game.ENABLE_DRAW2D) return;
 
-        for (int i = 0; i < game.entitiesCount; i++)
+        for (int i = 0; i < game.entities.Count; i++)
         {
             Entity e = game.entities[i];
             if (e?.drawArea == null || !e.drawArea.visible) continue;

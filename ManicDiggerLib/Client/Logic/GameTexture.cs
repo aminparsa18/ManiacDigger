@@ -110,8 +110,8 @@
     {
         terrainTexture = platform.LoadTextureFromBitmap(atlas2d);
 
-        terrainTexturesPerAtlas = Atlas1dheight() / (atlas2dWidth / atlas2dtiles());
-        Bitmap[] atlases1d = TextureAtlasConverter.Atlas2dInto1d(platform, atlas2d, atlas2dtiles(), Atlas1dheight(), out int atlasesidCount);
+        terrainTexturesPerAtlas = Atlas1dheight() / (atlas2dWidth / Atlas2DTiles);
+        Bitmap[] atlases1d = TextureAtlasConverter.Atlas2dInto1d(platform, atlas2d, Atlas2DTiles, Atlas1dheight(), out int atlasesidCount);
 
         terrainTextures1d = new int[atlasesidCount];
         int count = 0;
@@ -126,7 +126,7 @@
     {
         // TODO: support tile sizes other than 32x32
         const int tilesize = 32;
-        BitmapData_ atlas2d = BitmapData_.Create(tilesize * atlas2dtiles(), tilesize * atlas2dtiles());
+        BitmapData_ atlas2d = BitmapData_.Create(tilesize * Atlas2DTiles, tilesize * Atlas2DTiles);
 
         for (int i = 0; i < textureIdsCount; i++)
         {
@@ -148,8 +148,8 @@
             platform.BitmapGetPixelsArgb(bmp, bmpPixels);
             platform.BitmapDelete(bmp);
 
-            int x = i % texturesPacked();
-            int y = i / texturesPacked();
+            int x = i % TexturesPacked;
+            int y = i / TexturesPacked;
             for (int xx = 0; xx < tilesize; xx++)
                 for (int yy = 0; yy < tilesize; yy++)
                     atlas2d.SetPixel(x * tilesize + xx, y * tilesize + yy, bmpPixels[xx + yy * tilesize]);

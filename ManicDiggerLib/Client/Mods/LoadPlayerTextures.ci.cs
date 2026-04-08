@@ -70,7 +70,7 @@ public class ModLoadPlayerTextures : ModBase
             }
         }
 
-        for (int i = 0; i < game.entitiesCount; i++)
+        for (int i = 0; i < game.entities.Count; i++)
         {
             Entity e = game.entities[i];
             if (e?.drawModel == null) { continue; }

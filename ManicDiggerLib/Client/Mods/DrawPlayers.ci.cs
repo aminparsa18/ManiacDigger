@@ -10,7 +10,7 @@ public class ModDrawPlayers : ModBase
     {
         game.totaltimeMilliseconds = game.platform.TimeMillisecondsFromStart();
 
-        for (int i = 0; i < game.entitiesCount; i++)
+        for (int i = 0; i < game.entities.Count; i++)
         {
             Entity p = game.entities[i];
             if (p?.drawModel == null) continue;

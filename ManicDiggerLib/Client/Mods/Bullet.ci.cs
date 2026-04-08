@@ -7,7 +7,7 @@ public class ModBullet : ModBase
 {
     public override void OnNewFrameDraw3d(Game game, float dt)
     {
-        for (int i = 0; i < game.entitiesCount; i++)
+        for (int i = 0; i < game.entities.Count; i++)
         {
             Entity entity = game.entities[i];
             if (entity?.bullet == null) continue;

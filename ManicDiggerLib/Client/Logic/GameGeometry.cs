@@ -146,7 +146,7 @@
             Draw2dData d = todraw[i];
             RectangleF rect = new(0, 0, 1, 1);
             if (d.inAtlasId != null)
-                TextureAtlasCi.TextureCoords2d(d.inAtlasId, texturesPacked(), rect);
+                TextureAtlasCi.TextureCoords2d(d.inAtlasId, TexturesPacked, rect);
 
             modelDatas[modelDatasCount++] = QuadModelData.GetColoredQuadModelData(
                 rect.X, rect.Y, rect.Width, rect.Height,

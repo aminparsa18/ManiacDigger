@@ -8,7 +8,7 @@ public class ModExpire : ModBase
     public override void OnNewFrameFixed(Game game, float args)
     {
         float dt = args;
-        for (int i = 0; i < game.entitiesCount; i++)
+        for (int i = 0; i < game.entities.Count; i++)
         {
             Entity entity = game.entities[i];
             if (entity?.expires == null) continue;

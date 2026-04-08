@@ -173,7 +173,7 @@ public partial class Game
 
     internal bool IsAnyPlayerInPos(int blockposX, int blockposY, int blockposZ)
     {
-        for (int i = 0; i < entitiesCount; i++)
+        for (int i = 0; i < entities.Count; i++)
         {
             Entity e = entities[i];
             if (e?.drawModel == null) continue;

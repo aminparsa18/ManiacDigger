@@ -315,7 +315,7 @@ public class ModGuiChat : ModBase
     {
         if (!string.IsNullOrEmpty(text))
         {
-            for (int i = 0; i < game.entitiesCount; i++)
+            for (int i = 0; i < game.entities.Count; i++)
             {
                 Entity entity = game.entities[i];
                 if (entity == null) { continue; }

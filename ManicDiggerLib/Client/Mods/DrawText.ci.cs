@@ -12,7 +12,7 @@ public class ModDrawText : ModBase
 
     public override void OnNewFrameDraw3d(Game game, float deltaTime)
     {
-        for (int i = 0; i < game.entitiesCount; i++)
+        for (int i = 0; i < game.entities.Count; i++)
         {
             Entity e = game.entities[i];
             if (e?.drawText == null) continue;

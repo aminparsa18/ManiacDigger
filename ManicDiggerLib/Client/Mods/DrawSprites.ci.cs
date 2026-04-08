@@ -9,7 +9,7 @@ public class ModDrawSprites : ModBase
 
     public override void OnNewFrameDraw3d(Game game, float deltaTime)
     {
-        for (int i = 0; i < game.entitiesCount; i++)
+        for (int i = 0; i < game.entities.Count; i++)
         {
             Entity entity = game.entities[i];
             if (entity?.sprite == null) continue;

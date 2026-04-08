@@ -54,8 +54,8 @@ public partial class Game
     internal int maxTextureSize;
     internal int Atlas1dheight() => maxTextureSize;
 
-    internal static int texturesPacked() => GlobalVar.MAX_BLOCKTYPES_SQRT; // 16x16
-    internal static int atlas2dtiles() => GlobalVar.MAX_BLOCKTYPES_SQRT;   // 16x16
+    internal static int TexturesPacked => GlobalVar.MAX_BLOCKTYPES_SQRT; // 16x16
+    internal static int Atlas2DTiles => GlobalVar.MAX_BLOCKTYPES_SQRT;   // 16x16
 
     internal int handTexture;
     internal bool handRedraw;
@@ -325,9 +325,8 @@ public partial class Game
     internal string[] getAsset;
     internal int fillAreaLimit;
 
-    internal Entity[] entities;
+    internal List<Entity> entities;
     internal const int entitiesMax = 4096;
-    internal int entitiesCount;
 
     internal int ChatLinesMax;
     internal Chatline[] ChatLines;
@@ -371,7 +370,6 @@ public partial class Game
         InitCamera();
         InitLighting();
         InitInput();
-        InitEntities();
         InitOptions();
         InitNetworking();
         InitChat();
@@ -396,6 +394,7 @@ public partial class Game
         PlayerStats = new Packet_ServerPlayerStats();
         taskScheduler = new TaskScheduler();
         commitActions = new List<Action>();
+        entities = new List<Entity>(entitiesMax);
     }
 
     private void InitMap()
@@ -518,15 +517,6 @@ public partial class Game
         keyboardStateRaw = new bool[KeysMax];
         for (int i = 0; i < KeysMax; i++)
             keyboardStateRaw[i] = false;
-    }
-
-    private void InitEntities()
-    {
-        entities = new Entity[entitiesMax];
-        for (int i = 0; i < entitiesMax; i++)
-            entities[i] = null;
-
-        entitiesCount = 512;
     }
 
     private void InitOptions()

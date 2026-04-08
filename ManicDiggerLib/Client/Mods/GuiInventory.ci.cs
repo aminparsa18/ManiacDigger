@@ -369,7 +369,7 @@ public class ModGuiInventory : ModBase
             game.Draw2dTexture(game.terrainTexture, screenposX, screenposY,
                 drawsizeX, drawsizeY,
                 dataItems.TextureIdForInventory()[item.BlockId],
-                Game.texturesPacked(), Game.ColorFromArgb(255, 255, 255, 255), false);
+                Game.                TexturesPacked, Game.ColorFromArgb(255, 255, 255, 255), false);
 
             if (item.BlockCount > 1)
             {

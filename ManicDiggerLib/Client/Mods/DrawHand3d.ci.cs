@@ -181,7 +181,7 @@ public class ModDrawHand3d : ModBase
     public int TerrainTexture => game.terrainTexture;
 
     /// <summary>Returns the number of textures packed per row/column in the terrain atlas.</summary>
-    public static int TexturesPacked => Game.texturesPacked();
+    public static int TexturesPacked => Game.TexturesPacked;
 
     /// <summary>
     /// Returns the atlas texture ID for the given face of the currently held item.
@@ -863,7 +863,7 @@ public class BlockRendererTorch
     /// Returns the normalised UV rectangle for <paramref name="textureIndex"/> in the terrain atlas.
     /// </summary>
     private static RectangleF GetTexRect(int textureIndex)
-        => TextureAtlas.TextureCoords2d(textureIndex, Game.texturesPacked());
+        => TextureAtlas.TextureCoords2d(textureIndex, Game.TexturesPacked);
 
     /// <summary>
     /// Convenience overload of <see cref="AddVertex(ModelData,float,float,float,float,float,int)"/>

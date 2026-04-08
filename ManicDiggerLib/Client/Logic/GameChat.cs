@@ -121,7 +121,7 @@
         {
             case "clients":
                 Log("Clients:");
-                for (int i = 0; i < entitiesCount; i++)
+                for (int i = 0; i < entities.Count; i++)
                 {
                     Entity entity = entities[i];
                     if (entity == null || entity.drawName == null || !entity.drawName.ClientAutoComplete) continue;

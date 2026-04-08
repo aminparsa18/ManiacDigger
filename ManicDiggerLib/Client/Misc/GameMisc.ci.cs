@@ -856,7 +856,7 @@ public class ITerrainTextures
 {
     internal Game game;
 
-    public int TexturesPacked => Game.texturesPacked();
+    public int TexturesPacked => Game.TexturesPacked;
     public int TerrainTexture => game.terrainTexture;
     public int[] TerrainTextures1d => game.terrainTextures1d;
     public int TerrainTexturesPerAtlas => game.terrainTexturesPerAtlas;

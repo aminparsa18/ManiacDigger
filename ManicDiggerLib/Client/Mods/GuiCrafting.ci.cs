@@ -116,12 +116,12 @@ public class ModGuiCrafting : ModBase
             {
                 Packet_Ingredient ing = r.Ingredients[ii];
                 int colX = menuX + 20 + ii * 130;
-                game.Draw2dTexture(game.d_TerrainTextures.TerrainTexture, colX, rowY, 32, 32, game.TextureIdForInventory[ing.Type], Game.texturesPacked(), white, false);
+                game.Draw2dTexture(game.d_TerrainTextures.TerrainTexture, colX, rowY, 32, 32, game.TextureIdForInventory[ing.Type], Game.TexturesPacked, white, false);
                 game.Draw2dText1($"{ing.Amount} {game.blocktypes[ing.Type].Name}", colX + 50, rowY, FontSize, color, false);
             }
 
             int outX = menuX + 20 + OutputColumnOffset;
-            game.Draw2dTexture(game.d_TerrainTextures.TerrainTexture, outX, rowY, 32, 32, game.TextureIdForInventory[r.Output.Type], Game.texturesPacked(), white, false);
+            game.Draw2dTexture(game.d_TerrainTextures.TerrainTexture, outX, rowY, 32, 32, game.TextureIdForInventory[r.Output.Type], Game.TexturesPacked, white, false);
             game.Draw2dText1($"{r.Output.Amount} {game.blocktypes[r.Output.Type].Name}", outX + 50, rowY, FontSize, color, false);
         }
     }

@@ -476,7 +476,7 @@ public class ModPicking : ModBase
     {
         float eyeX = game.EyesPosX(), eyeY = game.EyesPosY(), eyeZ = game.EyesPosZ();
 
-        for (int i = 0; i < game.entitiesCount; i++)
+        for (int i = 0; i < game.entities.Count; i++)
         {
             Entity entity = game.entities[i];
             if (entity?.drawModel == null || entity.networkPosition == null) { continue; }
@@ -774,7 +774,7 @@ public class ModPicking : ModBase
 
         float eyeX = game.EyesPosX(), eyeY = game.EyesPosY(), eyeZ = game.EyesPosZ();
 
-        for (int i = 0; i < game.entitiesCount; i++)
+        for (int i = 0; i < game.entities.Count; i++)
         {
             Entity entity = game.entities[i];
             if (entity?.drawModel == null || i == game.LocalPlayerId) { continue; }
