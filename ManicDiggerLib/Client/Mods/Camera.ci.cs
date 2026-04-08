@@ -30,7 +30,7 @@ public class ModCamera : ModBase
     internal static Matrix4 FppCamera(Game game)
     {
         Vector3 forward = new();
-        VectorTool.ToVectorInFixedSystem(0, 0, 1, game.player.position.rotx, game.player.position.roty, ref forward);
+        VectorUtils.ToVectorInFixedSystem(0, 0, 1, game.player.position.rotx, game.player.position.roty, ref forward);
 
         float eyeX = game.player.position.x;
         float eyeY = game.player.position.y + game.GetCharacterEyesHeight();

@@ -432,7 +432,7 @@ public class Game
             || (block.WalkableType != Packet_WalkableTypeEnum.Solid && block.WalkableType != Packet_WalkableTypeEnum.Fluid);
     }
 
-    public int blockheight(int x, int y, int z_)
+    public int Blockheight(int x, int y, int z_)
     {
         for (int z = z_; z >= 0; z--)
         {

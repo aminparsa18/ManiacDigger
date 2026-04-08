@@ -31,7 +31,7 @@ public class ModFallDamageToPlayer : ModBase
         int posZ = game.GetPlayerEyesBlockZ();
 
         // Play falling wind sound when high up or falling fast
-        bool highUp = game.blockheight(posX, posY, posZ) < posZ - 8;
+        bool highUp = game.Blockheight(posX, posY, posZ) < posZ - 8;
         SetFallSoundActive(game, (highUp || fallSpeed > 3) && fallSpeed > 2);
 
         ApplyFallDamage(game, posX, posY, posZ, fallSpeed);

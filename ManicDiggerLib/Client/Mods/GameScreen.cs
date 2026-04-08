@@ -1,238 +1,245 @@
 ﻿using OpenTK.Windowing.Common;
 
+/// <summary>
+/// Base class for all in-game menu screens. Manages a fixed-size pool of
+/// <see cref="MenuWidget"/> objects and routes input events (keyboard, mouse,
+/// touch) to them. Derive from this class and override <see cref="OnButton"/>
+/// to respond to widget interactions.
+/// </summary>
 public class GameScreen : ModBase
 {
+    /// <summary>Reference to the current game instance.</summary>
+    internal Game game;
+
+    /// <summary>Maximum number of widgets this screen can hold.</summary>
+    internal int WidgetCount;
+
+    /// <summary>Widget pool. Entries are <see langword="null"/> when unused.</summary>
+    internal MenuWidget[] widgets;
+
+    /// <summary>Screen-space X origin added to all widget positions during drawing and hit-testing.</summary>
+    internal int screenx;
+
+    /// <summary>Screen-space Y origin added to all widget positions during drawing and hit-testing.</summary>
+    internal int screeny;
+
+    /// <summary>Initialises the widget pool with a capacity of 64.</summary>
     public GameScreen()
     {
         WidgetCount = 64;
         widgets = new MenuWidget[WidgetCount];
     }
-    internal Game game;
-    public override void OnKeyPress(Game game_, KeyPressEventArgs args) { KeyPress(args); }
-    public override void OnTouchStart(Game game_, TouchEventArgs e) { ScreenOnTouchStart(e); }
-    public void ScreenOnTouchStart(TouchEventArgs e)
-    {
-        e.SetHandled(MouseDown(e.GetX(), e.GetY()));
-    }
-    public override void OnTouchEnd(Game game_, TouchEventArgs e) { ScreenOnTouchEnd(e); }
-    public void ScreenOnTouchEnd(TouchEventArgs e)
-    {
-        MouseUp(e.GetX(), e.GetY());
-    }
-    public override void OnMouseDown(Game game_, MouseEventArgs args) { MouseDown(args.GetX(), args.GetY()); }
-    public override void OnMouseUp(Game game_, MouseEventArgs args) { MouseUp(args.GetX(), args.GetY()); }
-    public override void OnMouseMove(Game game_, MouseEventArgs args) { MouseMove(args); }
+
+    /// <inheritdoc/>
+    public override void OnKeyPress(Game game_, KeyPressEventArgs args) => KeyPress(args);
+
+    /// <inheritdoc/>
+    public override void OnTouchStart(Game game_, TouchEventArgs e)
+        => e.SetHandled(MouseDown(e.GetX(), e.GetY()));
+
+    /// <inheritdoc/>
+    public override void OnTouchEnd(Game game_, TouchEventArgs e) => MouseUp(e.GetX(), e.GetY());
+
+    /// <inheritdoc/>
+    public override void OnMouseDown(Game game_, MouseEventArgs args) => MouseDown(args.GetX(), args.GetY());
+
+    /// <inheritdoc/>
+    public override void OnMouseUp(Game game_, MouseEventArgs args) => MouseUp(args.GetX(), args.GetY());
+
+    /// <inheritdoc/>
+    public override void OnMouseMove(Game game_, MouseEventArgs args) => MouseMove(args);
+
+    /// <summary>Called when the hardware back button is pressed. Override to handle navigation.</summary>
     public virtual void OnBackPressed() { }
 
+    /// <summary>Called when the mouse wheel is scrolled. Override to handle scrolling.</summary>
+    public virtual void OnMouseWheel(MouseWheelEventArgs e) { }
+
+    /// <summary>
+    /// Called when a button widget is clicked (mouse-up inside its bounds).
+    /// Override to respond to button presses.
+    /// </summary>
+    /// <param name="w">The widget that was clicked.</param>
+    public virtual void OnButton(MenuWidget w) { }
+
+    /// <summary>
+    /// Handles keyboard character input, routing it to whichever text-box widget
+    /// is currently in editing mode. Supports backspace, tab/enter suppression,
+    /// paste (Ctrl+V / key code 22), and normal printable characters.
+    /// </summary>
     private void KeyPress(KeyPressEventArgs e)
     {
         for (int i = 0; i < WidgetCount; i++)
         {
             MenuWidget w = widgets[i];
-            if (w != null)
+            if (w == null || w.type != WidgetType.Textbox || !w.editing) { continue; }
+
+            int key = e.GetKeyChar();
+
+            if (key == 8) // backspace
             {
-                if (w.type == WidgetType.Textbox)
-                {
-                    if (w.editing)
-                    {
-                        string s = CharToString(e.GetKeyChar());
-                        if (e.GetKeyChar() == 8) // backspace
-                        {
-                            if (w.text.Length > 0)
-                            {
-                                w.text = w.text[..^1];
-                            }
-                            return;
-                        }
-                        if (e.GetKeyChar() == 9 || e.GetKeyChar() == 13) // tab, enter
-                        {
-                            return;
-                        }
-                        if (e.GetKeyChar() == 22) //paste
-                        {
-                            if (Clipboard.ContainsText())
-                            {
-                                w.text = string.Concat(w.text, Clipboard.GetText());
-                            }
-                            return;
-                        }
-                        if (game.platform.IsValidTypingChar(e.GetKeyChar()))
-                        {
-                            w.text = string.Concat(w.text, s);
-                        }
-                    }
-                }
+                if (w.text.Length > 0) { w.text = w.text[..^1]; }
+                return;
+            }
+            if (key == 9 || key == 13) // tab, enter
+            {
+                return;
+            }
+            if (key == 22) // paste (Ctrl+V)
+            {
+                if (Clipboard.ContainsText()) { w.text = string.Concat(w.text, Clipboard.GetText()); }
+                return;
+            }
+            if (game.platform.IsValidTypingChar(key))
+            {
+                w.text = string.Concat(w.text, ((char)key).ToString());
             }
         }
     }
 
+    /// <summary>
+    /// Handles a mouse or touch press at (<paramref name="x"/>, <paramref name="y"/>).
+    /// Updates the <c>pressed</c> and <c>editing</c> state of all widgets and
+    /// shows or hides the soft keyboard as needed.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> if any widget consumed the event.
+    /// </returns>
     private bool MouseDown(int x, int y)
     {
         bool handled = false;
         bool editingChange = false;
+
         for (int i = 0; i < WidgetCount; i++)
         {
             MenuWidget w = widgets[i];
-            if (w != null)
+            if (w == null) { continue; }
+
+            bool hit = PointInRect(x, y, screenx + w.x, screeny + w.y, w.sizex, w.sizey);
+
+            if (w.type == WidgetType.Button)
             {
-                if (w.type == WidgetType.Button)
+                w.pressed = hit;
+                if (hit) { handled = true; }
+            }
+
+            if (w.type == WidgetType.Textbox)
+            {
+                w.pressed = hit;
+                if (hit) { handled = true; }
+
+                bool wasEditing = w.editing;
+                w.editing = hit;
+
+                if (w.editing && !wasEditing)
                 {
-                    w.pressed = pointInRect(x, y, screenx + w.x, screeny + w.y, w.sizex, w.sizey);
-                    if (w.pressed) { handled = true; }
+                    game.platform.ShowKeyboard(true);
+                    editingChange = true;
                 }
-                if (w.type == WidgetType.Textbox)
+                if (!w.editing && wasEditing && !editingChange)
                 {
-                    w.pressed = pointInRect(x, y, screenx + w.x, screeny + w.y, w.sizex, w.sizey);
-                    if (w.pressed) { handled = true; }
-                    bool wasEditing = w.editing;
-                    w.editing = w.pressed;
-                    if (w.editing && (!wasEditing))
-                    {
-                        game.platform.ShowKeyboard(true);
-                        editingChange = true;
-                    }
-                    if ((!w.editing) && wasEditing && (!editingChange))
-                    {
-                        game.platform.ShowKeyboard(false);
-                    }
+                    game.platform.ShowKeyboard(false);
                 }
             }
         }
+
         return handled;
     }
 
+    /// <summary>
+    /// Handles a mouse or touch release at (<paramref name="x"/>, <paramref name="y"/>).
+    /// Clears all pressed states and fires <see cref="OnButton"/> for any button
+    /// whose bounds contain the release point.
+    /// </summary>
     private void MouseUp(int x, int y)
     {
         for (int i = 0; i < WidgetCount; i++)
         {
             MenuWidget w = widgets[i];
-            if (w != null)
-            {
-                w.pressed = false;
-            }
+            if (w != null) { w.pressed = false; }
         }
+
         for (int i = 0; i < WidgetCount; i++)
         {
             MenuWidget w = widgets[i];
-            if (w != null)
+            if (w == null || w.type != WidgetType.Button) { continue; }
+
+            if (PointInRect(x, y, screenx + w.x, screeny + w.y, w.sizex, w.sizey))
             {
-                if (w.type == WidgetType.Button)
-                {
-                    if (pointInRect(x, y, screenx + w.x, screeny + w.y, w.sizex, w.sizey))
-                    {
-                        OnButton(w);
-                    }
-                }
+                OnButton(w);
             }
         }
     }
 
-    public virtual void OnButton(MenuWidget w) { }
-
+    /// <summary>
+    /// Updates the <c>hover</c> state of all widgets based on the current mouse position.
+    /// Skips emulated move events unless <c>ForceUsage</c> is set.
+    /// </summary>
     private void MouseMove(MouseEventArgs e)
     {
-        if (e.GetEmulated() && !e.GetForceUsage())
-        {
-            return;
-        }
+        if (e.GetEmulated() && !e.GetForceUsage()) { return; }
+
         for (int i = 0; i < WidgetCount; i++)
         {
             MenuWidget w = widgets[i];
-            if (w != null)
-            {
-                w.hover = pointInRect(e.GetX(), e.GetY(), screenx + w.x, screeny + w.y, w.sizex, w.sizey);
-            }
+            w?.hover = PointInRect(e.GetX(), e.GetY(), screenx + w.x, screeny + w.y, w.sizex, w.sizey);
         }
     }
 
-    private static bool pointInRect(float x, float y, float rx, float ry, float rw, float rh)
-    {
-        return x >= rx && y >= ry && x < rx + rw && y < ry + rh;
-    }
-
-    public virtual void OnMouseWheel(MouseWheelEventArgs e) { }
-    internal int WidgetCount;
-    internal MenuWidget[] widgets;
+    /// <summary>
+    /// Draws all visible widgets. Buttons render as images or coloured rectangles
+    /// with centred text; text boxes render their text (masked with asterisks for
+    /// password fields) with a cursor appended while editing; labels render plain text.
+    /// </summary>
     public void DrawWidgets()
     {
         for (int i = 0; i < WidgetCount; i++)
         {
             MenuWidget w = widgets[i];
-            if (w != null)
+            if (w == null || !w.visible) { continue; }
+
+            string text = w.text;
+            if (w.selected)
             {
-                if (!w.visible)
+                text = string.Concat(game.platform, "&2", text);
+            }
+
+            if (w.type == WidgetType.Button)
+            {
+                if (w.buttonStyle != ButtonStyle.Text)
                 {
-                    continue;
-                }
-                string text = w.text;
-                if (w.selected)
-                {
-                    text = string.Concat(game.platform, "&2", text);
-                }
-                if (w.type == WidgetType.Button)
-                {
-                    if (w.buttonStyle == ButtonStyle.Text)
+                    if (w.image != null)
                     {
-                        //game.Draw2dText1(text, w.fontSize, w.x, w.y + w.sizey / 2, TextAlign.Left, TextBaseline.Middle);
+                        game.Draw2dBitmapFile(w.image, screenx + w.x, screeny + w.y, w.sizex, w.sizey);
                     }
                     else
                     {
-                        if (w.image != null)
-                        {
-                            game.Draw2dBitmapFile(w.image, screenx + w.x, screeny + w.y, w.sizex, w.sizey);
-                        }
-                        else
-                        {
-                            game.Draw2dTexture(game.WhiteTexture(), screenx + w.x, screeny + w.y, w.sizex, w.sizey, null, 0, w.color, false);
-                        }
-                        game.Draw2dText1(text, screenx + (int)(w.x), screeny + (int)(w.y + w.sizey / 2), (int)(w.fontSize), null, false);
+                        game.Draw2dTexture(game.WhiteTexture(), screenx + w.x, screeny + w.y, w.sizex, w.sizey, null, 0, w.color, false);
                     }
+                    game.Draw2dText1(text, screenx + (int)w.x, screeny + (int)(w.y + w.sizey / 2), (int)w.fontSize, null, false);
                 }
-                if (w.type == WidgetType.Textbox)
-                {
-                    if (w.password)
-                    {
-                        text = CharRepeat(42, w.text.Length); // '*'
-                    }
-                    if (w.editing)
-                    {
-                        text = string.Concat(game.platform, text, "_");
-                    }
-                    //if (w.buttonStyle == ButtonStyle.Text)
-                    {
-                        game.Draw2dText(text, w.font, screenx + w.x, screeny + w.y, null, false);//, TextAlign.Left, TextBaseline.Top);
-                    }
-                    //else
-                    {
-                        //menu.DrawButton(text, w.fontSize, w.x, w.y, w.sizex, w.sizey, (w.hover || w.editing));
-                    }
-                }
-                if (w.type == WidgetType.Label)
-                {
-                    game.Draw2dText(text, w.font, screenx + w.x, screeny + w.y, Game.ColorFromArgb(255, 0, 0, 0), false);
-                }
-                if (w.description != null)
-                {
-                    //menu.DrawText(w.description, w.fontSize, w.x, w.y + w.sizey / 2, TextAlign.Right, TextBaseline.Middle);
-                }
+                // ButtonStyle.Text rendering is not yet implemented.
+            }
+
+            if (w.type == WidgetType.Textbox)
+            {
+                if (w.password) { text = new string('*', w.text.Length); }
+                if (w.editing) { text = string.Concat(game.platform, text, "_"); }
+                game.Draw2dText(text, w.font, screenx + w.x, screeny + w.y, null, false);
+            }
+
+            if (w.type == WidgetType.Label)
+            {
+                game.Draw2dText(text, w.font, screenx + w.x, screeny + w.y, Game.ColorFromArgb(255, 0, 0, 0), false);
             }
         }
     }
-    public string CharToString(int a)
-    {
-        int[] arr = [a];
-        return StringUtils.CharArrayToString(arr, 1);
-    }
 
-    public string CharRepeat(int c, int length)
-    {
-        int[] charArray = new int[length];
-        for (int i = 0; i < length; i++)
-        {
-            charArray[i] = c;
-        }
-        return StringUtils.CharArrayToString(charArray, length);
-    }
-    internal int screenx;
-    internal int screeny;
+    /// <summary>
+    /// Returns <see langword="true"/> when the point (<paramref name="x"/>, <paramref name="y"/>)
+    /// lies within the rectangle defined by origin (<paramref name="rx"/>, <paramref name="ry"/>)
+    /// and size (<paramref name="rw"/>, <paramref name="rh"/>).
+    /// </summary>
+    private static bool PointInRect(float x, float y, float rx, float ry, float rw, float rh)
+        => x >= rx && y >= ry && x < rx + rw && y < ry + rh;
 }

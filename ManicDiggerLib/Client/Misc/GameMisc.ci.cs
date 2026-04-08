@@ -2108,16 +2108,6 @@ public class TextureAtlas
     }
 }
 
-public abstract class ClientPacketHandler
-{
-    public ClientPacketHandler()
-    {
-        one = 1;
-    }
-    internal float one;
-    public abstract void Handle(Game game, Packet_Server packet);
-}
-
 public class Map
 {
     internal Chunk[] chunks;

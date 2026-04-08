@@ -81,3 +81,21 @@ public class ModBlockDamageToPlayer : ModBase
         return game.map.IsValidPos(bx, bz, by) ? game.map.GetBlock((int)x, (int)z, (int)y) : 0;
     }
 }
+
+public class DialogScreen : GameScreen
+{
+    public override void OnButton(MenuWidget w)
+    {
+        if (w.isbutton)
+        {
+            string[] textValues = new string[WidgetCount];
+            for (int i = 0; i < WidgetCount; i++)
+            {
+                string s = widgets[i].text;
+                s ??= "";
+                textValues[i] = s;
+            }
+            game.SendPacketClient(ClientPackets.DialogClick(w.id, textValues, WidgetCount));
+        }
+    }
+}

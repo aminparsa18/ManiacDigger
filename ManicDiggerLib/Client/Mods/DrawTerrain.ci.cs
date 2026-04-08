@@ -1,748 +1,677 @@
 ﻿using OpenTK.Mathematics;
 
+/// <summary>
+/// Client-side mod responsible for tessellating, lighting, and drawing the voxel terrain.
+/// Runs chunk redraw logic on a background thread and commits GPU uploads on the main thread.
+/// </summary>
 public class ModDrawTerrain : ModBase
 {
+    /// <summary>Maximum light level used throughout the lighting system.</summary>
+    public static int MaxLight() => 15;
+
+    /// <summary>
+    /// Half of √3, used to compute the bounding-sphere radius of a chunk
+    /// (<c>√3 / 2 × chunkSize</c> is the circumradius of a cube).
+    /// </summary>
+    private float _sqrt3Half;
+
+    /// <summary>
+    /// Sentinel value meaning "no chunk found" when returned via the
+    /// <see cref="_tempNearestPos"/> array by <see cref="NearestDirty"/>.
+    /// </summary>
+    private const int NoChunk = -1;
+
+    /// <summary>Substitute for <see cref="int.MaxValue"/> safe inside <c>unchecked</c> contexts.</summary>
+    private const int IntMaxValue = 2147483647;
+
+    /// <summary>
+    /// Size of the extended (buffered) chunk buffer in one axis.
+    /// A 16³ chunk needs one block of overlap on each side → 18.
+    /// </summary>
+    private const int BufferedChunkEdge = 18;
+
+    /// <summary>Volume of the extended chunk buffer (<see cref="BufferedChunkEdge"/>³).</summary>
+    private const int BufferedChunkVolume = BufferedChunkEdge * BufferedChunkEdge * BufferedChunkEdge;
+
+    /// <summary>Reference to the current game instance, refreshed every frame.</summary>
+    internal Game _game;
+
+    /// <summary>Reusable lighting helper for computing per-block base light within a chunk.</summary>
+    private readonly LightBase _lightBase;
+
+    /// <summary>Reusable lighting helper for propagating light across chunk boundaries.</summary>
+    private readonly LightBetweenChunks _lightBetweenChunks;
+
+    /// <summary>
+    /// <see langword="true"/> after <see cref="StartTerrain"/> has been called and
+    /// the tessellator is ready to accept chunk redraw requests.
+    /// </summary>
+    private bool _terrainStarted;
+
+
+    /// <summary>Chunk edge length in blocks, copied from <see cref="Game.chunksize"/> at startup.</summary>
+    internal int chunksize;
+
+    /// <summary>
+    /// Extended chunk edge length (<c>chunksize + 2</c>).
+    /// The +2 accounts for the one-block border needed on each side.
+    /// </summary>
+    internal int bufferedChunkSize;
+
+    /// <summary>Reciprocal of <see cref="chunksize"/>, used to convert block coords to chunk coords.</summary>
+    internal float invertedChunkSize;
+
+    /// <summary>
+    /// Pending chunk redraws produced on the background thread, waiting to be
+    /// uploaded to the GPU on the main thread in <see cref="MainThreadCommit"/>.
+    /// </summary>
+    private readonly TerrainRendererRedraw[] _redrawQueue;
+
+    /// <summary>Number of valid entries in <see cref="_redrawQueue"/>.</summary>
+    private int _redrawQueueCount;
+
+    /// <summary>
+    /// Extended (18³) block-ID buffer for the chunk currently being tessellated.
+    /// Filled by <see cref="GetExtendedChunk"/> before tessellation.
+    /// </summary>
+    private readonly int[] _currentChunk;
+
+    /// <summary>
+    /// Per-block light values for the chunk currently being tessellated.
+    /// Filled by <see cref="CalculateShadows"/> before tessellation.
+    /// </summary>
+    private readonly byte[] _currentChunkShadows;
+
+    /// <summary>Scratch array of batcher IDs built during <see cref="DoRedraw"/>.</summary>
+    private readonly int[] _batcherIds;
+
+    /// <summary>Number of valid entries in <see cref="_batcherIds"/>.</summary>
+    private int _batcherIdsCount;
+
+    /// <summary>Reusable output array for the nearest dirty chunk position (x, y, z).</summary>
+    private readonly int[] _tempNearestPos;
+
+    /// <summary>
+    /// Per-block-type light radius, pre-fetched before shadow calculation to
+    /// avoid repeated property lookups in the inner loop.
+    /// </summary>
+    private readonly int[] _shadowLightRadius;
+
+    /// <summary>
+    /// Per-block-type transparency flag for light propagation, pre-fetched before
+    /// shadow calculation.
+    /// </summary>
+    private readonly bool[] _shadowIsTransparent;
+
+    /// <summary>Total number of chunk tessellations performed since startup.</summary>
+    private int _chunkUpdates;
+
+    /// <summary>
+    /// Timestamp (ms from start) of the last performance-info display update.
+    /// </summary>
+    private int _lastPerfUpdateMs;
+
+    /// <summary>Value of <see cref="_chunkUpdates"/> at the previous performance-info update.</summary>
+    private int _lastChunkUpdatesSnapshot;
+
+    /// <summary>
+    /// Allocates all fixed-size buffers. Call order: constructor → <see cref="Start"/>
+    /// (via <see cref="ModBase"/>) → <see cref="StartTerrain"/> (deferred until first redraw).
+    /// </summary>
     public ModDrawTerrain()
     {
-        currentChunk = new int[18 * 18 * 18];
-        currentChunkShadows = new byte[18 * 18 * 18];
-        tempnearestpos = new int[3];
-        ids = new int[1024];
-        idsCount = 0;
-        redraw = new TerrainRendererRedraw[128];
-        redrawCount = 0;
-        CalculateShadowslightRadius = new int[GlobalVar.MAX_BLOCKTYPES];
-        CalculateShadowsisTransparentForLight = new bool[GlobalVar.MAX_BLOCKTYPES];
-        lightBase = new LightBase();
-        lightBetweenChunks = new LightBetweenChunks();
-
-        lastPerformanceInfoupdateMilliseconds = 0;
-        lastchunkupdates = 0;
-        started = false;
+        _currentChunk = new int[BufferedChunkVolume];
+        _currentChunkShadows = new byte[BufferedChunkVolume];
+        _tempNearestPos = new int[3];
+        _batcherIds = new int[1024];
+        _redrawQueue = new TerrainRendererRedraw[128];
+        _shadowLightRadius = new int[GlobalVar.MAX_BLOCKTYPES];
+        _shadowIsTransparent = new bool[GlobalVar.MAX_BLOCKTYPES];
+        _lightBase = new LightBase();
+        _lightBetweenChunks = new LightBetweenChunks();
     }
 
-    internal Game game;
-    private int chunkupdates;
-    public int ChunkUpdates() { return chunkupdates; }
-    public static int maxlight() { return 15; }
+    /// <summary>Returns the total number of chunk tessellations performed since startup.</summary>
+    public int ChunkUpdates() => _chunkUpdates;
 
-    private bool terrainRendererStarted;
+    /// <summary>Returns the reciprocal of <see cref="chunksize"/>.</summary>
+    internal float GetInvertedChunkSize() => invertedChunkSize;
 
-    private bool started;
-    private int lastPerformanceInfoupdateMilliseconds;
-    private int lastchunkupdates;
+    /// <summary>Returns the total number of triangles currently submitted to the batcher.</summary>
+    public int TrianglesCount() => _game.d_Batcher.TotalTriangleCount();
 
-#if CITO
-    macro Index3d(x, y, h, sizex, sizey) ((((((h) * (sizey)) + (y))) * (sizex)) + (x))
-#else
-    private static int Index3d(int x, int y, int h, int sizex, int sizey)
+    /// <summary>
+    /// Converts a block coordinate to a chunk coordinate by multiplying by
+    /// <see cref="invertedChunkSize"/>.
+    /// </summary>
+    internal int InvertChunk(int num) => (int)(num * invertedChunkSize);
+
+    /// <inheritdoc/>
+    public override void OnNewFrameDraw3d(Game game, float _)
     {
-        return (h * sizey + y) * sizex + x;
-    }
-#endif
+        _game = game;
 
-    public override void OnNewFrameDraw3d(Game game_, float deltaTime)
-    {
-        game = game_;
-        if (!started)
+        if (_game.shouldRedrawAllBlocks)
         {
-            started = true;
-        }
-        if (game.shouldRedrawAllBlocks)
-        {
-            game.shouldRedrawAllBlocks = false;
+            _game.shouldRedrawAllBlocks = false;
             RedrawAllBlocks();
         }
+
         DrawTerrain();
-        UpdatePerformanceInfo(deltaTime);
+        UpdatePerformanceInfo();
     }
 
-    internal void UpdatePerformanceInfo(float dt)
+    /// <inheritdoc/>
+    public override void OnReadOnlyBackgroundThread(Game game_, float dt)
     {
-        float msPerSecond = 1.0f / 1000;
-        float elapsed = (game.platform.TimeMillisecondsFromStart() - lastPerformanceInfoupdateMilliseconds) * msPerSecond;
-        int triangles = TrianglesCount();
-        if (elapsed >= 1)
-        {
-            lastPerformanceInfoupdateMilliseconds = game.platform.TimeMillisecondsFromStart();
-            int chunkupdates_ = ChunkUpdates();
-            game.performanceinfo["chunk updates"] = string.Format(game.language.ChunkUpdates(), (chunkupdates_ - lastchunkupdates).ToString());
-            lastchunkupdates = ChunkUpdates();
-            game.performanceinfo["triangles"] = string.Format(game.language.Triangles(), triangles.ToString());
-        }
+        _game = game_;
+        UpdateTerrain();
+        game_.QueueActionCommit(MainThreadCommit);
     }
 
+    /// <inheritdoc/>
     public override void Dispose(Game game_)
     {
         Clear();
     }
 
+    /// <summary>
+    /// Initialises the tessellator and caches frequently used chunk-size values.
+    /// Must be called before any chunk can be tessellated.
+    /// Called lazily from <see cref="RedrawAllBlocks"/> if not already started.
+    /// </summary>
     public void StartTerrain()
     {
-        sqrt3half = MathF.Sqrt(3) * 0.5f;
-        game.d_TerrainChunkTesselator.Start();
-        terrainRendererStarted = true;
+        _sqrt3Half = MathF.Sqrt(3) * 0.5f;
         chunksize = Game.chunksize;
         bufferedChunkSize = chunksize + 2;
         invertedChunkSize = 1.0f / chunksize;
+        _game.d_TerrainChunkTesselator.Start();
+        _terrainStarted = true;
     }
 
-    internal int chunksize;
-    internal int bufferedChunkSize;
-    internal float invertedChunkSize;
-    internal float getInvertedChunkSize() { return invertedChunkSize; }
-
-    internal int invertChunk(int num)
-    {
-        return (int)(num * invertedChunkSize);
-    }
-    private int mapAreaSize() { return (int)(game.d_Config3d.viewdistance) * 2; }
-    private int centerAreaSize() { return (int)(game.d_Config3d.viewdistance * 0.5f); }
-    private int mapAreaSizeZ() { return mapAreaSize(); }
-
-    private int mapsizexchunks() { return game.map.Mapsizexchunks; }
-    private int mapsizeychunks() { return game.map.Mapsizeychunks; }
-    private int mapsizezchunks() { return game.map.Mapsizezchunks; }
-
-    public override void OnReadOnlyBackgroundThread(Game game_, float dt)
-    {
-        game = game_;
-        UpdateTerrain();
-        game_.QueueActionCommit(TerrainRendererCommit.Create(this));
-    }
-
-    public void MainThreadCommit()
-    {
-#if !CITO
-        unchecked
-        {
-#endif
-            for (int i = 0; i < redrawCount; i++)
-            {
-                DoRedraw(redraw[i]);
-                redraw[i] = null;
-            }
-#if !CITO
-        }
-#endif
-        redrawCount = 0;
-    }
-
-    public void UpdateTerrain()
-    {
-        if (!terrainRendererStarted)
-        {
-            //Start() not called yet.
-            return;
-        }
-
-#if CITO
-        if (!(game.lastplacedblockX == -1 && game.lastplacedblockY == -1 && game.lastplacedblockZ == -1))
-        {
-            HashSetVector3IntRef ChunksToRedraw = new HashSetVector3IntRef();
-            Vector3IntRef[] around = BlocksAround7(Vector3IntRef.Create(game.lastplacedblockX, game.lastplacedblockY, game.lastplacedblockZ));
-            for (int i = 0; i < 7; i++)
-            {
-                Vector3IntRef a = around[i];
-                ChunksToRedraw.Set(Vector3IntRef.Create(a.X/chunksize, a.Y/chunksize, a.Z/chunksize));
-            }
-            int mapSizeX = game.map.MapSizeX/chunksize;
-            int mapSizeY = game.map.MapSizeY/chunksize;
-            int mapSizeZ = game.map.MapSizeZ/chunksize;
-
-#else
-        unchecked
-        {
-
-            if (!(game.lastplacedblockX == -1 && game.lastplacedblockY == -1 && game.lastplacedblockZ == -1))
-            {
-                HashSet<Vector3i> ChunksToRedraw = new();
-                Vector3i[] around = BlocksAround7(new(game.lastplacedblockX, game.lastplacedblockY, game.lastplacedblockZ));
-                for (int i = 0; i < 7; i++)
-                {
-                    Vector3i a = around[i];
-                    ChunksToRedraw.Add(new(invertChunk(a.X), invertChunk(a.Y), invertChunk(a.Z)));
-                }
-                int mapSizeX = invertChunk(game.map.MapSizeX);
-                int mapSizeY = invertChunk(game.map.MapSizeY);
-                int mapSizeZ = invertChunk(game.map.MapSizeZ);
-#endif
-                int mapsizexchunks_ = mapsizexchunks();
-                int mapsizeychunks_ = mapsizeychunks();
-
-                foreach (Vector3i chunk3 in ChunksToRedraw)
-                {
-                    int[] c = new int[3];
-
-                    int xx = chunk3.X;
-                    int yy = chunk3.Y;
-                    int zz = chunk3.Z;
-                    if (xx >= 0 && yy >= 0 && zz >= 0 && xx < mapSizeX && yy < mapSizeY && zz < mapSizeZ)
-                    {
-                        Chunk chunk = game.map.chunks[Index3d(xx, yy, zz, mapsizexchunks_, mapsizeychunks_)];
-                        if (chunk == null || chunk.rendered == null)
-                        {
-                            continue;
-                        }
-                        if (chunk.rendered.dirty)
-                        {
-                            RedrawChunk(xx, yy, zz);
-                        }
-                    }
-                }
-                game.lastplacedblockX = -1;
-                game.lastplacedblockY = -1;
-                game.lastplacedblockZ = -1;
-            }
-            int updated = 0;
-            for (; ; )
-            {
-                NearestDirty(tempnearestpos);
-                if (tempnearestpos[0] == -1 && tempnearestpos[1] == -1 && tempnearestpos[2] == -1)
-                {
-                    break;
-                }
-                RedrawChunk(tempnearestpos[0], tempnearestpos[1], tempnearestpos[2]);
-                //if (updated++ >= 1)
-                {
-                    break;
-                }
-                //if (framestopwatch.ElapsedMilliseconds > 5)
-                //{
-                //    break;
-                //}
-            }
-#if !CITO
-        }
-#endif
-    }
-
-    public static Vector3i[] BlocksAround7(Vector3i pos)
-    {
-        return
-        [
-        pos,
-        new(pos.X + 1, pos.Y, pos.Z),
-        new(pos.X - 1, pos.Y, pos.Z),
-        new(pos.X, pos.Y + 1, pos.Z),
-        new(pos.X, pos.Y - 1, pos.Z),
-        new(pos.X, pos.Y, pos.Z + 1),
-        new(pos.X, pos.Y, pos.Z - 1),
-        ];
-    }
-
-    private const int intMaxValue = 2147483647;
-    private readonly int[] tempnearestpos;
-    private void NearestDirty(int[] nearestpos)
-    {
-#if !CITO
-        unchecked
-        {
-#endif
-            int nearestdist = intMaxValue;
-            nearestpos[0] = -1;
-            nearestpos[1] = -1;
-            nearestpos[2] = -1;
-#if CITO
-        int px = (int)(game.player.position.x) / chunksize;
-        int py = (int)(game.player.position.z) / chunksize;
-        int pz = (int)(game.player.position.y) / chunksize;
-
-        int chunksxy = this.mapAreaSize()/ chunksize /2;
-        int chunksz = this.mapAreaSizeZ()/ chunksize /2;
-#else
-            int px = invertChunk((int)(game.player.position.x));
-            int py = invertChunk((int)(game.player.position.z));
-            int pz = invertChunk((int)(game.player.position.y));
-
-            int chunksxy = invertChunk(this.mapAreaSize()) / 2;
-            int chunksz = invertChunk(this.mapAreaSizeZ()) / 2;
-#endif
-            int startx = px - chunksxy;
-            int endx = px + chunksxy;
-            int starty = py - chunksxy;
-            int endy = py + chunksxy;
-            int startz = pz - chunksz;
-            int endz = pz + chunksz;
-
-            if (startx < 0) { startx = 0; }
-            if (starty < 0) { starty = 0; }
-            if (startz < 0) { startz = 0; }
-            int mapsizexchunks_ = mapsizexchunks();
-            int mapsizeychunks_ = mapsizeychunks();
-            if (endx >= mapsizexchunks_) { endx = mapsizexchunks_ - 1; }
-            if (endy >= mapsizeychunks_) { endy = mapsizeychunks_ - 1; }
-            if (endz >= mapsizezchunks()) { endz = mapsizezchunks() - 1; }
-
-
-            for (int x = startx; x <= endx; x++)
-            {
-                for (int y = starty; y <= endy; y++)
-                {
-                    for (int z = startz; z <= endz; z++)
-                    {
-                        Chunk c = game.map.chunks[Index3d(x, y, z, mapsizexchunks_, mapsizeychunks_)];
-                        if (c == null || c.rendered == null)
-                        {
-                            continue;
-                        }
-                        if (c.rendered.dirty)
-                        {
-                            int dx = px - x;
-                            int dy = py - y;
-                            int dz = pz - z;
-                            int dist = dx * dx + dy * dy + dz * dz;
-                            if (dist < nearestdist)
-                            {
-                                nearestdist = dist;
-                                nearestpos[0] = x;
-                                nearestpos[1] = y;
-                                nearestpos[2] = z;
-                            }
-                        }
-                    }
-                }
-            }
-#if !CITO
-        }
-#endif
-    }
-
-    public void DrawTerrain()
-    {
-        game.d_Batcher.Draw(game.player.position.x, game.player.position.y, game.player.position.z);
-    }
-
+    /// <summary>
+    /// Marks every chunk in the map as dirty so the entire terrain is re-tessellated
+    /// on the next background pass. Calls <see cref="StartTerrain"/> if necessary.
+    /// </summary>
     public void RedrawAllBlocks()
     {
-        if (!terrainRendererStarted)
+        if (!_terrainStarted)
         {
             StartTerrain();
         }
-#if CITO
-        int chunksLength = (game.map.MapSizeX / chunksize)
-            * (game.map.MapSizeY / chunksize)
-            * (game.map.MapSizeZ / chunksize );
-#else
-        int chunksLength = (invertChunk(game.map.MapSizeX))
-            * invertChunk(game.map.MapSizeY)
-            * invertChunk(game.map.MapSizeZ);
+
+        int chunksLength = InvertChunk(_game.map.MapSizeX)
+                         * InvertChunk(_game.map.MapSizeY)
+                         * InvertChunk(_game.map.MapSizeZ);
+
         unchecked
         {
-#endif
             for (int i = 0; i < chunksLength; i++)
             {
-                Chunk c = game.map.chunks[i];
-                if (c == null)
-                {
-                    continue;
-                }
-                if (c.rendered == null)
-                {
-                    c.rendered = new RenderedChunk();
-                }
+                Chunk c = _game.map.chunks[i];
+                if (c == null) { continue; }
+
+                c.rendered ??= new RenderedChunk();
+
                 c.rendered.dirty = true;
                 c.baseLightDirty = true;
             }
-#if !CITO
         }
-#endif
     }
 
-    private readonly int[] ids;
-    private int idsCount;
+    /// <summary>
+    /// Background-thread entry point. Re-tessellates chunks that were dirtied by
+    /// block placements and then picks the nearest remaining dirty chunk for update.
+    /// Results are queued in <see cref="_redrawQueue"/> for GPU upload on the main thread.
+    /// </summary>
+    public void UpdateTerrain()
+    {
+        if (!_terrainStarted) { return; }
+
+        unchecked
+        {
+            RedrawChunksAroundLastPlacedBlock();
+
+            // Pick one more dirty chunk per pass (nearest to the player).
+            NearestDirty(_tempNearestPos);
+            if (_tempNearestPos[0] != NoChunk)
+            {
+                RedrawChunk(_tempNearestPos[0], _tempNearestPos[1], _tempNearestPos[2]);
+            }
+        }
+    }
+
+    /// <summary>
+    /// If the player placed or destroyed a block last frame, marks the chunk
+    /// containing it and its six axis-aligned neighbours as needing a redraw,
+    /// then clears the pending block position.
+    /// </summary>
+    private void RedrawChunksAroundLastPlacedBlock()
+    {
+        if (_game.lastplacedblockX == NoChunk
+         && _game.lastplacedblockY == NoChunk
+         && _game.lastplacedblockZ == NoChunk)
+        {
+            return;
+        }
+
+        int mapSizeX = InvertChunk(_game.map.MapSizeX);
+        int mapSizeY = InvertChunk(_game.map.MapSizeY);
+        int mapSizeZ = InvertChunk(_game.map.MapSizeZ);
+        int mapsizexchunks = MapsizeXChunks();
+        int mapsizeychunks = MapsizeYChunks();
+
+        HashSet<Vector3i> chunksToRedraw = [];
+        Vector3i[] around = BlocksAround7(new(_game.lastplacedblockX, _game.lastplacedblockY, _game.lastplacedblockZ));
+        for (int i = 0; i < 7; i++)
+        {
+            Vector3i a = around[i];
+            chunksToRedraw.Add(new(InvertChunk(a.X), InvertChunk(a.Y), InvertChunk(a.Z)));
+        }
+
+        foreach (Vector3i chunk3 in chunksToRedraw)
+        {
+            int xx = chunk3.X, yy = chunk3.Y, zz = chunk3.Z;
+            if (xx < 0 || yy < 0 || zz < 0
+             || xx >= mapSizeX || yy >= mapSizeY || zz >= mapSizeZ)
+            {
+                continue;
+            }
+
+            Chunk chunk = _game.map.chunks[Index3d(xx, yy, zz, mapsizexchunks, mapsizeychunks)];
+            if (chunk?.rendered == null) { continue; }
+
+            if (chunk.rendered.dirty)
+            {
+                RedrawChunk(xx, yy, zz);
+            }
+        }
+
+        _game.lastplacedblockX = NoChunk;
+        _game.lastplacedblockY = NoChunk;
+        _game.lastplacedblockZ = NoChunk;
+    }
+
+    /// <summary>
+    /// Returns the block position and its six axis-aligned neighbours (7 total).
+    /// Used to determine which chunks may be affected by a single block change.
+    /// </summary>
+    /// <param name="pos">The changed block position in world block coordinates.</param>
+    /// <returns>Array of 7 positions: the block itself followed by its six neighbours.</returns>
+    public static Vector3i[] BlocksAround7(Vector3i pos) =>
+    [
+        pos,
+        new(pos.X + 1, pos.Y,     pos.Z),
+        new(pos.X - 1, pos.Y,     pos.Z),
+        new(pos.X,     pos.Y + 1, pos.Z),
+        new(pos.X,     pos.Y - 1, pos.Z),
+        new(pos.X,     pos.Y,     pos.Z + 1),
+        new(pos.X,     pos.Y,     pos.Z - 1),
+    ];
+
+    /// <summary>
+    /// Finds the dirty chunk nearest to the player within the current view distance
+    /// and writes its chunk coordinates into <paramref name="nearestPos"/>.
+    /// Writes <c>(-1, -1, -1)</c> when no dirty chunk is found.
+    /// </summary>
+    /// <param name="nearestPos">Output array of length 3 receiving (x, y, z).</param>
+    private void NearestDirty(int[] nearestPos)
+    {
+        unchecked
+        {
+            int nearestDist = IntMaxValue;
+            nearestPos[0] = nearestPos[1] = nearestPos[2] = NoChunk;
+
+            int px = InvertChunk((int)_game.player.position.x);
+            int py = InvertChunk((int)_game.player.position.z);
+            int pz = InvertChunk((int)_game.player.position.y);
+
+            int halfXY = InvertChunk(MapAreaSize()) / 2;
+            int halfZ = InvertChunk(MapAreaSizeZ()) / 2;
+
+            int startX = Math.Max(px - halfXY, 0);
+            int startY = Math.Max(py - halfXY, 0);
+            int startZ = Math.Max(pz - halfZ, 0);
+            int endX = Math.Min(px + halfXY, MapsizeXChunks() - 1);
+            int endY = Math.Min(py + halfXY, MapsizeYChunks() - 1);
+            int endZ = Math.Min(pz + halfZ, MapsizeZChunks() - 1);
+
+            int mapsizexchunks = MapsizeXChunks();
+            int mapsizeychunks = MapsizeYChunks();
+
+            for (int x = startX; x <= endX; x++)
+                for (int y = startY; y <= endY; y++)
+                    for (int z = startZ; z <= endZ; z++)
+                    {
+                        Chunk c = _game.map.chunks[Index3d(x, y, z, mapsizexchunks, mapsizeychunks)];
+                        if (c?.rendered == null || !c.rendered.dirty) { continue; }
+
+                        int dx = px - x, dy = py - y, dz = pz - z;
+                        int dist = dx * dx + dy * dy + dz * dz;
+                        if (dist < nearestDist)
+                        {
+                            nearestDist = dist;
+                            nearestPos[0] = x;
+                            nearestPos[1] = y;
+                            nearestPos[2] = z;
+                        }
+                    }
+        }
+    }
+
+    /// <summary>
+    /// Uploads all pending chunk geometry from <see cref="_redrawQueue"/> to the GPU.
+    /// Must be called on the main (render) thread.
+    /// </summary>
+    public void MainThreadCommit()
+    {
+        for (int i = 0; i < _redrawQueueCount; i++)
+        {
+            DoRedraw(_redrawQueue[i]);
+        }
+        _redrawQueueCount = 0;
+    }
+
+    /// <summary>
+    /// Removes the old batcher entries for the chunk described by <paramref name="r"/>,
+    /// then uploads the new geometry and stores the resulting batcher IDs on the chunk.
+    /// </summary>
+    /// <param name="r">Redraw descriptor produced by <see cref="RedrawChunk"/>.</param>
     private void DoRedraw(TerrainRendererRedraw r)
     {
-#if !CITO
         unchecked
         {
-#endif
-            idsCount = 0;
-            RenderedChunk c = r.c.rendered;
-            if (c.ids != null)
+            _batcherIdsCount = 0;
+            RenderedChunk rendered = r.Chunk.rendered;
+
+            // Remove previous geometry for this chunk from the batcher.
+            if (rendered.ids != null)
             {
-                for (int i = 0; i < c.idsCount; i++)
+                for (int i = 0; i < rendered.idsCount; i++)
                 {
-                    int loadedSubmesh = c.ids[i];
-                    game.d_Batcher.Remove(loadedSubmesh);
+                    _game.d_Batcher.Remove(rendered.ids[i]);
                 }
             }
-            for (int i = 0; i < r.dataCount; i++)
+
+            // Upload each non-empty sub-mesh and record the new batcher ID.
+            for (int i = 0; i < r.DataCount; i++)
             {
-                VerticesIndicesToLoad submesh = r.data[i];
-                if (submesh.modelData.GetIndicesCount() != 0)
-                {
-                    float centerVecX = submesh.positionX + chunksize * 0.5f;
-                    float centerVecY = submesh.positionZ + chunksize * 0.5f;
-                    float centerVecZ = submesh.positionY + chunksize * 0.5f;
-                    float radius = sqrt3half * chunksize;
-                    ids[idsCount++] = game.d_Batcher.Add(submesh.modelData, submesh.transparent, submesh.texture, centerVecX, centerVecY, centerVecZ, radius);
-                }
+                VerticesIndicesToLoad submesh = r.Data[i];
+                if (submesh.modelData.GetIndicesCount() == 0) { continue; }
+
+                float cx = submesh.positionX + chunksize * 0.5f;
+                float cy = submesh.positionZ + chunksize * 0.5f;
+                float cz = submesh.positionY + chunksize * 0.5f;
+                float radius = _sqrt3Half * chunksize;
+
+                _batcherIds[_batcherIdsCount++] = _game.d_Batcher.Add(
+                    submesh.modelData, submesh.transparent, submesh.texture,
+                    cx, cy, cz, radius);
             }
-            int[] idsarr = new int[idsCount];
-            for (int i = 0; i < idsCount; i++)
-            {
-                idsarr[i] = ids[i];
-            }
-            c.ids = idsarr;
-            c.idsCount = idsCount;
-#if !CITO
+
+            // Write the new IDs back onto the chunk.
+            int[] idsArr = new int[_batcherIdsCount];
+            for (int i = 0; i < _batcherIdsCount; i++) { idsArr[i] = _batcherIds[i]; }
+            rendered.ids = idsArr;
+            rendered.idsCount = _batcherIdsCount;
         }
-#endif
     }
 
+    /// <summary>
+    /// Tessellates the chunk at (<paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>)
+    /// in chunk coordinates and enqueues the result for GPU upload.
+    /// Skips tessellation entirely for chunks where every block is the same (solid-fill optimisation).
+    /// </summary>
     private void RedrawChunk(int x, int y, int z)
     {
-#if !CITO
         unchecked
         {
-#endif
-            Chunk c = game.map.chunks[MapUtilCi.Index3d(x, y, z, mapsizexchunks(), mapsizeychunks())];
-            if (c == null)
-            {
-                return;
-            }
-            if (c.rendered == null)
-            {
-                c.rendered = new RenderedChunk();
-            }
+            Chunk c = _game.map.chunks[MapUtilCi.Index3d(x, y, z, MapsizeXChunks(), MapsizeYChunks())];
+            if (c == null) { return; }
+
+            c.rendered ??= new RenderedChunk();
             c.rendered.dirty = false;
-            chunkupdates++;
+            _chunkUpdates++;
 
             GetExtendedChunk(x, y, z);
 
-            TerrainRendererRedraw r = new()
-            {
-                c = c
-            };
+            VerticesIndicesToLoad[] meshData = Array.Empty<VerticesIndicesToLoad>();
+            int meshCount = 0;
 
-            VerticesIndicesToLoad[] a = null;
-            int retCount = 0;
-            if (!IsSolidChunk(currentChunk, (bufferedChunkSize) * (bufferedChunkSize) * (bufferedChunkSize)))
+            if (!IsSolidChunk(_currentChunk, BufferedChunkVolume))
             {
                 CalculateShadows(x, y, z);
-                a = game.d_TerrainChunkTesselator.MakeChunk(x, y, z, currentChunk, currentChunkShadows, game.mLightLevels, out retCount);
+                VerticesIndicesToLoad[] meshes = _game.d_TerrainChunkTesselator.MakeChunk(
+                    x, y, z, _currentChunk, _currentChunkShadows,
+                    _game.mLightLevels, out meshCount);
+
+                meshData = new VerticesIndicesToLoad[meshCount];
+                for (int i = 0; i < meshCount; i++)
+                {
+                    meshData[i] = CloneVerticesIndicesToLoad(meshes[i]);
+                }
             }
 
-            r.data = new VerticesIndicesToLoad[retCount];
-            for (int i = 0; i < retCount; i++)
-            {
-                r.data[i] = VerticesIndicesToLoadClone(a[i]);
-            }
-            r.dataCount = retCount;
-            redraw[redrawCount++] = r;
-#if !CITO
+            _redrawQueue[_redrawQueueCount++] = new(c, meshData, meshCount);
         }
-#endif
     }
 
-    private VerticesIndicesToLoad VerticesIndicesToLoadClone(VerticesIndicesToLoad source)
+    /// <summary>
+    /// Copies the extended (18³) block-ID data centred on the given chunk into
+    /// <see cref="_currentChunk"/> so the tessellator can access all border blocks.
+    /// </summary>
+    /// <param name="x">Chunk X coordinate.</param>
+    /// <param name="y">Chunk Y coordinate.</param>
+    /// <param name="z">Chunk Z coordinate.</param>
+    private void GetExtendedChunk(int x, int y, int z)
     {
-        VerticesIndicesToLoad dest = new()
+        _game.map.GetMapPortion(
+            _currentChunk,
+            x * chunksize - 1, y * chunksize - 1, z * chunksize - 1,
+            bufferedChunkSize, bufferedChunkSize, bufferedChunkSize);
+    }
+
+    /// <summary>
+    /// Returns <see langword="true"/> when every entry in <paramref name="chunk"/> is
+    /// identical (all-air or all-same-solid block). Such chunks produce no visible faces
+    /// and can skip tessellation entirely.
+    /// </summary>
+    /// <param name="chunk">Extended chunk block-ID buffer.</param>
+    /// <param name="length">Number of elements to check.</param>
+    private static bool IsSolidChunk(int[] chunk, int length)
+    {
+        int first = chunk[0];
+        unchecked
         {
-            modelData = ModelDataClone(source.modelData),
+            for (int i = 1; i < length; i++)
+            {
+                if (chunk[i] != first) { return false; }
+            }
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// Computes the light values for the 18³ region around the chunk at
+    /// (<paramref name="cx"/>, <paramref name="cy"/>, <paramref name="cz"/>) and
+    /// writes them into <see cref="_currentChunkShadows"/>.
+    /// Also triggers base-light recalculation for any of the 3×3×3 surrounding
+    /// chunks whose base light is marked dirty.
+    /// </summary>
+    private void CalculateShadows(int cx, int cy, int cz)
+    {
+        unchecked
+        {
+            // Pre-fetch per-block-type lighting properties to avoid repeated lookups.
+            for (int i = 0; i < GlobalVar.MAX_BLOCKTYPES; i++)
+            {
+                if (_game.blocktypes[i] == null) { continue; }
+                _shadowLightRadius[i] = _game.blocktypes[i].LightRadius;
+                _shadowIsTransparent[i] = IsTransparentForLight(i);
+            }
+
+            // Ensure base light is fresh for all 27 chunks in the 3×3×3 neighbourhood.
+            for (int xx = 0; xx < 3; xx++)
+                for (int yy = 0; yy < 3; yy++)
+                    for (int zz = 0; zz < 3; zz++)
+                    {
+                        int cx1 = cx + xx - 1;
+                        int cy1 = cy + yy - 1;
+                        int cz1 = cz + zz - 1;
+                        if (!_game.map.IsValidChunkPos(cx1, cy1, cz1)) { continue; }
+
+                        Chunk neighbour = _game.map.GetChunk(cx1 * chunksize, cy1 * chunksize, cz1 * chunksize);
+                        if (neighbour.baseLightDirty)
+                        {
+                            _lightBase.CalculateChunkBaseLight(
+                                _game, cx1, cy1, cz1,
+                                _shadowLightRadius, _shadowIsTransparent);
+                            neighbour.baseLightDirty = false;
+                        }
+                    }
+
+            // Initialise the chunk's light buffer to full brightness on first use.
+            RenderedChunk rendered = _game.map.GetChunk(cx * chunksize, cy * chunksize, cz * chunksize).rendered;
+            if (rendered.light == null)
+            {
+                rendered.light = new byte[BufferedChunkVolume];
+                for (int i = 0; i < BufferedChunkVolume; i++) { rendered.light[i] = 15; }
+            }
+
+            _lightBetweenChunks.CalculateLightBetweenChunks(
+                _game, cx, cy, cz, _shadowLightRadius, _shadowIsTransparent);
+
+            // Copy the computed light values into the per-frame scratch buffer.
+            for (int i = 0; i < BufferedChunkVolume; i++)
+            {
+                _currentChunkShadows[i] = rendered.light[i];
+            }
+        }
+    }
+
+    /// <summary>
+    /// Returns <see langword="true"/> when the given block type allows light to pass through it.
+    /// Solid blocks and closed doors are opaque; everything else is transparent for lighting.
+    /// </summary>
+    /// <param name="blockId">Block type ID to test.</param>
+    public bool IsTransparentForLight(int blockId)
+    {
+        Packet_BlockType b = _game.blocktypes[blockId];
+        return b.DrawType != Packet_DrawTypeEnum.Solid
+            && b.DrawType != Packet_DrawTypeEnum.ClosedDoor;
+    }
+
+    /// <summary>
+    /// Submits all currently loaded chunk geometry to the batcher for this frame.
+    /// </summary>
+    public void DrawTerrain()
+    {
+        _game.d_Batcher.Draw(
+            _game.player.position.x,
+            _game.player.position.y,
+            _game.player.position.z);
+    }
+
+    /// <summary>Removes all chunk geometry from the batcher.</summary>
+    internal void Clear() => _game.d_Batcher.Clear();
+
+    /// <summary>
+    /// Updates the on-screen chunk-update and triangle-count statistics once per second.
+    /// </summary>
+    /// <param name="dt">Frame delta time in seconds (unused; wall-clock ms is used instead).</param>
+    internal void UpdatePerformanceInfo()
+    {
+        const float MsToSeconds = 1f / 1000f;
+        float elapsed = (_game.platform.TimeMillisecondsFromStart() - _lastPerfUpdateMs) * MsToSeconds;
+
+        if (elapsed < 1f) { return; }
+
+        _lastPerfUpdateMs = _game.platform.TimeMillisecondsFromStart();
+
+        int updatesThisPeriod = _chunkUpdates - _lastChunkUpdatesSnapshot;
+        _lastChunkUpdatesSnapshot = _chunkUpdates;
+
+        _game.performanceinfo["chunk updates"] = string.Format(
+            _game.language.ChunkUpdates(), updatesThisPeriod.ToString());
+        _game.performanceinfo["triangles"] = string.Format(
+            _game.language.Triangles(), TrianglesCount().ToString());
+    }
+
+    /// <summary>View-distance-based side length of the active map area in blocks.</summary>
+    private int MapAreaSize() => (int)(_game.d_Config3d.viewdistance) * 2;
+
+    /// <summary>Vertical counterpart of <see cref="MapAreaSize"/>.</summary>
+    private int MapAreaSizeZ() => MapAreaSize();
+
+    /// <summary>Map width in chunks.</summary>
+    private int MapsizeXChunks() => _game.map.Mapsizexchunks;
+
+    /// <summary>Map depth in chunks.</summary>
+    private int MapsizeYChunks() => _game.map.Mapsizeychunks;
+
+    /// <summary>Map height in chunks.</summary>
+    private int MapsizeZChunks() => _game.map.Mapsizezchunks;
+
+    /// <summary>
+    /// Converts 3-D chunk coordinates to a flat array index using row-major order.
+    /// </summary>
+    private static int Index3d(int x, int y, int h, int sizeX, int sizeY)
+        => (h * sizeY + y) * sizeX + x;
+
+    /// <summary>
+    /// Performs a deep copy of a <see cref="VerticesIndicesToLoad"/> so the background
+    /// thread's data can be handed off to the main thread without aliasing.
+    /// </summary>
+    private static VerticesIndicesToLoad CloneVerticesIndicesToLoad(VerticesIndicesToLoad source)
+        => new()
+        {
+            modelData = CloneModelData(source.modelData),
             positionX = source.positionX,
             positionY = source.positionY,
             positionZ = source.positionZ,
             texture = source.texture,
-            transparent = source.transparent
+            transparent = source.transparent,
         };
-        return dest;
-    }
 
-    private static ModelData ModelDataClone(ModelData source)
+    /// <summary>
+    /// Performs a deep copy of a <see cref="ModelData"/> instance, duplicating all
+    /// vertex position, UV, colour, and index arrays.
+    /// Required because the background thread writes into shared tessellator buffers
+    /// that are overwritten on the next pass.
+    /// </summary>
+    private static ModelData CloneModelData(ModelData source)
     {
         ModelData dest = new();
-#if !CITO
         unchecked
         {
-#endif
             dest.xyz = new float[source.GetXyzCount()];
-            for (int i = 0; i < source.GetXyzCount(); i++)
-            {
-                dest.xyz[i] = source.xyz[i];
-            }
+            for (int i = 0; i < source.GetXyzCount(); i++) { dest.xyz[i] = source.xyz[i]; }
+
             dest.uv = new float[source.GetUvCount()];
-            for (int i = 0; i < source.GetUvCount(); i++)
-            {
-                dest.uv[i] = source.uv[i];
-            }
+            for (int i = 0; i < source.GetUvCount(); i++) { dest.uv[i] = source.uv[i]; }
+
             dest.rgba = new byte[source.GetRgbaCount()];
-            for (int i = 0; i < source.GetRgbaCount(); i++)
-            {
-                dest.rgba[i] = source.rgba[i];
-            }
+            for (int i = 0; i < source.GetRgbaCount(); i++) { dest.rgba[i] = source.rgba[i]; }
+
             dest.indices = new int[source.GetIndicesCount()];
-            for (int i = 0; i < source.GetIndicesCount(); i++)
-            {
-                dest.indices[i] = source.indices[i];
-            }
+            for (int i = 0; i < source.GetIndicesCount(); i++) { dest.indices[i] = source.indices[i]; }
+
             dest.SetVerticesCount(source.GetVerticesCount());
             dest.SetIndicesCount(source.GetIndicesCount());
-#if !CITO
         }
-#endif
         return dest;
     }
-
-    private readonly TerrainRendererRedraw[] redraw;
-    private int redrawCount;
-
-    private float sqrt3half;
-
-    private static bool IsSolidChunk(int[] currentChunk, int length)
-    {
-        int block = currentChunk[0];
-#if !CITO
-        unchecked
-        {
-#endif
-            for (int i = 0; i < length; i++)
-            {
-                if (currentChunk[i] != block)
-                {
-                    return false;
-                }
-            }
-#if !CITO
-        }
-#endif
-        return true;
-    }
-
-    private readonly int[] currentChunk;
-    private readonly byte[] currentChunkShadows;
-
-    //For performance, make a local copy of chunk and its surrounding.
-    //To render one chunk, we need to know all blocks that touch chunk boundaries.
-    //(because to render a single block we need to know all 6 blocks around it).
-    //So it's needed to copy 16x16x16 chunk and its Borders to make a 18x18x18 "extended" chunk.
-    private void GetExtendedChunk(int x, int y, int z)
-    {
-        game.map.GetMapPortion(currentChunk, x * chunksize - 1, y * chunksize - 1, z * chunksize - 1,
-            bufferedChunkSize, bufferedChunkSize, bufferedChunkSize);
-    }
-
-    private readonly int[] CalculateShadowslightRadius;
-    private readonly bool[] CalculateShadowsisTransparentForLight;
-    private readonly int[][] chunks3x3x3;
-    private readonly int[][] heightchunks3x3;
-    private readonly LightBase lightBase;
-    private readonly LightBetweenChunks lightBetweenChunks;
-    private void CalculateShadows(int cx, int cy, int cz)
-    {
-#if !CITO
-        unchecked
-        {
-#endif
-            for (int i = 0; i < GlobalVar.MAX_BLOCKTYPES; i++)
-            {
-                if (game.blocktypes[i] == null)
-                {
-                    continue;
-                }
-                CalculateShadowslightRadius[i] = game.blocktypes[i].LightRadius;
-                CalculateShadowsisTransparentForLight[i] = IsTransparentForLight(i);
-            }
-
-            for (int xx = 0; xx < 3; xx++)
-            {
-                int cx1 = cx + xx - 1;
-                int cx1Chunked = cx1 * chunksize;
-                for (int yy = 0; yy < 3; yy++)
-                {
-                    int cy1 = cy + yy - 1;
-                    int cy1Chunked = cy1 * chunksize;
-                    for (int zz = 0; zz < 3; zz++)
-                    {
-                        int cz1 = cz + zz - 1;
-                        if (!game.map.IsValidChunkPos(cx1, cy1, cz1))
-                        {
-                            continue;
-                        }
-                        Chunk c = game.map.GetChunk(cx1Chunked, cy1Chunked, cz1 * chunksize);
-                        if (c.baseLightDirty)
-                        {
-                            lightBase.CalculateChunkBaseLight(game, cx1, cy1, cz1, CalculateShadowslightRadius, CalculateShadowsisTransparentForLight);
-                            c.baseLightDirty = false;
-                        }
-                    }
-                }
-            }
-
-            RenderedChunk chunk = game.map.GetChunk(cx * chunksize, cy * chunksize, cz * chunksize).rendered;
-
-            if (chunk.light == null)
-            {
-                chunk.light = new byte[18 * 18 * 18];
-                for (int i = 0; i < 18 * 18 * 18; i++)
-                {
-                    chunk.light[i] = 15;
-                }
-            }
-
-            lightBetweenChunks.CalculateLightBetweenChunks(game, cx, cy, cz, CalculateShadowslightRadius, CalculateShadowsisTransparentForLight);
-
-            for (int i = 0; i < 18 * 18 * 18; i++)
-            {
-                currentChunkShadows[i] = chunk.light[i];
-            }
-#if !CITO
-        }
-#endif
-    }
-
-    public bool IsTransparentForLight(int block)
-    {
-        Packet_BlockType b = game.blocktypes[block];
-        return b.DrawType != Packet_DrawTypeEnum.Solid && b.DrawType != Packet_DrawTypeEnum.ClosedDoor;
-    }
-
-    public int TrianglesCount()
-    {
-        return game.d_Batcher.TotalTriangleCount();
-    }
-
-    internal void Clear()
-    {
-        game.d_Batcher.Clear();
-    }
 }
 
-public class TerrainRendererCommit
-{
-    public static Action Create(ModDrawTerrain renderer)
-    {
-        return renderer.MainThreadCommit;
-    }
-}
-
-public class TerrainRendererRedraw
-{
-    internal Chunk c;
-    internal VerticesIndicesToLoad[] data;
-    internal int dataCount;
-}
-
-public class ModUnloadRendererChunks : ModBase
-{
-    public ModUnloadRendererChunks()
-    {
-        unloadxyztemp = new Vector3i();
-    }
-
-    private Game game;
-
-    public static Action CreateUnloadRendererChunksCommit(Game game, int unloadChunkPos)
-    {
-        return () =>
-        {
-            if (unloadChunkPos != -1)
-            {
-                RenderedChunk c = game.map.chunks[unloadChunkPos].rendered;
-                for (int k = 0; k < c.idsCount; k++)
-                {
-                    game.d_Batcher.Remove(c.ids[k]);
-                }
-                c.ids = null;
-                c.dirty = true;
-                c.light = null;
-            }
-        };
-    }
-
-    public override void OnReadOnlyBackgroundThread(Game game_, float dt)
-    {
-        game = game_;
-
-        chunksize = Game.chunksize;
-        invertedChunk = 1.0f / chunksize;
-        mapsizexchunks = (int)(game.map.MapSizeX * invertedChunk);
-        mapsizeychunks = (int)(game.map.MapSizeY * invertedChunk);
-        mapsizezchunks = (int)(game.map.MapSizeZ * invertedChunk);
-
-        int px = (int)(game.player.position.x * invertedChunk);
-        int py = (int)(game.player.position.z * invertedChunk);
-        int pz = (int)(game.player.position.y * invertedChunk);
-
-        int chunksxy = (int)(this.mapAreaSize() * invertedChunk * 0.5f);
-        int chunksz = (int)(this.mapAreaSizeZ() * invertedChunk * 0.5f);
-
-        int startx = px - chunksxy;
-        int endx = px + chunksxy;
-        int starty = py - chunksxy;
-        int endy = py + chunksxy;
-        int startz = pz - chunksz;
-        int endz = pz + chunksz;
-
-        if (startx < 0) { startx = 0; }
-        if (starty < 0) { starty = 0; }
-        if (startz < 0) { startz = 0; }
-        if (endx >= mapsizexchunks) { endx = mapsizexchunks - 1; }
-        if (endy >= mapsizeychunks) { endy = mapsizeychunks - 1; }
-        if (endz >= mapsizezchunks) { endz = mapsizezchunks - 1; }
-
-        int mapsizexchunks_ = mapsizexchunks;
-        int mapsizeychunks_ = mapsizeychunks;
-        int mapsizezchunks_ = mapsizezchunks;
-        int sizeChunks = mapsizexchunks_ * mapsizeychunks_ * mapsizezchunks_;
-        int count;
-        if (game.platform.IsFastSystem())
-        {
-            count = 1000;
-        }
-        else
-        {
-            count = 250;
-        }
-
-        for (int i = 0; i < count; i++)
-        {
-            unloadIterationXy++;
-            if (unloadIterationXy >= sizeChunks)
-            {
-                unloadIterationXy = 0;
-            }
-            MapUtilCi.PosInt(unloadIterationXy, mapsizexchunks_, mapsizeychunks_, ref unloadxyztemp);
-            int x = unloadxyztemp.X;
-            int y = unloadxyztemp.Y;
-            int z = unloadxyztemp.Z;
-            int pos = MapUtilCi.Index3d(x, y, z, mapsizexchunks_, mapsizeychunks_);
-            bool unloaded = false;
-
-            Chunk c = game.map.chunks[pos];
-            if (c == null
-                || c.rendered == null
-                || c.rendered.ids == null)
-            {
-                continue;
-            }
-            if (x < startx || y < starty || z < startz
-                || x > endx || y > endy || z > endz)
-            {
-                int unloadChunkPos = pos;
-                game.QueueActionCommit(CreateUnloadRendererChunksCommit(game, unloadChunkPos));
-            }
-            unloaded = true;
-            if (unloaded)
-            {
-                break;
-            }
-        }
-    }
-
-    private int mapAreaSize() { return (int)(game.d_Config3d.viewdistance) * 2; }
-    private int centerAreaSize() { return (int)(game.d_Config3d.viewdistance * 0.5f); }
-    private int mapAreaSizeZ() { return mapAreaSize(); }
-
-    private int mapsizexchunks;
-    private int mapsizeychunks;
-    private int mapsizezchunks;
-
-    private int chunksize;
-    private float invertedChunk;
-
-
-    private int unloadIterationXy;
-    private Vector3i unloadxyztemp;
-}
+/// <summary>
+/// Carries the tessellated geometry for one chunk from the background thread
+/// to the main thread for GPU upload.
+/// </summary>
+/// <param name="Chunk">The chunk whose geometry was tessellated.</param>
+/// <param name="Data">Array of sub-meshes produced by the tessellator.</param>
+/// <param name="DataCount">Number of valid entries in <see cref="Data"/>.</param>
+internal readonly record struct TerrainRendererRedraw(
+    Chunk Chunk,
+    VerticesIndicesToLoad[] Data,
+    int DataCount);

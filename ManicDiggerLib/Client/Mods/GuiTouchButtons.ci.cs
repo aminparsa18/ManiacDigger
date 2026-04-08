@@ -1,102 +1,101 @@
-﻿public class ModGuiTouchButtons : GameScreen
+﻿/// <summary>
+/// Renders and handles the on-screen touch buttons (menu, inventory, talk, camera)
+/// shown during normal gameplay on touch-screen devices.
+/// Also manages two virtual joystick touch tracks: one for movement and one for
+/// camera rotation.
+/// </summary>
+public class ModGuiTouchButtons : GameScreen
 {
+    /// <summary>
+    /// <see langword="true"/> after the first touch event is received.
+    /// Buttons are hidden until then so they don't appear on non-touch devices.
+    /// </summary>
+    private bool _touchButtonsEnabled;
+
+    private readonly MenuWidget _buttonMenu;
+    private readonly MenuWidget _buttonInventory;
+    private readonly MenuWidget _buttonTalk;
+    private readonly MenuWidget _buttonCamera;
+
+    /// <summary>
+    /// Touch ID of the active movement finger, or <c>-1</c> when no movement
+    /// touch is active.
+    /// </summary>
+    private int _touchIdMove;
+
+    /// <summary>Screen X position where the movement touch began.</summary>
+    private int _touchMoveStartX;
+
+    /// <summary>Screen Y position where the movement touch began.</summary>
+    private int _touchMoveStartY;
+
+    /// <summary>
+    /// Touch ID of the active camera-rotation finger, or <c>-1</c> when no
+    /// rotation touch is active.
+    /// </summary>
+    private int _touchIdRotate;
+
+    /// <summary>Screen X position where the rotation touch began.</summary>
+    private int _touchRotateStartX;
+
+    /// <summary>Screen Y position where the rotation touch began.</summary>
+    private int _touchRotateStartY;
+
+    /// <summary>Initialises all four touch buttons and assigns them to widget slots 0–3.</summary>
     public ModGuiTouchButtons()
     {
-        touchButtonsEnabled = false;
-        buttonMenu = new MenuWidget
-        {
-            image = "TouchMenu.png"
-        };
-        buttonInventory = new MenuWidget
-        {
-            image = "TouchInventory.png"
-        };
-        buttonTalk = new MenuWidget
-        {
-            image = "TouchTalk.png"
-        };
-        buttonCamera = new MenuWidget
-        {
-            image = "TouchCamera.png"
-        };
-        widgets[0] = buttonMenu;
-        widgets[1] = buttonInventory;
-        widgets[2] = buttonTalk;
-        widgets[3] = buttonCamera;
-        touchIdMove = -1;
-        touchIdRotate = -1;
+        _touchButtonsEnabled = false;
+        _touchIdMove = -1;
+        _touchIdRotate = -1;
+
+        _buttonMenu = new MenuWidget { image = "TouchMenu.png" };
+        _buttonInventory = new MenuWidget { image = "TouchInventory.png" };
+        _buttonTalk = new MenuWidget { image = "TouchTalk.png" };
+        _buttonCamera = new MenuWidget { image = "TouchCamera.png" };
+
+        widgets[0] = _buttonMenu;
+        widgets[1] = _buttonInventory;
+        widgets[2] = _buttonTalk;
+        widgets[3] = _buttonCamera;
     }
 
-    private bool touchButtonsEnabled;
-    private readonly MenuWidget buttonMenu;
-    private readonly MenuWidget buttonInventory;
-    private readonly MenuWidget buttonTalk;
-    private readonly MenuWidget buttonCamera;
-
+    /// <inheritdoc/>
     public override void OnNewFrameDraw2d(Game game_, float deltaTime)
     {
-        if (!touchButtonsEnabled)
-        {
-            return;
-        }
+        if (!_touchButtonsEnabled) { return; }
 
         game = game_;
-        float dt = deltaTime;
-        int buttonSize = 80;
 
-        if (game.guistate != GuiState.Normal)
-        {
-            return;
-        }
+        if (game.guistate != GuiState.Normal) { return; }
 
-        buttonMenu.x = 16 * Scale();
-        buttonMenu.y = (16 + 96 * 0) * Scale();
-        buttonMenu.sizex = buttonSize * Scale();
-        buttonMenu.sizey = buttonSize * Scale();
+        const int buttonSize = 80;
+        float scale = Scale();
 
-        buttonInventory.x = 16 * Scale();
-        buttonInventory.y = (16 + 96 * 1) * Scale();
-        buttonInventory.sizex = buttonSize * Scale();
-        buttonInventory.sizey = buttonSize * Scale();
-
-        buttonTalk.x = 16 * Scale();
-        buttonTalk.y = (16 + 96 * 2) * Scale();
-        buttonTalk.sizex = buttonSize * Scale();
-        buttonTalk.sizey = buttonSize * Scale();
-
-        buttonCamera.x = 16 * Scale();
-        buttonCamera.y = (16 + 96 * 3) * Scale();
-        buttonCamera.sizex = buttonSize * Scale();
-        buttonCamera.sizey = buttonSize * Scale();
-
+        // Position each button in a vertical column on the left side of the screen.
+        LayoutButton(_buttonMenu, 0, buttonSize, scale);
+        LayoutButton(_buttonInventory, 1, buttonSize, scale);
+        LayoutButton(_buttonTalk, 2, buttonSize, scale);
+        LayoutButton(_buttonCamera, 3, buttonSize, scale);
 
         if (!game.platform.IsMousePointerLocked())
         {
             if (game.cameratype == CameraType.Fpp || game.cameratype == CameraType.Tpp)
             {
-                game.Draw2dText1("Move", game.Width() * 5 / 100, game.Height() * 85 / 100, (int)(Scale() * 50), null, false);
-                game.Draw2dText1("Look", game.Width() * 80 / 100, game.Height() * 85 / 100, (int)(Scale() * 50), null, false);
+                game.Draw2dText1("Move", game.Width() * 5 / 100, game.Height() * 85 / 100, (int)(scale * 50), null, false);
+                game.Draw2dText1("Look", game.Width() * 80 / 100, game.Height() * 85 / 100, (int)(scale * 50), null, false);
             }
             DrawWidgets();
         }
     }
 
-    private float Scale()
-    {
-        return game.Scale();
-    }
-
+    /// <inheritdoc/>
     public override void OnButton(MenuWidget w)
     {
-        if (w == buttonMenu)
-        {
-            game.ShowEscapeMenu();
-        }
-        if (w == buttonInventory)
-        {
-            game.ShowInventory();
-        }
-        if (w == buttonTalk)
+        if (w == _buttonMenu) { game.ShowEscapeMenu(); }
+        if (w == _buttonInventory) { game.ShowInventory(); }
+        if (w == _buttonCamera) { game.CameraChange(); }
+
+        if (w == _buttonTalk)
         {
             if (game.GuiTyping == TypingState.None)
             {
@@ -109,71 +108,55 @@
                 game.platform.ShowKeyboard(false);
             }
         }
-        if (w == buttonCamera)
-        {
-            game.CameraChange();
-        }
     }
 
-    private int touchIdMove;
-    private int touchMoveStartX;
-    private int touchMoveStartY;
-    private int touchIdRotate;
-    private int touchRotateStartX;
-    private int touchRotateStartY;
-
+    /// <inheritdoc/>
     public override void OnTouchStart(Game game_, TouchEventArgs e)
     {
-        touchButtonsEnabled = true;
-        ScreenOnTouchStart(e);
+        // First touch activates the button overlay.
+        _touchButtonsEnabled = true;
+
+        // Let the base class handle widget hit-testing via the overridden OnTouchStart.
+        base.OnTouchStart(game_, e);
         if (e.GetHandled()) { return; }
-        if (e.GetX() <= game.Width() / 2)
+
+        bool isLeftSide = e.GetX() <= game.Width() / 2;
+
+        if (isLeftSide && _touchIdMove == -1)
         {
-            if (touchIdMove == -1)
-            {
-                touchIdMove = e.GetId();
-                touchMoveStartX = e.GetX();
-                touchMoveStartY = e.GetY();
-                game.touchMoveDx = 0;
-                if (e.GetY() < game.Height() * 50 / 100)
-                {
-                    game.touchMoveDy = 1;
-                }
-                else
-                {
-                    game.touchMoveDy = 0;
-                }
-            }
+            _touchIdMove = e.GetId();
+            _touchMoveStartX = e.GetX();
+            _touchMoveStartY = e.GetY();
+            game.touchMoveDx = 0;
+            game.touchMoveDy = e.GetY() < game.Height() * 50 / 100 ? 1 : 0;
         }
-        if (((touchIdMove != -1)
-            && (e.GetId() != touchIdMove))
-            || (e.GetX() > game.Width() / 2))
+
+        bool isSecondFinger = _touchIdMove != -1 && e.GetId() != _touchIdMove;
+        if ((isSecondFinger || !isLeftSide) && _touchIdRotate == -1)
         {
-            if (touchIdRotate == -1)
-            {
-                touchIdRotate = e.GetId();
-                touchRotateStartX = e.GetX();
-                touchRotateStartY = e.GetY();
-            }
+            _touchIdRotate = e.GetId();
+            _touchRotateStartX = e.GetX();
+            _touchRotateStartY = e.GetY();
         }
     }
 
+    /// <inheritdoc/>
     public override void OnTouchMove(Game game, TouchEventArgs e)
     {
-        float one = 1;
-        if (e.GetId() == touchIdMove)
+        if (e.GetId() == _touchIdMove)
         {
-            float range = game.Width() * one / 20;
-            game.touchMoveDx = e.GetX() - touchMoveStartX;
-            game.touchMoveDy = -((e.GetY() - 1) - touchMoveStartY);
-            float length = game.Length(game.touchMoveDx, game.touchMoveDy, 0);
+            game.touchMoveDx = e.GetX() - _touchMoveStartX;
+            game.touchMoveDy = -((e.GetY() - 1) - _touchMoveStartY);
+
             if (e.GetY() < game.Height() * 50 / 100)
             {
+                // Upper half of screen — lock to forward movement only.
                 game.touchMoveDx = 0;
                 game.touchMoveDy = 1;
             }
             else
             {
+                float length = game.Length(game.touchMoveDx, game.touchMoveDy, 0);
                 if (length > 0)
                 {
                     game.touchMoveDx /= length;
@@ -181,30 +164,56 @@
                 }
             }
         }
-        if (e.GetId() == touchIdRotate)
+
+        if (e.GetId() == _touchIdRotate)
         {
-            game.touchOrientationDx += (e.GetX() - touchRotateStartX) / (game.Width() * one / 40);
-            game.touchOrientationDy += (e.GetY() - touchRotateStartY) / (game.Width() * one / 40);
-            touchRotateStartX = e.GetX();
-            touchRotateStartY = e.GetY();
+            float sensitivity = game.Width() / 40f;
+            game.touchOrientationDx += (e.GetX() - _touchRotateStartX) / sensitivity;
+            game.touchOrientationDy += (e.GetY() - _touchRotateStartY) / sensitivity;
+            _touchRotateStartX = e.GetX();
+            _touchRotateStartY = e.GetY();
         }
     }
 
+    /// <inheritdoc/>
     public override void OnTouchEnd(Game game_, TouchEventArgs e)
     {
-        ScreenOnTouchEnd(e);
+        base.OnTouchEnd(game_, e);
         if (e.GetHandled()) { return; }
-        if (e.GetId() == touchIdMove)
+
+        if (e.GetId() == _touchIdMove)
         {
-            touchIdMove = -1;
+            _touchIdMove = -1;
             game.touchMoveDx = 0;
             game.touchMoveDy = 0;
         }
-        if (e.GetId() == touchIdRotate)
+
+        if (e.GetId() == _touchIdRotate)
         {
-            touchIdRotate = -1;
+            _touchIdRotate = -1;
             game.touchOrientationDx = 0;
             game.touchOrientationDy = 0;
         }
+    }
+
+    /// <summary>
+    /// Returns the current UI scale factor from the game platform.
+    /// </summary>
+    private float Scale() => game.Scale();
+
+    /// <summary>
+    /// Positions a button in the left-side vertical stack at the given
+    /// <paramref name="slot"/> index (0 = top).
+    /// </summary>
+    /// <param name="button">The widget to position.</param>
+    /// <param name="slot">Zero-based vertical slot index.</param>
+    /// <param name="buttonSize">Unscaled button size in pixels.</param>
+    /// <param name="scale">Current UI scale factor.</param>
+    private static void LayoutButton(MenuWidget button, int slot, int buttonSize, float scale)
+    {
+        button.x = 16 * scale;
+        button.y = (16 + 96 * slot) * scale;
+        button.sizex = buttonSize * scale;
+        button.sizey = buttonSize * scale;
     }
 }
