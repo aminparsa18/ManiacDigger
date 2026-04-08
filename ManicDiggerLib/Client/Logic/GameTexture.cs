@@ -22,7 +22,7 @@
     public void DeleteUnusedCachedTextTextures()
     {
         int now = platform.TimeMillisecondsFromStart();
-        for (int i = 0; i < cachedTextTexturesMax; i++)
+        for (int i = 0; i < cachedTextTextures.Count; i++)
         {
             CachedTextTexture t = cachedTextTextures[i];
             if (t == null)
@@ -38,7 +38,7 @@
 
     private CachedTexture GetCachedTextTexture(Text_ t)
     {
-        for (int i = 0; i < cachedTextTexturesMax; i++)
+        for (int i = 0; i < cachedTextTextures.Count; i++)
         {
             CachedTextTexture ct = cachedTextTextures[i];
             if (ct == null)

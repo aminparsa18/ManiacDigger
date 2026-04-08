@@ -542,7 +542,7 @@ public class ModGuiEscapeMenu : ModBase
         }
         game.Font = fontValues[options.Font];
         game.UpdateTextRendererFont();
-        for (int i = 0; i < game.cachedTextTexturesMax; i++)
+        for (int i = 0; i < game.cachedTextTextures.Count; i++)
         {
             game.cachedTextTextures[i] = null;
         }

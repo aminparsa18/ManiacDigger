@@ -69,14 +69,7 @@ public partial class Game
 
     internal string ValidFont(string family)
     {
-        for (int i = 0; i < AllowedFontsCount; i++)
-        {
-            if (AllowedFonts[i] == family)
-            {
-                return family;
-            }
-        }
-        return AllowedFonts[0];
+        return AllowedFonts.Contains(family) ? family : AllowedFonts.First();
     }
 
     public int MaterialSlots_(int i)
@@ -445,7 +438,7 @@ public partial class Game
         {
             platform.GLDeleteTexture(id);
         }
-        for (int i = 0; i < cachedTextTexturesMax; i++)
+        for (int i = 0; i < cachedTextTextures.Count; i++)
         {
             if (cachedTextTextures[i] == null)
             {

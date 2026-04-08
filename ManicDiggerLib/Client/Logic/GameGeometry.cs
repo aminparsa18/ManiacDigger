@@ -305,14 +305,7 @@
             if (ct == null)
                 return;
 
-            for (int i = 0; i < cachedTextTexturesMax; i++)
-            {
-                if (cachedTextTextures[i] == null)
-                {
-                    cachedTextTextures[i] = new CachedTextTexture { text = t, texture = ct };
-                    break;
-                }
-            }
+            cachedTextTextures.Add(new CachedTextTexture { text = t, texture = ct });
         }
 
         CachedTexture cached = GetCachedTextTexture(t);

@@ -63,11 +63,9 @@ public partial class Game
     internal bool handSetAttackDestroy;
 
     internal int whitetexture;
-    internal int cachedTextTexturesMax;
-    internal CachedTextTexture[] cachedTextTextures;
+    internal List<CachedTextTexture> cachedTextTextures;
     internal Dictionary<string, int> textures;
-    internal int AllowedFontsCount;
-    internal string[] AllowedFonts;
+    internal List<string> AllowedFonts;
 
     // -------------------------------------------------------------------------
     // Fields — world / map
@@ -142,8 +140,7 @@ public partial class Game
     internal int[] LoadedAmmo;
     internal Dictionary<(int x, int y, int z), float> blockHealth = new();
     internal VisibleDialog[] dialogs;
-    internal string[] typinglog;
-    internal int typinglogCount;
+    internal List<string> typinglog;
 
     internal bool IronSights;
     internal Random rnd;
@@ -329,8 +326,7 @@ public partial class Game
     internal const int entitiesMax = 4096;
 
     internal int ChatLinesMax;
-    internal Chatline[] ChatLines;
-    internal int ChatLineLength;
+    internal List<Chatline> ChatLines;
 
     internal MapLoadingProgressEventArgs maploadingprogress;
     internal FontCi fontMapLoading;
@@ -416,15 +412,9 @@ public partial class Game
         handTexture = -1;
         whitetexture = -1;
         textures = [];
+        cachedTextTextures = [];
 
-        cachedTextTexturesMax = 1024;
-        cachedTextTextures = new CachedTextTexture[cachedTextTexturesMax];
-        for (int i = 0; i < cachedTextTexturesMax; i++)
-            cachedTextTextures[i] = null;
-
-        AllowedFontsCount = 1;
-        AllowedFonts = new string[AllowedFontsCount];
-        AllowedFonts[0] = "Verdana";
+        AllowedFonts = ["Verdana"];
     }
 
     private void InitPlayer()
@@ -460,8 +450,7 @@ public partial class Game
         LoadedAmmo = new int[GlobalVar.MAX_BLOCKTYPES];
         blockHealth = new();
         dialogs = new VisibleDialog[512];
-        typinglog = new string[1024 * 16];
-        typinglogCount = 0;
+        typinglog = [];
     }
 
     private void InitCamera()
@@ -538,8 +527,7 @@ public partial class Game
     private void InitChat()
     {
         ChatLinesMax = 1;
-        ChatLines = new Chatline[ChatLinesMax];
-        ChatLineLength = 64;
+        ChatLines = [];
     }
 
     private void InitAudio()

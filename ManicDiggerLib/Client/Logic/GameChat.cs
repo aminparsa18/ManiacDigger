@@ -17,12 +17,12 @@
         bool containsLink = linkTarget != null;
         int now = platform.TimeMillisecondsFromStart();
 
-        if (s.Length > ChatLineLength)
+        if (s.Length > ChatLines.Count && ChatLines.Count > 0)
         {
-            for (int i = 0; i <= s.Length / ChatLineLength; i++)
+            for (int i = 0; i <= s.Length / ChatLines.Count; i++)
             {
-                int displayLength = Math.Min(ChatLineLength, s.Length - i * ChatLineLength);
-                string chunk = s.Substring(i * ChatLineLength, displayLength);
+                int displayLength = Math.Min(ChatLines.Count, s.Length - i * ChatLines.Count);
+                string chunk = s.Substring(i * ChatLines.Count, displayLength);
                 ChatLinesAdd(containsLink
                     ? Chatline.CreateClickable(chunk, now, linkTarget)
                     : Chatline.Create(chunk, now));
@@ -59,10 +59,10 @@
             Chatline[] lines2 = new Chatline[ChatLinesMax * 2];
             for (int i = 0; i < ChatLinesMax; i++)
                 lines2[i] = ChatLines[i];
-            ChatLines = lines2;
+            ChatLines = [.. lines2];
             ChatLinesMax *= 2;
         }
-        ChatLines[ChatLinesCount++] = chatline;
+        ChatLines.Add(chatline);
     }
 
     // -------------------------------------------------------------------------
