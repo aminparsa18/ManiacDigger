@@ -168,7 +168,7 @@
         }
 
         // Always dispatch to client mods regardless of whether a command matched.
-        for (int i = 0; i < clientmodsCount; i++)
+        for (int i = 0; i < clientmods.Count; i++)
         {
             ClientCommandArgs args = new() { arguments = arguments, command = cmd };
             clientmods[i].OnClientCommand(this, args);

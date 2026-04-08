@@ -812,7 +812,7 @@ public class ModPicking : ModBase
     {
         if (game.currentlyAttackedEntity == -1 || !game.mouseLeft) { return; }
 
-        for (int i = 0; i < game.clientmodsCount; i++)
+        for (int i = 0; i < game.clientmods.Count; i++)
         {
             if (game.clientmods[i] == null) { continue; }
             game.clientmods[i].OnHitEntity(game, new OnUseEntityArgs { entityId = game.currentlyAttackedEntity });
