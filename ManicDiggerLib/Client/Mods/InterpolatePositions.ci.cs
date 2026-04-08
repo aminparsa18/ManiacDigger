@@ -52,7 +52,7 @@ public class ModInterpolatePositions : ModBase
         float netX = net.x, netY = net.y, netZ = net.z;
 
         // Feed a new state packet when network position or rotation has changed
-        bool posChanged = !Game.Vec3Equal(netX, netY, netZ, info.lastnetworkposX, info.lastnetworkposY, info.lastnetworkposZ);
+        bool posChanged = !(netX == info.lastnetworkposX && netY == info.lastnetworkposY && netZ == info.lastnetworkposZ);
         bool rotChanged = net.rotx != info.lastnetworkrotx || net.roty != info.lastnetworkroty || net.rotz != info.lastnetworkrotz;
 
         if (posChanged || rotChanged)
@@ -80,10 +80,12 @@ public class ModInterpolatePositions : ModBase
             cur.positionZ = net.z;
         }
 
-        info.velocityX = cur.positionX - info.lastcurposX;
-        info.velocityY = cur.positionY - info.lastcurposY;
-        info.velocityZ = cur.positionZ - info.lastcurposZ;
-        info.moves = !Game.Vec3Equal(cur.positionX, cur.positionY, cur.positionZ, info.lastcurposX, info.lastcurposY, info.lastcurposZ);
+        info.Velocity = new (
+            cur.positionX - info.lastcurposX,
+            cur.positionY - info.lastcurposY,
+            cur.positionZ - info.lastcurposZ
+        );
+        info.moves = !(cur.positionX == info.lastcurposX && cur.positionY == info.lastcurposY && cur.positionZ == info.lastcurposZ);
         info.lastcurposX = cur.positionX;
         info.lastcurposY = cur.positionY;
         info.lastcurposZ = cur.positionZ;

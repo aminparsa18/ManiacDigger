@@ -1,4 +1,6 @@
-﻿/// <summary>
+﻿using OpenTK.Mathematics;
+
+/// <summary>
 /// Renders and handles the on-screen touch buttons (menu, inventory, talk, camera)
 /// shown during normal gameplay on touch-screen devices.
 /// Also manages two virtual joystick touch tracks: one for movement and one for
@@ -156,7 +158,7 @@ public class ModGuiTouchButtons : GameScreen
             }
             else
             {
-                float length = game.Length(game.touchMoveDx, game.touchMoveDy, 0);
+                float length = new Vector3(game.touchMoveDx, game.touchMoveDy, 0).Length;
                 if (length > 0)
                 {
                     game.touchMoveDx /= length;

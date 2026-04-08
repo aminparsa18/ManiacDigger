@@ -18,7 +18,7 @@ public class ModDialog : ModBase
 
     internal static void DrawDialogs(Game game)
     {
-        for (int i = 0; i < game.dialogsCount; i++)
+        for (int i = 0; i < game.dialogs.Length; i++)
         {
             VisibleDialog d = game.dialogs[i];
             if (d == null) continue;
@@ -36,7 +36,7 @@ public class ModDialog : ModBase
 
         ForEachDialog(game, d => d.screen.OnKeyPress(game, args));
 
-        for (int k = 0; k < game.dialogsCount; k++)
+        for (int k = 0; k < game.dialogs.Length; k++)
         {
             VisibleDialog d = game.dialogs[k];
             if (d == null) continue;
@@ -47,7 +47,7 @@ public class ModDialog : ModBase
                 if (w == null) continue;
 
                 // Only typeable characters are handled here; special characters use KeyDown
-                if (TypableChars.Contains(game.CharToString(w.ClickKey)) && args.GetKeyChar() == w.ClickKey)
+                if (TypableChars.Contains((char)w.ClickKey) && args.GetKeyChar() == w.ClickKey)
                 {
                     game.SendPacketClient(ClientPackets.DialogClick(w.Id, Empty, 0));
                     return;
@@ -64,7 +64,7 @@ public class ModDialog : ModBase
 
         if (game.guistate == GuiState.Normal && isEsc)
         {
-            for (int i = 0; i < game.dialogsCount; i++)
+            for (int i = 0; i < game.dialogs.Length; i++)
             {
                 VisibleDialog d = game.dialogs[i];
                 if (d == null) continue;
@@ -84,7 +84,7 @@ public class ModDialog : ModBase
             if (isEsc)
             {
                 // Close all modal dialogs
-                for (int i = 0; i < game.dialogsCount; i++)
+                for (int i = 0; i < game.dialogs.Length; i++)
                 {
                     if (game.dialogs[i]?.value.IsModal != 0)
                         game.dialogs[i] = null;
@@ -113,7 +113,7 @@ public class ModDialog : ModBase
     /// <summary>Iterates all non-null dialogs and applies an action to each.</summary>
     private static void ForEachDialog(Game game, Action<VisibleDialog> action)
     {
-        for (int i = 0; i < game.dialogsCount; i++)
+        for (int i = 0; i < game.dialogs.Length; i++)
         {
             if (game.dialogs[i] != null)
                 action(game.dialogs[i]);

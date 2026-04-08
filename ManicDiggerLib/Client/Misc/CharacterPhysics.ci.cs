@@ -280,7 +280,7 @@ public class ScriptCharacterPhysics : EntityScript
         Packet_BlockType blocktype = game.blocktypes[block];
         return blocktype.WalkableType == Packet_WalkableTypeEnum.Fluid
             || Game.IsEmptyForPhysics(blocktype)
-            || Game.IsRail(blocktype);
+            || IsRail(blocktype);
     }
 
     private Vector3 tmpPlayerPosition;		//Temporarily stores the player's position. Used in WallSlide()
@@ -368,22 +368,22 @@ public class ScriptCharacterPhysics : EntityScript
             {
                 for (int zz = 0; zz < 3; zz++)
                 {
-                    if (!IsTileEmptyForPhysics(FloatToInt(x + xx - 1), FloatToInt(z + zz - 1), FloatToInt(y + yy - 1)))
+                    if (!IsTileEmptyForPhysics((int)(x + xx - 1), (int)(z + zz - 1), (int)(y + yy - 1)))
                     {
                         // Found a solid block
 
                         // Get bounding box of the block
-                        float minX = FloatToInt(x + xx - 1);
-                        float minY = FloatToInt(y + yy - 1);
-                        float minZ = FloatToInt(z + zz - 1);
+                        float minX = (x + xx - 1);
+                        float minY = (y + yy - 1);
+                        float minZ = (z + zz - 1);
                         float maxX = minX + 1;
-                        float maxY = minY + game.Getblockheight(FloatToInt(x + xx - 1), FloatToInt(z + zz - 1), FloatToInt(y + yy - 1));
+                        float maxY = minY + game.Getblockheight((int)(x + xx - 1), (int)(z + zz - 1), (int)(y + yy - 1));
                         float maxZ = minZ + 1;
 
                         // Check if the block is too close
                         if (BoxPointDistance(minX, minY, minZ, maxX, maxY, maxZ, x, y, z) < game.constWallDistance)
                         {
-                            blockingBlocktype = game.map.GetBlock(FloatToInt(x + xx - 1), FloatToInt(z + zz - 1), FloatToInt(y + yy - 1));
+                            blockingBlocktype = game.map.GetBlock((int)(x + xx - 1), (int)(z + zz - 1), (int)(y + yy - 1));
                             return false;
                         }
                     }
@@ -430,9 +430,9 @@ public class ScriptCharacterPhysics : EntityScript
         return Math.Max(Math.Max(a, b), c);
     }
 
-    private int FloatToInt(float value)
+    public static bool IsRail(Packet_BlockType block)
     {
-        return (int)(value);
+        return block.Rail > 0;	//Does not include Rail0, but this can't be placed.
     }
 }
 

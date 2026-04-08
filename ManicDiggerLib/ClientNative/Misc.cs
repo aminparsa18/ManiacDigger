@@ -274,24 +274,18 @@ public static class GameVersion
 
 public interface ICompression
 {
-    byte[] Compress(byte[] data);
+    byte[] Compress(ReadOnlySpan<byte> data);
     byte[] Decompress(byte[] data);
 }
 
 public class CompressionGzip : ICompression
 {
-    public byte[] Compress(byte[] data)
+    public byte[] Compress(ReadOnlySpan<byte> data)
     {
-        MemoryStream input = new(data);
         MemoryStream output = new();
         using (GZipStream compress = new(output, CompressionMode.Compress))
         {
-            byte[] buffer = new byte[4096];
-            int numRead;
-            while ((numRead = input.Read(buffer, 0, buffer.Length)) != 0)
-            {
-                compress.Write(buffer, 0, numRead);
-            }
+            compress.Write(data);
         }
         return output.ToArray();
     }
@@ -366,63 +360,6 @@ internal struct TextAndSize
     }
 }
 
-//Doesn't work on Ubuntu - pointer access crashes.
-public class FastBitmap
-{
-    public Bitmap bmp { get; set; }
-    private BitmapData bmd;
-
-    public void Lock()
-    {
-        if (bmd != null)
-        {
-            throw new Exception("Already locked.");
-        }
-        if (bmp.PixelFormat != PixelFormat.Format32bppArgb)
-        {
-            bmp = new Bitmap(bmp);
-        }
-        bmd = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
-            ImageLockMode.ReadOnly, bmp.PixelFormat);
-    }
-
-    public int GetPixel(int x, int y)
-    {
-        if (bmd == null)
-        {
-            throw new Exception();
-        }
-        unsafe
-        {
-            int* row = (int*)((byte*)bmd.Scan0 + (y * bmd.Stride));
-            return row[x];
-        }
-    }
-
-    public void SetPixel(int x, int y, int color)
-    {
-        if (bmd == null)
-        {
-            throw new Exception();
-        }
-        unsafe
-        {
-            int* row = (int*)((byte*)bmd.Scan0 + (y * bmd.Stride));
-            row[x] = color;
-        }
-    }
-
-    public void Unlock()
-    {
-        if (bmd == null)
-        {
-            throw new Exception("Not locked.");
-        }
-        bmp.UnlockBits(bmd);
-        bmd = null;
-    }
-}
-
 public static class Misc
 {
     public static bool ReadBool(string str)
@@ -436,19 +373,6 @@ public static class Misc
             return (str != "0"
                 && (!str.Equals(bool.FalseString, StringComparison.InvariantCultureIgnoreCase)));
         }
-    }
-    public static unsafe byte[] UshortArrayToByteArray(ushort[] a)
-    {
-        byte[] output = new byte[a.Length * 2];
-        fixed (ushort* a1 = a)
-        {
-            byte* a2 = (byte*)a1;
-            for (int i = 0; i < a.Length * 2; i++)
-            {
-                output[i] = a2[i];
-            }
-        }
-        return output;
     }
 }
 

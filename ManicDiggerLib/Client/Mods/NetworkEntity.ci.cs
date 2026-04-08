@@ -38,6 +38,8 @@ public class ClientPacketHandlerEntitySpawn : ClientPacketHandler
         }
     }
 
+    internal static float Angle256ToRad(int value) => value / 255f * MathF.PI * 2;
+
     public static EntityPosition_ ToClientEntityPosition(Packet_PositionAndOrientation pos)
     {
         float one = 1;
@@ -46,8 +48,8 @@ public class ClientPacketHandlerEntitySpawn : ClientPacketHandler
             x = (one * pos.X) / 32,
             y = (one * pos.Y) / 32,
             z = (one * pos.Z) / 32,
-            rotx = Game.Angle256ToRad(pos.Pitch),
-            roty = Game.Angle256ToRad(pos.Heading)
+            rotx = Angle256ToRad(pos.Pitch),
+            roty = Angle256ToRad(pos.Heading)
         };
         return p;
     }
@@ -68,8 +70,8 @@ public class ClientPacketHandlerEntitySpawn : ClientPacketHandler
         {
             old.drawModel = new EntityDrawModel
             {
-                eyeHeight = game.DeserializeFloat(entity.DrawModel.EyeHeight),
-                ModelHeight = game.DeserializeFloat(entity.DrawModel.ModelHeight),
+                eyeHeight = game.DecodeFixedPoint(entity.DrawModel.EyeHeight),
+                ModelHeight = game.DecodeFixedPoint(entity.DrawModel.ModelHeight),
                 Texture_ = entity.DrawModel.Texture_,
                 Model_ = entity.DrawModel.Model_
             };

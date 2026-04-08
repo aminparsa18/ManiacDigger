@@ -491,7 +491,7 @@ public class ModManagerSimple1 : ModManagerSimple
             {
                 continue;
             }
-            if (Game.StringEquals(server.blockTypes[i].Name, p))
+            if (String.Equals(server.blockTypes[i].Name, p))
             {
                 return i;
             }

@@ -31,7 +31,7 @@ public class ModSkySphereStatic : ModBase
             ? skySphereTexture
             : skySphereNightTexture;
 
-        Draw(game, game.currentfov());
+        Draw(game, game.CurrentFov());
     }
 
     public void Draw(Game game, float fov)
@@ -48,12 +48,12 @@ public class ModSkySphereStatic : ModBase
         game.platform.BindTexture2d(SkyTexture);
         game.DrawModel(skyModel);
         game.GLPopMatrix();
-        game.Set3dProjection(game.zfar(), fov);
+        game.Set3dProjection(game.Zfar(), fov);
     }
 
     private static int LoadTexture(Game game, string filename)
     {
-        BitmapCi bmp = game.platform.BitmapCreateFromPng(game.GetFile(filename), game.GetFileLength(filename));
+        Bitmap bmp = game.platform.BitmapCreateFromPng(game.GetAssetFile(filename), game.GetAssetFileLength(filename));
         int texture = game.platform.LoadTextureFromBitmap(bmp);
         game.platform.BitmapDelete(bmp);
         return texture;

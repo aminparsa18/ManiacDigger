@@ -136,6 +136,6 @@ public class ModGrenade : ModBase
     {
         velocity *= BounceSpeedMultiply;
         if (isMoving)
-            game.AudioPlayAt("grenadebounce.ogg", pos.X, pos.Y, pos.Z);
+            game.PlayAudioAt("grenadebounce.ogg", pos.X, pos.Y, pos.Z);
     }
 }

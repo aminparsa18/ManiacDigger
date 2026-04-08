@@ -33,14 +33,14 @@ public class ModSkySphereAnimated : ModBase
 
         game.platform.GLDisableAlphaTest();
         game.platform.GlDisableDepthTest();
-        Draw(game, game.currentfov());
+        Draw(game, game.CurrentFov());
         game.platform.GLEnableAlphaTest();
         game.platform.GlEnableDepthTest();
     }
 
     private void LoadPixels(Game game, string filename, ref int[] pixels)
     {
-        BitmapCi bmp = game.platform.BitmapCreateFromPng(game.GetFile(filename), game.GetFileLength(filename));
+        Bitmap bmp = game.platform.BitmapCreateFromPng(game.GetAssetFile(filename), game.GetAssetFileLength(filename));
         pixels = new int[TextureSize * TextureSize * 4];
         game.platform.BitmapGetPixelsArgb(bmp, pixels);
         game.platform.BitmapDelete(bmp);
@@ -61,7 +61,7 @@ public class ModSkySphereAnimated : ModBase
         game.platform.BindTexture2d(0);
         game.DrawModelData(skyModel);
         game.GLPopMatrix();
-        game.Set3dProjection(game.zfar(), fov);
+        game.Set3dProjection(game.Zfar(), fov);
     }
 
     public static ModelData GetSphereModelData2(ModelData data,

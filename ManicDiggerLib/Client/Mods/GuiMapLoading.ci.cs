@@ -64,7 +64,7 @@ public class ModGuiMapLoading : ModBase
         DrawCentered(game, progress1, centerY + 10);
 
         float ratio = game.maploadingprogress.ProgressPercent / 100f;
-        int barX = game.xcenter(ProgressBarWidth);
+        int barX = game.Xcenter(ProgressBarWidth);
         int barY = centerY + 70;
         int color = InterpolationCi.InterpolateColor(platform, ratio, ProgressBarColors, ProgressBarColors.Length);
 
@@ -75,7 +75,7 @@ public class ModGuiMapLoading : ModBase
     private void DrawCentered(Game game, string text, int y)
     {
         game.platform.TextSize(text, FontSize, out int textWidth, out _);
-        game.Draw2dText(text, game.fontMapLoading, game.xcenter(textWidth), y, null, false);
+        game.Draw2dText(text, game.fontMapLoading, game.Xcenter(textWidth), y, null, false);
     }
 
     private static void DrawBackground(Game game, int width, int height)

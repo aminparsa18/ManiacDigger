@@ -1,4 +1,5 @@
-﻿using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
+﻿using OpenTK.Mathematics;
+using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 /// <summary>
 /// Handles keyboard input for player movement and camera control each fixed frame.
@@ -76,9 +77,9 @@ public class ModCameraKeys : ModBase
         game.overheadcameraK.Move(m, dt);
 
         // Click-to-move: steer player toward destination
-        float toDest = game.Dist(
-            game.player.position.x, game.player.position.y, game.player.position.z,
-            game.playerdestination.X + 0.5f, game.playerdestination.Y - 0.5f, game.playerdestination.Z + 0.5f);
+        float toDest = Vector3.Distance(
+            new Vector3(game.player.position.x, game.player.position.y, game.player.position.z),
+            new Vector3(game.playerdestination.X + 0.5f, game.playerdestination.Y - 0.5f, game.playerdestination.Z + 0.5f));
 
         if (toDest >= 1)
         {
@@ -86,9 +87,8 @@ public class ModCameraKeys : ModBase
             if (game.reachedwall) game.controls.wantsjump = true;
 
             float qX = game.playerdestination.X - game.player.position.x;
-            float qY = game.playerdestination.Y - game.player.position.y;
             float qZ = game.playerdestination.Z - game.player.position.z;
-            game.player.position.roty = MathF.PI / 2 + game.VectorAngleGet(qX, qY, qZ);
+            game.player.position.roty = MathF.PI / 2 + MathF.Atan2(qX, qZ);
             game.player.position.rotx = MathF.PI;
         }
     }

@@ -322,7 +322,7 @@ public class ScreenMultiplayer : Screen
                     if (thumbResponses[i].done)
                     {
                         //Request completed. load received bitmap
-                        BitmapCi bmp = menu.p.BitmapCreateFromPng(thumbResponses[i].data, thumbResponses[i].dataLength);
+                        Bitmap bmp = menu.p.BitmapCreateFromPng(thumbResponses[i].data, thumbResponses[i].dataLength);
                         if (bmp != null)
                         {
                             int texture = menu.p.LoadTextureFromBitmap(bmp);

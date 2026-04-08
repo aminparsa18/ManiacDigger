@@ -1,4 +1,6 @@
-﻿/// <summary>
+﻿using System.Numerics;
+
+/// <summary>
 /// Renders floating 3D text labels attached to entities, facing the player when nearby.
 /// </summary>
 public class ModDrawText : ModBase
@@ -21,7 +23,7 @@ public class ModDrawText : ModBase
             float posY = p.dy + e.position.y;
             float posZ = MathF.Cos(e.position.roty) * p.dz + e.position.z;
 
-            bool nearEnough = game.Dist(game.player.position.x, game.player.position.y, game.player.position.z, posX, posY, posZ) < TextDrawDistance;
+            bool nearEnough = Vector3.Distance(new Vector3(game.player.position.x, game.player.position.y, game.player.position.z), new Vector3(posX, posY, posZ)) < TextDrawDistance;
             bool altHeld = game.keyboardState[Game.KeyAltLeft] || game.keyboardState[Game.KeyAltRight];
             if (!nearEnough && !altHeld) continue;
 

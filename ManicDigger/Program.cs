@@ -73,7 +73,7 @@ public class Program
     {
         if (args.Length > 0)
         {
-            var connectdata = ConnectData.FromUri(new GamePlatformNative().ParseUri(args[0]));
+            var connectdata = ConnectData.FromUri(new(args[0]));
             mainmenu.StartGame(false, null, connectdata);
         }
     }

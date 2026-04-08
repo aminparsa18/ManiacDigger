@@ -135,7 +135,7 @@
     {
         if (w == buttonConnect)
         {
-            if (!Game.StringEquals(textboxIp.text, "")
+            if (!string.Equals(textboxIp.text, "")
                 && float.TryParse(textboxPort.text, out _))
             {
                 menu.StartLogin(null, textboxIp.text, int.Parse(textboxPort.text));

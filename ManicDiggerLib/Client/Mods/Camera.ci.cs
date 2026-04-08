@@ -65,7 +65,7 @@ public class ModCamera : ModBase
         const float MinDistance = 0.3f;
 
         Vector3 dir = eye - target;
-        float dirLength = game.Length(dir.X, dir.Y, dir.Z);
+        float dirLength = dir.Length;
         dir /= dirLength;
 
         Vector3 rayEnd = target + dir * (game.tppcameradistance + 1);
@@ -78,11 +78,8 @@ public class ModCamera : ModBase
         ArraySegment<BlockPosSide> hits = game.Pick(game.s, pick, out int hitCount);
         if (hitCount > 0)
         {
-            BlockPosSide nearest = game.Nearest(hits, hitCount, target.X, target.Y, target.Z);
-            float pickX = nearest.blockPos[0] - target.X;
-            float pickY = nearest.blockPos[1] - target.Y;
-            float pickZ = nearest.blockPos[2] - target.Z;
-            float pickDistance = game.Length(pickX, pickY, pickZ);
+            BlockPosSide nearest = game.Nearest(hits, hitCount, target);
+            float pickDistance = new Vector3(nearest.blockPos[0] - target.X, nearest.blockPos[1] - target.Y, nearest.blockPos[2] - target.Z).Length;
             distance = Math.Max(MinDistance, Math.Min(pickDistance - 1, distance));
         }
 

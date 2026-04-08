@@ -1,4 +1,6 @@
-﻿/// <summary>
+﻿using OpenTK.Mathematics;
+
+/// <summary>
 /// Renders player name tags and health bars above entity models in the 3D world.
 /// </summary>
 public class ModDrawPlayerNames : ModBase
@@ -22,8 +24,7 @@ public class ModDrawPlayerNames : ModBase
             float posX = p.TextX + e.position.x;
             float posY = p.TextY + e.position.y + e.drawModel.ModelHeight + NameTagHeightOffset;
             float posZ = p.TextZ + e.position.z;
-
-            bool nearEnough = game.Dist(game.player.position.x, game.player.position.y, game.player.position.z, posX, posY, posZ) < NameTagDrawDistance;
+            bool nearEnough = Vector3.Distance(new(game.player.position.x, game.player.position.y, game.player.position.z), new(posX, posY, posZ)) < NameTagDrawDistance;
             bool altHeld = game.keyboardState[Game.KeyAltLeft] || game.keyboardState[Game.KeyAltRight];
             if (!nearEnough && !altHeld) continue;
 

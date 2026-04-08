@@ -1,4 +1,6 @@
-﻿/// <summary>
+﻿using OpenTK.Mathematics;
+
+/// <summary>
 /// Moves bullet entities along their trajectory each 3D frame and removes them on arrival.
 /// </summary>
 public class ModBullet : ModBase
@@ -16,7 +18,7 @@ public class ModBullet : ModBase
             float dirX = b.toX - b.fromX;
             float dirY = b.toY - b.fromY;
             float dirZ = b.toZ - b.fromZ;
-            float length = game.Dist(0, 0, 0, dirX, dirY, dirZ);
+            float length = Vector3.Distance(Vector3.Zero, new Vector3(dirX, dirY, dirZ));
 
             dirX /= length;
             dirY /= length;

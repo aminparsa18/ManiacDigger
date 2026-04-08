@@ -36,7 +36,7 @@ public class ModWalkSound : ModBase
         if (game.rnd.Next() % 100 < RandomSoundChance)
             lastWalkSound = game.rnd.Next() % soundCount;
 
-        game.AudioPlay(sounds[lastWalkSound]);
+        game.PlayAudio(sounds[lastWalkSound]);
     }
 
     internal static string[] CurrentWalkSounds(Game game)

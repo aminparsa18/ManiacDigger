@@ -96,12 +96,12 @@ public class ModGuiCrafting : ModBase
 
         if (currentRecipesCount == 0)
         {
-            game.Draw2dText1(game.language.NoMaterialsForCrafting(), game.xcenter(200), game.ycenter(20), FontSize, null, false);
+            game.Draw2dText1(game.language.NoMaterialsForCrafting(), game.Xcenter(200), game.Ycenter(20), FontSize, null, false);
             return;
         }
 
-        int menuX = game.xcenter(MenuWidth);
-        int menuY = game.ycenter(currentRecipesCount * RecipeRowHeight);
+        int menuX = game.Xcenter(MenuWidth);
+        int menuY = game.Ycenter(currentRecipesCount * RecipeRowHeight);
 
         for (int i = 0; i < currentRecipesCount; i++)
         {
@@ -130,8 +130,8 @@ public class ModGuiCrafting : ModBase
     {
         if (currentRecipes == null) return;
 
-        int menuX = game.xcenter(MenuWidth);
-        int menuY = game.ycenter(currentRecipesCount * RecipeRowHeight);
+        int menuX = game.Xcenter(MenuWidth);
+        int menuY = game.Ycenter(currentRecipesCount * RecipeRowHeight);
 
         if (game.mouseCurrentY >= menuY && game.mouseCurrentY < menuY + currentRecipesCount * RecipeRowHeight)
             craftingSelectedRecipe = (game.mouseCurrentY - menuY) / RecipeRowHeight;

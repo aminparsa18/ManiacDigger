@@ -13,7 +13,7 @@
             {
                 game.dialogs[game.GetDialogId(d.DialogId)] = null;
             }
-            if (game.DialogsCount_() == 0)
+            if (game.DialogsCount == 0)
             {
                 game.SetFreeMouse(false);
             }
@@ -29,7 +29,7 @@
             d2.screen.game = game;
             if (game.GetDialogId(d.DialogId) == -1)
             {
-                for (int i = 0; i < game.dialogsCount; i++)
+                for (int i = 0; i < game.dialogs.Count(); i++)
                 {
                     if (game.dialogs[i] == null)
                     {
@@ -92,7 +92,7 @@
                 b.font = new FontCi
                 {
                     family = game.ValidFont(a.Font.FamilyName),
-                    size = game.DeserializeFloat(a.Font.SizeFloat),
+                    size = game.DecodeFixedPoint(a.Font.SizeFloat),
                     style = a.Font.FontStyle
                 };
             }

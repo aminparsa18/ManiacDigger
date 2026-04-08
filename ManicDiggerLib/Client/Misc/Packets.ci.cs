@@ -357,8 +357,8 @@
             p.X = (int)(positionX * 32);
             p.Y = (int)(positionY * 32);
             p.Z = (int)(positionZ * 32);
-            p.Heading = (int)(Game.RadToAngle256(orientationY));
-            p.Pitch = (int)(Game.RadToAngle256(orientationX));
+            p.Heading = (int)(RadToAngle256(orientationY));
+            p.Pitch = (int)(RadToAngle256(orientationX));
             p.Stance = stance;
         }
         Packet_Client pp = new()
@@ -379,6 +379,9 @@
         };
         return pp;
     }
+
+    internal static float RadToAngle256(float value) => value / (2 * MathF.PI) * 255;
+
 
     internal static Packet_Client UseEntity(int entityId)
     {

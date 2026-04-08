@@ -100,7 +100,7 @@ public class ModAudio : ModBase
     {
         if (!audioData.TryGetValue(sound, out AudioData data))
         {
-            data = game.platform.AudioDataCreate(game.GetFile(sound), game.GetFileLength(sound));
+            data = game.platform.AudioDataCreate(game.GetAssetFile(sound), game.GetAssetFileLength(sound));
             audioData[sound] = data;
         }
         return data;

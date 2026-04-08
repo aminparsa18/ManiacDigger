@@ -555,7 +555,7 @@ public class ModGuiEscapeMenu : ModBase
 
     private void MakeSimpleOptions(int fontsize, int textheight)
     {
-        int starty = game.ycenter(widgetsCount * textheight);
+        int starty = game.Ycenter(widgetsCount * textheight);
         for (int i = 0; i < widgetsCount; i++)
         {
             string s = widgets[i].Text;
@@ -563,7 +563,7 @@ public class ModGuiEscapeMenu : ModBase
             float sizeHeight = game.TextSizeHeight(s, fontsize);
             int Width = (int)(sizeWidth) + 10;
             int Height = (int)(sizeHeight);
-            int X = game.xcenter(sizeWidth);
+            int X = game.Xcenter(sizeWidth);
             int Y = starty + textheight * i;
             widgets[i].x = X;
             widgets[i].y = Y;

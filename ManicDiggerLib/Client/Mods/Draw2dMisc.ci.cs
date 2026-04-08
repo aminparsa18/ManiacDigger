@@ -107,15 +107,15 @@ public class ModDraw2dMisc : ModBase
     internal static void DrawEnemyHealthUseInfo(Game game, string name, float progress, bool useInfo)
     {
         int y = useInfo ? 55 : 35;
-        game.Draw2dTexture(game.WhiteTexture(), game.xcenter(300), 40, 300, y, null, 0, Game.ColorFromArgb(255, 0, 0, 0), false);
-        game.Draw2dTexture(game.WhiteTexture(), game.xcenter(300), 40, 300 * progress, y, null, 0, Game.ColorFromArgb(255, 255, 0, 0), false);
+        game.Draw2dTexture(game.WhiteTexture(), game.Xcenter(300), 40, 300, y, null, 0, Game.ColorFromArgb(255, 0, 0, 0), false);
+        game.Draw2dTexture(game.WhiteTexture(), game.Xcenter(300), 40, 300 * progress, y, null, 0, Game.ColorFromArgb(255, 255, 0, 0), false);
         FontCi font = new()
         {
             family = "Arial",
             size = 14
         };
         game.platform.TextSize(name, 14, out int w, out int h);
-        game.Draw2dText(name, font, game.xcenter(w), 40, null, false);
+        game.Draw2dText(name, font, game.Xcenter(w), 40, null, false);
         if (useInfo)
         {
             name = string.Format(game.language.PressToUse(), "E");
@@ -125,7 +125,7 @@ public class ModDraw2dMisc : ModBase
                 family = "Arial",
                 size = 10
             };
-            game.Draw2dText(name, font2, game.xcenter(w), 70, null, false);
+            game.Draw2dText(name, font2, game.Xcenter(w), 70, null, false);
         }
     }
 
@@ -140,7 +140,7 @@ public class ModDraw2dMisc : ModBase
         game.platform.BindTexture2d(0);
         if (game.CurrentAimRadius() > 1)
         {
-            float fov_ = game.currentfov();
+            float fov_ = game.CurrentFov();
             game.Circle3i(game.Width() / 2, game.Height() / 2, game.CurrentAimRadius() * game.fov / fov_);
         }
         game.Draw2dBitmapFile("target.png", game.Width() / 2 - aimwidth / 2, game.Height() / 2 - aimheight / 2, aimwidth, aimheight);
@@ -180,8 +180,8 @@ public class ModDraw2dMisc : ModBase
         float one = 1;
         if (game.ENABLE_DRAWPOSITION)
         {
-            float heading = one * game.HeadingByte(game.player.position.rotx, game.player.position.roty, game.player.position.rotz);
-            float pitch = one * game.PitchByte(game.player.position.rotx, game.player.position.roty, game.player.position.rotz);
+            float heading = one * Game.HeadingByte(game.player.position.rotx, game.player.position.roty, game.player.position.rotz);
+            float pitch = one * Game.PitchByte(game.player.position.rotx, game.player.position.roty, game.player.position.rotz);
             string postext = string.Format("X: {0}", MathF.Floor(game.player.position.x).ToString());
             postext = string.Concat(postext, ",\tY: ");
             postext = string.Concat(postext, MathF.Floor(game.player.position.z).ToString());

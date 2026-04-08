@@ -3,6 +3,7 @@ using OpenTK;
 using OpenTK.Mathematics;
 using ProtoBuf;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -2907,7 +2908,7 @@ public partial class Server : ICurrentTime, IDropItem
     internal int chunkdrawdistance { get { return drawdistance / chunksize; } }
     public byte[] CompressChunkNetwork(ushort[] chunk)
     {
-        return d_NetworkCompression.Compress(Misc.UshortArrayToByteArray(chunk));
+        return d_NetworkCompression.Compress(MemoryMarshal.AsBytes(chunk.AsSpan()));
     }
     public byte[] CompressChunkNetwork(byte[, ,] chunk)
     {

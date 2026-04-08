@@ -1,4 +1,6 @@
-﻿/// <summary>
+﻿using OpenTK.Mathematics;
+
+/// <summary>
 /// Removes entities when their lifetime expires, triggering grenade explosions where applicable.
 /// </summary>
 public class ModExpire : ModBase
@@ -32,7 +34,7 @@ public class ModExpire : ModBase
         float posY = sprite.positionY;
         float posZ = sprite.positionZ;
 
-        game.AudioPlayAt("grenadeexplosion.ogg", posX, posY, posZ);
+        game.PlayAudioAt("grenadeexplosion.ogg", posX, posY, posZ);
 
         // Spawn explosion animation sprite
         game.EntityAddLocal(new Entity
@@ -50,16 +52,16 @@ public class ModExpire : ModBase
         });
 
         // Spawn explosion push entity
-        float explosionTime = game.DeserializeFloat(blockType.ExplosionTimeFloat);
-        float explosionRange = game.DeserializeFloat(blockType.ExplosionRangeFloat);
+        float explosionTime = game.DecodeFixedPoint(blockType.ExplosionTimeFloat);
+        float explosionRange = game.DecodeFixedPoint(blockType.ExplosionRangeFloat);
 
         game.EntityAddLocal(new Entity
         {
             push = new Packet_ServerExplosion
             {
-                XFloat = game.SerializeFloat(posX),
-                YFloat = game.SerializeFloat(posZ),
-                ZFloat = game.SerializeFloat(posY),
+                XFloat = Game.EncodeFixedPoint(posX),
+                YFloat = Game.EncodeFixedPoint(posZ),
+                ZFloat = Game.EncodeFixedPoint(posY),
                 RangeFloat = blockType.ExplosionRangeFloat,
                 IsRelativeToPlayerPosition = 0,
                 TimeFloat = blockType.ExplosionTimeFloat
@@ -68,8 +70,8 @@ public class ModExpire : ModBase
         });
 
         // Apply damage to local player based on distance
-        float dist = game.Dist(game.player.position.x, game.player.position.y, game.player.position.z, posX, posY, posZ);
-        float dmg = (1f - dist / explosionRange) * game.DeserializeFloat(blockType.DamageBodyFloat);
+        float dist = Vector3.Distance(new Vector3(game.player.position.x, game.player.position.y, game.player.position.z), new Vector3(posX, posY, posZ));
+        float dmg = (1f - dist / explosionRange) * game.DecodeFixedPoint(blockType.DamageBodyFloat);
         if (dmg > 0)
             game.ApplyDamageToPlayer((int)dmg, Packet_DeathReasonEnum.Explosion, grenade.sourcePlayer);
     }

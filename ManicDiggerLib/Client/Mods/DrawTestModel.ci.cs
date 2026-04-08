@@ -21,8 +21,8 @@ public class ModDrawTestModel : ModBase
         if (testmodel == null)
         {
             testmodel = new AnimatedModelRenderer();
-            byte[] data = game.GetFile("player.txt");
-            int dataLength = game.GetFileLength("player.txt");
+            byte[] data = game.GetAssetFile("player.txt");
+            int dataLength = game.GetAssetFileLength("player.txt");
             string dataString = Encoding.UTF8.GetString(data, 0, dataLength);
             AnimatedModel model = AnimatedModelSerializer.Deserialize(dataString);
             testmodel.Start(game, model);

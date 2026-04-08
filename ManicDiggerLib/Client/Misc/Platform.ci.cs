@@ -20,21 +20,19 @@ public abstract class GamePlatform
     public abstract int GetCanvasHeight();
     public abstract int TimeMillisecondsFromStart();
     public abstract void ThrowException(string message);
-    public abstract BitmapCi BitmapCreate(int width, int height);
-    public abstract void BitmapSetPixelsArgb(BitmapCi bmp, int[] pixels);
-    public abstract BitmapCi CreateTextTexture(Text_ t);
+    public abstract void BitmapSetPixelsArgb(Bitmap bmp, int[] pixels);
+    public abstract Bitmap CreateTextTexture(Text_ t);
     public abstract void SetTextRendererFont(int fontID);
-    public abstract float BitmapGetWidth(BitmapCi bmp);
-    public abstract float BitmapGetHeight(BitmapCi bmp);
-    public abstract void BitmapDelete(BitmapCi bmp);
+    public abstract float BitmapGetWidth(Bitmap bmp);
+    public abstract float BitmapGetHeight(Bitmap bmp);
+    public abstract void BitmapDelete(Bitmap bmp);
     public abstract void ConsoleWriteLine(string p);
     public abstract MonitorObject MonitorCreate();
     public abstract void MonitorEnter(MonitorObject monitorObject);
     public abstract void MonitorExit(MonitorObject monitorObject);
     public abstract void SaveScreenshot();
-    public abstract BitmapCi GrabScreenshot();
+    public abstract Bitmap GrabScreenshot();
     public abstract AviWriterCi AviWriterCreate();
-    public abstract UriCi ParseUri(string uri);
     public abstract string PathStorage();
     public abstract void SetVSync(bool enabled);
     public abstract string GetGameVersion();
@@ -43,8 +41,8 @@ public abstract class GamePlatform
     public abstract bool IsValidTypingChar(int c);
     public abstract void WindowExit();
     public abstract void MessageBoxShowError(string text, string caption);
-    public abstract BitmapCi BitmapCreateFromPng(byte[] data, int dataLength);
-    public abstract void BitmapGetPixelsArgb(BitmapCi bitmap, int[] bmpPixels);
+    public abstract Bitmap BitmapCreateFromPng(byte[] data, int dataLength);
+    public abstract void BitmapGetPixelsArgb(Bitmap bitmap, int[] bmpPixels);
     public abstract void SetTitle(string applicationname);
     public abstract bool Focused();
     public abstract void AddOnCrash(OnCrashHandler handler);
@@ -153,7 +151,7 @@ public abstract class GamePlatform
     public abstract void DrawModels(List<Model> model, int count);
     public abstract void DrawModelData(ModelData data);
     public abstract void DeleteModel(Model model);
-    public abstract int LoadTextureFromBitmap(BitmapCi bmp);
+    public abstract int LoadTextureFromBitmap(Bitmap bmp);
     
     // Game
     public abstract bool SinglePlayerServerAvailable();
@@ -267,18 +265,6 @@ public class Preferences
     {
         items.Remove(key);
     }
-}
-
-public class UriCi
-{
-    internal string url;
-    internal string ip;
-    internal int port;
-    internal Dictionary<string, string> get;
-    public string GetUrl() { return url; }
-    public string GetIp() { return ip; }
-    public int GetPort() { return port; }
-    public Dictionary<string, string> GetGet() { return get; }
 }
 
 public class EnetHost

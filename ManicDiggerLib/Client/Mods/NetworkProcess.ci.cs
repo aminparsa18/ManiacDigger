@@ -1,4 +1,6 @@
-﻿namespace ManicDigger.Mods;
+﻿using System.Runtime.InteropServices;
+
+namespace ManicDigger.Mods;
 
 public class ModNetworkProcess : ModBase
 {
@@ -131,7 +133,7 @@ public class ModNetworkProcess : ModBase
                 {
                     Packet_ServerHeightmapChunk p = packet.HeightmapChunk;
                     game.platform.GzipDecompress(p.CompressedHeightmap, p.CompressedHeightmap.Length, decompressedchunk);
-                    int[] decompressedchunk1 = Game.ByteArrayToUshortArray(decompressedchunk, p.SizeX * p.SizeY * 2);
+                    ReadOnlySpan<ushort> decompressedchunk1 = MemoryMarshal.Cast<byte, ushort>(decompressedchunk.AsSpan(0, p.SizeX * p.SizeY * 2));
                     for (int xx = 0; xx < p.SizeX; xx++)
                     {
                         for (int yy = 0; yy < p.SizeY; yy++)
@@ -383,7 +385,7 @@ public class ModNetworkProcess : ModBase
                 break;
             case Packet_ServerIdEnum.Sound:
                 {
-                    game.PlaySoundAt(packet.Sound.Name, packet.Sound.X, packet.Sound.Y, packet.Sound.Z);
+                    game.PlayAudio(packet.Sound.Name, packet.Sound.X, packet.Sound.Y, packet.Sound.Z);
                 }
                 break;
             case Packet_ServerIdEnum.RemoveMonsters:
@@ -406,7 +408,7 @@ public class ModNetworkProcess : ModBase
             case Packet_ServerIdEnum.LightLevels:
                 for (int i = 0; i < packet.LightLevels.LightlevelsCount; i++)
                 {
-                    game.mLightLevels[i] = game.DeserializeFloat(packet.LightLevels.Lightlevels[i]);
+                    game.mLightLevels[i] = game.DecodeFixedPoint(packet.LightLevels.Lightlevels[i]);
                 }
                 break;
             case Packet_ServerIdEnum.Follow:
@@ -425,13 +427,13 @@ public class ModNetworkProcess : ModBase
                 break;
             case Packet_ServerIdEnum.Bullet:
                 game.EntityAddLocal(Game.CreateBulletEntity(
-                   game.DeserializeFloat(packet.Bullet.FromXFloat),
-                   game.DeserializeFloat(packet.Bullet.FromYFloat),
-                   game.DeserializeFloat(packet.Bullet.FromZFloat),
-                   game.DeserializeFloat(packet.Bullet.ToXFloat),
-                   game.DeserializeFloat(packet.Bullet.ToYFloat),
-                   game.DeserializeFloat(packet.Bullet.ToZFloat),
-                   game.DeserializeFloat(packet.Bullet.SpeedFloat)));
+                   game.DecodeFixedPoint(packet.Bullet.FromXFloat),
+                   game.DecodeFixedPoint(packet.Bullet.FromYFloat),
+                   game.DecodeFixedPoint(packet.Bullet.FromZFloat),
+                   game.DecodeFixedPoint(packet.Bullet.ToXFloat),
+                   game.DecodeFixedPoint(packet.Bullet.ToYFloat),
+                   game.DecodeFixedPoint(packet.Bullet.ToZFloat),
+                   game.DecodeFixedPoint(packet.Bullet.SpeedFloat)));
                 break;
             case Packet_ServerIdEnum.Ammo:
                 if (!game.ammostarted)
@@ -455,7 +457,7 @@ public class ModNetworkProcess : ModBase
                     {
                         expires = new Expires
                         {
-                            timeLeft = game.DeserializeFloat(packet.Explosion.TimeFloat)
+                            timeLeft = game.DecodeFixedPoint(packet.Explosion.TimeFloat)
                         },
                         push = packet.Explosion
                     };
@@ -471,23 +473,23 @@ public class ModNetworkProcess : ModBase
                         image = "ChemicalGreen.png",
                         size = 14,
                         animationcount = 0,
-                        positionX = game.DeserializeFloat(packet.Projectile.FromXFloat),
-                        positionY = game.DeserializeFloat(packet.Projectile.FromYFloat),
-                        positionZ = game.DeserializeFloat(packet.Projectile.FromZFloat)
+                        positionX = game.DecodeFixedPoint(packet.Projectile.FromXFloat),
+                        positionY = game.DecodeFixedPoint(packet.Projectile.FromYFloat),
+                        positionZ = game.DecodeFixedPoint(packet.Projectile.FromZFloat)
                     };
                     entity.sprite = sprite;
 
                     Grenade_ grenade = new()
                     {
-                        velocityX = game.DeserializeFloat(packet.Projectile.VelocityXFloat),
-                        velocityY = game.DeserializeFloat(packet.Projectile.VelocityYFloat),
-                        velocityZ = game.DeserializeFloat(packet.Projectile.VelocityZFloat),
+                        velocityX = game.DecodeFixedPoint(packet.Projectile.VelocityXFloat),
+                        velocityY = game.DecodeFixedPoint(packet.Projectile.VelocityYFloat),
+                        velocityZ = game.DecodeFixedPoint(packet.Projectile.VelocityZFloat),
                         block = packet.Projectile.BlockId,
                         sourcePlayer = packet.Projectile.SourcePlayerID
                     };
                     entity.grenade = grenade;
 
-                    entity.expires = Expires.Create(game.DeserializeFloat(packet.Projectile.ExplodesAfterFloat));
+                    entity.expires = Expires.Create(game.DecodeFixedPoint(packet.Projectile.ExplodesAfterFloat));
 
                     game.EntityAddLocal(entity);
                 }
@@ -565,7 +567,7 @@ public class ModNetworkProcess : ModBase
     {
         for (int i = 0; i < arrLength; i++)
         {
-            if (Game.StringEquals(arr[i], value))
+            if (string.Equals(arr[i], value))
             {
                 return i;
             }

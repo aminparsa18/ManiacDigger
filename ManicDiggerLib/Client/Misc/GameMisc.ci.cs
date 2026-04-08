@@ -222,9 +222,7 @@ public class PlayerDrawInfo
     internal float lastnetworkrotx;
     internal float lastnetworkroty;
     internal float lastnetworkrotz;
-    internal float velocityX;
-    internal float velocityY;
-    internal float velocityZ;
+    internal Vector3 Velocity = Vector3.Zero;
     internal bool moves;
 }
 
@@ -999,7 +997,7 @@ public abstract class ClientModManager
     public abstract void ShowGui(int level);
     public abstract void SetFreemove(int level);
     public abstract int GetFreemove();
-    public abstract BitmapCi GrabScreenshot();
+    public abstract Bitmap GrabScreenshot();
     public abstract AviWriterCi AviWriterCreate();
     public abstract int GetWindowWidth();
     public abstract int GetWindowHeight();
@@ -1131,7 +1129,7 @@ public class ClientModManager1 : ClientModManager
         }
     }
 
-    public override BitmapCi GrabScreenshot()
+    public override Bitmap GrabScreenshot()
     {
         return game.platform.GrabScreenshot();
     }
@@ -1212,13 +1210,8 @@ public class ClientModManager1 : ClientModManager
 public abstract class AviWriterCi
 {
     public abstract void Open(string filename, int framerate, int width, int height);
-    public abstract void AddFrame(BitmapCi bitmap);
+    public abstract void AddFrame(Bitmap bitmap);
     public abstract void Close();
-}
-
-public class BitmapCi
-{
-    public virtual void Dispose() { }
 }
 
 public class FreemoveLevelEnum
@@ -1344,7 +1337,7 @@ public class TextColorRenderer
 {
     internal GamePlatform platform;
 
-    internal BitmapCi CreateTextTexture(Text_ t)
+    internal Bitmap CreateTextTexture(Text_ t)
     {
         TextPart[] parts = DecodeColors(t.text, t.color, out int partsCount);
 
@@ -1366,7 +1359,7 @@ public class TextColorRenderer
 
         int size2X = NextPowerOfTwo((int)(totalwidth) + 1);
         int size2Y = NextPowerOfTwo((int)(totalheight) + 1);
-        BitmapCi bmp2 = platform.BitmapCreate(size2X, size2Y);
+        Bitmap bmp2 = new(size2X, size2Y);
         int[] bmp2Pixels = new int[size2X * size2Y];
 
         float currentwidth = 0;
@@ -1386,7 +1379,7 @@ public class TextColorRenderer
                 fontstyle = t.fontstyle,
                 fontfamily = t.fontfamily
             };
-            BitmapCi partBmp = platform.CreateTextTexture(partText);
+            Bitmap partBmp = platform.CreateTextTexture(partText);
             int partWidth = (int)(platform.BitmapGetWidth(partBmp));
             int partHeight = (int)(platform.BitmapGetHeight(partBmp));
             int[] partBmpPixels = new int[partWidth * partHeight];

@@ -403,7 +403,7 @@ public class ModAutoCamera : ModBase
         {
             _writeAccum -= _one / Framerate * _recSpeed;
 
-            BitmapCi bmp = _m.GrabScreenshot();
+            var bmp = _m.GrabScreenshot();
             _avi.AddFrame(bmp);
             bmp.Dispose();
         }

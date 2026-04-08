@@ -1,5 +1,6 @@
 ﻿using OpenTK.Mathematics;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 //The main function for loading, unloading and sending chunks to players.
 public class ServerSystemNotifyMap : ServerSystem
@@ -120,7 +121,7 @@ public class ServerSystemNotifyMap : ServerSystem
             //commented because it was being sent too early, before full column was generated.
             //if (!c.heightmapchunksseen.ContainsKey(new Vector2i(v.x, v.y)))
             {
-                byte[] heightmapchunk = Misc.UshortArrayToByteArray(server.d_Map.GetHeightmapChunk(globalpos.X, globalpos.Y));
+                ReadOnlySpan<byte> heightmapchunk = MemoryMarshal.AsBytes(server.d_Map.GetHeightmapChunk(globalpos.X, globalpos.Y).AsSpan());
                 byte[] compressedHeightmapChunk = server.d_NetworkCompression.Compress(heightmapchunk);
                 Packet_ServerHeightmapChunk p1 = new()
                 {
