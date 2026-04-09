@@ -1018,8 +1018,16 @@ public class Model
 {
 }
 
-public class ModelData
+public class ModelData : Model
 {
+    // GPU handles (set by CreateModel)
+    public int vaoId;
+    public int vertexVboId;
+    public int colorVboId;
+    public int uvVboId;
+    public int indexVboId;
+
+    // CPU data (used by CreateModel, can be cleared after upload if needed)
     internal int verticesCount;
     public int GetVerticesCount() { return verticesCount; }
     public void SetVerticesCount(int value) { verticesCount = value; }

@@ -77,8 +77,10 @@ public static class CuboidRenderer
     }
 
     /// <summary>
-    /// Creates and submits a <see cref="ModelData"/> buffer for a cuboid,
+    /// Uploads and submits a <see cref="ModelData"/> buffer for a cuboid,
     /// disabling face culling during the draw call so all faces are visible.
+    /// Since cuboid geometry is rebuilt every draw call, <see cref="IGamePlatform.UpdateModel"/>
+    /// is used to sync the CPU buffers to the GPU before drawing.
     /// </summary>
     /// <param name="game">The game instance used for GL draw calls.</param>
     /// <param name="data">The model data with all vertices already written.</param>
@@ -95,6 +97,11 @@ public static class CuboidRenderer
             data.indices[i * IndicesPerFace + 5] = i * VerticesPerFace + 0;
         }
         data.indicesCount = FaceCount * IndicesPerFace;
+        data.setMode(DrawModeEnum.Triangles);
+
+        // Sync all CPU buffers (xyz, rgba, uv, indices) to GPU.
+        // CreateModel is called on first use; BufferSubData on subsequent frames.
+        game.platform.UpdateModel(data);
 
         game.platform.GlDisableCullFace();
         game.DrawModelData(data);
@@ -108,7 +115,7 @@ public static class CuboidRenderer
     /// <param name="color">The packed ARGB color encoding the light intensity.</param>
     private static ModelData CreateCuboidBuffer(float light, out int color)
     {
-        int light255 = (int)light * 255;
+        int light255 = (int)(light * 255);
         color = Game.ColorFromArgb(255, light255, light255, light255);
         return new ModelData
         {
@@ -262,5 +269,4 @@ public static class CuboidRenderer
 
         model.verticesCount++;
     }
-
 }

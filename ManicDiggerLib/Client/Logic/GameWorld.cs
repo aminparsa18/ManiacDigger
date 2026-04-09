@@ -244,8 +244,6 @@
         }
 
         platform.GlEnableFog();
-        platform.GlHintFogHintNicest();
-        platform.GlFogFogModeExp2();
         platform.GlFogFogColor(fogR, fogG, fogB, fogA);
         platform.GlFogFogDensity(density);
     }

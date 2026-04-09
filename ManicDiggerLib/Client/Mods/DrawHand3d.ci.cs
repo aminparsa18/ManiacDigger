@@ -307,6 +307,7 @@ public class ModDrawHand3d : ModBase
         if (curMaterial != _cachedMaterial || curLight != _cachedLight || _modelData == null || game.handRedraw)
         {
             RebuildHandModel(lightByte);
+            game.platform.UpdateModel(_modelData); // sync rebuilt geometry to GPU
             game.handRedraw = false;
         }
 

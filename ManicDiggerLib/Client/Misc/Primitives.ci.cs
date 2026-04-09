@@ -73,6 +73,17 @@ public class QuadModelData
         Array.Copy(QuadTextureCoords, uv, uv.Length);
         m.setUv(uv);
 
+        // white, fully opaque for all vertices
+        byte[] rgba = new byte[4 * VertexCount];
+        for (int i = 0; i < VertexCount; i++)
+        {
+            rgba[i * 4 + 0] = 255; // R
+            rgba[i * 4 + 1] = 255; // G
+            rgba[i * 4 + 2] = 255; // B
+            rgba[i * 4 + 3] = 255; // A
+        }
+        m.setRgba(rgba);
+
         m.SetVerticesCount(VertexCount);
         m.setIndices(QuadVertexIndices);
         m.SetIndicesCount(IndexCount);

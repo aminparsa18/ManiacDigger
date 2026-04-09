@@ -53,7 +53,8 @@ public class ModSkySphereAnimated : ModBase
 
         skyModel = GetSphereModelData2(skyModel, game.platform, size, size, segments, segments,
             skyPixels, glowPixels, game.sunPositionX, game.sunPositionY, game.sunPositionZ);
-
+        
+        game.platform.UpdateModel(skyModel);
         game.Set3dProjection(size * 2, fov);
         game.GLMatrixModeModelView();
         game.GLPushMatrix();

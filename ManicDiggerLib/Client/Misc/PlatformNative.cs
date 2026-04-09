@@ -1,7 +1,7 @@
 ﻿using ENet;
 using ManicDigger;
 using ManicDigger.ClientNative;
-using OpenTK.Graphics.OpenGL;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Common.Input;
@@ -11,15 +11,14 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Net;
-using System.Net.Sockets;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
 using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 using Monitor = System.Threading.Monitor;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
 using Vector3 = OpenTK.Mathematics.Vector3;
+using Vector4 = OpenTK.Mathematics.Vector4;
 
 public class GamePlatformNative : IGamePlatform
 {
@@ -931,7 +930,16 @@ public class GamePlatformNative : IGamePlatform
         window.RenderFrame += WindowRenderFrame;
         window.Closing += WindowClosed;
         window.Title = "Manic Digger";
+        //GL.Enable(EnableCap.DebugOutput);
+       // GL.Enable(EnableCap.DebugOutputSynchronous);
+        GL.DebugMessageCallback((source, type, id, severity, length, message, param) =>
+        {
+            if (severity == DebugSeverity.DebugSeverityNotification)
+                return; // ignore info messages like this one
+            string msg = Marshal.PtrToStringAnsi(message, length);
+            Console.WriteLine($"[OpenGL] [{severity}] [{type}] {msg}");
 
+        }, IntPtr.Zero);
     }
 
     private void WindowClosed(CancelEventArgs e)
@@ -1053,134 +1061,256 @@ public class GamePlatformNative : IGamePlatform
     public  void BindTexture2d(int texture)
     {
         GL.BindTexture(TextureTarget.Texture2D, texture);
+        if (_shaderProgram != -1)
+            GL.Uniform1(_uUseTexture, texture != 0 ? 1 : 0);
     }
 
-    private readonly float[] xyz = new float[65536 * 3];
-    private readonly float[] uv = new float[65536 * 2];
-    private readonly byte[] rgba = new byte[65536 * 4];
-    private readonly ushort[] indices = new ushort[65536];
+    private int _uUseTexture;
+    private int _uProjection;
+    private int _uModelView;
+    private int _uAmbientLight;
+    private int _uFogEnabled;
+    private int _uFogColor;
+    private int _uFogDensity;
 
-    public  Model CreateModel(ModelData data)
+    public Model CreateModel(ModelData data)
     {
-        int id = GL.GenLists(1);
+        int vao = GL.GenVertexArray();
+        GL.BindVertexArray(vao);
 
-        GL.NewList(id, ListMode.Compile);
+        // positions → attribute 0
+        int vertexVbo = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ArrayBuffer, vertexVbo);
+        GL.BufferData(BufferTarget.ArrayBuffer, data.xyz.Length * sizeof(float), data.xyz, BufferUsageHint.StaticDraw);
+        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
+        GL.EnableVertexAttribArray(0);
 
-        DrawModelData(data);
+        // colors → attribute 1
+        int colorVbo = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ArrayBuffer, colorVbo);
+        GL.BufferData(BufferTarget.ArrayBuffer, data.rgba.Length * sizeof(byte), data.rgba, BufferUsageHint.StaticDraw);
+        GL.VertexAttribPointer(1, 4, VertexAttribPointerType.UnsignedByte, true, 0, 0);
+        GL.EnableVertexAttribArray(1);
 
-        GL.EndList();
-        DisplayListModel m = new()
+        // UVs → attribute 2
+        int uvVbo = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ArrayBuffer, uvVbo);
+        GL.BufferData(BufferTarget.ArrayBuffer, data.uv.Length * sizeof(float), data.uv, BufferUsageHint.StaticDraw);
+        GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 0, 0);
+        GL.EnableVertexAttribArray(2);
+
+        // indices
+        int indexVbo = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexVbo);
+        GL.BufferData(BufferTarget.ElementArrayBuffer, data.indices.Length * sizeof(int), data.indices, BufferUsageHint.StaticDraw);
+
+        GL.BindVertexArray(0);
+
+        data.vaoId = vao;
+        data.vertexVboId = vertexVbo;
+        data.colorVboId = colorVbo;
+        data.uvVboId = uvVbo;
+        data.indexVboId = indexVbo;
+        return data;
+    }
+
+    public void UpdateModel(ModelData data)
+    {
+        if (data.vaoId == 0)
         {
-            listId = id
-        };
-        return m;
+            CreateModel(data);
+            return;
+        }
+
+        GL.BindBuffer(BufferTarget.ArrayBuffer, data.vertexVboId);
+        GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero,
+            data.xyz.Length * sizeof(float), data.xyz);
+
+        GL.BindBuffer(BufferTarget.ArrayBuffer, data.colorVboId);
+        GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero,
+            data.rgba.Length * sizeof(byte), data.rgba);
+
+        GL.BindBuffer(BufferTarget.ArrayBuffer, data.uvVboId);
+        GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero,
+            data.uv.Length * sizeof(float), data.uv);
+
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, data.indexVboId);
+        GL.BufferSubData(BufferTarget.ElementArrayBuffer, IntPtr.Zero,
+            data.indices.Length * sizeof(int), data.indices);
+
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+    }
+
+    public void UpdateModelColors(ModelData data)
+    {
+        if (data.vaoId == 0)
+        {
+            // first time - full upload
+            CreateModel(data);
+            return;
+        }
+
+        // re-upload only the color buffer
+        GL.BindBuffer(BufferTarget.ArrayBuffer, data.colorVboId);
+        GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero,
+            data.rgba.Length * sizeof(byte), data.rgba);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
     }
 
     public  void DrawModelData(ModelData data)
     {
-        GL.EnableClientState(ArrayCap.VertexArray);
-        GL.EnableClientState(ArrayCap.ColorArray);
-        GL.EnableClientState(ArrayCap.TextureCoordArray);
-
-        float[] dataXyz = data.getXyz();
-        float[] dataUv = data.getUv();
-        byte[] dataRgba = data.getRgba();
-
-        for (int i = 0; i < data.GetXyzCount(); i++)
-        {
-            xyz[i] = dataXyz[i];
-        }
-        for (int i = 0; i < data.GetUvCount(); i++)
-        {
-            uv[i] = dataUv[i];
-        }
-        if (dataRgba == null)
-        {
-            for (int i = 0; i < data.GetRgbaCount(); i++)
-            {
-                rgba[i] = 255;
-            }
-        }
-        else
-        {
-            for (int i = 0; i < data.GetRgbaCount(); i++)
-            {
-                rgba[i] = dataRgba[i];
-            }
-        }
-        GL.VertexPointer(3, VertexPointerType.Float, 3 * 4, xyz);
-        GL.ColorPointer(4, ColorPointerType.UnsignedByte, 4 * 1, rgba);
-        GL.TexCoordPointer(2, TexCoordPointerType.Float, 2 * 4, uv);
-
-        BeginMode beginmode = BeginMode.Triangles;
-        if (data.getMode() == DrawModeEnum.Triangles)
-        {
-            beginmode = BeginMode.Triangles;
-            GL.Enable(EnableCap.Texture2D);
-        }
-        else if (data.getMode() == DrawModeEnum.Lines)
-        {
-            beginmode = BeginMode.Lines;
-            GL.Disable(EnableCap.Texture2D);
-        }
-        else
-        {
-            throw new Exception();
-        }
-
-        int[] dataIndices = data.getIndices();
-        for (int i = 0; i < data.GetIndicesCount(); i++)
-        {
-            indices[i] = (ushort)dataIndices[i];
-        }
-
-        GL.DrawElements(beginmode, data.GetIndicesCount(), DrawElementsType.UnsignedShort, indices);
-
-        GL.DisableClientState(ArrayCap.VertexArray);
-        GL.DisableClientState(ArrayCap.ColorArray);
-        GL.DisableClientState(ArrayCap.TextureCoordArray);
-        GL.Disable(EnableCap.Texture2D);
+        GL.UseProgram(_shaderProgram);
+        GL.UniformMatrix4(_uProjection, false, ref _projectionMatrix);
+        GL.UniformMatrix4(_uModelView, false, ref _modelViewMatrix);
+        GL.BindVertexArray(data.vaoId);
+        PrimitiveType primitiveType = data.mode == DrawModeEnum.Triangles
+            ? PrimitiveType.Triangles
+            : PrimitiveType.Lines;
+        GL.DrawElements(primitiveType, data.indicesCount, DrawElementsType.UnsignedInt, 0);
+        GL.BindVertexArray(0);
     }
 
-    private class DisplayListModel : Model
+    public void DrawModel(Model model)
     {
-        public int listId;
+        DrawModelData((ModelData)model);
     }
 
-    public  void DrawModel(Model model)
+    public  void DrawModels(List<Model> models, int count)
     {
-        GL.CallList(((DisplayListModel)model).listId);
-    }
-
-    private int[] lists = new int[1024];
-
-    public  void DrawModels(List<Model> model, int count)
-    {
-        if (lists.Length < count)
-        {
-            lists = new int[count * 2];
-        }
         for (int i = 0; i < count; i++)
         {
-            lists[i] = ((DisplayListModel)model[i]).listId;
+            DrawModelData((ModelData)models[i]);
         }
-        GL.CallLists(count, ListNameType.Int, lists);
     }
 
     public  void InitShaders()
     {
+        string vertexSource = @"
+        #version 330 core
+
+        layout(location = 0) in vec3 aPosition;
+        layout(location = 1) in vec4 aColor;
+        layout(location = 2) in vec2 aUv;
+
+        uniform mat4 uProjection;
+        uniform mat4 uModelView;
+
+        out vec4 vColor;
+        out vec2 vUv;
+        out float vFogDepth;
+
+        void main()
+        {
+            vec4 viewPos = uModelView * vec4(aPosition, 1.0);
+            gl_Position = uProjection * viewPos;
+            vColor = aColor;
+            vUv = aUv;
+            vFogDepth = abs(viewPos.z);
+        }
+    ";
+
+        string fragmentSource = @"
+        #version 330 core
+
+        in vec4 vColor;
+        in vec2 vUv;
+        in float vFogDepth;
+
+        uniform sampler2D uTexture;
+        uniform vec3 uAmbientLight;
+        uniform vec4 uFogColor;
+        uniform float uFogDensity;
+        uniform bool uFogEnabled;
+        uniform bool uUseTexture;
+        
+        out vec4 fragColor;
+
+        void main()
+        {
+            if (uUseTexture)
+                fragColor = texture(uTexture, vUv) * vColor;
+            else
+                fragColor = vColor; // sky sphere, hand tint, etc.
+            
+            // only discard when texturing — alpha test doesn't apply to vertex-colored geometry
+            if (uUseTexture && fragColor.a < 0.5)
+                discard;
+
+            fragColor.rgb *= uAmbientLight;
+
+            if (uFogEnabled)
+            {
+                float fogFactor = exp(-uFogDensity * uFogDensity * vFogDepth * vFogDepth);
+                fogFactor = clamp(fogFactor, 0.0, 1.0);
+                fragColor.rgb = mix(uFogColor.rgb, fragColor.rgb, fogFactor);
+            }
+        }
+    ";
+
+        // compile vertex shader
+        int vertexShader = GL.CreateShader(ShaderType.VertexShader);
+        GL.ShaderSource(vertexShader, vertexSource);
+        GL.CompileShader(vertexShader);
+        GL.GetShader(vertexShader, ShaderParameter.CompileStatus, out int vertStatus);
+        if (vertStatus == 0)
+            throw new Exception($"Vertex shader error: {GL.GetShaderInfoLog(vertexShader)}");
+
+        // compile fragment shader
+        int fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
+        GL.ShaderSource(fragmentShader, fragmentSource);
+        GL.CompileShader(fragmentShader);
+        GL.GetShader(fragmentShader, ShaderParameter.CompileStatus, out int fragStatus);
+        if (fragStatus == 0)
+            throw new Exception($"Fragment shader error: {GL.GetShaderInfoLog(fragmentShader)}");
+
+        // link program
+        _shaderProgram = GL.CreateProgram();
+        GL.AttachShader(_shaderProgram, vertexShader);
+        GL.AttachShader(_shaderProgram, fragmentShader);
+        GL.LinkProgram(_shaderProgram);
+        GL.GetProgram(_shaderProgram, GetProgramParameterName.LinkStatus, out int linkStatus);
+        if (linkStatus == 0)
+            throw new Exception($"Shader link error: {GL.GetProgramInfoLog(_shaderProgram)}");
+        
+        // cleanup - shaders are linked into program, no longer needed
+        GL.DetachShader(_shaderProgram, vertexShader);
+        GL.DetachShader(_shaderProgram, fragmentShader);
+        GL.DeleteShader(vertexShader);
+        GL.DeleteShader(fragmentShader);
+
+        // set initial uniform values
+        GL.UseProgram(_shaderProgram);
+        GL.Uniform1(GL.GetUniformLocation(_shaderProgram, "uTexture"), 0);
+        GL.Uniform3(GL.GetUniformLocation(_shaderProgram, "uAmbientLight"), 1f, 1f, 1f);
+        GL.Uniform1(GL.GetUniformLocation(_shaderProgram, "uFogEnabled"), 0);
+        GL.Uniform1(GL.GetUniformLocation(_shaderProgram, "uFogDensity"), _fogDensity);
+        GL.Uniform4(GL.GetUniformLocation(_shaderProgram, "uFogColor"), _fogColor);
+        _uUseTexture = GL.GetUniformLocation(_shaderProgram, "uUseTexture");
+        _uProjection = GL.GetUniformLocation(_shaderProgram, "uProjection");
+        _uModelView = GL.GetUniformLocation(_shaderProgram, "uModelView");
+        _uAmbientLight = GL.GetUniformLocation(_shaderProgram, "uAmbientLight");
+        _uFogEnabled = GL.GetUniformLocation(_shaderProgram, "uFogEnabled");
+        _uFogColor = GL.GetUniformLocation(_shaderProgram, "uFogColor");
+        _uFogDensity = GL.GetUniformLocation(_shaderProgram, "uFogDensity");
+        GL.UseProgram(_shaderProgram);
     }
 
-    public  void SetMatrixUniformProjection(ref Matrix4 pMatrix)
+    private Matrix4 _projectionMatrix;
+    private Matrix4 _modelViewMatrix;
+    private int _shaderProgram = -1; // will be set when we create shaders
+
+    public void SetMatrixUniformProjection(ref Matrix4 pMatrix)
     {
-        GL.MatrixMode(MatrixMode.Projection);
-        GL.LoadMatrix(ref pMatrix);
+        _projectionMatrix = pMatrix;
+        if (_shaderProgram != -1)
+            GL.UniformMatrix4(_uProjection, false, ref _projectionMatrix);
     }
 
-    public  void SetMatrixUniformModelView(ref Matrix4 mvMatrix)
+    public void SetMatrixUniformModelView(ref Matrix4 mvMatrix)
     {
-        GL.MatrixMode(MatrixMode.Modelview);
-        GL.LoadMatrix(ref mvMatrix);
+        _modelViewMatrix = mvMatrix;
+        if (_shaderProgram != -1)
+            GL.UniformMatrix4(_uModelView, false, ref _modelViewMatrix);
     }
 
     public  void GlClearColorRgbaf(float r, float g, float b, float a)
@@ -1217,7 +1347,7 @@ public class GamePlatformNative : IGamePlatform
             convertedbitmap = true;
             bmp = bmp2;
         }
-        GL.Enable(EnableCap.Texture2D);
+       // GL.Enable(EnableCap.Texture2D);
         int id = GL.GenTexture();
         GL.BindTexture(TextureTarget.Texture2D, id);
         if (!ENABLE_MIPMAPS)
@@ -1245,7 +1375,7 @@ public class GamePlatformNative : IGamePlatform
         BitmapData bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmp_data.Width, bmp_data.Height, 0,
-            OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, bmp_data.Scan0);
+            OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, bmp_data.Scan0);
 
         bmp.UnlockBits(bmp_data);
 
@@ -1253,8 +1383,9 @@ public class GamePlatformNative : IGamePlatform
 
         if (ENABLE_TRANSPARENCY)
         {
-            GL.Enable(EnableCap.AlphaTest);
-            GL.AlphaFunc(AlphaFunction.Greater, 0.5f);
+            // TODO: alpha test moved to fragment shader
+            // GL.Enable(EnableCap.AlphaTest);
+            // GL.AlphaFunc(AlphaFunction.Greater, 0.5f);
         }
 
 
@@ -1285,13 +1416,17 @@ public class GamePlatformNative : IGamePlatform
 
     public  void DeleteModel(Model model)
     {
-        DisplayListModel m = (DisplayListModel)model;
-        GL.DeleteLists(m.listId, 1);
+        ModelData m = (ModelData)model;
+        GL.DeleteVertexArray(m.vaoId);
+        GL.DeleteBuffer(m.vertexVboId);
+        GL.DeleteBuffer(m.colorVboId);
+        GL.DeleteBuffer(m.uvVboId);
+        GL.DeleteBuffer(m.indexVboId);
     }
 
     public  void GlEnableTexture2d()
     {
-        GL.Enable(EnableCap.Texture2D);
+       // GL.Enable(EnableCap.Texture2D);
     }
 
     public  void GLLineWidth(int width)
@@ -1299,14 +1434,14 @@ public class GamePlatformNative : IGamePlatform
         GL.LineWidth(width);
     }
 
-    public  void GLDisableAlphaTest()
+    public void GLDisableAlphaTest()
     {
-        GL.Disable(EnableCap.AlphaTest);
+        // TODO: alpha test moved to fragment shader (discard if alpha < 0.5)
     }
 
-    public  void GLEnableAlphaTest()
+    public void GLEnableAlphaTest()
     {
-        GL.Enable(EnableCap.AlphaTest);
+        // TODO: alpha test moved to fragment shader (discard if alpha < 0.5)
     }
 
     public  void GLDeleteTexture(int id)
@@ -1319,37 +1454,45 @@ public class GamePlatformNative : IGamePlatform
         GL.Clear(ClearBufferMask.DepthBufferBit);
     }
 
-    public  void GlLightModelAmbient(int r, int g, int b)
+    private Vector3 _ambientLight = Vector3.One;
+    private Vector4 _fogColor = Vector4.One;
+    private float _fogDensity = 0.003f;
+    private bool _fogEnabled = false;
+
+    public void GlLightModelAmbient(int r, int g, int b)
     {
-        float mult = 1f;
-        float[] global_ambient = [r / 255f * mult, g / 255f * mult, b / 255f * mult, 1f];
-        GL.LightModel(LightModelParameter.LightModelAmbient, global_ambient);
+        _ambientLight = new Vector3(r / 255f, g / 255f, b / 255f);
+        if (_shaderProgram != -1)
+            GL.Uniform3(GL.GetUniformLocation(_shaderProgram, "uAmbientLight"),
+                _ambientLight.X, _ambientLight.Y, _ambientLight.Z);
     }
 
-    public  void GlEnableFog()
+    public void GlEnableFog()
     {
-        GL.Enable(EnableCap.Fog);
+        _fogEnabled = true;
+        if (_shaderProgram != -1)
+            GL.Uniform1(GL.GetUniformLocation(_shaderProgram, "uFogEnabled"), 1);
     }
 
-    public  void GlHintFogHintNicest()
+    public void GlDisableFog()
     {
-        GL.Hint(HintTarget.FogHint, HintMode.Nicest);
+        _fogEnabled = false;
+        if (_shaderProgram != -1)
+            GL.Uniform1(GL.GetUniformLocation(_shaderProgram, "uFogEnabled"), 0);
     }
 
-    public  void GlFogFogModeExp2()
+    public void GlFogFogColor(int r, int g, int b, int a)
     {
-        GL.Fog(FogParameter.FogMode, (int)FogMode.Exp2);
+        _fogColor = new Vector4(r / 255f, g / 255f, b / 255f, a / 255f);
+        if (_shaderProgram != -1)
+            GL.Uniform4(GL.GetUniformLocation(_shaderProgram, "uFogColor"), _fogColor);
     }
 
-    public  void GlFogFogColor(int r, int g, int b, int a)
+    public void GlFogFogDensity(float density)
     {
-        float[] fogColor = [(float)r / 255, (float)g / 255, (float)b / 255, (float)a / 255];
-        GL.Fog(FogParameter.FogColor, fogColor);
-    }
-
-    public  void GlFogFogDensity(float density)
-    {
-        GL.Fog(FogParameter.FogDensity, density);
+        _fogDensity = density;
+        if (_shaderProgram != -1)
+            GL.Uniform1(GL.GetUniformLocation(_shaderProgram, "uFogDensity"), _fogDensity);
     }
 
     public  int GlGetMaxTextureSize()
@@ -1370,34 +1513,29 @@ public class GamePlatformNative : IGamePlatform
         GL.DepthMask(flag);
     }
 
-    public  void GlCullFaceBack()
+    public void GlCullFaceBack()
     {
-        GL.CullFace(CullFaceMode.Back);
+        GL.CullFace(TriangleFace.Back);
     }
 
-    public  void GlEnableLighting()
+    public void GlEnableLighting()
     {
-        GL.Enable(EnableCap.Lighting);
+        // TODO: lighting moved to shader, use _ambientLight uniform
     }
 
-    public  void GlEnableColorMaterial()
+    public void GlEnableColorMaterial()
     {
-        GL.Enable(EnableCap.ColorMaterial);
+        // no equivalent needed - shader reads vertex color attribute directly
     }
 
-    public  void GlColorMaterialFrontAndBackAmbientAndDiffuse()
+    public void GlColorMaterialFrontAndBackAmbientAndDiffuse()
     {
-        GL.ColorMaterial(MaterialFace.FrontAndBack, ColorMaterialParameter.AmbientAndDiffuse);
+        // no equivalent needed - shader handles material properties
     }
 
-    public  void GlShadeModelSmooth()
+    public void GlShadeModelSmooth()
     {
-        GL.ShadeModel(ShadingModel.Smooth);
-    }
-
-    public  void GlDisableFog()
-    {
-        GL.Disable(EnableCap.Fog);
+        // no equivalent needed - interpolation across fragments is default in modern GL
     }
 
     #endregion
@@ -1840,7 +1978,7 @@ public class GameWindowNative : GameWindow
                 Title = "",
                 WindowState = WindowState.Normal,
                 Profile = ContextProfile.Compatability,
-                APIVersion = new Version(3, 3),
+               // APIVersion = new Version(3, 3),
             })
     {
     }

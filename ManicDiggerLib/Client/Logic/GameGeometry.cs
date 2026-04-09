@@ -60,7 +60,6 @@
     private void Draw2dTextureSimple(int textureid, float x1, float y1, float width, float height, bool enabledepthtest)
     {
         platform.GlDisableCullFace();
-        platform.GlEnableTexture2d();
         platform.BindTexture2d(textureid);
 
         if (!enabledepthtest)
@@ -81,7 +80,6 @@
             platform.GlEnableDepthTest();
 
         platform.GlEnableCullFace();
-        platform.GlEnableTexture2d();
     }
 
     private void Draw2dTextureInAtlas(int textureid, float x1, float y1, float width, float height, int? inAtlasId, int atlastextures, int color, bool enabledepthtest)
@@ -92,7 +90,6 @@
         RectangleF rect = TextureAtlasCi.TextureCoords2d(inAtlasId ?? 0, atlastextures);
 
         platform.GlDisableCullFace();
-        platform.GlEnableTexture2d();
         platform.BindTexture2d(textureid);
 
         if (!enabledepthtest)
@@ -102,13 +99,14 @@
             rect.X, rect.Y, rect.Width, rect.Height,
             x1, y1, width, height,
             (byte)ColorR(color), (byte)ColorG(color), (byte)ColorB(color), (byte)ColorA(color));
+        data.setMode(DrawModeEnum.Triangles);
+        platform.UpdateModel(data);
         DrawModelData(data);
 
         if (!enabledepthtest)
             platform.GlEnableDepthTest();
 
         platform.GlEnableCullFace();
-        platform.GlEnableTexture2d();
     }
 
     public void Draw2dTexturePart(int textureid, float srcwidth, float srcheight, float dstx, float dsty, float dstwidth, float dstheight, int color, bool enabledepthtest)
@@ -116,7 +114,6 @@
         RectangleF rect = new(0, 0, srcwidth, srcheight);
 
         platform.GlDisableCullFace();
-        platform.GlEnableTexture2d();
         platform.BindTexture2d(textureid);
 
         if (!enabledepthtest)
@@ -126,13 +123,14 @@
             rect.X, rect.Y, rect.Width, rect.Height,
             dstx, dsty, dstwidth, dstheight,
             (byte)ColorR(color), (byte)ColorG(color), (byte)ColorB(color), (byte)ColorA(color));
+        data.setMode(DrawModeEnum.Triangles);
+        platform.UpdateModel(data);
         DrawModelData(data);
 
         if (!enabledepthtest)
             platform.GlEnableDepthTest();
 
         platform.GlEnableCullFace();
-        platform.GlEnableTexture2d();
     }
 
     public void Draw2dTextures(Draw2dData[] todraw, int todrawLength, int textureid)
@@ -152,15 +150,15 @@
         }
 
         ModelData combined = CombineModelData(modelDatas, modelDatasCount);
+        combined.setMode(DrawModeEnum.Triangles);
 
         platform.GlDisableCullFace();
-        platform.GlEnableTexture2d();
         platform.BindTexture2d(textureid);
         platform.GlDisableDepthTest();
+        platform.UpdateModel(combined);
         DrawModelData(combined);
         platform.GlEnableDepthTest();
-        platform.GlDisableCullFace();
-        platform.GlEnableTexture2d();
+        platform.GlEnableCullFace();
     }
 
     internal void Draw2d(float dt)
@@ -266,7 +264,7 @@
             // uv is already zero-initialised by default
         }
 
-        // Only xyz changes per call.
+        // Only xyz changes per call — re-upload positions to GPU.
         for (int i = 0; i < CircleSegments; i++)
         {
             float angle = i * 2 * MathF.PI / CircleSegments;
@@ -274,6 +272,8 @@
             circleModelData.xyz[i * 3 + 1] = y + MathF.Sin(angle) * radius;
             circleModelData.xyz[i * 3 + 2] = 0;
         }
+
+        platform.UpdateModel(circleModelData);
 
         GLPushMatrix();
         GLLoadIdentity();

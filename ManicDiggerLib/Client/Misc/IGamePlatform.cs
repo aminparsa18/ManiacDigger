@@ -162,8 +162,6 @@ public interface IPlatformOpenGl
     void GlClearDepthBuffer();
     void GlLightModelAmbient(int r, int g, int b);
     void GlEnableFog();
-    void GlHintFogHintNicest();
-    void GlFogFogModeExp2();
     void GlFogFogColor(int r, int g, int b, int a);
     void GlFogFogDensity(float density);
     int GlGetMaxTextureSize();
@@ -176,6 +174,8 @@ public interface IPlatformOpenGl
     void GlDisableFog();
     void BindTexture2d(int texture);
     Model CreateModel(ModelData modelData);
+    void UpdateModel(ModelData data);
+    void UpdateModelColors(ModelData data);
     void DrawModel(Model model);
     void InitShaders();
     void SetMatrixUniformProjection(ref Matrix4 pMatrix);
