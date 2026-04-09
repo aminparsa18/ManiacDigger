@@ -1,4 +1,5 @@
 ﻿using OpenTK.Windowing.Common;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 /// <summary>
@@ -155,7 +156,7 @@ public class ModGuiInventory : ModBase
                 AreaY = cell.Value.Y + ScrollLine
             };
 
-            if (args.GetButton() == MouseButtonEnum.Left)
+            if (args.GetButton() == (int)MouseButton.Left)
             {
                 controller.InventoryClick(mainClick);
             }

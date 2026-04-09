@@ -314,15 +314,6 @@ public class MouseEventArgs
     public void SetEmulated(bool value) { emulated = value; }
 }
 
-
-
-public class MouseButtonEnum
-{
-    public const int Left = 0;
-    public const int Middle = 1;
-    public const int Right = 2;
-}
-
 public abstract class MouseEventHandler
 {
     public abstract void OnMouseDown(MouseEventArgs e);

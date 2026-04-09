@@ -89,8 +89,7 @@
         if (inAtlasId == null)
             return;
 
-        RectangleF rect = new(0, 0, 1, 1);
-        TextureAtlasCi.TextureCoords2d(inAtlasId ?? 0, atlastextures, rect);
+        RectangleF rect = TextureAtlasCi.TextureCoords2d(inAtlasId ?? 0, atlastextures);
 
         platform.GlDisableCullFace();
         platform.GlEnableTexture2d();
@@ -144,9 +143,7 @@
         for (int i = 0; i < todrawLength; i++)
         {
             Draw2dData d = todraw[i];
-            RectangleF rect = new(0, 0, 1, 1);
-            if (d.inAtlasId != null)
-                TextureAtlasCi.TextureCoords2d(d.inAtlasId, TexturesPacked, rect);
+            RectangleF rect = TextureAtlasCi.TextureCoords2d(d.inAtlasId, TexturesPacked);
 
             modelDatas[modelDatasCount++] = QuadModelData.GetColoredQuadModelData(
                 rect.X, rect.Y, rect.Width, rect.Height,

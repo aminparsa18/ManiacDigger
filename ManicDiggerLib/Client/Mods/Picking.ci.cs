@@ -722,7 +722,7 @@ public class ModPicking : ModBase
             for (int y = startY; y <= endY; y++)
                 for (int z = startZ; z <= endZ; z++)
                 {
-                    if (fillarea.Count() > game.fillAreaLimit) { ClearFillArea(game); return; }
+                    if (fillarea.Count > game.fillAreaLimit) { ClearFillArea(game); return; }
                     if (!game.IsFillBlock(game.map.GetBlock(x, y, z)))
                     {
                         fillarea[(x, y, z)] = game.map.GetBlock(x, y, z);

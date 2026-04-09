@@ -1,4 +1,5 @@
 ﻿using OpenTK.Windowing.Common;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 public partial class Game
@@ -11,9 +12,16 @@ public partial class Game
     {
         int btn = args.GetButton();
 
-        if (btn == MouseButtonEnum.Left) { mouseLeft = true; mouseleftclick = true; }
-        if (btn == MouseButtonEnum.Middle) mouseMiddle = true;
-        if (btn == MouseButtonEnum.Right) { mouseRight = true; mouserightclick = true; }
+        if (btn == (int)MouseButton.Left) 
+        { 
+            mouseLeft = true; mouseleftclick = true;
+        }
+        if (btn == (int)MouseButton.Middle) 
+            mouseMiddle = true;
+        if (btn == (int)MouseButton.Right) 
+        { 
+            mouseRight = true; mouserightclick = true; 
+        }
 
         for (int i = 0; i < clientmods.Count; i++)
         {
@@ -35,9 +43,9 @@ public partial class Game
     {
         int btn = args.GetButton();
 
-        if (btn == MouseButtonEnum.Left) { mouseLeft = false; mouseleftdeclick = true; }
-        if (btn == MouseButtonEnum.Middle) mouseMiddle = false;
-        if (btn == MouseButtonEnum.Right) { mouseRight = false; mouserightdeclick = true; }
+        if (btn == (int)MouseButton.Left) { mouseLeft = false; mouseleftdeclick = true; }
+        if (btn == (int)MouseButton.Middle) mouseMiddle = false;
+        if (btn == (int)MouseButton.Right) { mouseRight = false; mouserightdeclick = true; }
 
         for (int i = 0; i < clientmods.Count; i++)
         {

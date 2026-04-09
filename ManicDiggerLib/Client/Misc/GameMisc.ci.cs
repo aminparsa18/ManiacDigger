@@ -1256,13 +1256,16 @@ public class ClientCommandArgs
 
 public class TextureAtlasCi
 {
-    public static void TextureCoords2d(int textureId, int texturesPacked, RectangleF r)
+    public static RectangleF TextureCoords2d(int textureId, int texturesPacked)
     {
-        float one = 1;
-        r.Y = (one / texturesPacked * (textureId / texturesPacked));
-        r.X = (one / texturesPacked * (textureId % texturesPacked));
-        r.Width = one / texturesPacked;
-        r.Height = one / texturesPacked;
+        var r = new RectangleF
+        {
+            Y = (1 / texturesPacked * (textureId / texturesPacked)),
+            X = (1 / texturesPacked * (textureId % texturesPacked)),
+            Width = 1 / texturesPacked,
+            Height = 1 / texturesPacked
+        };
+        return r;
     }
 }
 
