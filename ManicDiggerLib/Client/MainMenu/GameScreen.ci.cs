@@ -107,8 +107,8 @@ public class ScreenGame : Screen
                 LoginClientCi lic = new();
                 LoginData lidata = new();
                 string token = qresult.PublicHash.Split('=')[1];
-                lic.Login(platform, connectData.Username, "", token, platform.GetPreferences().GetString("Password", ""), new LoginResultRef(), lidata);
-                while (lic.loginResult.value == LoginResult.Connecting)
+                lic.Login(platform, connectData.Username, "", token, platform.GetPreferences().GetString("Password", ""), new LoginResult(), lidata);
+                while (lic.loginResult == LoginResult.Connecting)
                 {
                     lic.Update(platform);
                 }

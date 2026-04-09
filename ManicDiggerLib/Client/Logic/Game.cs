@@ -1,6 +1,5 @@
 ﻿using OpenTK.Mathematics;
 using System.Numerics;
-using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 using Vector3 = OpenTK.Mathematics.Vector3;
 
 public partial class Game
@@ -10,7 +9,7 @@ public partial class Game
         guistate = GuiState.MapLoading;
         SetFreeMouse(true);
         maploadingprogress = new MapLoadingProgressEventArgs();
-        fontMapLoading = FontCi.Create("Arial", 14, 0);
+        fontMapLoading = new Font("Arial", 14, FontStyle.Regular);
     }
 
     internal int Xcenter(float width)

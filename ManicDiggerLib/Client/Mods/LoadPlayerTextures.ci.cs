@@ -18,7 +18,7 @@ public class ModLoadPlayerTextures : ModBase
     internal string skinserver;
 
     /// <summary>Async HTTP response for the skin-server URL list.</summary>
-    internal HttpResponseCi _skinServerResponse;
+    internal HttpResponse _skinServerResponse;
 
     /// <inheritdoc/>
     public override void OnNewFrame(Game game, float args)
@@ -30,7 +30,7 @@ public class ModLoadPlayerTextures : ModBase
             _started = true;
             if (!game.issingleplayer)
             {
-                _skinServerResponse = new HttpResponseCi();
+                _skinServerResponse = new HttpResponse();
                 game.platform.WebClientDownloadDataAsync(
                     "http://manicdigger.sourceforge.net/skinserver.txt",
                     _skinServerResponse);
@@ -54,12 +54,12 @@ public class ModLoadPlayerTextures : ModBase
     {
         if (!game.issingleplayer)
         {
-            if (_skinServerResponse.done)
+            if (_skinServerResponse.Done)
             {
                 skinserver = Encoding.UTF8.GetString(
-                    _skinServerResponse.value, 0, _skinServerResponse.valueLength);
+                    _skinServerResponse.Value, 0, _skinServerResponse.ValueLength);
             }
-            else if (_skinServerResponse.error)
+            else if (_skinServerResponse.Error)
             {
                 skinserver = null;
             }
@@ -105,19 +105,19 @@ public class ModLoadPlayerTextures : ModBase
         // Initiate the download on first visit.
         if (e.drawModel.SkinDownloadResponse == null)
         {
-            e.drawModel.SkinDownloadResponse = new HttpResponseCi();
+            e.drawModel.SkinDownloadResponse = new HttpResponse();
             string url = string.Concat(skinserver, e.drawName.Name[2..], ".png");
             game.platform.WebClientDownloadDataAsync(url, e.drawModel.SkinDownloadResponse);
             return true; // still downloading
         }
 
-        if (e.drawModel.SkinDownloadResponse.error) { return false; }
-        if (!e.drawModel.SkinDownloadResponse.done) { return true; }
+        if (e.drawModel.SkinDownloadResponse.Error) { return false; }
+        if (!e.drawModel.SkinDownloadResponse.Done) { return true; }
 
         // Download finished — decode and upload.
         Bitmap bmp = game.platform.BitmapCreateFromPng(
-            e.drawModel.SkinDownloadResponse.value,
-            e.drawModel.SkinDownloadResponse.valueLength);
+            e.drawModel.SkinDownloadResponse.Value,
+            e.drawModel.SkinDownloadResponse.ValueLength);
 
         if (bmp != null)
         {

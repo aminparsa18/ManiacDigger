@@ -8,7 +8,7 @@ public class ModDrawText : ModBase
     private const float TextScale = 0.005f;
     private const float TextDrawDistance = 20f;
 
-    private static readonly FontCi Font = new() { family = "Arial", size = 14 };
+    private static readonly Font Font = new("Arial", 14, FontStyle.Regular);
 
     public override void OnNewFrameDraw3d(Game game, float deltaTime)
     {

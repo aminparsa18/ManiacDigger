@@ -13,7 +13,7 @@ public class ModGuiTextEditor : GameScreen
     private const int CharCursor = 95; // '_'
     private const int CharSpace = 32;
 
-    private static readonly FontCi Font = new() { family = "Courier New", size = 12 };
+    private static readonly Font Font = new Font("Courier New", 12);
     private static readonly int BackgroundColor = Game.ColorFromArgb(255, 100, 100, 100);
 
     private readonly int[][] buffer = new int[MaxLines][];

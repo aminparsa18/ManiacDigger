@@ -69,7 +69,7 @@ public class GamePlatformNative : IGamePlatform
         return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
     }
 
-    public void WebClientDownloadDataAsync(string url, HttpResponseCi response)
+    public void WebClientDownloadDataAsync(string url, HttpResponse response)
     {
         DownloadDataArgs args = new()
         {
@@ -82,7 +82,7 @@ public class GamePlatformNative : IGamePlatform
     private class DownloadDataArgs
     {
         public string url;
-        public HttpResponseCi response;
+        public HttpResponse response;
     }
 
     private void DownloadData(object o)
@@ -92,13 +92,13 @@ public class GamePlatformNative : IGamePlatform
         try
         {
             byte[] data = c.DownloadData(args.url);
-            args.response.value = data;
-            args.response.valueLength = data.Length;
-            args.response.done = true;
+            args.response.Value = data;
+            args.response.ValueLength = data.Length;
+            args.response.Done = true;
         }
         catch
         {
-            args.response.error = true;
+            args.response.Error = true;
         }
     }
 
@@ -115,7 +115,6 @@ public class GamePlatformNative : IGamePlatform
         if (result != null)
         {
             args.response.data = result.ServerThumbnail;
-            args.response.dataLength = result.ServerThumbnail.Length;
             args.response.serverMessage = message;
             args.response.done = true;
         }
@@ -413,10 +412,10 @@ public class GamePlatformNative : IGamePlatform
         public string url;
         public byte[] data;
         public int dataLength;
-        public HttpResponseCi response;
+        public HttpResponse response;
     }
 
-    public void WebClientUploadDataAsync(string url, byte[] data, int dataLength, HttpResponseCi response)
+    public void WebClientUploadDataAsync(string url, byte[] data, int dataLength, HttpResponse response)
     {
         UploadData d = new()
         {
@@ -455,16 +454,16 @@ public class GamePlatformNative : IGamePlatform
             {
                 CopyTo(s, m);
             }
-            d.response.value = m.ToArray();
-            d.response.valueLength = d.response.value.Length;
-            d.response.done = true;
+            d.response.Value = m.ToArray();
+            d.response.ValueLength = d.response.Value.Length;
+            d.response.Done = true;
 
             request.Abort();
 
         }
         catch
         {
-            d.response.error = true;
+            d.response.Error = true;
         }
     }
 

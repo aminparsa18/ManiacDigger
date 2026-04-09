@@ -89,12 +89,9 @@
             b.color = a.Color;
             if (a.Font != null)
             {
-                b.font = new FontCi
-                {
-                    family = game.ValidFont(a.Font.FamilyName),
-                    size = game.DecodeFixedPoint(a.Font.SizeFloat),
-                    style = a.Font.FontStyle
-                };
+                b.font = new Font(game.ValidFont(a.Font.FamilyName),
+                    game.DecodeFixedPoint(a.Font.SizeFloat),
+                    (FontStyle)a.Font.FontStyle);
             }
             b.id = a.Id;
             b.isbutton = a.ClickKey != 0;

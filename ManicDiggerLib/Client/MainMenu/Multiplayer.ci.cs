@@ -73,8 +73,8 @@ public class ScreenMultiplayer : Screen
         widgets[6] = loggedInName;
         widgets[7] = logout;
 
-        serverListAddress = new HttpResponseCi();
-        serverListCsv = new HttpResponseCi();
+        serverListAddress = new HttpResponse();
+        serverListCsv = new HttpResponse();
         serversOnList = new ServerOnList[serversOnListCount];
         thumbResponses = new ThumbnailResponseCi[serversOnListCount];
 
@@ -96,8 +96,8 @@ public class ScreenMultiplayer : Screen
     }
 
     private bool loaded;
-    private readonly HttpResponseCi serverListAddress;
-    private readonly HttpResponseCi serverListCsv;
+    private readonly HttpResponse serverListAddress;
+    private readonly HttpResponse serverListCsv;
     private readonly ServerOnList[] serversOnList;
     private const int serversOnListCount = 1024;
     private int page;
@@ -121,15 +121,15 @@ public class ScreenMultiplayer : Screen
             menu.p.WebClientDownloadDataAsync("http://manicdigger.sourceforge.net/serverlistcsv.php", serverListAddress);
             loaded = true;
         }
-        if (serverListAddress.done)
+        if (serverListAddress.Done)
         {
-            serverListAddress.done = false;
+            serverListAddress.Done = false;
             menu.p.WebClientDownloadDataAsync(serverListAddress.GetString(), serverListCsv);
         }
-        if (serverListCsv.done)
+        if (serverListCsv.Done)
         {
             loading = false;
-            serverListCsv.done = false;
+            serverListCsv.Done = false;
             for (int i = 0; i < serversOnListCount; i++)
             {
                 serversOnList[i] = null;
@@ -145,16 +145,16 @@ public class ScreenMultiplayer : Screen
                 }
                 ServerOnList s = new()
                 {
-                    hash = ss[0],
-                    name = menu.p.DecodeHTMLEntities(ss[1]),
-                    motd = menu.p.DecodeHTMLEntities(ss[2]),
-                    port = int.Parse(ss[3]),
-                    ip = ss[4],
-                    version = ss[5],
-                    users = int.Parse(ss[6]),
-                    max = int.Parse(ss[7]),
-                    gamemode = ss[8],
-                    players = ss[9]
+                    Hash = ss[0],
+                    Name = menu.p.DecodeHTMLEntities(ss[1]),
+                    Motd = menu.p.DecodeHTMLEntities(ss[2]),
+                    Port = int.Parse(ss[3]),
+                    Ip = ss[4],
+                    Version = ss[5],
+                    Users = int.Parse(ss[6]),
+                    Max = int.Parse(ss[7]),
+                    GameMode = ss[8],
+                    Players = ss[9]
                 };
                 serversOnList[i] = s;
             }
@@ -256,12 +256,12 @@ public class ScreenMultiplayer : Screen
             {
                 continue;
             }
-            string t = string.Format("{1}", index.ToString(), s.name);
-            t = string.Format("{0}\n{1}", t, s.motd);
-            t = string.Format("{0}\n{1}", t, s.gamemode);
-            t = string.Format("{0}\n{1}", t, s.users.ToString());
-            t = string.Format("{0}/{1}", t, s.max.ToString());
-            t = string.Format("{0}\n{1}", t, s.version);
+            string t = string.Format("{1}", index.ToString(), s.Name);
+            t = string.Format("{0}\n{1}", t, s.Motd);
+            t = string.Format("{0}\n{1}", t, s.GameMode);
+            t = string.Format("{0}\n{1}", t, s.Users.ToString());
+            t = string.Format("{0}/{1}", t, s.Max.ToString());
+            t = string.Format("{0}\n{1}", t, s.Version);
 
             serverButtons[i].text = t;
             serverButtons[i].x = 100 * scale;
@@ -270,7 +270,7 @@ public class ScreenMultiplayer : Screen
             serverButtons[i].sizey = 64 * scale;
             serverButtons[i].visible = true;
             serverButtons[i].buttonStyle = ButtonStyle.ServerEntry;
-            if (s.thumbnailError)
+            if (s.ThumbnailError)
             {
                 //Server did not respond to ServerQuery. Maybe not reachable?
                 serverButtons[i].description = "Server did not respond to query!";
@@ -279,9 +279,9 @@ public class ScreenMultiplayer : Screen
             {
                 serverButtons[i].description = null;
             }
-            if (s.thumbnailFetched && !s.thumbnailError)
+            if (s.ThumbnailFetched && !s.ThumbnailError)
             {
-                serverButtons[i].image = string.Format("serverlist_entry_{0}.png", s.hash);
+                serverButtons[i].image = string.Format("serverlist_entry_{0}.png", s.Hash);
             }
             else
             {
@@ -302,17 +302,17 @@ public class ScreenMultiplayer : Screen
             {
                 continue;
             }
-            if (server.thumbnailFetched)
+            if (server.ThumbnailFetched)
             {
                 //Thumbnail already loaded
                 continue;
             }
-            if (!server.thumbnailDownloading)
+            if (!server.ThumbnailDownloading)
             {
                 //Not started downloading yet
                 thumbResponses[i] = new ThumbnailResponseCi();
-                menu.p.ThumbnailDownloadAsync(server.ip, server.port, thumbResponses[i]);
-                server.thumbnailDownloading = true;
+                menu.p.ThumbnailDownloadAsync(server.Ip, server.Port, thumbResponses[i]);
+                server.ThumbnailDownloading = true;
             }
             else
             {
@@ -322,30 +322,30 @@ public class ScreenMultiplayer : Screen
                     if (thumbResponses[i].done)
                     {
                         //Request completed. load received bitmap
-                        Bitmap bmp = menu.p.BitmapCreateFromPng(thumbResponses[i].data, thumbResponses[i].dataLength);
+                        Bitmap bmp = menu.p.BitmapCreateFromPng(thumbResponses[i].data, thumbResponses[i].data.Length);
                         if (bmp != null)
                         {
                             int texture = menu.p.LoadTextureFromBitmap(bmp);
-                            menu.textures[string.Format("serverlist_entry_{0}.png", server.hash)] = texture;
+                            menu.textures[string.Format("serverlist_entry_{0}.png", server.Hash)] = texture;
                             menu.p.BitmapDelete(bmp);
                         }
-                        server.thumbnailDownloading = false;
-                        server.thumbnailFetched = true;
+                        server.ThumbnailDownloading = false;
+                        server.ThumbnailFetched = true;
                     }
                     if (thumbResponses[i].error)
                     {
                         //Error while trying to download thumbnail
-                        server.thumbnailDownloading = false;
-                        server.thumbnailError = true;
-                        server.thumbnailFetched = true;
+                        server.ThumbnailDownloading = false;
+                        server.ThumbnailError = true;
+                        server.ThumbnailFetched = true;
                     }
                 }
                 else
                 {
                     //An error occured. stop trying
-                    server.thumbnailDownloading = false;
-                    server.thumbnailError = true;
-                    server.thumbnailFetched = true;
+                    server.ThumbnailDownloading = false;
+                    server.ThumbnailError = true;
+                    server.ThumbnailFetched = true;
                 }
             }
         }
@@ -438,7 +438,7 @@ public class ScreenMultiplayer : Screen
                 serverButtons[i].selected = true;
                 if (serversOnList[i + serversPerPage * page] != null)
                 {
-                    selectedServerHash = serversOnList[i + serversPerPage * page].hash;
+                    selectedServerHash = serversOnList[i + serversPerPage * page].Hash;
                 }
             }
         }

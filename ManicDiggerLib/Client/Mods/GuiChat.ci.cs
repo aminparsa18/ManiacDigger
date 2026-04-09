@@ -6,13 +6,10 @@ public class ModGuiChat : ModBase
     {
         one = 1;
         ChatFontSize = 11;
+        currentFontSize = ChatFontSize;
         ChatScreenExpireTimeSeconds = 20;
         ChatLinesMaxToDraw = 10;
-        font = new FontCi
-        {
-            family = "Arial",
-            size = ChatFontSize
-        };
+        font = new Font("Arial", currentFontSize, currentFontStyle);
         chatlines2 = new Chatline[1024];
     }
 
@@ -22,6 +19,8 @@ public class ModGuiChat : ModBase
     internal int ChatLinesMaxToDraw;
     internal int ChatPageScroll;
     internal float one;
+    private float currentFontSize = 11;
+    private FontStyle currentFontStyle = FontStyle.Regular;
 
     public override void OnNewFrameDraw2d(Game game_, float deltaTime)
     {
@@ -97,7 +96,9 @@ public class ModGuiChat : ModBase
                 chatlines2[chatlines2Count++] = c;
             }
         }
-        font.size = ChatFontSize * game.Scale();
+        currentFontSize= ChatFontSize * game.Scale();
+        font = new Font("Arial", currentFontSize, currentFontStyle);
+
         float dx = 20;
         //if (!game.platform.IsMousePointerLocked())
         //{
@@ -110,13 +111,15 @@ public class ModGuiChat : ModBase
                 //Different display of links in chat
                 //2 = italic
                 //3 = bold italic
-                font.style = 3;
+                currentFontStyle = FontStyle.Italic;
+                font = new Font("Arial", currentFontSize, currentFontStyle);
             }
             else
             {
                 //0 = normal
                 //1 = bold
-                font.style = 1;
+                currentFontStyle = FontStyle.Bold;
+                font = new Font("Arial", currentFontSize, currentFontStyle);
             }
             game.Draw2dText(chatlines2[i].text, font, dx * game.Scale(), (90 + i * 25) * game.Scale(), null, false);
         }
@@ -125,10 +128,11 @@ public class ModGuiChat : ModBase
             game.Draw2dText(string.Format("&7Page: {0}", ChatPageScroll.ToString()), font, dx * game.Scale(), (90 + (-1) * 25) * game.Scale(), null, false);
         }
     }
-    private readonly FontCi font;
+    private Font font;
     public void DrawTypingBuffer()
     {
-        font.size = ChatFontSize * game.Scale();
+        currentFontSize = ChatFontSize * game.Scale();
+        font = new Font("Arial", currentFontSize, currentFontStyle);
         string s = game.GuiTypingBuffer;
         if (game.IsTeamchat)
         {

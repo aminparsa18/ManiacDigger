@@ -225,11 +225,7 @@
 
     internal void Draw2dText1(string text, int x, int y, int fontsize, int? color, bool enabledepthtest)
     {
-        FontCi font = new()
-        {
-            family = "Arial",
-            size = fontsize
-        };
+        Font font = new("Arial", fontsize, FontStyle.Regular);
         Draw2dText(text, font, x, y, color, enabledepthtest);
     }
 
@@ -281,7 +277,7 @@
         GLPopMatrix();
     }
 
-    public void Draw2dText(string text, FontCi font, float x, float y, int? color, bool enabledepthtest)
+    public void Draw2dText(string text, Font font, float x, float y, int? color, bool enabledepthtest)
     {
         if (string.IsNullOrWhiteSpace(text))
             return;
@@ -291,9 +287,9 @@
         {
             text = text,
             color = color.Value,
-            fontsize = font.size,
-            fontfamily = font.family,
-            fontstyle = font.style
+            fontsize = font.Size,
+            fontfamily = font.FontFamily.Name,
+            fontstyle = (int)font.Style
         };
 
         if (GetCachedTextTexture(t) == null)

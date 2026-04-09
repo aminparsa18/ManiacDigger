@@ -25,7 +25,7 @@ public interface IPlatformMisc
     void Exit();
     bool ExitAvailable();
     string PathSavegames();
-    void WebClientDownloadDataAsync(string url, HttpResponseCi response);
+    void WebClientDownloadDataAsync(string url, HttpResponse response);
     void ThumbnailDownloadAsync(string ip, int port, ThumbnailResponseCi response);
     string FileName(string fullpath);
     void AddOnNewFrame(Action<float> handler);
@@ -76,7 +76,7 @@ public interface IPlatformMisc
     void SetWindowState(WindowState value);
     void ChangeResolution(int width, int height, int bitsPerPixel, float refreshRate);
     DisplayResolutionCi GetDisplayResolutionDefault();
-    void WebClientUploadDataAsync(string url, byte[] data, int dataLength, HttpResponseCi response);
+    void WebClientUploadDataAsync(string url, byte[] data, int dataLength, HttpResponse response);
     string FileOpenDialog(string extension, string extensionName, string initialDirectory);
     void MouseCursorSetVisible(bool value);
     bool MouseCursorIsVisible();

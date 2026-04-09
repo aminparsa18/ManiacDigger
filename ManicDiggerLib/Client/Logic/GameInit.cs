@@ -328,7 +328,7 @@ public partial class Game
     internal List<Chatline> ChatLines;
 
     internal MapLoadingProgressEventArgs maploadingprogress;
-    internal FontCi fontMapLoading;
+    internal Font fontMapLoading;
     internal string invalidVersionDrawMessage;
     internal Packet_Server invalidVersionPacketIdentification;
 

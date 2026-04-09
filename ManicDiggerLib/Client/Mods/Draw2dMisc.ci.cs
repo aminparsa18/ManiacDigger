@@ -109,22 +109,14 @@ public class ModDraw2dMisc : ModBase
         int y = useInfo ? 55 : 35;
         game.Draw2dTexture(game.WhiteTexture(), game.Xcenter(300), 40, 300, y, null, 0, Game.ColorFromArgb(255, 0, 0, 0), false);
         game.Draw2dTexture(game.WhiteTexture(), game.Xcenter(300), 40, 300 * progress, y, null, 0, Game.ColorFromArgb(255, 255, 0, 0), false);
-        FontCi font = new()
-        {
-            family = "Arial",
-            size = 14
-        };
+        Font font = new("Arial", 14);
         game.platform.TextSize(name, 14, out int w, out int h);
         game.Draw2dText(name, font, game.Xcenter(w), 40, null, false);
         if (useInfo)
         {
             name = string.Format(game.language.PressToUse(), "E");
             game.platform.TextSize(name, 10, out w, out h);
-            FontCi font2 = new()
-            {
-                family = "Arial",
-                size = 10
-            };
+            Font font2 = new("Arial", 10);
             game.Draw2dText(name, font2, game.Xcenter(w), 70, null, false);
         }
     }
@@ -156,17 +148,13 @@ public class ModDraw2dMisc : ModBase
                 int loaded = game.LoadedAmmo[item.BlockId];
                 int total = game.TotalAmmo[item.BlockId];
                 string s = string.Format("{0}/{1}", loaded.ToString(), (total - loaded).ToString());
-                FontCi font = new()
-                {
-                    family = "Arial",
-                    size = 18
-                };
+                Font font = new("Arial", 18);
                 game.Draw2dText(s, font, game.Width() - game.TextSizeWidth(s, 18) - 50,
-                    game.Height() - game.TextSizeHeight(s, 18) - 50, loaded == 0 ? Game.ColorFromArgb(255, 255, 0, 0) 
+                    game.Height() - game.TextSizeHeight(s, 18) - 50, loaded == 0 ? Game.ColorFromArgb(255, 255, 0, 0)
                     : Game.ColorFromArgb(255, 255, 255, 255), false);
                 if (loaded == 0)
                 {
-                    font.size = 14;
+                    font = new("Arial", 14);
                     string pressR = "Press R to reload";
                     game.Draw2dText(pressR, font, game.Width() - game.TextSizeWidth(pressR, 14) - 50,
                         game.Height() - game.TextSizeHeight(s, 14) - 80, Game.ColorFromArgb(255, 255, 0, 0), false);
@@ -191,11 +179,7 @@ public class ModDraw2dMisc : ModBase
             postext = string.Concat(postext, MathF.Floor(heading).ToString());
             postext = string.Concat(postext, "\nPitch: ");
             postext = string.Concat(postext, MathF.Floor(pitch).ToString());
-            FontCi font = new()
-            {
-                family = "Arial",
-                size = Game.ChatFontSize
-            };
+            Font font = new("Arial", Game.ChatFontSize);
             game.Draw2dText(postext, font, 100, 460, null, false);
         }
     }
@@ -208,11 +192,7 @@ public class ModDraw2dMisc : ModBase
             && game.invalidVersionDrawMessage == null && !(game.issingleplayer && (!game.platform.SinglePlayerServerLoaded())))
         {
             game.Draw2dBitmapFile("disconnected.png", game.Width() - 100, 50, 50, 50);
-            FontCi font = new()
-            {
-                family = "Arial",
-                size = 12
-            };
+            Font font = new("Arial", 12);
             game.Draw2dText(((int)(lagSeconds)).ToString(), font, game.Width() - 100, 50 + 50 + 10, null, false);
             game.Draw2dText("Press F6 to reconnect", font, game.Width() / 2 - 200 / 2, 50, null, false);
         }

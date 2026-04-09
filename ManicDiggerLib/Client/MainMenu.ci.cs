@@ -496,29 +496,24 @@ public class MainMenu
         screen.LoadTranslations();
     }
 
-    internal void Login(string user, string password, string serverHash, string token, LoginResultRef loginResult, LoginData loginResultData)
+    internal void Login(string user, string password, string serverHash, string token, LoginResult loginResult, LoginData loginResultData)
     {
         if (user == "" || (password == "" && token == ""))
         {
-            loginResult.value = LoginResult.Failed;
+            loginResult = LoginResult.Failed;
+            return;
         }
-        else
-        {
-            loginClient.Login(p, user, password, serverHash, token, loginResult, loginResultData);
-        }
+        loginClient.Login(p, user, password, serverHash, token, loginResult, loginResultData);
     }
+
     private readonly LoginClientCi loginClient;
 
-    internal static void CreateAccount(string user, string password, LoginResultRef loginResult)
+    internal static LoginResult CreateAccount(string user, string password)
     {
         if (user == "" || password == "")
-        {
-            loginResult.value = LoginResult.Failed;
-        }
-        else
-        {
-            loginResult.value = LoginResult.Ok;
-        }
+            return LoginResult.Failed;
+
+        return LoginResult.Ok;
     }
 
     internal string[] GetSavegames(out int length)
@@ -894,115 +889,11 @@ public enum LoginResult
     Ok
 }
 
-public class LoginResultRef
-{
-    internal LoginResult value;
-}
-
-public class HttpResponseCi
-{
-    internal bool done;
-    internal byte[] value;
-    internal int valueLength;
-
-    internal string GetString()
-    {
-       return Encoding.UTF8.GetString(value, 0, valueLength);
-    }
-
-    internal bool error;
-
-    public bool GetDone() { return done; } public void SetDone(bool value_) { done = value_; }
-    public byte[] GetValue() { return value; } public void SetValue(byte[] value_) { value = value_; }
-    public int GetValueLength() { return valueLength; } public void SetValueLength(int value_) { valueLength = value_; }
-    public bool GetError() { return error; } public void SetError(bool value_) { error = value_; }
-}
-
 public class ThumbnailResponseCi
 {
     internal bool done;
     internal bool error;
     internal string serverMessage;
     internal byte[] data;
-    internal int dataLength;
 }
 
-public class ServerOnList
-{
-    internal string hash;
-    internal string name;
-    internal string motd;
-    internal int port;
-    internal string ip;
-    internal string version;
-    internal int users;
-    internal int max;
-    internal string gamemode;
-    internal string players;
-    internal bool thumbnailDownloading;
-    internal bool thumbnailError;
-    internal bool thumbnailFetched;
-}
-
-public enum WidgetType
-{
-    Button,
-    Textbox,
-    Label
-}
-
-public class MenuWidget
-{
-    public MenuWidget()
-    {
-        visible = true;
-        fontSize = 14;
-        nextWidget = -1;
-        hasKeyboardFocus = false;
-    }
-    public void GetFocus()
-    {
-        hasKeyboardFocus = true;
-        if (type == WidgetType.Textbox)
-        {
-            editing = true;
-        }
-    }
-    public void LoseFocus()
-    {
-        hasKeyboardFocus = false;
-        if (type == WidgetType.Textbox)
-        {
-            editing = false;
-        }
-    }
-    internal string text;
-    internal float x;
-    internal float y;
-    internal float sizex;
-    internal float sizey;
-    internal bool pressed;
-    internal bool hover;
-    internal WidgetType type;
-    internal bool editing;
-    internal bool visible;
-    internal float fontSize;
-    internal string description;
-    internal bool password;
-    internal bool selected;
-    internal ButtonStyle buttonStyle;
-    internal string image;
-    internal int nextWidget;
-    internal bool hasKeyboardFocus;
-    internal int color;
-    internal string id;
-    internal bool isbutton;
-    internal FontCi font;
-}
-
-public enum ButtonStyle
-{
-    Button,
-    Text,
-    ServerEntry
-}

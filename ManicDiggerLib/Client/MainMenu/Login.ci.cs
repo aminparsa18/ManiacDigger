@@ -76,7 +76,7 @@
 
         loginUsername.GetFocus();
 
-        loginResult = new LoginResultRef();
+        loginResult = new LoginResult();
     }
 
     private readonly MenuWidget login;
@@ -148,11 +148,11 @@
         float y = p.GetCanvasHeight() / 2 - 250 * scale;
 
         string loginResultText = null;
-        if (loginResult.value == LoginResult.Failed)
+        if (loginResult == LoginResult.Failed)
         {
             loginResultText = menu.lang.Get("MainMenu_LoginInvalid");
         }
-        if (loginResult.value == LoginResult.Connecting)
+        if (loginResult == LoginResult.Connecting)
         {
             loginResultText = menu.lang.Get("MainMenu_LoginConnecting");
         }
@@ -234,7 +234,7 @@
         menu.StartMultiplayer();
     }
 
-    private readonly LoginResultRef loginResult;
+    private LoginResult loginResult;
     private LoginData loginResultData;
 
     public override void OnButton(MenuWidget w)
@@ -270,7 +270,7 @@
         }
         if (w == createAccount)
         {
-            MainMenu.CreateAccount(createAccountUsername.text, createAccountPassword.text, loginResult);
+            loginResult = MainMenu.CreateAccount(createAccountUsername.text, createAccountPassword.text);
         }
         if (w == loginRememberMe || w == createAccountRememberMe)
         {

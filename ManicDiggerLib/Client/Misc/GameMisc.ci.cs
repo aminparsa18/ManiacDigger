@@ -14,19 +14,19 @@ public class LoginData
 
 public class LoginClientCi
 {
-    internal LoginResultRef loginResult;
-    public void Login(IGamePlatform platform, string user, string password, string publicServerKey, string token, LoginResultRef result, LoginData resultLoginData_)
+    internal LoginResult loginResult;
+
+    public void Login(IGamePlatform platform, string user, string password, string publicServerKey, string token, LoginResult result, LoginData resultLoginData_)
     {
         loginResult = result;
         resultLoginData = resultLoginData_;
-        result.value = LoginResult.Connecting;
-
         LoginUser = user;
         LoginPassword = password;
         LoginToken = token;
         LoginPublicServerKey = publicServerKey;
         shouldLogin = true;
     }
+
     private string LoginUser;
     private string LoginPassword;
     private string LoginToken;
@@ -34,9 +34,10 @@ public class LoginClientCi
 
     private bool shouldLogin;
     private string loginUrl;
-    private HttpResponseCi loginUrlResponse;
-    private HttpResponseCi loginResponse;
+    private HttpResponse loginUrlResponse;
+    private HttpResponse loginResponse;
     private LoginData resultLoginData;
+
     public void Update(IGamePlatform platform)
     {
         if (loginResult == null)
@@ -46,12 +47,12 @@ public class LoginClientCi
 
         if (loginUrlResponse == null && loginUrl == null)
         {
-            loginUrlResponse = new HttpResponseCi();
+            loginUrlResponse = new HttpResponse();
             platform.WebClientDownloadDataAsync("http://manicdigger.sourceforge.net/login.php", loginUrlResponse);
         }
-        if (loginUrlResponse != null && loginUrlResponse.done)
+        if (loginUrlResponse != null && loginUrlResponse.Done)
         {
-            loginUrl = Encoding.UTF8.GetString(loginUrlResponse.value, 0, loginUrlResponse.valueLength);
+            loginUrl = Encoding.UTF8.GetString(loginUrlResponse.Value, 0, loginUrlResponse.ValueLength);
             loginUrlResponse = null;
         }
 
@@ -63,21 +64,21 @@ public class LoginClientCi
                 string requestString = string.Format("username={0}&password={1}&server={2}&token={3}"
                     , LoginUser, LoginPassword, LoginPublicServerKey, LoginToken);
                 byte[] byteArray = Encoding.UTF8.GetBytes(requestString);
-                loginResponse = new HttpResponseCi();
+                loginResponse = new HttpResponse();
                 platform.WebClientUploadDataAsync(loginUrl, byteArray, byteArray.Length, loginResponse);
             }
-            if (loginResponse != null && loginResponse.done)
+            if (loginResponse != null && loginResponse.Done)
             {
-                string responseString = Encoding.UTF8.GetString(loginResponse.value, 0, loginResponse.valueLength);
+                string responseString = Encoding.UTF8.GetString(loginResponse.Value, 0, loginResponse.ValueLength);
                 resultLoginData.PasswordCorrect = !(responseString.Contains("Wrong username") || responseString.Contains("Incorrect username"));
                 resultLoginData.ServerCorrect = !responseString.Contains("server");
                 if (resultLoginData.PasswordCorrect)
                 {
-                    loginResult.value = LoginResult.Ok;
+                    loginResult = LoginResult.Ok;
                 }
                 else
                 {
-                    loginResult.value = LoginResult.Failed;
+                    loginResult = LoginResult.Failed;
                 }
                 string[] lines = responseString.Split(Environment.NewLine);
                 if (lines.Length >= 3)
@@ -366,7 +367,7 @@ public class EntityDrawModel
     internal bool DownloadSkin;
 
     internal int CurrentTexture;
-    internal HttpResponseCi SkinDownloadResponse;
+    internal HttpResponse SkinDownloadResponse;
     internal AnimatedModelRenderer renderer;
 }
 
@@ -1183,11 +1184,7 @@ public class ClientModManager1 : ClientModManager
 
     public override void Draw2dText(string text, float x, float y, float fontsize)
     {
-        FontCi font = new()
-        {
-            family = "Arial",
-            size = fontsize
-        };
+        Font font = new("Arial", fontsize);
         game.Draw2dText(text, font, x, y, null, false);
     }
 
@@ -1310,24 +1307,6 @@ public class CachedTextTexture
 {
     internal Text_ text;
     internal CachedTexture texture;
-}
-
-public class FontCi
-{
-    internal string family;
-    internal float size;
-    internal int style;
-
-    internal static FontCi Create(string family_, float size_, int style_)
-    {
-        FontCi f = new()
-        {
-            family = family_,
-            size = size_,
-            style = style_
-        };
-        return f;
-    }
 }
 
 public class TextPart

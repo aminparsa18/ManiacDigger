@@ -375,7 +375,7 @@ public class ModGuiInventory : ModBase
             if (item.BlockCount > 1)
             {
                 game.Draw2dText(item.BlockCount.ToString(),
-                    new FontCi { size = 8, family = "Arial" },
+                    new Font("Arial", 8),
                     screenposX, screenposY, null, false);
             }
         }
@@ -409,7 +409,7 @@ public class ModGuiInventory : ModBase
         game.Draw2dTexture(game.WhiteTexture(), screenposX - w + 2, screenposY - h + 2, w - 4, h - 4, null, 0, Game.ColorFromArgb(255, 105, 105, 105), false);
 
         game.Draw2dText(dataItems.ItemInfo(item),
-            new FontCi { family = "Arial", size = 10 },
+            new Font("Arial", 10),
             screenposX - tw + 4, screenposY - h + 2, null, false);
 
         DrawItem(screenposX - w + 2, screenposY - h + 2, new Packet_Item { BlockId = item.BlockId }, 0, 0);
