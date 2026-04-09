@@ -2,9 +2,8 @@
 using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 /// <summary>
-/// Base class for all main-menu screens. Manages a fixed-size pool of
-/// <see cref="MenuWidget"/> objects and routes keyboard, mouse and touch
-/// input events to them.
+/// Base class for all main-menu screens. Manages a list of <see cref="MenuWidget"/>
+/// objects and routes keyboard, mouse and touch input events to them.
 /// </summary>
 /// <remarks>
 /// Derive from this class and override <see cref="OnButton"/> to respond to
@@ -16,18 +15,8 @@ public class ScreenBase
     /// <summary>Reference to the owning <see cref="MainMenu"/>.</summary>
     internal MainMenu menu;
 
-    /// <summary>Maximum number of widgets this screen can hold.</summary>
-    internal int WidgetCount;
-
-    /// <summary>Widget pool. Entries are <see langword="null"/> when unused.</summary>
-    internal MenuWidget[] widgets;
-
-    /// <summary>Initialises the widget pool with a capacity of 64.</summary>
-    public ScreenBase()
-    {
-        WidgetCount = 64;
-        widgets = new MenuWidget[WidgetCount];
-    }
+    /// <summary>All widgets registered to this screen, in render and hit-test order.</summary>
+    internal List<MenuWidget> widgets = new();
 
     /// <summary>Called once per frame. Override to render screen-specific content.</summary>
     /// <param name="dt">Elapsed time in seconds since the previous frame.</param>
@@ -66,11 +55,8 @@ public class ScreenBase
     /// </summary>
     private void KeyDown(KeyEventArgs e)
     {
-        for (int i = 0; i < WidgetCount; i++)
+        foreach (MenuWidget w in widgets)
         {
-            MenuWidget w = widgets[i];
-            if (w == null) { continue; }
-
             if (w.hasKeyboardFocus && (e.KeyChar == (int)Keys.Tab || e.KeyChar == (int)Keys.Enter))
             {
                 if (w.type == WidgetType.Button && e.KeyChar == (int)Keys.Enter)
@@ -116,10 +102,9 @@ public class ScreenBase
     /// </summary>
     private void KeyPress(KeyPressEventArgs e)
     {
-        for (int i = 0; i < WidgetCount; i++)
+        foreach (MenuWidget w in widgets)
         {
-            MenuWidget w = widgets[i];
-            if (w == null || w.type != WidgetType.Textbox || !w.editing) { continue; }
+            if (w.type != WidgetType.Textbox || !w.editing) { continue; }
 
             if (menu.p.IsValidTypingChar(e.KeyChar))
             {
@@ -137,11 +122,8 @@ public class ScreenBase
     {
         bool editingChanged = false;
 
-        for (int i = 0; i < WidgetCount; i++)
+        foreach (MenuWidget w in widgets)
         {
-            MenuWidget w = widgets[i];
-            if (w == null) { continue; }
-
             bool hit = VectorUtils.PointInRect(x, y, w.x, w.y, w.sizex, w.sizey);
             w.pressed = hit;
 
@@ -169,12 +151,12 @@ public class ScreenBase
         }
     }
 
-    /// <summary>Removes keyboard focus from every widget in the pool.</summary>
+    /// <summary>Removes keyboard focus from every widget.</summary>
     private void AllLoseFocus()
     {
-        for (int i = 0; i < WidgetCount; i++)
+        foreach (MenuWidget w in widgets)
         {
-            widgets[i]?.LoseFocus();
+            w.LoseFocus();
         }
     }
 
@@ -185,16 +167,14 @@ public class ScreenBase
     /// </summary>
     private void MouseUp(int x, int y)
     {
-        for (int i = 0; i < WidgetCount; i++)
+        foreach (MenuWidget w in widgets)
         {
-            MenuWidget w = widgets[i];
-            if (w != null) { w.pressed = false; }
+            w.pressed = false;
         }
 
-        for (int i = 0; i < WidgetCount; i++)
+        foreach (MenuWidget w in widgets)
         {
-            MenuWidget w = widgets[i];
-            if (w == null || w.type != WidgetType.Button) { continue; }
+            if (w.type != WidgetType.Button) { continue; }
 
             if (VectorUtils.PointInRect(x, y, w.x, w.y, w.sizex, w.sizey))
             {
@@ -212,13 +192,9 @@ public class ScreenBase
     {
         if (e.GetEmulated() && !e.GetForceUsage()) { return; }
 
-        for (int i = 0; i < WidgetCount; i++)
+        foreach (MenuWidget w in widgets)
         {
-            MenuWidget w = widgets[i];
-            if (w != null)
-            {
-                w.hover = VectorUtils.PointInRect(e.GetX(), e.GetY(), w.x, w.y, w.sizex, w.sizey);
-            }
+            w.hover = VectorUtils.PointInRect(e.GetX(), e.GetY(), w.x, w.y, w.sizex, w.sizey);
         }
     }
 
@@ -234,10 +210,9 @@ public class ScreenBase
     /// </summary>
     public void DrawWidgets()
     {
-        for (int i = 0; i < WidgetCount; i++)
+        foreach (MenuWidget w in widgets)
         {
-            MenuWidget w = widgets[i];
-            if (w == null || !w.visible) { continue; }
+            if (!w.visible) { continue; }
 
             string text = w.selected ? string.Concat("&2", w.text) : w.text;
 

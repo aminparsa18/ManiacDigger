@@ -35,9 +35,9 @@ public class MainScreen : ScreenBase
         buttonMultiplayer = new MenuWidget { text = "Multiplayer" };
         buttonExit = new MenuWidget { text = "Quit" };
 
-        widgets[0] = buttonSingleplayer;
-        widgets[1] = buttonMultiplayer;
-        widgets[2] = buttonExit;
+        widgets.Add(buttonSingleplayer);
+        widgets.Add(buttonMultiplayer);
+        widgets.Add(buttonExit);
     }
 
     /// <inheritdoc/>

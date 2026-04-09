@@ -4,7 +4,7 @@
 /// restores them on the next visit.
 /// </summary>
 /// <remarks>
-/// Widget tab order: IP textbox (1) → Port textbox (2) → Connect button (0) → Back button (3) → IP textbox.
+/// Tab order (by list index): [0] Connect → [3] Back → [1] IP → [2] Port → [0] Connect.
 /// </remarks>
 public class ConnectionScreen : ScreenBase
 {
@@ -26,39 +26,17 @@ public class ConnectionScreen : ScreenBase
 
     public ConnectionScreen()
     {
-        buttonConnect = new MenuWidget
-        {
-            text = "Connect",
-            type = WidgetType.Button,
-            nextWidget = 3
-        };
-        textboxIp = new MenuWidget
-        {
-            type = WidgetType.Textbox,
-            text = "",
-            description = "IP",
-            nextWidget = 2
-        };
-        textboxPort = new MenuWidget
-        {
-            type = WidgetType.Textbox,
-            text = "",
-            description = "Port",
-            nextWidget = 0
-        };
-        buttonBack = new MenuWidget
-        {
-            text = "Back",
-            type = WidgetType.Button,
-            nextWidget = 1
-        };
+        buttonConnect = new MenuWidget { text = "Connect", type = WidgetType.Button, nextWidget = 3 };
+        textboxIp = new MenuWidget { text = "", type = WidgetType.Textbox, description = "IP", nextWidget = 2 };
+        textboxPort = new MenuWidget { text = "", type = WidgetType.Textbox, description = "Port", nextWidget = 0 };
+        buttonBack = new MenuWidget { text = "Back", type = WidgetType.Button, nextWidget = 1 };
 
         title = "Connect to IP";
 
-        widgets[0] = buttonConnect;
-        widgets[1] = textboxIp;
-        widgets[2] = textboxPort;
-        widgets[3] = buttonBack;
+        widgets.Add(buttonConnect); // 0
+        widgets.Add(textboxIp);     // 1
+        widgets.Add(textboxPort);   // 2
+        widgets.Add(buttonBack);    // 3
 
         textboxIp.GetFocus();
     }
@@ -127,12 +105,6 @@ public class ConnectionScreen : ScreenBase
     /// <summary>
     /// Assigns position, size, and font size to a widget using pre-scaled base dimensions.
     /// </summary>
-    /// <param name="w">Widget to update.</param>
-    /// <param name="x">Left edge in pixels.</param>
-    /// <param name="y">Top edge in pixels.</param>
-    /// <param name="w_">Unscaled width in logical units.</param>
-    /// <param name="h">Unscaled height in logical units.</param>
-    /// <param name="scale">Current UI scale factor.</param>
     private static void LayoutWidget(MenuWidget w, float x, float y, float w_, float h, float scale)
     {
         w.x = x;

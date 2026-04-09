@@ -16,7 +16,7 @@ public class ModifyWorldScreen : ScreenBase
             type = WidgetType.Button
         };
 
-        widgets[0] = buttonBack;
+        widgets.Add(buttonBack);
     }
 
     /// <inheritdoc/>

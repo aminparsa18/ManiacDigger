@@ -48,20 +48,17 @@ public class SingleplayerScreen : ScreenBase
 
         title = "Singleplayer";
 
-        widgets[0] = play;
-        widgets[1] = newWorld;
-        widgets[2] = modify;
-        widgets[3] = back;
-        widgets[4] = open;
+        widgets.Add(play);
+        widgets.Add(newWorld);
+        widgets.Add(modify);
+        widgets.Add(back);
+        widgets.Add(open);
 
         worldButtons = new MenuWidget[10];
         for (int i = 0; i < 10; i++)
         {
-            worldButtons[i] = new MenuWidget
-            {
-                visible = false
-            };
-            widgets[5 + i] = worldButtons[i];
+            worldButtons[i] = new MenuWidget { visible = false };
+            widgets.Add(worldButtons[i]);
         }
     }
 

@@ -4,32 +4,11 @@ public class MultiplayerScreen : ScreenBase
 {
     public MultiplayerScreen()
     {
-        WidgetCount = 64 + serverButtonsCount;
-        widgets = new MenuWidget[WidgetCount];
-        back = new MenuWidget
-        {
-            text = "Back",
-            type = WidgetType.Button,
-            nextWidget = 1
-        };
-        connect = new MenuWidget
-        {
-            text = "Connect",
-            type = WidgetType.Button,
-            nextWidget = 3
-        };
-        connectToIp = new MenuWidget
-        {
-            text = "Connect to IP",
-            type = WidgetType.Button,
-            nextWidget = 2
-        };
-        refresh = new MenuWidget
-        {
-            text = "Refresh",
-            type = WidgetType.Button,
-            nextWidget = 0
-        };
+        // Tab chain (by list index): [0] Back → [1] Connect → [3] ConnectToIp → [2] Refresh → [0] Back
+        back = new MenuWidget { text = "Back", type = WidgetType.Button, nextWidget = 1 };
+        connect = new MenuWidget { text = "Connect", type = WidgetType.Button, nextWidget = 3 };
+        connectToIp = new MenuWidget { text = "Connect to IP", type = WidgetType.Button, nextWidget = 2 };
+        refresh = new MenuWidget { text = "Refresh", type = WidgetType.Button, nextWidget = 0 };
 
         page = 0;
         pageUp = new MenuWidget
@@ -46,32 +25,29 @@ public class MultiplayerScreen : ScreenBase
             buttonStyle = ButtonStyle.Text,
             visible = false
         };
-
         loggedInName = new MenuWidget
         {
             text = "",
             type = WidgetType.Button,
             buttonStyle = ButtonStyle.Text
         };
-
         logout = new MenuWidget
         {
             text = "",
             type = WidgetType.Button,
-            //logout.image = "serverlist_entry_background.png";
             buttonStyle = ButtonStyle.Button
         };
 
         title = "Multiplayer";
 
-        widgets[0] = back;
-        widgets[1] = connect;
-        widgets[2] = refresh;
-        widgets[3] = connectToIp;
-        widgets[4] = pageUp;
-        widgets[5] = pageDown;
-        widgets[6] = loggedInName;
-        widgets[7] = logout;
+        widgets.Add(back);         // 0
+        widgets.Add(connect);      // 1
+        widgets.Add(refresh);      // 2
+        widgets.Add(connectToIp);  // 3
+        widgets.Add(pageUp);       // 4
+        widgets.Add(pageDown);     // 5
+        widgets.Add(loggedInName); // 6
+        widgets.Add(logout);       // 7
 
         serverListAddress = new HttpResponse();
         serverListCsv = new HttpResponse();
@@ -81,8 +57,7 @@ public class MultiplayerScreen : ScreenBase
         serverButtons = new MenuWidget[serverButtonsCount];
         for (int i = 0; i < serverButtonsCount; i++)
         {
-            MenuWidget b = new();
-            b = new MenuWidget
+            MenuWidget b = new MenuWidget
             {
                 text = "Invalid",
                 type = WidgetType.Button,
@@ -90,7 +65,7 @@ public class MultiplayerScreen : ScreenBase
                 image = "serverlist_entry_noimage.png"
             };
             serverButtons[i] = b;
-            widgets[8 + i] = b;
+            widgets.Add(b); // 8 + i
         }
         loading = true;
     }

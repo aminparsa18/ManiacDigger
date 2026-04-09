@@ -52,77 +52,29 @@ public class LoginScreen : ScreenBase
 
     public LoginScreen()
     {
-        buttonLogin = new MenuWidget
-        {
-            text = "Login",
-            type = WidgetType.Button,
-            nextWidget = 9
-        };
-        textboxUsername = new MenuWidget
-        {
-            type = WidgetType.Textbox,
-            text = "",
-            description = "Username",
-            nextWidget = 2
-        };
-        textboxPassword = new MenuWidget
-        {
-            type = WidgetType.Textbox,
-            text = "",
-            description = "Password",
-            password = true,
-            nextWidget = 3
-        };
-        buttonRememberMe = new MenuWidget
-        {
-            text = "Yes",
-            type = WidgetType.Button,
-            description = "Remember me",
-            nextWidget = 0
-        };
-        buttonCreateAccount = new MenuWidget
-        {
-            text = "Create account",
-            type = WidgetType.Button
-        };
-        textboxCreateUsername = new MenuWidget
-        {
-            text = "",
-            type = WidgetType.Textbox,
-            description = "Username"
-        };
-        textboxCreatePassword = new MenuWidget
-        {
-            text = "",
-            type = WidgetType.Textbox,
-            description = "Password",
-            password = true
-        };
-        buttonCreateRememberMe = new MenuWidget
-        {
-            text = "Yes",
-            type = WidgetType.Button,
-            description = "Remember me"
-        };
-        buttonBack = new MenuWidget
-        {
-            text = "Back",
-            type = WidgetType.Button,
-            nextWidget = 1
-        };
+        // Tab chain (by list index):
+        // [1] Username → [2] Password → [3] RememberMe → [0] Login → [8] Back → [1] Username
+        buttonLogin = new MenuWidget { text = "Login", type = WidgetType.Button, nextWidget = 8 };
+        textboxUsername = new MenuWidget { text = "", type = WidgetType.Textbox, description = "Username", nextWidget = 2 };
+        textboxPassword = new MenuWidget { text = "", type = WidgetType.Textbox, description = "Password", password = true, nextWidget = 3 };
+        buttonRememberMe = new MenuWidget { text = "Yes", type = WidgetType.Button, description = "Remember me", nextWidget = 0 };
+        buttonCreateAccount = new MenuWidget { text = "Create account", type = WidgetType.Button };
+        textboxCreateUsername = new MenuWidget { text = "", type = WidgetType.Textbox, description = "Username" };
+        textboxCreatePassword = new MenuWidget { text = "", type = WidgetType.Textbox, description = "Password", password = true };
+        buttonCreateRememberMe = new MenuWidget { text = "Yes", type = WidgetType.Button, description = "Remember me" };
+        buttonBack = new MenuWidget { text = "Back", type = WidgetType.Button, nextWidget = 1 };
 
         title = "Login";
 
-        widgets[0] = buttonLogin;
-        widgets[1] = textboxUsername;
-        widgets[2] = textboxPassword;
-        widgets[3] = buttonRememberMe;
-        widgets[4] = buttonCreateAccount;
-        widgets[5] = textboxCreateUsername;
-        widgets[6] = textboxCreatePassword;
-        widgets[7] = buttonCreateRememberMe;
-        // widgets[8] reserved
-        widgets[9] = buttonBack;
+        widgets.Add(buttonLogin);           // 0
+        widgets.Add(textboxUsername);       // 1
+        widgets.Add(textboxPassword);       // 2
+        widgets.Add(buttonRememberMe);      // 3
+        widgets.Add(buttonCreateAccount);   // 4
+        widgets.Add(textboxCreateUsername); // 5
+        widgets.Add(textboxCreatePassword); // 6
+        widgets.Add(buttonCreateRememberMe);// 7
+        widgets.Add(buttonBack);            // 8
 
         textboxUsername.GetFocus();
         loginResult = new LoginResult();
