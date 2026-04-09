@@ -86,18 +86,18 @@ public static class CuboidRenderer
     /// <param name="data">The model data with all vertices already written.</param>
     private static void SubmitCuboid(Game game, ModelData data)
     {
-        data.indices = new int[FaceCount * IndicesPerFace];
+        data.Indices = new int[FaceCount * IndicesPerFace];
         for (int i = 0; i < FaceCount; i++)
         {
-            data.indices[i * IndicesPerFace + 0] = i * VerticesPerFace + 3;
-            data.indices[i * IndicesPerFace + 1] = i * VerticesPerFace + 2;
-            data.indices[i * IndicesPerFace + 2] = i * VerticesPerFace + 0;
-            data.indices[i * IndicesPerFace + 3] = i * VerticesPerFace + 2;
-            data.indices[i * IndicesPerFace + 4] = i * VerticesPerFace + 1;
-            data.indices[i * IndicesPerFace + 5] = i * VerticesPerFace + 0;
+            data.Indices[i * IndicesPerFace + 0] = i * VerticesPerFace + 3;
+            data.Indices[i * IndicesPerFace + 1] = i * VerticesPerFace + 2;
+            data.Indices[i * IndicesPerFace + 2] = i * VerticesPerFace + 0;
+            data.Indices[i * IndicesPerFace + 3] = i * VerticesPerFace + 2;
+            data.Indices[i * IndicesPerFace + 4] = i * VerticesPerFace + 1;
+            data.Indices[i * IndicesPerFace + 5] = i * VerticesPerFace + 0;
         }
-        data.indicesCount = FaceCount * IndicesPerFace;
-        data.setMode(DrawModeEnum.Triangles);
+        data.IndicesCount = FaceCount * IndicesPerFace;
+        data.Mode = (int)DrawMode.Triangles;
 
         // Sync all CPU buffers (xyz, rgba, uv, indices) to GPU.
         // CreateModel is called on first use; BufferSubData on subsequent frames.
@@ -119,9 +119,9 @@ public static class CuboidRenderer
         color = Game.ColorFromArgb(255, light255, light255, light255);
         return new ModelData
         {
-            xyz = new float[VerticesPerFace * FaceCount * 3],
-            uv = new float[VerticesPerFace * FaceCount * 2],
-            rgba = new byte[VerticesPerFace * FaceCount * 4]
+            Xyz = new float[VerticesPerFace * FaceCount * 3],
+            Uv = new float[VerticesPerFace * FaceCount * 2],
+            Rgba = new byte[VerticesPerFace * FaceCount * 4]
         };
     }
 
@@ -251,22 +251,21 @@ public static class CuboidRenderer
     /// <param name="color">Packed ARGB color value, typically encoding light intensity.</param>
     private static void AddVertex(ModelData model, float x, float y, float z, float u, float v, int color)
     {
-        int xyzOffset = model.GetXyzCount();
-        int uvOffset = model.GetUvCount();
-        int rgbaOffset = model.GetRgbaCount();
+        int xyzOffset = model.XyzCount;
+        int uvOffset = model.UvCount;
+        int rgbaOffset = model.RgbaCount;
 
-        model.xyz[xyzOffset + 0] = x;
-        model.xyz[xyzOffset + 1] = y;
-        model.xyz[xyzOffset + 2] = z;
+        model.Xyz[xyzOffset + 0] = x;
+        model.Xyz[xyzOffset + 1] = y;
+        model.Xyz[xyzOffset + 2] = z;
 
-        model.uv[uvOffset + 0] = u;
-        model.uv[uvOffset + 1] = v;
+        model.Uv[uvOffset + 0] = u;
+        model.Uv[uvOffset + 1] = v;
+        model.Rgba[rgbaOffset + 0] = (byte)Game.ColorR(color);
+        model.Rgba[rgbaOffset + 1] = (byte)Game.ColorG(color);
+        model.Rgba[rgbaOffset + 2] = (byte)Game.ColorB(color);
+        model.Rgba[rgbaOffset + 3] = (byte)Game.ColorA(color);
 
-        model.rgba[rgbaOffset + 0] = (byte)Game.ColorR(color);
-        model.rgba[rgbaOffset + 1] = (byte)Game.ColorG(color);
-        model.rgba[rgbaOffset + 2] = (byte)Game.ColorB(color);
-        model.rgba[rgbaOffset + 3] = (byte)Game.ColorA(color);
-
-        model.verticesCount++;
+        model.VerticesCount++;
     }
 }

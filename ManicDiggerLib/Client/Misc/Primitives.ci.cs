@@ -67,12 +67,11 @@ public class QuadModelData
 
         float[] xyz = new float[PositionComponents * VertexCount];
         Array.Copy(QuadVertices, xyz, xyz.Length);
-        m.setXyz(xyz);
+        m.Xyz = (xyz);
 
         float[] uv = new float[UvComponents * VertexCount];
         Array.Copy(QuadTextureCoords, uv, uv.Length);
-        m.setUv(uv);
-
+        m.Uv = (uv);
         // white, fully opaque for all vertices
         byte[] rgba = new byte[4 * VertexCount];
         for (int i = 0; i < VertexCount; i++)
@@ -82,11 +81,11 @@ public class QuadModelData
             rgba[i * 4 + 2] = 255; // B
             rgba[i * 4 + 3] = 255; // A
         }
-        m.setRgba(rgba);
+        m.Rgba = (rgba);
 
-        m.SetVerticesCount(VertexCount);
-        m.setIndices(QuadVertexIndices);
-        m.SetIndicesCount(IndexCount);
+        m.VerticesCount = (VertexCount);
+        m.Indices = (QuadVertexIndices);
+        m.IndicesCount = (IndexCount);
 
         return m;
     }
@@ -123,7 +122,7 @@ public class QuadModelData
             dx + dw, dy + dh, 0f,
             dx,      dy + dh, 0f,
         ];
-        m.setXyz(xyz);
+        m.Xyz = (xyz);
 
         float[] uv =
         [
@@ -132,7 +131,7 @@ public class QuadModelData
             sx + sw, sy + sh,
             sx,      sy + sh,
         ];
-        m.setUv(uv);
+        m.Uv =(uv);
 
         // Apply the same flat colour to all 4 vertices.
         byte[] rgba = new byte[ColorComponents * VertexCount];
@@ -143,12 +142,11 @@ public class QuadModelData
             rgba[i * ColorComponents + 2] = b;
             rgba[i * ColorComponents + 3] = a;
         }
-        m.setRgba(rgba);
+        m.Rgba = (rgba);
 
-        m.SetVerticesCount(VertexCount);
-        m.setIndices(QuadVertexIndices);
-        m.SetIndicesCount(IndexCount);
-
+        m.VerticesCount = (VertexCount);
+        m.Indices = (QuadVertexIndices);
+        m.IndicesCount = (IndexCount);
         return m;
     }
 }
@@ -208,12 +206,12 @@ public class SphereModelData
         }
 
         ModelData data = new();
-        data.SetVerticesCount(vertexCount);
-        data.SetIndicesCount(vertexCount * 6);
-        data.setXyz(xyz);
-        data.setUv(uv);
-        data.setRgba(rgba);
-        data.setIndices(CalculateElements(segments, rings));
+        data.VerticesCount = (vertexCount);
+        data.IndicesCount = (vertexCount * 6);
+        data.Xyz = (xyz);
+        data.Uv = (uv);
+        data.Rgba = (rgba);
+        data.Indices = (CalculateElements(segments, rings));
         return data;
     }
 
@@ -278,13 +276,14 @@ public class WireframeCube
     /// <returns>A <see cref="ModelData"/> representing the wireframe cube.</returns>
     public static ModelData GetWireframeCubeModelData()
     {
-        ModelData m = new();
-        m.setMode(DrawModeEnum.Lines);
-        m.xyz = new float[VerticesPerFace * FaceCount * 3];
-        m.uv = new float[VerticesPerFace * FaceCount * 2];
-        m.rgba = new byte[VerticesPerFace * FaceCount * 4];
-        m.indices = new int[IndicesPerFace * FaceCount];
-
+        ModelData m = new()
+        {
+            Mode = (int)DrawMode.Lines,
+            Xyz = new float[VerticesPerFace * FaceCount * 3],
+            Uv = new float[VerticesPerFace * FaceCount * 2],
+            Rgba = new byte[VerticesPerFace * FaceCount * 4],
+            Indices = new int[IndicesPerFace * FaceCount]
+        };
         DrawLineLoop(m, new Vector3(-1, -1, -1), new Vector3(-1, 1, -1), new Vector3(1, 1, -1), new Vector3(1, -1, -1)); // Back face
         DrawLineLoop(m, new Vector3(-1, -1, -1), new Vector3(1, -1, -1), new Vector3(1, -1, 1), new Vector3(-1, -1, 1)); // Bottom face
         DrawLineLoop(m, new Vector3(-1, -1, -1), new Vector3(-1, -1, 1), new Vector3(-1, 1, 1), new Vector3(-1, 1, -1)); // Left face
@@ -306,7 +305,7 @@ public class WireframeCube
     /// <param name="p3">Fourth corner of the face.</param>
     private static void DrawLineLoop(ModelData m, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
     {
-        int start = m.GetVerticesCount();
+        int start = m.VerticesCount;
 
         AddVertex(m, p0.X, p0.Y, p0.Z);
         AddVertex(m, p1.X, p1.Y, p1.Z);
@@ -314,14 +313,14 @@ public class WireframeCube
         AddVertex(m, p3.X, p3.Y, p3.Z);
 
         // Each edge is two indices — connect corners in a loop: 0→1→2→3→0.
-        m.indices[m.indicesCount++] = start + 0;
-        m.indices[m.indicesCount++] = start + 1;
-        m.indices[m.indicesCount++] = start + 1;
-        m.indices[m.indicesCount++] = start + 2;
-        m.indices[m.indicesCount++] = start + 2;
-        m.indices[m.indicesCount++] = start + 3;
-        m.indices[m.indicesCount++] = start + 3;
-        m.indices[m.indicesCount++] = start + 0;
+        m.Indices[m.IndicesCount++] = start + 0;
+        m.Indices[m.IndicesCount++] = start + 1;
+        m.Indices[m.IndicesCount++] = start + 1;
+        m.Indices[m.IndicesCount++] = start + 2;
+        m.Indices[m.IndicesCount++] = start + 2;
+        m.Indices[m.IndicesCount++] = start + 3;
+        m.Indices[m.IndicesCount++] = start + 3;
+        m.Indices[m.IndicesCount++] = start + 0;
     }
 
     /// <summary>
@@ -334,23 +333,22 @@ public class WireframeCube
     /// <param name="z">Vertex Z position.</param>
     private static void AddVertex(ModelData m, float x, float y, float z)
     {
-        int xyzOffset = m.GetXyzCount();
-        int uvOffset = m.GetUvCount();
-        int rgbaOffset = m.GetRgbaCount();
+        int xyzOffset = m.XyzCount;
+        int uvOffset = m.UvCount;
+        int rgbaOffset = m.RgbaCount;
 
-        m.xyz[xyzOffset] = x;
-        m.xyz[xyzOffset + 1] = y;
-        m.xyz[xyzOffset + 2] = z;
-
+        m.Xyz[xyzOffset] = x;
+        m.Xyz[xyzOffset + 1] = y;
+        m.Xyz[xyzOffset + 2] = z;
         // UV is always (0,0) for wireframe — no texture sampling needed.
-        m.uv[uvOffset] = 0f;
-        m.uv[uvOffset + 1] = 0f;
+        m.Uv[uvOffset] = 0f;
+        m.Uv[uvOffset + 1] = 0f;
 
-        m.rgba[rgbaOffset] = (byte)Game.ColorR(White);
-        m.rgba[rgbaOffset + 1] = (byte)Game.ColorG(White);
-        m.rgba[rgbaOffset + 2] = (byte)Game.ColorB(White);
-        m.rgba[rgbaOffset + 3] = (byte)Game.ColorA(White);
+        m.Rgba[rgbaOffset] = (byte)Game.ColorR(White);
+        m.Rgba[rgbaOffset + 1] = (byte)Game.ColorG(White);
+        m.Rgba[rgbaOffset + 2] = (byte)Game.ColorB(White);
+        m.Rgba[rgbaOffset + 3] = (byte)Game.ColorA(White);
 
-        m.verticesCount++;
+        m.VerticesCount++;
     }
 }

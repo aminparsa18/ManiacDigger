@@ -75,13 +75,13 @@ public class ModSkySphereAnimated : ModBase
         {
             data = new ModelData
             {
-                xyz = new float[rings * segments * 3],
-                uv = new float[rings * segments * 2],
-                rgba = new byte[rings * segments * 4]
+                Xyz = new float[rings * segments * 3],
+                Uv = new float[rings * segments * 2],
+                Rgba = new byte[rings * segments * 4]
             };
-            data.SetVerticesCount(segments * rings);
-            data.SetIndicesCount(segments * rings * 6);
-            data.setIndices(CalculateElements(segments, rings));
+            data.VerticesCount = segments * rings;
+            data.IndicesCount = segments * rings * 6;
+            data.Indices = CalculateElements(segments, rings);
         }
 
         // Normalize sun direction once outside the vertex loop
@@ -105,12 +105,11 @@ public class ModSkySphereAnimated : ModBase
                 float vy = height * cosPhi;
                 float vz = radius * sinPhi * MathF.Sin(theta);
 
-                data.xyz[i * 3] = vx;
-                data.xyz[i * 3 + 1] = vy;
-                data.xyz[i * 3 + 2] = vz;
-                data.uv[i * 2] = x / (float)(segments - 1);
-                data.uv[i * 2 + 1] = y / (float)(rings - 1);
-
+                data.Xyz[i * 3] = vx;
+                data.Xyz[i * 3 + 1] = vy;
+                data.Xyz[i * 3 + 2] = vz;
+                data.Uv[i * 2] = x / (float)(segments - 1);
+                data.Uv[i * 2 + 1] = y / (float)(rings - 1);
                 float vertLen = MathF.Sqrt(vx * vx + vy * vy + vz * vz);
                 float vxN = vx / vertLen, vyN = vy / vertLen, vzN = vz / vertLen;
 
@@ -130,10 +129,10 @@ public class ModSkySphereAnimated : ModBase
                 float glowB = Game.ColorB(glowColor) / 255f;
 
                 // Blend sky and glow
-                data.rgba[i * 4] = (byte)(Math.Min(1f, skyR + glowR * glowA) * 255);
-                data.rgba[i * 4 + 1] = (byte)(Math.Min(1f, skyG + glowG * glowA) * 255);
-                data.rgba[i * 4 + 2] = (byte)(Math.Min(1f, skyB + glowB * glowA) * 255);
-                data.rgba[i * 4 + 3] = (byte)(Math.Min(1f, skyA) * 255);
+                data.Rgba[i * 4] = (byte)(Math.Min(1f, skyR + glowR * glowA) * 255);
+                data.Rgba[i * 4 + 1] = (byte)(Math.Min(1f, skyG + glowG * glowA) * 255);
+                data.Rgba[i * 4 + 2] = (byte)(Math.Min(1f, skyB + glowB * glowA) * 255);
+                data.Rgba[i * 4 + 3] = (byte)(Math.Min(1f, skyA) * 255);
                 i++;
             }
         }

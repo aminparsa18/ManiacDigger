@@ -353,10 +353,10 @@ public class ModDrawHand3d : ModBase
     {
         _modelData = new ModelData
         {
-            indices = new int[128],
-            xyz = new float[128],
-            uv = new float[128],
-            rgba = new byte[128]
+            Indices = new int[128],
+            Xyz = new float[128],
+            Uv = new float[128],
+            Rgba = new byte[128]
         };
 
         const int x = 0, y = 0, z = 0;
@@ -507,7 +507,7 @@ public class ModDrawHand3d : ModBase
     {
         int tex = GetWeaponTextureId(side);
         RectangleF r = TextureAtlas.TextureCoords2d(tex, TexturesPacked);
-        int base_ = m.GetVerticesCount();
+        int base_ = m.VerticesCount;
 
         switch (side)
         {
@@ -551,21 +551,21 @@ public class ModDrawHand3d : ModBase
 
         if (!windingCw)
         {
-            m.indices[m.indicesCount++] = base_ + 0;
-            m.indices[m.indicesCount++] = base_ + 1;
-            m.indices[m.indicesCount++] = base_ + 2;
-            m.indices[m.indicesCount++] = base_ + 1;
-            m.indices[m.indicesCount++] = base_ + 3;
-            m.indices[m.indicesCount++] = base_ + 2;
+            m.Indices[m.IndicesCount++] = base_ + 0;
+            m.Indices[m.IndicesCount++] = base_ + 1;
+            m.Indices[m.IndicesCount++] = base_ + 2;
+            m.Indices[m.IndicesCount++] = base_ + 1;
+            m.Indices[m.IndicesCount++] = base_ + 3;
+            m.Indices[m.IndicesCount++] = base_ + 2;
         }
         else
         {
-            m.indices[m.indicesCount++] = base_ + 1;
-            m.indices[m.indicesCount++] = base_ + 0;
-            m.indices[m.indicesCount++] = base_ + 2;
-            m.indices[m.indicesCount++] = base_ + 3;
-            m.indices[m.indicesCount++] = base_ + 1;
-            m.indices[m.indicesCount++] = base_ + 2;
+            m.Indices[m.IndicesCount++] = base_ + 1;
+            m.Indices[m.IndicesCount++] = base_ + 0;
+            m.Indices[m.IndicesCount++] = base_ + 2;
+            m.Indices[m.IndicesCount++] = base_ + 3;
+            m.Indices[m.IndicesCount++] = base_ + 1;
+            m.Indices[m.IndicesCount++] = base_ + 2;
         }
     }
 
@@ -581,23 +581,22 @@ public class ModDrawHand3d : ModBase
     /// <param name="color">Packed ARGB colour applied to the vertex.</param>
     public static void AddVertex(ModelData model, float x, float y, float z, float u, float v, int color)
     {
-        int xyzOffset = model.GetXyzCount();
-        int uvOffset = model.GetUvCount();
-        int rgbaOffset = model.GetRgbaCount();
+        int xyzOffset = model.XyzCount;
+        int uvOffset = model.UvCount;
+        int rgbaOffset = model.RgbaCount;
 
-        model.xyz[xyzOffset] = x;
-        model.xyz[xyzOffset + 1] = y;
-        model.xyz[xyzOffset + 2] = z;
+        model.Xyz[xyzOffset] = x;
+        model.Xyz[xyzOffset + 1] = y;
+        model.Xyz[xyzOffset + 2] = z;
 
-        model.uv[uvOffset] = u;
-        model.uv[uvOffset + 1] = v;
+        model.Uv[uvOffset] = u;
+        model.Uv[uvOffset + 1] = v;
+        model.Rgba[rgbaOffset] = (byte)Game.ColorR(color);
+        model.Rgba[rgbaOffset + 1] = (byte)Game.ColorG(color);
+        model.Rgba[rgbaOffset + 2] = (byte)Game.ColorB(color);
+        model.Rgba[rgbaOffset + 3] = (byte)Game.ColorA(color);
 
-        model.rgba[rgbaOffset] = (byte)Game.ColorR(color);
-        model.rgba[rgbaOffset + 1] = (byte)Game.ColorG(color);
-        model.rgba[rgbaOffset + 2] = (byte)Game.ColorB(color);
-        model.rgba[rgbaOffset + 3] = (byte)Game.ColorA(color);
-
-        model.verticesCount++;
+        model.VerticesCount++;
     }
 }
 
@@ -750,7 +749,7 @@ public class BlockRendererTorch
         Vector3 v00, Vector3 v01, Vector3 v10, Vector3 v11)
     {
         RectangleF r = GetTexRect(TopTexture);
-        int b = m.GetVerticesCount();
+        int b = m.VerticesCount;
         AddVertex(m, v00, r.Left, r.Top, White);
         AddVertex(m, v01, r.Left, r.Bottom, White);
         AddVertex(m, v10, r.Right, r.Top, White);
@@ -766,7 +765,7 @@ public class BlockRendererTorch
         Vector3 v00, Vector3 v01, Vector3 v10, Vector3 v11)
     {
         RectangleF r = GetTexRect(SideTexture);
-        int b = m.GetVerticesCount();
+        int b = m.VerticesCount;
         AddVertex(m, v00, r.Left, r.Top, White);
         AddVertex(m, v01, r.Left, r.Bottom, White);
         AddVertex(m, v10, r.Right, r.Top, White);
@@ -779,7 +778,7 @@ public class BlockRendererTorch
         Vector3 b00, Vector3 b01, Vector3 t00, Vector3 t01)
     {
         RectangleF r = GetTexRect(SideTexture);
-        int b = m.GetVerticesCount();
+        int b = m.VerticesCount;
         AddVertex(m, b00, r.Left, r.Bottom, White);
         AddVertex(m, b01, r.Right, r.Bottom, White);
         AddVertex(m, t00, r.Left, r.Top, White);
@@ -792,7 +791,7 @@ public class BlockRendererTorch
         Vector3 b10, Vector3 b11, Vector3 t10, Vector3 t11)
     {
         RectangleF r = GetTexRect(SideTexture);
-        int b = m.GetVerticesCount();
+        int b = m.VerticesCount;
         AddVertex(m, b10, r.Right, r.Bottom, White);
         AddVertex(m, b11, r.Left, r.Bottom, White);
         AddVertex(m, t10, r.Right, r.Top, White);
@@ -805,7 +804,7 @@ public class BlockRendererTorch
         Vector3 b00, Vector3 b10, Vector3 t00, Vector3 t10)
     {
         RectangleF r = GetTexRect(SideTexture);
-        int b = m.GetVerticesCount();
+        int b = m.VerticesCount;
         AddVertex(m, b00, r.Right, r.Bottom, White);
         AddVertex(m, t00, r.Right, r.Top, White);
         AddVertex(m, b10, r.Left, r.Bottom, White);
@@ -818,7 +817,7 @@ public class BlockRendererTorch
         Vector3 b01, Vector3 b11, Vector3 t01, Vector3 t11)
     {
         RectangleF r = GetTexRect(SideTexture);
-        int b = m.GetVerticesCount();
+        int b = m.VerticesCount;
         AddVertex(m, b01, r.Left, r.Bottom, White);
         AddVertex(m, t01, r.Left, r.Top, White);
         AddVertex(m, b11, r.Right, r.Bottom, White);
@@ -835,12 +834,12 @@ public class BlockRendererTorch
     /// <param name="b">Base vertex index of the quad's first vertex.</param>
     private static void EmitQuadCcw(ModelData m, int b)
     {
-        m.indices[m.indicesCount++] = b + 0;
-        m.indices[m.indicesCount++] = b + 1;
-        m.indices[m.indicesCount++] = b + 2;
-        m.indices[m.indicesCount++] = b + 1;
-        m.indices[m.indicesCount++] = b + 3;
-        m.indices[m.indicesCount++] = b + 2;
+        m.Indices[m.IndicesCount++] = b + 0;
+        m.Indices[m.IndicesCount++] = b + 1;
+        m.Indices[m.IndicesCount++] = b + 2;
+        m.Indices[m.IndicesCount++] = b + 1;
+        m.Indices[m.IndicesCount++] = b + 3;
+        m.Indices[m.IndicesCount++] = b + 2;
     }
 
     /// <summary>
@@ -852,12 +851,12 @@ public class BlockRendererTorch
     /// <param name="b">Base vertex index of the quad's first vertex.</param>
     private static void EmitQuadCw(ModelData m, int b)
     {
-        m.indices[m.indicesCount++] = b + 1;
-        m.indices[m.indicesCount++] = b + 0;
-        m.indices[m.indicesCount++] = b + 2;
-        m.indices[m.indicesCount++] = b + 3;
-        m.indices[m.indicesCount++] = b + 1;
-        m.indices[m.indicesCount++] = b + 2;
+        m.Indices[m.IndicesCount++] = b + 1;
+        m.Indices[m.IndicesCount++] = b + 0;
+        m.Indices[m.IndicesCount++] = b + 2;
+        m.Indices[m.IndicesCount++] = b + 3;
+        m.Indices[m.IndicesCount++] = b + 1;
+        m.Indices[m.IndicesCount++] = b + 2;
     }
 
     /// <summary>
@@ -885,22 +884,22 @@ public class BlockRendererTorch
     /// <param name="color">Packed ARGB colour applied to the vertex.</param>
     public static void AddVertex(ModelData model, float x, float y, float z, float u, float v, int color)
     {
-        int xyzOffset = model.GetXyzCount();
-        int uvOffset = model.GetUvCount();
-        int rgbaOffset = model.GetRgbaCount();
+        int xyzOffset = model.XyzCount;
+        int uvOffset = model.UvCount;
+        int rgbaOffset = model.RgbaCount;
 
-        model.xyz[xyzOffset] = x;
-        model.xyz[xyzOffset + 1] = y;
-        model.xyz[xyzOffset + 2] = z;
+        model.Xyz[xyzOffset] = x;
+        model.Xyz[xyzOffset + 1] = y;
+        model.Xyz[xyzOffset + 2] = z;
 
-        model.uv[uvOffset] = u;
-        model.uv[uvOffset + 1] = v;
+        model.Uv[uvOffset] = u;
+        model.Uv[uvOffset + 1] = v;
 
-        model.rgba[rgbaOffset] = (byte)Game.ColorR(color);
-        model.rgba[rgbaOffset + 1] = (byte)Game.ColorG(color);
-        model.rgba[rgbaOffset + 2] = (byte)Game.ColorB(color);
-        model.rgba[rgbaOffset + 3] = (byte)Game.ColorA(color);
+        model.Rgba[rgbaOffset] = (byte)Game.ColorR(color);
+        model.Rgba[rgbaOffset + 1] = (byte)Game.ColorG(color);
+        model.Rgba[rgbaOffset + 2] = (byte)Game.ColorB(color);
+        model.Rgba[rgbaOffset + 3] = (byte)Game.ColorA(color);
 
-        model.verticesCount++;
+        model.VerticesCount++;
     }
 }

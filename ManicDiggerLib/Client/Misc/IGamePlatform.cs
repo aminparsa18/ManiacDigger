@@ -32,7 +32,11 @@ public interface IPlatformMisc
     void AddOnKeyEvent(Action<KeyEventArgs> onKeyDown,
         Action<KeyEventArgs> onKeyUp,
         Action<KeyPressEventArgs> onKeyPress);
-    void AddOnMouseEvent(MouseEventHandler handler);
+    void AddOnMouseEvent(
+        Action<MouseEventArgs> onMouseDown,
+        Action<MouseEventArgs> onMouseUp,
+        Action<MouseEventArgs> onMouseMove,
+        Action<MouseWheelEventArgs> onMouseWheel);
     void AddOnTouchEvent(TouchEventHandler handler);
     int GetCanvasWidth();
     int GetCanvasHeight();
@@ -173,16 +177,15 @@ public interface IPlatformOpenGl
     void GlShadeModelSmooth();
     void GlDisableFog();
     void BindTexture2d(int texture);
-    Model CreateModel(ModelData modelData);
+    ModelData CreateModel(ModelData modelData);
     void UpdateModel(ModelData data);
-    void UpdateModelColors(ModelData data);
-    void DrawModel(Model model);
+    void DrawModel(ModelData model);
     void InitShaders();
     void SetMatrixUniformProjection(ref Matrix4 pMatrix);
     void SetMatrixUniformModelView(ref Matrix4 mvMatrix);
-    void DrawModels(List<Model> model, int count);
+    void DrawModels(List<ModelData> model, int count);
     void DrawModelData(ModelData data);
-    void DeleteModel(Model model);
+    void DeleteModel(ModelData model);
     int LoadTextureFromBitmap(Bitmap bmp);
 }
 
@@ -312,14 +315,6 @@ public class MouseEventArgs
     private bool emulated;
     public bool GetEmulated() { return emulated; }
     public void SetEmulated(bool value) { emulated = value; }
-}
-
-public abstract class MouseEventHandler
-{
-    public abstract void OnMouseDown(MouseEventArgs e);
-    public abstract void OnMouseUp(MouseEventArgs e);
-    public abstract void OnMouseMove(MouseEventArgs e);
-    public abstract void OnMouseWheel(MouseWheelEventArgs e);
 }
 
 public class TouchEventArgs

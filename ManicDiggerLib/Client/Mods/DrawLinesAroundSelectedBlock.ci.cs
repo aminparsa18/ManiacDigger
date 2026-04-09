@@ -46,7 +46,7 @@ public class ModDrawLinesAroundSelectedBlock : ModBase
 /// </summary>
 public class DrawWireframeCube
 {
-    private Model wireframeCube;
+    private ModelData wireframeCube;
 
     public void DrawWireframeCube_(Game game, float posX, float posY, float posZ, float scaleX, float scaleY, float scaleZ)
     {

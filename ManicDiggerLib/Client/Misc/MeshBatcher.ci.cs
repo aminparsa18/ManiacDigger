@@ -46,8 +46,8 @@ public class MeshBatcher
     /// </summary>
     private readonly List<int> _glTextures;
 
-    private List<Model>[] tocallSolid;
-    private List<Model>[] tocallTransparent;
+    private List<ModelData>[] tocallSolid;
+    private List<ModelData>[] tocallTransparent;
 
     /// <summary>
     /// Initialises a new <see cref="MeshBatcher"/> with pre-allocated model slots.
@@ -61,8 +61,8 @@ public class MeshBatcher
         _modelsCount = 0;
         _freeSlots = new Stack<int>();
         _glTextures = new List<int>(MaxTextures);
-        tocallSolid = new List<Model>[MaxTextures];
-        tocallTransparent = new List<Model>[MaxTextures];
+        tocallSolid = new List<ModelData>[MaxTextures];
+        tocallTransparent = new List<ModelData>[MaxTextures];
         for (int i = 0; i < MaxTextures; i++)
         {
             tocallSolid[i] = [];
@@ -92,10 +92,10 @@ public class MeshBatcher
             ? _freeSlots.Pop()
             : _modelsCount++;
 
-        Model model = game.platform.CreateModel(modelData);
+        ModelData model = game.platform.CreateModel(modelData);
 
         BatchEntry slot = _models[id];
-        slot.IndicesCount = modelData.GetIndicesCount();
+        slot.IndicesCount = modelData.IndicesCount;
         slot.CenterX = centerX;
         slot.CenterY = centerY;
         slot.CenterZ = centerZ;
@@ -211,7 +211,7 @@ public class MeshBatcher
             if (li.Empty)
                 continue;
 
-            List<Model> bucket = li.Transparent
+            List<ModelData> bucket = li.Transparent
                 ? tocallTransparent[li.Texture]
                 : tocallSolid[li.Texture];
 
@@ -287,5 +287,5 @@ internal class BatchEntry
     internal int Texture;
 
     /// <summary>The GPU model handle issued by the platform layer.</summary>
-    internal Model Model;
+    internal ModelData Model;
 }

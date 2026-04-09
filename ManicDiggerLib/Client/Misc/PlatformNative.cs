@@ -54,22 +54,22 @@ public class GamePlatformNative : IGamePlatform
         outHeight = (int)size.Height;
     }
 
-    public  void Exit()
+    public void Exit()
     {
         Environment.Exit(0);
     }
 
-    public  bool ExitAvailable()
+    public bool ExitAvailable()
     {
         return true;
     }
 
-    public  string PathSavegames()
+    public string PathSavegames()
     {
         return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
     }
 
-    public  void WebClientDownloadDataAsync(string url, HttpResponseCi response)
+    public void WebClientDownloadDataAsync(string url, HttpResponseCi response)
     {
         DownloadDataArgs args = new()
         {
@@ -133,7 +133,7 @@ public class GamePlatformNative : IGamePlatform
         public ThumbnailResponseCi response;
     }
 
-    public  string FileName(string fullpath)
+    public string FileName(string fullpath)
     {
         FileInfo info = new(fullpath);
         return info.Name.Replace(info.Extension, "");
@@ -141,17 +141,17 @@ public class GamePlatformNative : IGamePlatform
 
     private readonly Stopwatch start = new();
 
-    public  int TimeMillisecondsFromStart()
+    public int TimeMillisecondsFromStart()
     {
         return (int)start.ElapsedMilliseconds;
     }
 
-    public  void ThrowException(string message)
+    public void ThrowException(string message)
     {
         throw new Exception(message);
     }
 
-    public  void BitmapSetPixelsArgb(Bitmap bmp, int[] pixels)
+    public void BitmapSetPixelsArgb(Bitmap bmp, int[] pixels)
     {
         if (IsMono)
         {
@@ -190,7 +190,7 @@ public class GamePlatformNative : IGamePlatform
         }
     }
 
-    public  Bitmap BitmapCreateFromPng(byte[] data, int dataLength)
+    public Bitmap BitmapCreateFromPng(byte[] data, int dataLength)
     {
         Bitmap bmp;
         try
@@ -207,7 +207,7 @@ public class GamePlatformNative : IGamePlatform
 
     public bool IsMono = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
-    public  void BitmapGetPixelsArgb(Bitmap bitmap, int[] bmpPixels)
+    public void BitmapGetPixelsArgb(Bitmap bitmap, int[] bmpPixels)
     {
         if (IsMono)
         {
@@ -266,77 +266,77 @@ public class GamePlatformNative : IGamePlatform
         }
     }
 
-    public  int LoadTextureFromBitmap(Bitmap bmp)
+    public int LoadTextureFromBitmap(Bitmap bmp)
     {
         return LoadTexture(bmp, false);
     }
 
     private readonly ManicDigger.Renderers.TextRenderer textrenderer = new();
 
-    public  Bitmap CreateTextTexture(Text_ t)
+    public Bitmap CreateTextTexture(Text_ t)
     {
         Bitmap bmp = textrenderer.MakeTextTexture(t);
         return bmp;
     }
 
-    public  void SetTextRendererFont(int fontID)
+    public void SetTextRendererFont(int fontID)
     {
         textrenderer.SetFont(fontID);
     }
 
-    public  float BitmapGetWidth(Bitmap bmp)
+    public float BitmapGetWidth(Bitmap bmp)
     {
         return bmp.Width;
     }
 
-    public  float BitmapGetHeight(Bitmap bmp)
+    public float BitmapGetHeight(Bitmap bmp)
     {
         return bmp.Height;
     }
 
-    public  void BitmapDelete(Bitmap bmp)
+    public void BitmapDelete(Bitmap bmp)
     {
         bmp.Dispose();
     }
 
-    public  void ConsoleWriteLine(string s)
+    public void ConsoleWriteLine(string s)
     {
         Console.WriteLine(s);
     }
 
-    public  MonitorObject MonitorCreate()
+    public MonitorObject MonitorCreate()
     {
         return new MonitorObject();
     }
 
-    public  void MonitorEnter(MonitorObject monitorObject)
+    public void MonitorEnter(MonitorObject monitorObject)
     {
         Monitor.Enter(monitorObject);
     }
 
-    public  void MonitorExit(MonitorObject monitorObject)
+    public void MonitorExit(MonitorObject monitorObject)
     {
         Monitor.Exit(monitorObject);
     }
 
-    public  AviWriterCi AviWriterCreate()
+    public AviWriterCi AviWriterCreate()
     {
         AviWriterCiCs avi = new();
         return avi;
     }
 
-    public  string PathStorage()
+    public string PathStorage()
     {
         return GameStorePath.GetStorePath();
     }
 
-    public  string GetGameVersion()
+    public string GetGameVersion()
     {
         return GameVersion.Version;
     }
 
     private readonly ICompression compression = new CompressionGzip();
-    public  void GzipDecompress(byte[] compressed, int compressedLength, byte[] ret)
+    public void GzipDecompress(byte[] compressed, int compressedLength, byte[] ret)
     {
         byte[] data = new byte[compressedLength];
         for (int i = 0; i < compressedLength; i++)
@@ -349,7 +349,7 @@ public class GamePlatformNative : IGamePlatform
             ret[i] = decompressed[i];
         }
     }
-    public  byte[] GzipCompress(byte[] data, int dataLength, out int retLength)
+    public byte[] GzipCompress(byte[] data, int dataLength, out int retLength)
     {
         byte[] data_ = new byte[dataLength];
         for (int i = 0; i < dataLength; i++)
@@ -368,7 +368,7 @@ public class GamePlatformNative : IGamePlatform
         string invalidReStr = string.Format(@"[{0}]", invalidChars);
         return Regex.Replace(name, invalidReStr, "_");
     }
-    public  bool ChatLog(string servername, string p)
+    public bool ChatLog(string servername, string p)
     {
         if (!ENABLE_CHATLOG)
         {
@@ -390,7 +390,7 @@ public class GamePlatformNative : IGamePlatform
         }
     }
 
-    public  bool IsValidTypingChar(int c_)
+    public bool IsValidTypingChar(int c_)
     {
         char c = (char)c_;
         return (char.IsLetterOrDigit(c) || char.IsWhiteSpace(c)
@@ -398,7 +398,7 @@ public class GamePlatformNative : IGamePlatform
                     && c != '\r' && c != '\t';
     }
 
-    public  void MessageBoxShowError(string text, string caption)
+    public void MessageBoxShowError(string text, string caption)
     {
         MessageBox.Show(text, caption, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
     }
@@ -416,7 +416,7 @@ public class GamePlatformNative : IGamePlatform
         public HttpResponseCi response;
     }
 
-    public  void WebClientUploadDataAsync(string url, byte[] data, int dataLength, HttpResponseCi response)
+    public void WebClientUploadDataAsync(string url, byte[] data, int dataLength, HttpResponseCi response)
     {
         UploadData d = new()
         {
@@ -479,7 +479,7 @@ public class GamePlatformNative : IGamePlatform
         }
     }
 
-    public  string FileOpenDialog(string extension, string extensionName, string initialDirectory)
+    public string FileOpenDialog(string extension, string extensionName, string initialDirectory)
     {
         OpenFileDialog d = new()
         {
@@ -499,7 +499,7 @@ public class GamePlatformNative : IGamePlatform
         return null;
     }
 
-    public  void ApplicationDoEvents()
+    public void ApplicationDoEvents()
     {
         if (IsMono)
         {
@@ -508,16 +508,16 @@ public class GamePlatformNative : IGamePlatform
         }
     }
 
-    public  void ThreadSpinWait(int iterations)
+    public void ThreadSpinWait(int iterations)
     {
         Thread.SpinWait(iterations);
     }
 
-    public  void ShowKeyboard(bool show)
+    public void ShowKeyboard(bool show)
     {
     }
 
-    public  bool IsFastSystem()
+    public bool IsFastSystem()
     {
         return true;
     }
@@ -532,7 +532,7 @@ public class GamePlatformNative : IGamePlatform
         return Path.Combine(path, "Preferences.txt");
     }
 
-    public  Preferences GetPreferences()
+    public Preferences GetPreferences()
     {
         if (File.Exists(GetPreferencesFilePath()))
         {
@@ -580,12 +580,12 @@ public class GamePlatformNative : IGamePlatform
 
     public bool IsMac = Environment.OSVersion.Platform == PlatformID.MacOSX;
 
-    public  bool MultithreadingAvailable()
+    public bool MultithreadingAvailable()
     {
         return true;
     }
 
-    public  void QueueUserWorkItem(Action action)
+    public void QueueUserWorkItem(Action action)
     {
         ThreadPool.QueueUserWorkItem((a) => { action(); });
     }
@@ -597,12 +597,12 @@ public class GamePlatformNative : IGamePlatform
         return assetloader.LoadAssetsAsync(out progress);
     }
 
-    public  bool IsSmallScreen()
+    public bool IsSmallScreen()
     {
         return TouchTest;
     }
 
-    public  void OpenLinkInBrowser(string url)
+    public void OpenLinkInBrowser(string url)
     {
         if (!(url.StartsWith("http://") || url.StartsWith("https://")))
         {
@@ -621,7 +621,7 @@ public class GamePlatformNative : IGamePlatform
         }
     }
 
-    public  void SaveAssetToCache(Asset tosave)
+    public void SaveAssetToCache(Asset tosave)
     {
         //Check if cache directory exists
         Checkcachedir();
@@ -632,7 +632,7 @@ public class GamePlatformNative : IGamePlatform
         bw.Close();
     }
 
-    public  Asset LoadAssetFromCache(string md5)
+    public Asset LoadAssetFromCache(string md5)
     {
         //Check if cache directory exists
         Checkcachedir();
@@ -651,14 +651,14 @@ public class GamePlatformNative : IGamePlatform
         return a;
     }
 
-    public  bool IsCached(string md5)
+    public bool IsCached(string md5)
     {
         if (!Directory.Exists(Cachepath()))
             return false;
         return File.Exists(Path.Combine(Cachepath(), md5));
     }
 
-    public  bool IsChecksum(string checksum)
+    public bool IsChecksum(string checksum)
     {
         //Check if checksum string has correct length
         if (checksum.Length != 32)
@@ -680,17 +680,17 @@ public class GamePlatformNative : IGamePlatform
         return true;
     }
 
-    public  string DecodeHTMLEntities(string htmlencodedstring)
+    public string DecodeHTMLEntities(string htmlencodedstring)
     {
         return System.Web.HttpUtility.HtmlDecode(htmlencodedstring);
     }
 
-    public  bool IsDebuggerAttached()
+    public bool IsDebuggerAttached()
     {
         return Debugger.IsAttached;
     }
 
-    public  string QueryStringValue(string key)
+    public string QueryStringValue(string key)
     {
         return null;
     }
@@ -709,49 +709,49 @@ public class GamePlatformNative : IGamePlatform
         };
     }
 
-    public  AudioData AudioDataCreate(byte[] data, int dataLength)
+    public AudioData AudioDataCreate(byte[] data, int dataLength)
     {
         StartAudio();
         return AudioOpenAl.GetSampleFromArray(data);
     }
 
-    public  bool AudioDataLoaded(AudioData data)
+    public bool AudioDataLoaded(AudioData data)
     {
         return true;
     }
 
-    public  AudioCi AudioCreate(AudioData data)
+    public AudioCi AudioCreate(AudioData data)
     {
         return audio.CreateAudio((AudioDataCs)data);
     }
 
-    public  void AudioPlay(AudioCi audio_)
+    public void AudioPlay(AudioCi audio_)
     {
         StartAudio();
         ((AudioOpenAl.AudioTask)audio_).Play();
     }
 
-    public  void AudioPause(AudioCi audio_)
+    public void AudioPause(AudioCi audio_)
     {
         ((AudioOpenAl.AudioTask)audio_).Pause();
     }
 
-    public  void AudioDelete(AudioCi audio_)
+    public void AudioDelete(AudioCi audio_)
     {
         ((AudioOpenAl.AudioTask)audio_).Stop();
     }
 
-    public  bool AudioFinished(AudioCi audio_)
+    public bool AudioFinished(AudioCi audio_)
     {
         return ((AudioOpenAl.AudioTask)audio_).Finished;
     }
 
-    public  void AudioSetPosition(AudioCi audio_, float x, float y, float z)
+    public void AudioSetPosition(AudioCi audio_, float x, float y, float z)
     {
         ((AudioOpenAl.AudioTask)audio_).position = new Vector3(x, y, z);
     }
 
-    public  void AudioUpdateListener(float posX, float posY, float posZ, float orientX, float orientY, float orientZ)
+    public void AudioUpdateListener(float posX, float posY, float posZ, float orientX, float orientY, float orientZ)
     {
         StartAudio();
         AudioOpenAl.UpdateListener(new Vector3(posX, posY, posZ), new Vector3(orientX, orientY, orientZ));
@@ -760,7 +760,7 @@ public class GamePlatformNative : IGamePlatform
     #endregion
 
     #region ENet
-    public  bool TcpAvailable()
+    public bool TcpAvailable()
     {
         return true;
     }
@@ -889,15 +889,15 @@ public class GamePlatformNative : IGamePlatform
         return false;
     }
 
-    public  void WebSocketConnect(string ip, int port)
+    public void WebSocketConnect(string ip, int port)
     {
     }
 
-    public  void WebSocketSend(byte[] data, int dataLength)
+    public void WebSocketSend(byte[] data, int dataLength)
     {
     }
 
-    public  int WebSocketReceive(byte[] data, int dataLength)
+    public int WebSocketReceive(byte[] data, int dataLength)
     {
         return -1;
     }
@@ -908,12 +908,12 @@ public class GamePlatformNative : IGamePlatform
 
     public GameWindow window;
 
-    public  int GetCanvasWidth()
+    public int GetCanvasWidth()
     {
         return window.ClientSize.X;
     }
 
-    public  int GetCanvasHeight()
+    public int GetCanvasHeight()
     {
         return window.ClientSize.Y;
     }
@@ -931,7 +931,7 @@ public class GamePlatformNative : IGamePlatform
         window.Closing += WindowClosed;
         window.Title = "Manic Digger";
         //GL.Enable(EnableCap.DebugOutput);
-       // GL.Enable(EnableCap.DebugOutputSynchronous);
+        // GL.Enable(EnableCap.DebugOutputSynchronous);
         GL.DebugMessageCallback((source, type, id, severity, length, message, param) =>
         {
             if (severity == DebugSeverity.DebugSeverityNotification)
@@ -947,38 +947,38 @@ public class GamePlatformNative : IGamePlatform
         gameexit.exit = e.Cancel;
     }
 
-    public  void SetVSync(bool enabled)
+    public void SetVSync(bool enabled)
     {
         window.VSync = enabled ? VSyncMode.On : VSyncMode.Off;
     }
 
     private readonly Screenshot screenshot = new();
 
-    public  void SaveScreenshot()
+    public void SaveScreenshot()
     {
         screenshot.d_GameWindow = window;
         screenshot.SaveScreenshot();
     }
 
-    public  Bitmap GrabScreenshot()
+    public Bitmap GrabScreenshot()
     {
         screenshot.d_GameWindow = window;
         Bitmap bmp = screenshot.GrabScreenshot();
         return bmp;
     }
 
-    public  void WindowExit()
+    public void WindowExit()
     {
         gameexit?.exit = true;
         window.Close();
     }
 
-    public  void SetTitle(string applicationname)
+    public void SetTitle(string applicationname)
     {
         window.Title = applicationname;
     }
 
-    public  string KeyName(int key)
+    public string KeyName(int key)
     {
         if (Enum.IsDefined(typeof(Keys), key))
         {
@@ -989,7 +989,7 @@ public class GamePlatformNative : IGamePlatform
 
     private DisplayResolutionCi[] resolutions;
     private int resolutionsCount;
-    public  DisplayResolutionCi[] GetDisplayResolutions(out int retResolutionsCount)
+    public DisplayResolutionCi[] GetDisplayResolutions(out int retResolutionsCount)
     {
         if (resolutions == null)
         {
@@ -1012,22 +1012,22 @@ public class GamePlatformNative : IGamePlatform
         return resolutions;
     }
 
-    public  WindowState GetWindowState()
+    public WindowState GetWindowState()
     {
         return window.WindowState;
     }
 
-    public  void SetWindowState(WindowState value)
+    public void SetWindowState(WindowState value)
     {
         window.WindowState = value;
     }
 
-    public  void ChangeResolution(int width, int height, int bitsPerPixel, float refreshRate)
+    public void ChangeResolution(int width, int height, int bitsPerPixel, float refreshRate)
     {
         window.Size = new Vector2i(width, height);
     }
 
-    public  DisplayResolutionCi GetDisplayResolutionDefault()
+    public DisplayResolutionCi GetDisplayResolutionDefault()
     {
         var screen = System.Windows.Forms.Screen.PrimaryScreen!;
         var r = new DisplayResolutionCi
@@ -1043,22 +1043,22 @@ public class GamePlatformNative : IGamePlatform
     #endregion
 
     #region OpenGl
-    public  void GlViewport(int x, int y, int width, int height)
+    public void GlViewport(int x, int y, int width, int height)
     {
         GL.Viewport(x, y, width, height);
     }
 
-    public  void GlClearColorBufferAndDepthBuffer()
+    public void GlClearColorBufferAndDepthBuffer()
     {
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
     }
 
-    public  void GlDisableDepthTest()
+    public void GlDisableDepthTest()
     {
         GL.Disable(EnableCap.DepthTest);
     }
 
-    public  void BindTexture2d(int texture)
+    public void BindTexture2d(int texture)
     {
         GL.BindTexture(TextureTarget.Texture2D, texture);
         if (_shaderProgram != -1)
@@ -1073,7 +1073,7 @@ public class GamePlatformNative : IGamePlatform
     private int _uFogColor;
     private int _uFogDensity;
 
-    public Model CreateModel(ModelData data)
+    public ModelData CreateModel(ModelData data)
     {
         int vao = GL.GenVertexArray();
         GL.BindVertexArray(vao);
@@ -1081,69 +1081,69 @@ public class GamePlatformNative : IGamePlatform
         // positions → attribute 0
         int vertexVbo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, vertexVbo);
-        GL.BufferData(BufferTarget.ArrayBuffer, data.xyz.Length * sizeof(float), data.xyz, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ArrayBuffer, data.Xyz.Length * sizeof(float), data.Xyz, BufferUsageHint.StaticDraw);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
         GL.EnableVertexAttribArray(0);
 
         // colors → attribute 1
         int colorVbo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, colorVbo);
-        GL.BufferData(BufferTarget.ArrayBuffer, data.rgba.Length * sizeof(byte), data.rgba, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ArrayBuffer, data.Rgba.Length * sizeof(byte), data.Rgba, BufferUsageHint.StaticDraw);
         GL.VertexAttribPointer(1, 4, VertexAttribPointerType.UnsignedByte, true, 0, 0);
         GL.EnableVertexAttribArray(1);
 
         // UVs → attribute 2
         int uvVbo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, uvVbo);
-        GL.BufferData(BufferTarget.ArrayBuffer, data.uv.Length * sizeof(float), data.uv, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ArrayBuffer, data.Uv.Length * sizeof(float), data.Uv, BufferUsageHint.StaticDraw);
         GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 0, 0);
         GL.EnableVertexAttribArray(2);
 
         // indices
         int indexVbo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexVbo);
-        GL.BufferData(BufferTarget.ElementArrayBuffer, data.indices.Length * sizeof(int), data.indices, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ElementArrayBuffer, data.Indices.Length * sizeof(int), data.Indices, BufferUsageHint.StaticDraw);
 
         GL.BindVertexArray(0);
 
-        data.vaoId = vao;
-        data.vertexVboId = vertexVbo;
-        data.colorVboId = colorVbo;
-        data.uvVboId = uvVbo;
-        data.indexVboId = indexVbo;
+        data.VaoId = vao;
+        data.VertexVboId = vertexVbo;
+        data.ColorVboId = colorVbo;
+        data.UvVboId = uvVbo;
+        data.IndexVboId = indexVbo;
         return data;
     }
 
     public void UpdateModel(ModelData data)
     {
-        if (data.vaoId == 0)
+        if (data.VaoId == 0)
         {
             CreateModel(data);
             return;
         }
 
-        GL.BindBuffer(BufferTarget.ArrayBuffer, data.vertexVboId);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, data.VertexVboId);
         GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero,
-            data.xyz.Length * sizeof(float), data.xyz);
+            data.Xyz.Length * sizeof(float), data.Xyz);
 
-        GL.BindBuffer(BufferTarget.ArrayBuffer, data.colorVboId);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, data.ColorVboId);
         GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero,
-            data.rgba.Length * sizeof(byte), data.rgba);
+            data.Rgba.Length * sizeof(byte), data.Rgba);
 
-        GL.BindBuffer(BufferTarget.ArrayBuffer, data.uvVboId);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, data.UvVboId);
         GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero,
-            data.uv.Length * sizeof(float), data.uv);
+            data.Uv.Length * sizeof(float), data.Uv);
 
-        GL.BindBuffer(BufferTarget.ElementArrayBuffer, data.indexVboId);
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, data.IndexVboId);
         GL.BufferSubData(BufferTarget.ElementArrayBuffer, IntPtr.Zero,
-            data.indices.Length * sizeof(int), data.indices);
+            data.Indices.Length * sizeof(int), data.Indices);
 
         GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
     }
 
     public void UpdateModelColors(ModelData data)
     {
-        if (data.vaoId == 0)
+        if (data.VaoId == 0)
         {
             // first time - full upload
             CreateModel(data);
@@ -1151,31 +1151,31 @@ public class GamePlatformNative : IGamePlatform
         }
 
         // re-upload only the color buffer
-        GL.BindBuffer(BufferTarget.ArrayBuffer, data.colorVboId);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, data.ColorVboId);
         GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero,
-            data.rgba.Length * sizeof(byte), data.rgba);
+            data.Rgba.Length * sizeof(byte), data.Rgba);
         GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
     }
 
-    public  void DrawModelData(ModelData data)
+    public void DrawModelData(ModelData data)
     {
         GL.UseProgram(_shaderProgram);
         GL.UniformMatrix4(_uProjection, false, ref _projectionMatrix);
         GL.UniformMatrix4(_uModelView, false, ref _modelViewMatrix);
-        GL.BindVertexArray(data.vaoId);
-        PrimitiveType primitiveType = data.mode == DrawModeEnum.Triangles
+        GL.BindVertexArray(data.VaoId);
+        PrimitiveType primitiveType = data.Mode == (int)DrawMode.Triangles
             ? PrimitiveType.Triangles
             : PrimitiveType.Lines;
-        GL.DrawElements(primitiveType, data.indicesCount, DrawElementsType.UnsignedInt, 0);
+        GL.DrawElements(primitiveType, data.IndicesCount, DrawElementsType.UnsignedInt, 0);
         GL.BindVertexArray(0);
     }
 
-    public void DrawModel(Model model)
+    public void DrawModel(ModelData model)
     {
         DrawModelData((ModelData)model);
     }
 
-    public  void DrawModels(List<Model> models, int count)
+    public void DrawModels(List<ModelData> models, int count)
     {
         for (int i = 0; i < count; i++)
         {
@@ -1183,7 +1183,7 @@ public class GamePlatformNative : IGamePlatform
         }
     }
 
-    public  void InitShaders()
+    public void InitShaders()
     {
         string vertexSource = @"
         #version 330 core
@@ -1271,7 +1271,7 @@ public class GamePlatformNative : IGamePlatform
         GL.GetProgram(_shaderProgram, GetProgramParameterName.LinkStatus, out int linkStatus);
         if (linkStatus == 0)
             throw new Exception($"Shader link error: {GL.GetProgramInfoLog(_shaderProgram)}");
-        
+
         // cleanup - shaders are linked into program, no longer needed
         GL.DetachShader(_shaderProgram, vertexShader);
         GL.DetachShader(_shaderProgram, fragmentShader);
@@ -1292,6 +1292,13 @@ public class GamePlatformNative : IGamePlatform
         _uFogEnabled = GL.GetUniformLocation(_shaderProgram, "uFogEnabled");
         _uFogColor = GL.GetUniformLocation(_shaderProgram, "uFogColor");
         _uFogDensity = GL.GetUniformLocation(_shaderProgram, "uFogDensity");
+
+        // set initial values using cached locations
+        GL.Uniform3(_uAmbientLight, 1f, 1f, 1f);
+        GL.Uniform1(_uFogEnabled, 0);
+        GL.Uniform1(_uFogDensity, _fogDensity);
+        GL.Uniform4(_uFogColor, _fogColor);
+
         GL.UseProgram(_shaderProgram);
     }
 
@@ -1313,12 +1320,12 @@ public class GamePlatformNative : IGamePlatform
             GL.UniformMatrix4(_uModelView, false, ref _modelViewMatrix);
     }
 
-    public  void GlClearColorRgbaf(float r, float g, float b, float a)
+    public void GlClearColorRgbaf(float r, float g, float b, float a)
     {
         GL.ClearColor(r, g, b, a);
     }
 
-    public  void GlEnableDepthTest()
+    public void GlEnableDepthTest()
     {
         GL.Enable(EnableCap.DepthTest);
     }
@@ -1347,7 +1354,7 @@ public class GamePlatformNative : IGamePlatform
             convertedbitmap = true;
             bmp = bmp2;
         }
-       // GL.Enable(EnableCap.Texture2D);
+        // GL.Enable(EnableCap.Texture2D);
         int id = GL.GenTexture();
         GL.BindTexture(TextureTarget.Texture2D, id);
         if (!ENABLE_MIPMAPS)
@@ -1404,32 +1411,32 @@ public class GamePlatformNative : IGamePlatform
         return id;
     }
 
-    public  void GlDisableCullFace()
+    public void GlDisableCullFace()
     {
         GL.Disable(EnableCap.CullFace);
     }
 
-    public  void GlEnableCullFace()
+    public void GlEnableCullFace()
     {
         GL.Enable(EnableCap.CullFace);
     }
 
-    public  void DeleteModel(Model model)
+    public void DeleteModel(ModelData model)
     {
         ModelData m = (ModelData)model;
-        GL.DeleteVertexArray(m.vaoId);
-        GL.DeleteBuffer(m.vertexVboId);
-        GL.DeleteBuffer(m.colorVboId);
-        GL.DeleteBuffer(m.uvVboId);
-        GL.DeleteBuffer(m.indexVboId);
+        GL.DeleteVertexArray(m.VaoId);
+        GL.DeleteBuffer(m.VertexVboId);
+        GL.DeleteBuffer(m.ColorVboId);
+        GL.DeleteBuffer(m.UvVboId);
+        GL.DeleteBuffer(m.IndexVboId);
     }
 
-    public  void GlEnableTexture2d()
+    public void GlEnableTexture2d()
     {
-       // GL.Enable(EnableCap.Texture2D);
+        // GL.Enable(EnableCap.Texture2D);
     }
 
-    public  void GLLineWidth(int width)
+    public void GLLineWidth(int width)
     {
         GL.LineWidth(width);
     }
@@ -1444,12 +1451,12 @@ public class GamePlatformNative : IGamePlatform
         // TODO: alpha test moved to fragment shader (discard if alpha < 0.5)
     }
 
-    public  void GLDeleteTexture(int id)
+    public void GLDeleteTexture(int id)
     {
         GL.DeleteTexture(id);
     }
 
-    public  void GlClearDepthBuffer()
+    public void GlClearDepthBuffer()
     {
         GL.Clear(ClearBufferMask.DepthBufferBit);
     }
@@ -1471,31 +1478,31 @@ public class GamePlatformNative : IGamePlatform
     {
         _fogEnabled = true;
         if (_shaderProgram != -1)
-            GL.Uniform1(GL.GetUniformLocation(_shaderProgram, "uFogEnabled"), 1);
+            GL.Uniform1(_uFogEnabled, 1);
     }
 
     public void GlDisableFog()
     {
         _fogEnabled = false;
         if (_shaderProgram != -1)
-            GL.Uniform1(GL.GetUniformLocation(_shaderProgram, "uFogEnabled"), 0);
+            GL.Uniform1(_uFogEnabled, 0);
     }
 
     public void GlFogFogColor(int r, int g, int b, int a)
     {
         _fogColor = new Vector4(r / 255f, g / 255f, b / 255f, a / 255f);
         if (_shaderProgram != -1)
-            GL.Uniform4(GL.GetUniformLocation(_shaderProgram, "uFogColor"), _fogColor);
+            GL.Uniform4(_uFogColor, _fogColor);
     }
 
     public void GlFogFogDensity(float density)
     {
         _fogDensity = density;
         if (_shaderProgram != -1)
-            GL.Uniform1(GL.GetUniformLocation(_shaderProgram, "uFogDensity"), _fogDensity);
+            GL.Uniform1(_uFogDensity, _fogDensity);
     }
 
-    public  int GlGetMaxTextureSize()
+    public int GlGetMaxTextureSize()
     {
         int size = 1024;
         try
@@ -1508,7 +1515,7 @@ public class GamePlatformNative : IGamePlatform
         return size;
     }
 
-    public  void GlDepthMask(bool flag)
+    public void GlDepthMask(bool flag)
     {
         GL.DepthMask(flag);
     }
@@ -1543,19 +1550,19 @@ public class GamePlatformNative : IGamePlatform
     #region Game
 
     private bool singlePlayerServerAvailable = true;
-    public  bool SinglePlayerServerAvailable()
+    public bool SinglePlayerServerAvailable()
     {
         return singlePlayerServerAvailable;
     }
 
-    public  void SinglePlayerServerStart(string saveFilename)
+    public void SinglePlayerServerStart(string saveFilename)
     {
         singlepLayerServerExit = false;
         StartSinglePlayerServer(saveFilename);
     }
 
     public bool singlepLayerServerExit;
-    public  void SinglePlayerServerExit()
+    public void SinglePlayerServerExit()
     {
         singlepLayerServerExit = true;
     }
@@ -1563,27 +1570,27 @@ public class GamePlatformNative : IGamePlatform
     public System.Action<string> StartSinglePlayerServer;
     public bool singlePlayerServerLoaded;
 
-    public  bool SinglePlayerServerLoaded()
+    public bool SinglePlayerServerLoaded()
     {
         return singlePlayerServerLoaded;
     }
     public DummyNetwork singlePlayerServerDummyNetwork;
-    public  DummyNetwork SinglePlayerServerGetNetwork()
+    public DummyNetwork SinglePlayerServerGetNetwork()
     {
         return singlePlayerServerDummyNetwork;
     }
 
-    public  void SinglePlayerServerDisable()
+    public void SinglePlayerServerDisable()
     {
         singlePlayerServerAvailable = false;
     }
 
-    public  EnetNetConnection CastToEnetNetConnection(NetConnection connection)
+    public EnetNetConnection CastToEnetNetConnection(NetConnection connection)
     {
         return (EnetNetConnection)connection;
     }
 
-    public  PlayerInterpolationState CastToPlayerInterpolationState(InterpolatedObject a)
+    public PlayerInterpolationState CastToPlayerInterpolationState(InterpolatedObject a)
     {
         return (PlayerInterpolationState)a;
     }
@@ -1602,6 +1609,11 @@ public class GamePlatformNative : IGamePlatform
     public List<Action<KeyEventArgs>> keyUpHandlers = new();
     public List<Action<KeyPressEventArgs>> keyPressHandlers = new();
 
+    public event Action<MouseEventArgs> OnMouseDown;
+    public event Action<MouseEventArgs> OnMouseUp;
+    public event Action<MouseEventArgs> OnMouseMove;
+    public event Action<MouseWheelEventArgs> OnMouseWheel;
+
     public void AddOnKeyEvent(
         Action<KeyEventArgs> onKeyDown,
         Action<KeyEventArgs> onKeyUp,
@@ -1613,25 +1625,31 @@ public class GamePlatformNative : IGamePlatform
     }
 
     public List<KeyEventHandler> keyEventHandlers = new();
-    public  void AddOnKeyEvent(KeyEventHandler handler)
+    public void AddOnKeyEvent(KeyEventHandler handler)
     {
         keyEventHandlers.Add(handler);
     }
 
-    public List<MouseEventHandler> mouseEventHandlers = new();
-    public  void AddOnMouseEvent(MouseEventHandler handler)
+    public void AddOnMouseEvent(
+        Action<MouseEventArgs> onMouseDown,
+        Action<MouseEventArgs> onMouseUp,
+        Action<MouseEventArgs> onMouseMove,
+        Action<MouseWheelEventArgs> onMouseWheel)
     {
-        mouseEventHandlers.Add(handler);
+        OnMouseDown += onMouseDown;
+        OnMouseUp += onMouseUp;
+        OnMouseMove += onMouseMove;
+        OnMouseWheel += onMouseWheel;
     }
 
     public List<TouchEventHandler> touchEventHandlers = new();
-    public  void AddOnTouchEvent(TouchEventHandler handler)
+    public void AddOnTouchEvent(TouchEventHandler handler)
     {
         touchEventHandlers.Add(handler);
     }
 
     public CrashReporter crashreporter;
-    public  void AddOnCrash(OnCrashHandler handler)
+    public void AddOnCrash(OnCrashHandler handler)
     {
         crashreporter.OnCrash += handler.OnCrash;
     }
@@ -1645,17 +1663,17 @@ public class GamePlatformNative : IGamePlatform
     //private MouseState current, previous;
     private float lastX, lastY;
 
-    public  bool IsMousePointerLocked()
+    public bool IsMousePointerLocked()
     {
         return mousePointerLocked;
     }
 
-    public  bool MouseCursorIsVisible()
+    public bool MouseCursorIsVisible()
     {
         return mouseCursorVisible;
     }
 
-    public  void SetWindowCursor(int hotx, int hoty, int sizex, int sizey, byte[] imgdata, int imgdataLength)
+    public void SetWindowCursor(int hotx, int hoty, int sizex, int sizey, byte[] imgdata, int imgdataLength)
     {
         try
         {
@@ -1689,7 +1707,7 @@ public class GamePlatformNative : IGamePlatform
         }
     }
 
-    public  void RestoreWindowCursor()
+    public void RestoreWindowCursor()
     {
         window.Cursor = MouseCursor.Default;
     }
@@ -1699,7 +1717,7 @@ public class GamePlatformNative : IGamePlatform
         return (int)key;
     }
 
-    public  void MouseCursorSetVisible(bool value)
+    public void MouseCursorSetVisible(bool value)
     {
         if (!value)
         {
@@ -1727,19 +1745,19 @@ public class GamePlatformNative : IGamePlatform
         }
     }
 
-    public  void RequestMousePointerLock()
+    public void RequestMousePointerLock()
     {
         MouseCursorSetVisible(false);
         mousePointerLocked = true;
     }
 
-    public  void ExitMousePointerLock()
+    public void ExitMousePointerLock()
     {
         MouseCursorSetVisible(true);
         mousePointerLocked = false;
     }
 
-    public  bool Focused()
+    public bool Focused()
     {
         return window.IsFocused;
     }
@@ -1755,36 +1773,27 @@ public class GamePlatformNative : IGamePlatform
     private void UpdateMousePosition()
     {
         if (!window.IsFocused)
-        {
             return;
-        }
 
-        // Mouse state has changed
         var mouse = window.MouseState;
         float xdelta = mouse.Delta.X;
         float ydelta = mouse.Delta.Y;
 
         if (xdelta != 0 || ydelta != 0)
         {
-            foreach (MouseEventHandler h in mouseEventHandlers)
-            {
-                MouseEventArgs args = new();
-                args.SetX((int)mouse.Position.X);
-                args.SetY((int)mouse.Position.Y);
-                args.SetMovementX((int)xdelta);
-                args.SetMovementY((int)ydelta);
-                args.SetEmulated(true);
-                h.OnMouseMove(args);
-            }
+            MouseEventArgs args = new();
+            args.SetX((int)mouse.Position.X);
+            args.SetY((int)mouse.Position.Y);
+            args.SetMovementX((int)xdelta);
+            args.SetMovementY((int)ydelta);
+            args.SetEmulated(true);
+            OnMouseMove?.Invoke(args);
         }
     }
 
     private void Mouse_WheelChanged(MouseWheelEventArgs e)
     {
-        foreach (MouseEventHandler h in mouseEventHandlers)
-        {
-            h.OnMouseWheel(e);
-        }
+        OnMouseWheel?.Invoke(e);
     }
 
     private void Mouse_ButtonDown(MouseButtonEventArgs e)
@@ -1803,14 +1812,11 @@ public class GamePlatformNative : IGamePlatform
         }
         else
         {
-            foreach (MouseEventHandler h in mouseEventHandlers)
-            {
-                MouseEventArgs args = new();
-                args.SetX((int)pos.X);
-                args.SetY((int)pos.Y);
-                args.SetButton((int)e.Button);
-                h.OnMouseDown(args);
-            }
+            MouseEventArgs args = new();
+            args.SetX((int)pos.X);
+            args.SetY((int)pos.Y);
+            args.SetButton((int)e.Button);
+            OnMouseDown?.Invoke(args);
         }
     }
 
@@ -1830,14 +1836,11 @@ public class GamePlatformNative : IGamePlatform
         }
         else
         {
-            foreach (MouseEventHandler h in mouseEventHandlers)
-            {
-                MouseEventArgs args = new();
-                args.SetX((int)pos.X);
-                args.SetY((int)pos.Y);
-                args.SetButton((int)e.Button);
-                h.OnMouseUp(args);
-            }
+            MouseEventArgs args = new();
+            args.SetX((int)pos.X);
+            args.SetY((int)pos.Y);
+            args.SetButton((int)e.Button);
+            OnMouseUp?.Invoke(args);
         }
     }
 
@@ -1865,17 +1868,13 @@ public class GamePlatformNative : IGamePlatform
             else
             {
                 Console.WriteLine("Mouse path");
-                foreach (MouseEventHandler h in mouseEventHandlers)
-                {
-                    Console.WriteLine($"Mouse handler: {h}");
-                    MouseEventArgs args = new();
-                    args.SetX((int)e.X);
-                    args.SetY((int)e.Y);
-                    args.SetMovementX((int)e.DeltaX);
-                    args.SetMovementY((int)e.DeltaY);
-                    args.SetEmulated(false);
-                    h.OnMouseMove(args);
-                }
+                MouseEventArgs args = new();
+                args.SetX((int)e.X);
+                args.SetY((int)e.Y);
+                args.SetMovementX((int)e.DeltaX);
+                args.SetMovementY((int)e.DeltaY);
+                args.SetEmulated(false);
+                OnMouseMove?.Invoke(args);
             }
         }
         catch (Exception ex)
@@ -1978,7 +1977,7 @@ public class GameWindowNative : GameWindow
                 Title = "",
                 WindowState = WindowState.Normal,
                 Profile = ContextProfile.Compatability,
-               // APIVersion = new Version(3, 3),
+                // APIVersion = new Version(3, 3),
             })
     {
     }

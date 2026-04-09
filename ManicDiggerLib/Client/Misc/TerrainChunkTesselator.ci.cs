@@ -243,23 +243,22 @@ public class TerrainChunkTesselatorCi
         toreturnatlas1dtransparent = new ModelData[toreturnatlas1dLength];
         for (int i = 0; i < toreturnatlas1dLength; i++)
         {
-            toreturnatlas1d[i] = new ModelData();
             int max = 1024;
-            toreturnatlas1d[i].xyz = new float[max * 3];
-            toreturnatlas1d[i].uv = new float[max * 2];
-            toreturnatlas1d[i].rgba = new byte[max * 4];
-            toreturnatlas1d[i].indices = new int[max];
-            toreturnatlas1d[i].verticesMax = max;
-            toreturnatlas1d[i].indicesMax = max;
+
+            toreturnatlas1d[i] = new ModelData
+            {
+                Xyz = new float[max * 3],
+                Uv = new float[max * 2],
+                Rgba = new byte[max * 4],
+                Indices = new int[max]
+            };
 
             toreturnatlas1dtransparent[i] = new ModelData
             {
-                xyz = new float[max * 3],
-                uv = new float[max * 2],
-                rgba = new byte[max * 4],
-                indices = new int[max],
-                verticesMax = max,
-                indicesMax = max
+                Xyz = new float[max * 3],
+                Uv = new float[max * 2],
+                Rgba = new byte[max * 4],
+                Indices = new int[max]
             };
         }
     }
@@ -734,7 +733,7 @@ public class TerrainChunkTesselatorCi
         ModelData toreturn = GetModelData(tileType, sidetexture);
         float texrecTop = (terrainTexturesPerAtlasInverse * (sidetexture % terrainTexturesPerAtlas)) + (AtiArtifactFix * terrainTexturesPerAtlasInverse);
         float texrecBottom = texrecTop +_texrecHeight;
-        int lastelement = toreturn.verticesCount;
+        int lastelement = toreturn.VerticesCount;
 
         VecCito3i v = tmpv;
         float fSlopeModifier = 0f;
@@ -1110,23 +1109,23 @@ public class TerrainChunkTesselatorCi
 
     public static void AddVertex(ModelData model, float x, float y, float z, float u, float v, int color)
     {
-        int xyzOffset = model.GetXyzCount();
-        int uvOffset = model.GetUvCount();
-        int rgbaOffset = model.GetRgbaCount();
+        int xyzOffset = model.XyzCount;
+        int uvOffset = model.UvCount;
+        int rgbaOffset = model.RgbaCount;
 
-        model.xyz[xyzOffset] = x;
-        model.xyz[xyzOffset + 1] = y;
-        model.xyz[xyzOffset + 2] = z;
+        model.Xyz[xyzOffset] = x;
+        model.Xyz[xyzOffset + 1] = y;
+        model.Xyz[xyzOffset + 2] = z;
 
-        model.uv[uvOffset] = u;
-        model.uv[uvOffset + 1] = v;
+        model.Uv[uvOffset] = u;
+        model.Uv[uvOffset + 1] = v;
 
-        model.rgba[rgbaOffset] = (byte)Game.ColorR(color);
-        model.rgba[rgbaOffset + 1] = (byte)Game.ColorG(color);
-        model.rgba[rgbaOffset + 2] = (byte)Game.ColorB(color);
-        model.rgba[rgbaOffset + 3] = (byte)Game.ColorA(color);
+        model.Rgba[rgbaOffset] = (byte)Game.ColorR(color);
+        model.Rgba[rgbaOffset + 1] = (byte)Game.ColorG(color);
+        model.Rgba[rgbaOffset + 2] = (byte)Game.ColorB(color);
+        model.Rgba[rgbaOffset + 3] = (byte)Game.ColorA(color);
 
-        model.verticesCount++;
+        model.VerticesCount++;
     }
 
     internal int TorchTopTexture;
@@ -1326,7 +1325,7 @@ public class TerrainChunkTesselatorCi
             float texrecBottom = texrecTop + _texrecHeight;
             ModelData toreturn = GetModelData(tt, sidetexture);
 
-            int lastelement = toreturn.verticesCount;
+            int lastelement = toreturn.VerticesCount;
             ModelDataTool.AddVertex(toreturn, top00.X, top00.Y, top00.Z, _texrecLeft, texrecTop, curcolor);
             ModelDataTool.AddVertex(toreturn, top01.X, top01.Y, top01.Z, _texrecLeft, texrecBottom, curcolor);
             ModelDataTool.AddVertex(toreturn, top10.X, top10.Y, top10.Z, _texrecRight, texrecTop, curcolor);
@@ -1346,7 +1345,7 @@ public class TerrainChunkTesselatorCi
             float texrecBottom = texrecTop + _texrecHeight;
             ModelData toreturn = GetModelData(tt, sidetexture);
 
-            int lastelement = toreturn.verticesCount;
+            int lastelement = toreturn.VerticesCount;
             ModelDataTool.AddVertex(toreturn, bottom00.X, bottom00.Y, bottom00.Z, _texrecLeft, texrecTop, curcolor);
             ModelDataTool.AddVertex(toreturn, bottom01.X, bottom01.Y, bottom01.Z, _texrecLeft, texrecBottom, curcolor);
             ModelDataTool.AddVertex(toreturn, bottom10.X, bottom10.Y, bottom10.Z, _texrecRight, texrecTop, curcolor);
@@ -1366,7 +1365,7 @@ public class TerrainChunkTesselatorCi
             float texrecBottom = texrecTop + _texrecHeight;
             ModelData toreturn = GetModelData(tt, sidetexture);
 
-            int lastelement = toreturn.verticesCount;
+            int lastelement = toreturn.VerticesCount;
             ModelDataTool.AddVertex(toreturn, bottom00.X, bottom00.Y, bottom00.Z, _texrecLeft, texrecBottom, curcolor);
             ModelDataTool.AddVertex(toreturn, bottom01.X, bottom01.Y, bottom01.Z, _texrecRight, texrecBottom, curcolor);
             ModelDataTool.AddVertex(toreturn, top00.X, top00.Y, top00.Z, _texrecLeft, texrecTop, curcolor);
@@ -1386,7 +1385,7 @@ public class TerrainChunkTesselatorCi
             float texrecBottom = texrecTop + _texrecHeight;
             ModelData toreturn = GetModelData(tt, sidetexture);
 
-            int lastelement = toreturn.verticesCount;
+            int lastelement = toreturn.VerticesCount;
             ModelDataTool.AddVertex(toreturn, bottom10.X, bottom10.Y, bottom10.Z, _texrecRight, texrecBottom, curcolor);
             ModelDataTool.AddVertex(toreturn, bottom11.X, bottom11.Y, bottom11.Z, _texrecLeft, texrecBottom, curcolor);
             ModelDataTool.AddVertex(toreturn, top10.X, top10.Y, top10.Z, _texrecRight, texrecTop, curcolor);
@@ -1405,7 +1404,7 @@ public class TerrainChunkTesselatorCi
             float texrecBottom = texrecTop + _texrecHeight;
             ModelData toreturn = GetModelData(tt, sidetexture);
 
-            int lastelement = toreturn.verticesCount;
+            int lastelement = toreturn.VerticesCount;
             ModelDataTool.AddVertex(toreturn, bottom00.X, bottom00.Y, bottom00.Z, _texrecRight, texrecBottom, curcolor);
             ModelDataTool.AddVertex(toreturn, top00.X, top00.Y, top00.Z, _texrecRight, texrecTop, curcolor);
             ModelDataTool.AddVertex(toreturn, bottom10.X, bottom10.Y, bottom10.Z, _texrecLeft, texrecBottom, curcolor);
@@ -1425,7 +1424,7 @@ public class TerrainChunkTesselatorCi
             float texrecBottom = texrecTop + _texrecHeight;
             ModelData toreturn = GetModelData(tt, sidetexture);
 
-            int lastelement = toreturn.verticesCount;
+            int lastelement = toreturn.VerticesCount;
             ModelDataTool.AddVertex(toreturn, bottom01.X, bottom01.Y, bottom01.Z, _texrecLeft, texrecBottom, curcolor);
             ModelDataTool.AddVertex(toreturn, top01.X, top01.Y, top01.Z, _texrecLeft, texrecTop, curcolor);
             ModelDataTool.AddVertex(toreturn, bottom11.X, bottom11.Y, bottom11.Z, _texrecRight, texrecBottom, curcolor);
@@ -1459,14 +1458,14 @@ public class TerrainChunkTesselatorCi
         retCount = 0;
         for (int i = 0; i < toreturnatlas1dLength; i++)
         {
-            if (toreturnatlas1d[i].indicesCount > 0)
+            if (toreturnatlas1d[i].IndicesCount > 0)
             {
                 ret[retCount++] = GetVerticesIndices(toreturnatlas1d[i], x, y, z, game.d_TerrainTextures.TerrainTextures1d[i % game.d_TerrainTextures.TerrainTexturesPerAtlas], false);
             }
         }
         for (int i = 0; i < toreturnatlas1dLength; i++)
         {
-            if (toreturnatlas1dtransparent[i].indicesCount > 0)
+            if (toreturnatlas1dtransparent[i].IndicesCount > 0)
             {
                 ret[retCount++] = GetVerticesIndices(toreturnatlas1dtransparent[i], x, y, z, game.d_TerrainTextures.TerrainTextures1d[i % game.d_TerrainTextures.TerrainTexturesPerAtlas], true);
             }
@@ -1498,18 +1497,18 @@ public class TerrainChunkTesselatorCi
             isFluid[i] = b.DrawType == Packet_DrawTypeEnum.Fluid;
         }
 
-        if (x < 0 || y < 0 || z < 0) { retCount = 0; return new VerticesIndicesToLoad[0]; }
+        if (x < 0 || y < 0 || z < 0) { retCount = 0; return []; }
         if (!started) { game.platform.ThrowException("not started"); }
         if (x >= mapsizex / chunksize
             || y >= mapsizey / chunksize
-            || z >= mapsizez / chunksize) { retCount = 0; return new VerticesIndicesToLoad[0]; }
+            || z >= mapsizez / chunksize) { retCount = 0; return []; }
 
         for (int i = 0; i < toreturnatlas1dLength; i++)
         {
-            toreturnatlas1d[i].verticesCount = 0;
-            toreturnatlas1d[i].indicesCount = 0;
-            toreturnatlas1dtransparent[i].verticesCount = 0;
-            toreturnatlas1dtransparent[i].indicesCount = 0;
+            toreturnatlas1d[i].VerticesCount = 0;
+            toreturnatlas1d[i].IndicesCount = 0;
+            toreturnatlas1dtransparent[i].VerticesCount = 0;
+            toreturnatlas1dtransparent[i].IndicesCount = 0;
         }
 
         CalculateVisibleFaces(currentChunk18);

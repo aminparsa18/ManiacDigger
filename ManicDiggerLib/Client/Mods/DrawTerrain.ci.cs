@@ -398,7 +398,7 @@ public class ModDrawTerrain : ModBase
             for (int i = 0; i < r.DataCount; i++)
             {
                 VerticesIndicesToLoad submesh = r.Data[i];
-                if (submesh.modelData.GetIndicesCount() == 0) { continue; }
+                if (submesh.modelData.IndicesCount == 0) { continue; }
 
                 float cx = submesh.positionX + chunksize * 0.5f;
                 float cy = submesh.positionZ + chunksize * 0.5f;
@@ -645,20 +645,18 @@ public class ModDrawTerrain : ModBase
         ModelData dest = new();
         unchecked
         {
-            dest.xyz = new float[source.GetXyzCount()];
-            for (int i = 0; i < source.GetXyzCount(); i++) { dest.xyz[i] = source.xyz[i]; }
+            dest.Xyz = new float[source.XyzCount];
+            for (int i = 0; i < source.XyzCount; i++) { dest.Xyz[i] = source.Xyz[i]; }
 
-            dest.uv = new float[source.GetUvCount()];
-            for (int i = 0; i < source.GetUvCount(); i++) { dest.uv[i] = source.uv[i]; }
+            dest.Uv = new float[source.UvCount];
+            for (int i = 0; i < source.UvCount; i++) { dest.Uv[i] = source.Uv[i]; }
+            dest.Rgba = new byte[source.RgbaCount];
+            for (int i = 0; i < source.RgbaCount; i++) { dest.Rgba[i] = source.Rgba[i]; }
 
-            dest.rgba = new byte[source.GetRgbaCount()];
-            for (int i = 0; i < source.GetRgbaCount(); i++) { dest.rgba[i] = source.rgba[i]; }
-
-            dest.indices = new int[source.GetIndicesCount()];
-            for (int i = 0; i < source.GetIndicesCount(); i++) { dest.indices[i] = source.indices[i]; }
-
-            dest.SetVerticesCount(source.GetVerticesCount());
-            dest.SetIndicesCount(source.GetIndicesCount());
+            dest.Indices = new int[source.IndicesCount];
+            for (int i = 0; i < source.IndicesCount; i++) { dest.Indices[i] = source.Indices[i]; }
+            dest.VerticesCount = source.VerticesCount;
+            dest.IndicesCount = source.IndicesCount;
         }
         return dest;
     }

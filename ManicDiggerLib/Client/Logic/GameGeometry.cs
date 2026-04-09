@@ -47,7 +47,7 @@
     // 2D drawing
     // -------------------------------------------------------------------------
 
-    private Model quadModel;
+    private ModelData quadModel;
 
     public void Draw2dTexture(int textureid, float x1, float y1, float width, float height, int? inAtlasId, int atlastextures, int color, bool enabledepthtest)
     {
@@ -99,7 +99,7 @@
             rect.X, rect.Y, rect.Width, rect.Height,
             x1, y1, width, height,
             (byte)ColorR(color), (byte)ColorG(color), (byte)ColorB(color), (byte)ColorA(color));
-        data.setMode(DrawModeEnum.Triangles);
+        data.Mode=(int)DrawMode.Triangles;
         platform.UpdateModel(data);
         DrawModelData(data);
 
@@ -123,7 +123,7 @@
             rect.X, rect.Y, rect.Width, rect.Height,
             dstx, dsty, dstwidth, dstheight,
             (byte)ColorR(color), (byte)ColorG(color), (byte)ColorB(color), (byte)ColorA(color));
-        data.setMode(DrawModeEnum.Triangles);
+        data.Mode = (int)DrawMode.Triangles;
         platform.UpdateModel(data);
         DrawModelData(data);
 
@@ -150,7 +150,7 @@
         }
 
         ModelData combined = CombineModelData(modelDatas, modelDatasCount);
-        combined.setMode(DrawModeEnum.Triangles);
+        combined.Mode = (int)DrawMode.Triangles;
 
         platform.GlDisableCullFace();
         platform.BindTexture2d(textureid);
@@ -184,38 +184,36 @@
         int totalVertices = 0;
         for (int i = 0; i < count; i++)
         {
-            totalIndices += modelDatas[i].indicesCount;
-            totalVertices += modelDatas[i].verticesCount;
+            totalIndices += modelDatas[i].IndicesCount;
+            totalVertices += modelDatas[i].VerticesCount;
         }
 
         ModelData ret = new()
         {
-            indices = new int[totalIndices],
-            xyz = new float[totalVertices * 3],
-            uv = new float[totalVertices * 2],
-            rgba = new byte[totalVertices * 4]
+            Indices = new int[totalIndices],
+            Xyz = new float[totalVertices * 3],
+            Uv = new float[totalVertices * 2],
+            Rgba = new byte[totalVertices * 4]
         };
 
         for (int i = 0; i < count; i++)
         {
             ModelData m = modelDatas[i];
-            int baseVertex = ret.verticesCount;
-            int baseIndex = ret.indicesCount;
+            int baseVertex = ret.VerticesCount;
+            int baseIndex = ret.IndicesCount;
 
-            for (int k = 0; k < m.indicesCount; k++)
-                ret.indices[baseIndex + k] = m.indices[k] + baseVertex;
-            ret.indicesCount += m.indicesCount;
+            for (int k = 0; k < m.IndicesCount; k++)
+                ret.Indices[baseIndex + k] = m.Indices[k] + baseVertex;
+            ret.IndicesCount += m.IndicesCount; 
+            for (int k = 0; k < m.VerticesCount * 3; k++)
+                ret.Xyz[baseVertex * 3 + k] = m.Xyz[k];
 
-            for (int k = 0; k < m.verticesCount * 3; k++)
-                ret.xyz[baseVertex * 3 + k] = m.xyz[k];
+            for (int k = 0; k < m.VerticesCount * 2; k++)
+                ret.Uv[baseVertex * 2 + k] = m.Uv[k];
+            for (int k = 0; k < m.VerticesCount * 4; k++)
+                ret.Rgba[baseVertex * 4 + k] = m.Rgba[k];
 
-            for (int k = 0; k < m.verticesCount * 2; k++)
-                ret.uv[baseVertex * 2 + k] = m.uv[k];
-
-            for (int k = 0; k < m.verticesCount * 4; k++)
-                ret.rgba[baseVertex * 4 + k] = m.rgba[k];
-
-            ret.verticesCount += m.verticesCount;
+            ret.VerticesCount += m.VerticesCount;
         }
 
         return ret;
@@ -244,23 +242,25 @@
     {
         if (circleModelData == null)
         {
-            circleModelData = new ModelData();
-            circleModelData.setMode(DrawModeEnum.Lines);
-            circleModelData.indices = new int[CircleSegments * 2];
-            circleModelData.xyz = new float[CircleSegments * 3];
-            circleModelData.rgba = new byte[CircleSegments * 4];
-            circleModelData.uv = new float[CircleSegments * 2];
-            circleModelData.indicesCount = CircleSegments * 2;
-            circleModelData.verticesCount = CircleSegments;
+            circleModelData = new ModelData
+            {
+                Mode = (int)DrawMode.Lines,
+                Indices = new int[CircleSegments * 2],
+                Xyz = new float[CircleSegments * 3],
+                Rgba = new byte[CircleSegments * 4],
+                Uv = new float[CircleSegments * 2],
+                IndicesCount = CircleSegments * 2,
+                VerticesCount = CircleSegments
+            };
 
             // Indices and uv/rgba never change — build once.
             for (int i = 0; i < CircleSegments; i++)
             {
-                circleModelData.indices[i * 2] = i;
-                circleModelData.indices[i * 2 + 1] = (i + 1) % CircleSegments;
+                circleModelData.Indices[i * 2] = i;
+                circleModelData.Indices[i * 2 + 1] = (i + 1) % CircleSegments;
             }
             for (int i = 0; i < CircleSegments * 4; i++)
-                circleModelData.rgba[i] = 255;
+                circleModelData.Rgba[i] = 255;
             // uv is already zero-initialised by default
         }
 
@@ -268,9 +268,9 @@
         for (int i = 0; i < CircleSegments; i++)
         {
             float angle = i * 2 * MathF.PI / CircleSegments;
-            circleModelData.xyz[i * 3 + 0] = x + MathF.Cos(angle) * radius;
-            circleModelData.xyz[i * 3 + 1] = y + MathF.Sin(angle) * radius;
-            circleModelData.xyz[i * 3 + 2] = 0;
+            circleModelData.Xyz[i * 3 + 0] = x + MathF.Cos(angle) * radius;
+            circleModelData.Xyz[i * 3 + 1] = y + MathF.Sin(angle) * radius;
+            circleModelData.Xyz[i * 3 + 2] = 0;
         }
 
         platform.UpdateModel(circleModelData);

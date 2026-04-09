@@ -9,7 +9,7 @@ public class ModSkySphereStatic : ModBase
     internal int SkyTexture = -1;
     private int skySphereTexture = -1;
     private int skySphereNightTexture = -1;
-    private Model skyModel;
+    private ModelData skyModel;
 
     public override void OnNewFrameDraw3d(Game game, float deltaTime)
     {
