@@ -129,7 +129,7 @@ public class LightBetweenChunks
 
                     // Copy block data via the chunk's unified accessor.
                     for (int i = 0; i < ChunkVolume; i++)
-                        dataSlot[i] = chunk.GetBlockInChunk(i);
+                        dataSlot[i] = chunk.GetBlock(i);
 
                     // Copy base light computed by LightBase.
                     Array.Copy(chunk.baseLight, lightSlot, ChunkVolume);
@@ -299,7 +299,7 @@ public class LightBetweenChunks
                         [Index3d(ncx, ncy, ncz, NeighbourhoodSize, NeighbourhoodSize)]
                         [Index3d(localX, localY, localZ, ChunkSize, ChunkSize)];
 
-                    chunk.rendered.light[Index3d(x, y, z, OutputSize, OutputSize)] = light;
+                    chunk.rendered.Light[Index3d(x, y, z, OutputSize, OutputSize)] = light;
                 }
             }
         }

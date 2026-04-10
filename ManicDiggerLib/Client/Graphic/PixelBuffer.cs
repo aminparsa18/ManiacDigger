@@ -166,7 +166,7 @@ public class PixelBuffer
 
         int tilesize = orig.Width / tiles;
         int totalTiles = tiles * tiles;
-        int atlasesCount = Math.Max(1, (totalTiles * tilesize) / atlasSizeLimit);
+        int atlasesCount = Math.Max(1, totalTiles * tilesize / atlasSizeLimit);
         int tilesPerAtlas = totalTiles / atlasesCount;
 
         Bitmap[] atlases = new Bitmap[128];
@@ -186,7 +186,7 @@ public class PixelBuffer
                 atlas1d = Create(tilesize, atlasSizeLimit);
             }
 
-            int destY = (i % tilesPerAtlas) * tilesize;
+            int destY = i % tilesPerAtlas * tilesize;
             for (int yy = 0; yy < tilesize; yy++)
                 for (int xx = 0; xx < tilesize; xx++)
                     atlas1d.SetPixel(xx, destY + yy, orig.GetPixel(x * tilesize + xx, y * tilesize + yy));

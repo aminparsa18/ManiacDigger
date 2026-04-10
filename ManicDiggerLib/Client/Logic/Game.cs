@@ -53,7 +53,7 @@ public partial class Game
 
     internal float DecodeFixedPoint(int value)
     {
-        return (one * value) / 32;
+        return one * value / 32;
     }
 
     public static int EncodeFixedPoint(float p)
@@ -111,7 +111,7 @@ public partial class Game
     }
 
     public static byte HeadingByte(float orientationX, float orientationY, float orientationZ) =>
-     (byte)(int)((orientationY % (2 * MathF.PI)) / (2 * MathF.PI) * 256);
+     (byte)(int)(orientationY % (2 * MathF.PI) / (2 * MathF.PI) * 256);
 
     public static byte PitchByte(float orientationX, float orientationY, float orientationZ)
     {
@@ -180,7 +180,7 @@ public partial class Game
     {
         Entity entity = new();
 
-        Bullet_ bullet = new()
+        Bullet bullet = new()
         {
             fromX = fromX,
             fromY = fromY,
@@ -318,17 +318,17 @@ public partial class Game
 
     public ArraySegment<BlockPosSide> Pick(BlockOctreeSearcher s_, Line3D line, out int retCount)
     {
-        int minX = (int)(Math.Min(line.Start[0], line.End[0]));
-        int minY = (int)(Math.Min(line.Start[1], line.End[1]));
-        int minZ = (int)(Math.Min(line.Start[2], line.End[2]));
+        int minX = (int)Math.Min(line.Start[0], line.End[0]);
+        int minY = (int)Math.Min(line.Start[1], line.End[1]);
+        int minZ = (int)Math.Min(line.Start[2], line.End[2]);
 
         if (minX < 0) { minX = 0; }
         if (minY < 0) { minY = 0; }
         if (minZ < 0) { minZ = 0; }
 
-        int maxX = (int)(Math.Max(line.Start[0], line.End[0]));
-        int maxY = (int)(Math.Max(line.Start[1], line.End[1]));
-        int maxZ = (int)(Math.Max(line.Start[2], line.End[2]));
+        int maxX = (int)Math.Max(line.Start[0], line.End[0]);
+        int maxY = (int)Math.Max(line.Start[1], line.End[1]);
+        int maxZ = (int)Math.Max(line.Start[2], line.End[2]);
 
         if (maxX > VoxelMap.MapSizeX) { maxX = VoxelMap.MapSizeX; }
         if (maxY > VoxelMap.MapSizeZ) { maxY = VoxelMap.MapSizeZ; }

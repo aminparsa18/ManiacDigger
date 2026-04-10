@@ -162,18 +162,18 @@ public class ModGuiChat : ModBase
             game.IsTyping = true;
             game.GuiTypingBuffer = "";
             game.IsTeamchat = false;
-            args.Handled=(true);
+            args.Handled=true;
             return;
         }
         if (eKey == game.GetKey(Keys.PageUp) && game.GuiTyping == TypingState.Typing)
         {
             ChatPageScroll++;
-            args.Handled=(true);
+            args.Handled=true;
         }
         if (eKey == game.GetKey(Keys.PageDown) && game.GuiTyping == TypingState.Typing)
         {
             ChatPageScroll--;
-            args.Handled=(true);
+            args.Handled=true;
         }
         ChatPageScroll = Math.Clamp(ChatPageScroll, 0, game.ChatLinesCount / ChatLinesMaxToDraw);
         if (eKey == game.GetKey(Keys.Enter) || eKey == game.GetKey(Keys.KeyPadEnter))
@@ -198,7 +198,7 @@ public class ModGuiChat : ModBase
             {
                 game.platform.ConsoleWriteLine("Keyboard_KeyDown ready");
             }
-            args.Handled=(true);
+            args.Handled=true;
             return;
         }
         if (game.GuiTyping == TypingState.Typing)
@@ -210,7 +210,7 @@ public class ModGuiChat : ModBase
                 {
                     game.GuiTypingBuffer = game.GuiTypingBuffer[..^1];
                 }
-                args.Handled=(true);
+                args.Handled=true;
                 return;
             }
             if (game.keyboardStateRaw[game.GetKey(Keys.LeftControl)] || game.keyboardStateRaw[game.GetKey(Keys.RightControl)])
@@ -221,7 +221,7 @@ public class ModGuiChat : ModBase
                     {
                         game.GuiTypingBuffer = string.Concat(game.GuiTypingBuffer, Clipboard.GetText());
                     }
-                    args.Handled=(true);
+                    args.Handled=true;
                     return;
                 }
             }
@@ -233,7 +233,7 @@ public class ModGuiChat : ModBase
                 {
                     game.GuiTypingBuffer = game.typinglog[game.typinglogpos];
                 }
-                args.Handled=(true);
+                args.Handled=true;
             }
             if (key == game.GetKey(Keys.Down))
             {
@@ -247,7 +247,7 @@ public class ModGuiChat : ModBase
                 {
                     game.GuiTypingBuffer = "";
                 }
-                args.Handled=(true);
+                args.Handled=true;
             }
             //Handles player name autocomplete in chat
             if (eKey == game.GetKey(Keys.Tab) && game.GuiTypingBuffer.Trim() != "")
@@ -257,7 +257,7 @@ public class ModGuiChat : ModBase
                 if (completed == "")
                 {
                     //No completion available. Abort.
-                    args.Handled=(true);
+                    args.Handled=true;
                     return;
                 }
                 else if (parts.Length == 1)
@@ -271,10 +271,10 @@ public class ModGuiChat : ModBase
                     parts[parts.Length - 1] = completed;
                     game.GuiTypingBuffer = string.Concat(string.Join(" ", parts), " ");
                 }
-                args.Handled=(true);
+                args.Handled=true;
                 return;
             }
-            args.Handled=(true);
+            args.Handled=true;
             return;
         }
     }

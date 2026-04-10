@@ -287,7 +287,7 @@ public class Fluids : IMod
         searchTarget = 0;
         if (!m.IsBlockFluid(searchMedium))
             return false;
-        if ((searchMedium) == Water)
+        if (searchMedium == Water)
             maxRecursionDepth = 25;
         visitedBlocks = [];
         RecursiveSearch(maxRecursionDepth, x, y, z);
@@ -307,7 +307,7 @@ public class Fluids : IMod
         searchTarget = searchMedium;
         if (!m.IsBlockFluid(searchMedium))
             return false;
-        if ((searchMedium) == Water)
+        if (searchMedium == Water)
             maxRecursionDepth = 25;
         visitedBlocks = [];
         RecursiveSearch(maxRecursionDepth, x, y, z);

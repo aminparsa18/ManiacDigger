@@ -314,8 +314,8 @@ public class VegetationGrowth : IMod
             else
             {
                 int under = m.GetBlock(x, y, z - 1);
-                if ((under == Dirt
-                     || under == Grass)) return;
+                if (under == Dirt
+                     || under == Grass) return;
                 m.SetBlock(x, y, z, 0);
             }
         }

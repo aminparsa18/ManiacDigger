@@ -9,7 +9,7 @@ public class ModFpsHistoryGraph : ModBase
     private const int GraphPosX = 25;
     private const int PerLine = 2;
 
-    private ClientModManager m;
+    private IModManager m;
     private readonly float[] dtHistory = new float[MaxCount];
     private readonly Draw2dData[] todraw = new Draw2dData[MaxCount];
 
@@ -20,7 +20,7 @@ public class ModFpsHistoryGraph : ModBase
     private bool drawFpsText;
     private bool drawFpsGraph;
 
-    public override void Start(ClientModManager modmanager)
+    public override void Start(IModManager modmanager)
     {
         m = modmanager;
         for (int i = 0; i < MaxCount; i++)

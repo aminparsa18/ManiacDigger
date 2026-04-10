@@ -214,7 +214,7 @@ public class ModDrawTerrain : ModBase
 
                 c.rendered ??= new RenderedChunk();
 
-                c.rendered.dirty = true;
+                c.rendered.Dirty = true;
                 c.baseLightDirty = true;
             }
         }
@@ -282,7 +282,7 @@ public class ModDrawTerrain : ModBase
             Chunk chunk = _game.VoxelMap.chunks[Index3d(xx, yy, zz, mapsizexchunks, mapsizeychunks)];
             if (chunk?.rendered == null) { continue; }
 
-            if (chunk.rendered.dirty)
+            if (chunk.rendered.Dirty)
             {
                 RedrawChunk(xx, yy, zz);
             }
@@ -345,7 +345,7 @@ public class ModDrawTerrain : ModBase
                     for (int z = startZ; z <= endZ; z++)
                     {
                         Chunk c = _game.VoxelMap.chunks[Index3d(x, y, z, mapsizexchunks, mapsizeychunks)];
-                        if (c?.rendered == null || !c.rendered.dirty) { continue; }
+                        if (c?.rendered == null || !c.rendered.Dirty) { continue; }
 
                         int dx = px - x, dy = py - y, dz = pz - z;
                         int dist = dx * dx + dy * dy + dz * dz;
@@ -386,11 +386,11 @@ public class ModDrawTerrain : ModBase
             RenderedChunk rendered = r.Chunk.rendered;
 
             // Remove previous geometry for this chunk from the batcher.
-            if (rendered.ids != null)
+            if (rendered.Ids != null)
             {
-                for (int i = 0; i < rendered.idsCount; i++)
+                for (int i = 0; i < rendered.IdsCount; i++)
                 {
-                    _game.d_Batcher.Remove(rendered.ids[i]);
+                    _game.d_Batcher.Remove(rendered.Ids[i]);
                 }
             }
 
@@ -413,8 +413,8 @@ public class ModDrawTerrain : ModBase
             // Write the new IDs back onto the chunk.
             int[] idsArr = new int[_batcherIdsCount];
             for (int i = 0; i < _batcherIdsCount; i++) { idsArr[i] = _batcherIds[i]; }
-            rendered.ids = idsArr;
-            rendered.idsCount = _batcherIdsCount;
+            rendered.Ids = idsArr;
+            rendered.IdsCount = _batcherIdsCount;
         }
     }
 
@@ -431,7 +431,7 @@ public class ModDrawTerrain : ModBase
             if (c == null) { return; }
 
             c.rendered ??= new RenderedChunk();
-            c.rendered.dirty = false;
+            c.rendered.Dirty = false;
             _chunkUpdates++;
 
             GetExtendedChunk(x, y, z);
@@ -533,10 +533,10 @@ public class ModDrawTerrain : ModBase
 
             // Initialise the chunk's light buffer to full brightness on first use.
             RenderedChunk rendered = _game.VoxelMap.GetChunk(cx * chunksize, cy * chunksize, cz * chunksize).rendered;
-            if (rendered.light == null)
+            if (rendered.Light == null)
             {
-                rendered.light = new byte[BufferedChunkVolume];
-                for (int i = 0; i < BufferedChunkVolume; i++) { rendered.light[i] = 15; }
+                rendered.Light = new byte[BufferedChunkVolume];
+                for (int i = 0; i < BufferedChunkVolume; i++) { rendered.Light[i] = 15; }
             }
 
             _lightBetweenChunks.CalculateLightBetweenChunks(
@@ -545,7 +545,7 @@ public class ModDrawTerrain : ModBase
             // Copy the computed light values into the per-frame scratch buffer.
             for (int i = 0; i < BufferedChunkVolume; i++)
             {
-                _currentChunkShadows[i] = rendered.light[i];
+                _currentChunkShadows[i] = rendered.Light[i];
             }
         }
     }
@@ -599,7 +599,7 @@ public class ModDrawTerrain : ModBase
     }
 
     /// <summary>View-distance-based side length of the active map area in blocks.</summary>
-    private int MapAreaSize() => (int)(_game.d_Config3d.viewdistance) * 2;
+    private int MapAreaSize() => (int)_game.d_Config3d.viewdistance * 2;
 
     /// <summary>Vertical counterpart of <see cref="MapAreaSize"/>.</summary>
     private int MapAreaSizeZ() => MapAreaSize();

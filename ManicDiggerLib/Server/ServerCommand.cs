@@ -1169,7 +1169,7 @@ public partial class Server
                 foreach (var k in clients)
                 {
                     // Format: Key Playername IP
-                    SendMessage(sourceClientId, string.Format("[{0}] {1} {2}", k.Key, k.Value.ColoredPlayername(colorNormal), (k.Value.socket.RemoteEndPoint()).AddressToString()));
+                    SendMessage(sourceClientId, string.Format("[{0}] {1} {2}", k.Key, k.Value.ColoredPlayername(colorNormal), k.Value.socket.RemoteEndPoint().AddressToString()));
                 }
                 return true;
             case "-clients2":

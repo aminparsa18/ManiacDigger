@@ -26,11 +26,11 @@ public class Sphere
         int i = 0;
         for (int y = 0; y < rings; y++)
         {
-            float phi = ((float)y / (rings - 1)) * MathF.PI;
+            float phi = (float)y / (rings - 1) * MathF.PI;
 
             for (int x = 0; x < segments; x++)
             {
-                float theta = ((float)x / (segments - 1)) * 2f * MathF.PI;
+                float theta = (float)x / (segments - 1) * 2f * MathF.PI;
 
                 float vx = radius * MathF.Sin(phi) * MathF.Cos(theta);
                 float vy = height * MathF.Cos(phi);
@@ -55,12 +55,12 @@ public class Sphere
 
         GeometryModel data = new()
         {
-            VerticesCount = (vertexCount),
-            IndicesCount = (vertexCount * 6),
-            Xyz = (xyz),
-            Uv = (uv),
-            Rgba = (rgba),
-            Indices = (CalculateElements(segments, rings))
+            VerticesCount = vertexCount,
+            IndicesCount = vertexCount * 6,
+            Xyz = xyz,
+            Uv = uv,
+            Rgba = rgba,
+            Indices = CalculateElements(segments, rings)
         };
         return data;
     }

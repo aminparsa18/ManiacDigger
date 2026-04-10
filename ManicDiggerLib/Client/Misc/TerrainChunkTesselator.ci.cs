@@ -298,7 +298,7 @@ public class TerrainChunkTesselatorCi
                     int[] nPos = tmpnPos;
                     nPos[TileSideEnum.Top] = pos + movez;
                     nPos[TileSideEnum.Bottom] = pos - movez;
-                    nPos[TileSideEnum.Front] = pos + (chunksize + 2);
+                    nPos[TileSideEnum.Front] = pos + chunksize + 2;
                     nPos[TileSideEnum.Back] = pos - (chunksize + 2);
                     nPos[TileSideEnum.Left] = pos - 1;
                     nPos[TileSideEnum.Right] = pos + 1;
@@ -345,7 +345,7 @@ public class TerrainChunkTesselatorCi
                     }
 
                     //Store drawing flags
-                    currentChunkDraw16[Index3d(xx - 1, yy - 1, zz - 1, chunksize, chunksize)] = (byte)(draw);
+                    currentChunkDraw16[Index3d(xx - 1, yy - 1, zz - 1, chunksize, chunksize)] = (byte)draw;
                 }
             }
         }
@@ -526,7 +526,7 @@ public class TerrainChunkTesselatorCi
                 if (shadowratio != shadowratio2) { break; }
                 if ((currentChunkDraw16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)] & dirflags) == 0) { break; } // fixes water and rail problem (chunk-long stripes)
                 currentChunkDrawCount16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)][dir] = 0;
-                currentChunkDraw16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)] &= (byte)(~dirflags);
+                currentChunkDraw16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)] &= (byte)~dirflags;
                 newxx++;
             }
             return newxx - xx;
@@ -543,7 +543,7 @@ public class TerrainChunkTesselatorCi
                 if (shadowratio != shadowratio2) { break; }
                 if ((currentChunkDraw16[Index3d(xx - 1, newyy - 1, zz - 1, chunksize, chunksize)] & dirflags) == 0) { break; } // fixes water and rail problem (chunk-long stripes)
                 currentChunkDrawCount16[Index3d(xx - 1, newyy - 1, zz - 1, chunksize, chunksize)][dir] = 0;
-                currentChunkDraw16[Index3d(xx - 1, newyy - 1, zz - 1, chunksize, chunksize)] &= (byte)(~dirflags);
+                currentChunkDraw16[Index3d(xx - 1, newyy - 1, zz - 1, chunksize, chunksize)] &= (byte)~dirflags;
                 newyy++;
             }
             return newyy - yy;
@@ -560,7 +560,7 @@ public class TerrainChunkTesselatorCi
                 if (shadowratio != shadowratio2) { break; }
                 if ((currentChunkDraw16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)] & dirflags) == 0) { break; } // fixes water and rail problem (chunk-long stripes)
                 currentChunkDrawCount16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)][dir] = 0;
-                currentChunkDraw16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)] &= (byte)(~dirflags);
+                currentChunkDraw16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)] &= (byte)~dirflags;
                 newxx++;
             }
             return newxx - xx;
@@ -737,39 +737,39 @@ public class TerrainChunkTesselatorCi
         //Calculate the corner points
         v = vNeighbors[TileDirectionEnum.TopRight] + new Vector3i(1, 1, 1);
         fSlopeModifier = GetCornerHeightModifier(tileSide, CornerEnum.TopRight);
-        float xPos = x + vOffsetX + ((v.X * 0.5f) * vScaleX);
-        float zPos = z + vOffsetZ + ((v.Z * 0.5f) * vScaleZ) + fSlopeModifier;
-        float yPos = y + vOffsetY + ((v.Y * 0.5f) * vScaleY);
+        float xPos = x + vOffsetX + (v.X * 0.5f * vScaleX);
+        float zPos = z + vOffsetZ + (v.Z * 0.5f * vScaleZ) + fSlopeModifier;
+        float yPos = y + vOffsetY + (v.Y * 0.5f * vScaleY);
         ModelDataTool.AddVertex(toreturn, xPos, zPos , yPos, _texrecRight, texrecTop, ColorMultiply(color, fShadowRation[CornerEnum.TopRight]));
 
         v = vNeighbors[TileDirectionEnum.TopLeft] + new Vector3i(1, 1, 1);
         fSlopeModifier = GetCornerHeightModifier(tileSide, CornerEnum.TopLeft);
-        xPos = x + vOffsetX + ((v.X * 0.5f) * vScaleX);
-        zPos = z + vOffsetZ + ((v.Z * 0.5f) * vScaleZ) + fSlopeModifier;
-        yPos = y + vOffsetY + ((v.Y * 0.5f) * vScaleY);
+        xPos = x + vOffsetX + (v.X * 0.5f * vScaleX);
+        zPos = z + vOffsetZ + (v.Z * 0.5f * vScaleZ) + fSlopeModifier;
+        yPos = y + vOffsetY + (v.Y * 0.5f * vScaleY);
         ModelDataTool.AddVertex(toreturn, xPos, zPos, yPos, _texrecLeft, texrecTop, ColorMultiply(color, fShadowRation[CornerEnum.TopLeft]));
 
         v = vNeighbors[TileDirectionEnum.BottomRight] + new Vector3i(1, 1, 1);
         fSlopeModifier = GetCornerHeightModifier(tileSide, CornerEnum.BottomRight);
-        xPos = x + vOffsetX + ((v.X * 0.5f) * vScaleX);
-        zPos = z + vOffsetZ + ((v.Z * 0.5f) * vScaleZ) + fSlopeModifier;
-        yPos = y + vOffsetY + ((v.Y * 0.5f) * vScaleY);
+        xPos = x + vOffsetX + (v.X * 0.5f * vScaleX);
+        zPos = z + vOffsetZ + (v.Z * 0.5f * vScaleZ) + fSlopeModifier;
+        yPos = y + vOffsetY + (v.Y * 0.5f * vScaleY);
         ModelDataTool.AddVertex(toreturn, xPos, zPos, yPos, _texrecRight, texrecBottom, ColorMultiply(color, fShadowRation[CornerEnum.BottomRight]));
 
         v = vNeighbors[TileDirectionEnum.BottomLeft] + new Vector3i(1, 1, 1);
         fSlopeModifier = GetCornerHeightModifier(tileSide, CornerEnum.BottomLeft);
-        xPos = x + vOffsetX + ((v.X * 0.5f) * vScaleX);
-        zPos = z + vOffsetZ + ((v.Z * 0.5f) * vScaleZ) + fSlopeModifier;
-        yPos = y + vOffsetY + ((v.Y * 0.5f) * vScaleY);
+        xPos = x + vOffsetX + (v.X * 0.5f * vScaleX);
+        zPos = z + vOffsetZ + (v.Z * 0.5f * vScaleZ) + fSlopeModifier;
+        yPos = y + vOffsetY + (v.Y * 0.5f * vScaleY);
         ModelDataTool.AddVertex(toreturn, xPos, zPos, yPos, _texrecLeft, texrecBottom, ColorMultiply(color, fShadowRation[CornerEnum.BottomLeft]));
 
         {
-            ModelDataTool.AddIndex(toreturn, (lastelement + 0));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 1));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 2));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 1));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 3));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 2));
+            ModelDataTool.AddIndex(toreturn, lastelement + 0);
+            ModelDataTool.AddIndex(toreturn, lastelement + 1);
+            ModelDataTool.AddIndex(toreturn, lastelement + 2);
+            ModelDataTool.AddIndex(toreturn, lastelement + 1);
+            ModelDataTool.AddIndex(toreturn, lastelement + 3);
+            ModelDataTool.AddIndex(toreturn, lastelement + 2);
         }
     }
 
@@ -1317,7 +1317,7 @@ public class TerrainChunkTesselatorCi
         //top
         {
             int sidetexture = TorchTopTexture;
-            float texrecTop = (terrainTexturesPerAtlasInverse * (sidetexture % terrainTexturesPerAtlas));
+            float texrecTop = terrainTexturesPerAtlasInverse * (sidetexture % terrainTexturesPerAtlas);
             float texrecBottom = texrecTop + _texrecHeight;
             GeometryModel toreturn = GetModelData(tt, sidetexture);
 
@@ -1326,18 +1326,18 @@ public class TerrainChunkTesselatorCi
             ModelDataTool.AddVertex(toreturn, top01.X, top01.Y, top01.Z, _texrecLeft, texrecBottom, curcolor);
             ModelDataTool.AddVertex(toreturn, top10.X, top10.Y, top10.Z, _texrecRight, texrecTop, curcolor);
             ModelDataTool.AddVertex(toreturn, top11.X, top11.Y, top11.Z, _texrecRight, texrecBottom, curcolor);
-            ModelDataTool.AddIndex(toreturn, (lastelement + 0));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 1));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 2));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 1));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 3));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 2));
+            ModelDataTool.AddIndex(toreturn, lastelement + 0);
+            ModelDataTool.AddIndex(toreturn, lastelement + 1);
+            ModelDataTool.AddIndex(toreturn, lastelement + 2);
+            ModelDataTool.AddIndex(toreturn, lastelement + 1);
+            ModelDataTool.AddIndex(toreturn, lastelement + 3);
+            ModelDataTool.AddIndex(toreturn, lastelement + 2);
         }
 
         //bottom - same as top, but z is 1 less.
         {
             int sidetexture = TorchSideTexture;
-            float texrecTop = (terrainTexturesPerAtlasInverse * (sidetexture % terrainTexturesPerAtlas));
+            float texrecTop = terrainTexturesPerAtlasInverse * (sidetexture % terrainTexturesPerAtlas);
             float texrecBottom = texrecTop + _texrecHeight;
             GeometryModel toreturn = GetModelData(tt, sidetexture);
 
@@ -1346,18 +1346,18 @@ public class TerrainChunkTesselatorCi
             ModelDataTool.AddVertex(toreturn, bottom01.X, bottom01.Y, bottom01.Z, _texrecLeft, texrecBottom, curcolor);
             ModelDataTool.AddVertex(toreturn, bottom10.X, bottom10.Y, bottom10.Z, _texrecRight, texrecTop, curcolor);
             ModelDataTool.AddVertex(toreturn, bottom11.X, bottom11.Y, bottom11.Z, _texrecRight, texrecBottom, curcolor);
-            ModelDataTool.AddIndex(toreturn, (lastelement + 1));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 0));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 2));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 3));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 1));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 2));
+            ModelDataTool.AddIndex(toreturn, lastelement + 1);
+            ModelDataTool.AddIndex(toreturn, lastelement + 0);
+            ModelDataTool.AddIndex(toreturn, lastelement + 2);
+            ModelDataTool.AddIndex(toreturn, lastelement + 3);
+            ModelDataTool.AddIndex(toreturn, lastelement + 1);
+            ModelDataTool.AddIndex(toreturn, lastelement + 2);
         }
 
         //front
         {
             int sidetexture = TorchSideTexture;
-            float texrecTop = (terrainTexturesPerAtlasInverse * (sidetexture % terrainTexturesPerAtlas));
+            float texrecTop = terrainTexturesPerAtlasInverse * (sidetexture % terrainTexturesPerAtlas);
             float texrecBottom = texrecTop + _texrecHeight;
             GeometryModel toreturn = GetModelData(tt, sidetexture);
 
@@ -1366,18 +1366,18 @@ public class TerrainChunkTesselatorCi
             ModelDataTool.AddVertex(toreturn, bottom01.X, bottom01.Y, bottom01.Z, _texrecRight, texrecBottom, curcolor);
             ModelDataTool.AddVertex(toreturn, top00.X, top00.Y, top00.Z, _texrecLeft, texrecTop, curcolor);
             ModelDataTool.AddVertex(toreturn, top01.X, top01.Y, top01.Z, _texrecRight, texrecTop, curcolor);
-            ModelDataTool.AddIndex(toreturn, (lastelement + 0));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 1));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 2));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 1));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 3));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 2));
+            ModelDataTool.AddIndex(toreturn, lastelement + 0);
+            ModelDataTool.AddIndex(toreturn, lastelement + 1);
+            ModelDataTool.AddIndex(toreturn, lastelement + 2);
+            ModelDataTool.AddIndex(toreturn, lastelement + 1);
+            ModelDataTool.AddIndex(toreturn, lastelement + 3);
+            ModelDataTool.AddIndex(toreturn, lastelement + 2);
         }
 
         //back - same as front, but x is 1 greater.
         {
             int sidetexture = TorchSideTexture;
-            float texrecTop = (terrainTexturesPerAtlasInverse * (sidetexture % terrainTexturesPerAtlas));
+            float texrecTop = terrainTexturesPerAtlasInverse * (sidetexture % terrainTexturesPerAtlas);
             float texrecBottom = texrecTop + _texrecHeight;
             GeometryModel toreturn = GetModelData(tt, sidetexture);
 
@@ -1386,17 +1386,17 @@ public class TerrainChunkTesselatorCi
             ModelDataTool.AddVertex(toreturn, bottom11.X, bottom11.Y, bottom11.Z, _texrecLeft, texrecBottom, curcolor);
             ModelDataTool.AddVertex(toreturn, top10.X, top10.Y, top10.Z, _texrecRight, texrecTop, curcolor);
             ModelDataTool.AddVertex(toreturn, top11.X, top11.Y, top11.Z, _texrecLeft, texrecTop, curcolor);
-            ModelDataTool.AddIndex(toreturn, (lastelement + 1));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 0));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 2));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 3));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 1));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 2));
+            ModelDataTool.AddIndex(toreturn, lastelement + 1);
+            ModelDataTool.AddIndex(toreturn, lastelement + 0);
+            ModelDataTool.AddIndex(toreturn, lastelement + 2);
+            ModelDataTool.AddIndex(toreturn, lastelement + 3);
+            ModelDataTool.AddIndex(toreturn, lastelement + 1);
+            ModelDataTool.AddIndex(toreturn, lastelement + 2);
         }
 
         {
             int sidetexture = TorchSideTexture;
-            float texrecTop = (terrainTexturesPerAtlasInverse * (sidetexture % terrainTexturesPerAtlas));
+            float texrecTop = terrainTexturesPerAtlasInverse * (sidetexture % terrainTexturesPerAtlas);
             float texrecBottom = texrecTop + _texrecHeight;
             GeometryModel toreturn = GetModelData(tt, sidetexture);
 
@@ -1405,18 +1405,18 @@ public class TerrainChunkTesselatorCi
             ModelDataTool.AddVertex(toreturn, top00.X, top00.Y, top00.Z, _texrecRight, texrecTop, curcolor);
             ModelDataTool.AddVertex(toreturn, bottom10.X, bottom10.Y, bottom10.Z, _texrecLeft, texrecBottom, curcolor);
             ModelDataTool.AddVertex(toreturn, top10.X, top10.Y, top10.Z, _texrecLeft, texrecTop, curcolor);
-            ModelDataTool.AddIndex(toreturn, (lastelement + 0));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 1));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 2));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 1));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 3));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 2));
+            ModelDataTool.AddIndex(toreturn, lastelement + 0);
+            ModelDataTool.AddIndex(toreturn, lastelement + 1);
+            ModelDataTool.AddIndex(toreturn, lastelement + 2);
+            ModelDataTool.AddIndex(toreturn, lastelement + 1);
+            ModelDataTool.AddIndex(toreturn, lastelement + 3);
+            ModelDataTool.AddIndex(toreturn, lastelement + 2);
         }
 
         //right - same as left, but y is 1 greater.
         {
             int sidetexture = TorchSideTexture;
-            float texrecTop = (terrainTexturesPerAtlasInverse * (sidetexture % terrainTexturesPerAtlas));
+            float texrecTop = terrainTexturesPerAtlasInverse * (sidetexture % terrainTexturesPerAtlas);
             float texrecBottom = texrecTop + _texrecHeight;
             GeometryModel toreturn = GetModelData(tt, sidetexture);
 
@@ -1425,12 +1425,12 @@ public class TerrainChunkTesselatorCi
             ModelDataTool.AddVertex(toreturn, top01.X, top01.Y, top01.Z, _texrecLeft, texrecTop, curcolor);
             ModelDataTool.AddVertex(toreturn, bottom11.X, bottom11.Y, bottom11.Z, _texrecRight, texrecBottom, curcolor);
             ModelDataTool.AddVertex(toreturn, top11.X, top11.Y, top11.Z, _texrecRight, texrecTop, curcolor);
-            ModelDataTool.AddIndex(toreturn, (lastelement + 1));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 0));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 2));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 3));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 1));
-            ModelDataTool.AddIndex(toreturn, (lastelement + 2));
+            ModelDataTool.AddIndex(toreturn, lastelement + 1);
+            ModelDataTool.AddIndex(toreturn, lastelement + 0);
+            ModelDataTool.AddIndex(toreturn, lastelement + 2);
+            ModelDataTool.AddIndex(toreturn, lastelement + 3);
+            ModelDataTool.AddIndex(toreturn, lastelement + 1);
+            ModelDataTool.AddIndex(toreturn, lastelement + 2);
         }
     }
 

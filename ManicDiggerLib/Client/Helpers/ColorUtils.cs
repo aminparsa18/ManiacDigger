@@ -18,7 +18,7 @@
         if (colorb >= colorsLength) { colorb = colorsLength - 1; }
         int a = colors[colora];
         int b = colors[colorb];
-        float p = (progress - ((one * colora) / (colorsLength - 1))) * (colorsLength - 1);
+        float p = (progress - (one * colora / (colorsLength - 1))) * (colorsLength - 1);
         int A = (int)(ColorA(a) + ((ColorA(b) - ColorA(a)) * p));
         int R = (int)(ColorR(a) + ((ColorR(b) - ColorR(a)) * p));
         int G = (int)(ColorG(a) + ((ColorG(b) - ColorG(a)) * p));

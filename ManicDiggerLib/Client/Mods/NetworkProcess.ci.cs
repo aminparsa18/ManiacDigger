@@ -479,7 +479,7 @@ public class ModNetworkProcess : ModBase
                     };
                     entity.sprite = sprite;
 
-                    Grenade_ grenade = new()
+                    Grenade grenade = new()
                     {
                         velocityX = game.DecodeFixedPoint(packet.Projectile.VelocityXFloat),
                         velocityY = game.DecodeFixedPoint(packet.Projectile.VelocityYFloat),

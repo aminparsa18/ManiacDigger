@@ -45,8 +45,8 @@ public class ServerSystemBanList : ServerSystem
                 if (string.IsNullOrEmpty(reason))
                     reason = "";
                 server.SendPacket(clientId, ServerPackets.DisconnectPlayer(string.Format(server.language.ServerUsernameBanned(), reason)));
-                Console.WriteLine(string.Format("{0} fails to join (banned username: {1}).", (c.socket.RemoteEndPoint()).AddressToString(), username));
-                server.ServerEventLog(string.Format("{0} fails to join (banned username: {1}).", (c.socket.RemoteEndPoint()).AddressToString(), username));
+                Console.WriteLine(string.Format("{0} fails to join (banned username: {1}).", c.socket.RemoteEndPoint().AddressToString(), username));
+                server.ServerEventLog(string.Format("{0} fails to join (banned username: {1}).", c.socket.RemoteEndPoint().AddressToString(), username));
                 server.KillPlayer(clientId);
                 continue;
             }
@@ -339,7 +339,7 @@ public class ServerSystemBanList : ServerSystem
             string sourceName = server.GetClient(sourceClientId).playername;
             string targetNameColored = targetClient.ColoredPlayername(server.colorImportant);
             string sourceNameColored = server.GetClient(sourceClientId).ColoredPlayername(server.colorImportant);
-            server.banlist.BanIP((targetClient.socket.RemoteEndPoint()).AddressToString(), sourceName, reason);
+            server.banlist.BanIP(targetClient.socket.RemoteEndPoint().AddressToString(), sourceName, reason);
             SaveBanlist(server);
             server.SendMessageToAll(string.Format(server.language.Get("Server_CommandIPBanMessage"), server.colorImportant, targetNameColored, sourceNameColored, reason));
             server.ServerEventLog(string.Format("{0} IP bans {1}.{2}", sourceName, targetName, reason));
@@ -451,7 +451,7 @@ public class ServerSystemBanList : ServerSystem
             string sourceName =server. GetClient(sourceClientId).playername;
             string targetNameColored = targetClient.ColoredPlayername(server.colorImportant);
             string sourceNameColored = server.GetClient(sourceClientId).ColoredPlayername(server.colorImportant);
-            server.banlist.TimeBanIP((targetClient.socket.RemoteEndPoint()).AddressToString(), sourceName, reason, duration);
+            server.banlist.TimeBanIP(targetClient.socket.RemoteEndPoint().AddressToString(), sourceName, reason, duration);
             SaveBanlist(server);
             server.SendMessageToAll(string.Format(server.language.Get("Server_CommandTimeIPBanMessage"),server. colorImportant, targetNameColored, sourceNameColored, duration, reason));
             server.ServerEventLog(string.Format("{0} IP bans {1} for {2} minutes.{3}", sourceName, targetName, duration, reason));

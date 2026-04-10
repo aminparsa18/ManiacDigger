@@ -322,9 +322,9 @@ public class ServerSystemNotifyEntities : ServerSystem
                 Dx = (int)(entity.drawText.dx * 32),
                 Dy = (int)(entity.drawText.dy * 32),
                 Dz = (int)(entity.drawText.dz * 32),
-                Rotx = (int)(entity.drawText.rotx),
-                Roty = (int)(entity.drawText.roty),
-                Rotz = (int)(entity.drawText.rotz),
+                Rotx = (int)entity.drawText.rotx,
+                Roty = (int)entity.drawText.roty,
+                Rotz = (int)entity.drawText.rotz,
                 Text = entity.drawText.text
             };
         }

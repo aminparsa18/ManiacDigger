@@ -71,7 +71,7 @@ public partial class Game
     // -------------------------------------------------------------------------
 
     internal VoxelMap VoxelMap;
-    internal ChunkedMap2d d_Heightmap;
+    internal ChunkedMap2d<int> d_Heightmap;
     internal Config3d d_Config3d;
 
     internal int lastplacedblockX;
@@ -289,7 +289,7 @@ public partial class Game
 
     internal IGamePlatform platform;
     internal Language language;
-    internal ClientModManager1 modmanager;
+    internal ClientModManager modmanager;
     internal FrustumCulling d_FrustumCulling;
     internal TerrainChunkTesselatorCi d_TerrainChunkTesselator;
     internal MeshBatcher d_Batcher;
@@ -378,7 +378,7 @@ public partial class Game
     {
         performanceinfo = new();
         language = new Language();
-        modmanager = new ClientModManager1();
+        modmanager = new ClientModManager();
         particleEffectBlockBreak = new ModDrawParticleEffectBlockBreak();
         ServerInfo = new ServerInformation();
         options = new GameOption();

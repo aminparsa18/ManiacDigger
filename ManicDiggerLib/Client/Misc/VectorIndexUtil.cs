@@ -15,7 +15,7 @@ public class VectorIndexUtil
     public static Vector3 Pos(int index, int sizex, int sizey)
     {
         int x = index % sizex;
-        int y = (index / sizex) % sizey;
+        int y = index / sizex % sizey;
         int h = index / (sizex * sizey);
         return new Vector3(x, y, h);
     }
@@ -23,7 +23,7 @@ public class VectorIndexUtil
     internal static void PosInt(int index, int sizex, int sizey, ref Vector3i ret)
     {
         int x = index % sizex;
-        int y = (index / sizex) % sizey;
+        int y = index / sizex % sizey;
         int h = index / (sizex * sizey);
         ret.X = x;
         ret.Y = y;
@@ -37,7 +37,7 @@ public class VectorIndexUtil
 
     public static int PosY(int index, int sizex, int sizey)
     {
-        return (index / sizex) % sizey;
+        return index / sizex % sizey;
     }
 
     public static int PosZ(int index, int sizex, int sizey)

@@ -662,9 +662,9 @@ public class War : IMod
             float dy = y1 - y2;
             float dz = z1 - z2;
             float dist = MathF.Sqrt(dx * dx + dy * dy + dz * dz);
-            dx = (dx / dist) * 0.1f;
-            dy = (dy / dist) * 0.1f;
-            dz = (dz / dist) * 0.1f;
+            dx = dx / dist * 0.1f;
+            dy = dy / dist * 0.1f;
+            dz = dz / dist * 0.1f;
             m.SendExplosion(targetplayer, dx, dy, dz, true, m.GetBlockType(block).ExplosionRange, m.GetBlockType(block).ExplosionTime);
         }
         int health = m.GetPlayerHealth(targetplayer);
@@ -829,7 +829,7 @@ public class War : IMod
         for (int t = 0; t < allteams.Length; t++)
         {
             List<int> players = playersByTeam[allteams[t]];
-            players.Sort((a, b) => (this.players[b].kills.CompareTo(this.players[a].kills)));
+            players.Sort((a, b) => this.players[b].kills.CompareTo(this.players[a].kills));
             for (int i = 0; i < players.Count; i++)
             {
                 string s = string.Format("{0} {1}ms {2} kills", m.GetPlayerName(players[i]), (int)(m.GetPlayerPing(players[i]) * 1000), this.players[players[i]].kills);
@@ -898,12 +898,12 @@ public class War : IMod
 
     private static float XCenter(float outerWidth, float innerWidth)
     {
-        return (outerWidth / 2 - innerWidth / 2);
+        return outerWidth / 2 - innerWidth / 2;
     }
 
     private static float YCenter(float outerHeight, float innerHeight)
     {
-        return (outerHeight / 2 - innerHeight / 2);
+        return outerHeight / 2 - innerHeight / 2;
     }
 
     private float TextWidth(string text, DialogFont font)
@@ -986,7 +986,7 @@ public class War : IMod
     private void UpdateRespawnTimer()
     {
         int[] allplayers = m.AllPlayers();
-        int secondsToRespawn = (int)((CurrentRespawnTime + RespawnTime) - DateTime.UtcNow).TotalSeconds;
+        int secondsToRespawn = (int)(CurrentRespawnTime + RespawnTime - DateTime.UtcNow).TotalSeconds;
         if (secondsToRespawn <= 0)
         {
             for (int i = 0; i < allplayers.Length; i++)

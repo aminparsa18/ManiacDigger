@@ -110,7 +110,7 @@ public class Tnt : IMod
                             {
                                 if ((block != 0)
                                     && (block != adminium)
-                                    && !(m.IsBlockFluid(block)))
+                                    && !m.IsBlockFluid(block))
                                 {
                                     m.SetBlock(pos2.x, pos2.y, pos2.z, 0);
                                     if (!m.IsCreative)

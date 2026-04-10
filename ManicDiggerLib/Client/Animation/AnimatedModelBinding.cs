@@ -126,7 +126,7 @@ public class AnimatedModelBinding : ITableBinding
     }
 
     /// <summary>Parses a string to int via float intermediary, as required by <see cref="IGamePlatform"/>.</summary>
-    private int IntParse(string s) => (int)(FloatParse(s));
+    private int IntParse(string s) => (int)FloatParse(s);
 
     /// <summary>Parses a string to float using <see cref="IGamePlatform"/>, returning 0 on failure.</summary>
     private static float FloatParse(string s)

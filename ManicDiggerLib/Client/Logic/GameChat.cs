@@ -106,7 +106,7 @@
     public bool BoolCommandArgument(string arguments)
     {
         arguments = arguments.Trim();
-        return (arguments == "" || arguments == "1" || arguments == "on" || arguments == "yes");
+        return arguments == "" || arguments == "1" || arguments == "on" || arguments == "yes";
     }
 
     private void ExecuteClientCommand(string s_)

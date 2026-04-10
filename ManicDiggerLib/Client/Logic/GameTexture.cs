@@ -157,8 +157,8 @@
             PixelBuffer tile = PixelBuffer.FromBitmap(bmp);
             bmp.Dispose();
 
-            int x = (i % TexturesPacked) * tilesize;
-            int y = (i / TexturesPacked) * tilesize;
+            int x = i % TexturesPacked * tilesize;
+            int y = i / TexturesPacked * tilesize;
             for (int yy = 0; yy < tilesize; yy++)
                 for (int xx = 0; xx < tilesize; xx++)
                     atlas2d.SetPixel(x + xx, y + yy, tile.GetPixel(xx, yy));

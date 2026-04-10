@@ -261,7 +261,7 @@ public class PlayerInterpolationState : InterpolatedObject
     internal byte pitch;
 }
 
-public class Bullet_
+public class Bullet
 {
     internal float fromX;
     internal float fromY;
@@ -305,17 +305,17 @@ public class Entity
 {
     public Entity()
     {
-        scripts = new EntityScript[8];
+        scripts = new IEntityScript[8];
         scriptsCount = 0;
     }
     internal Expires expires;
     internal Sprite sprite;
-    internal Grenade_ grenade;
-    internal Bullet_ bullet;
+    internal Grenade grenade;
+    internal Bullet bullet;
     internal Minecart minecart;
     internal PlayerDrawInfo playerDrawInfo;
 
-    internal EntityScript[] scripts;
+    internal IEntityScript[] scripts;
     internal int scriptsCount;
 
     // network
@@ -577,23 +577,16 @@ public class DirectionUtils
 
     public static int ToRailDirectionFlags(RailDirection direction)
     {
-        switch (direction)
+        return direction switch
         {
-            case RailDirection.DownLeft:
-                return RailDirectionFlags.DownLeft;
-            case RailDirection.DownRight:
-                return RailDirectionFlags.DownRight;
-            case RailDirection.Horizontal:
-                return RailDirectionFlags.Horizontal;
-            case RailDirection.UpLeft:
-                return RailDirectionFlags.UpLeft;
-            case RailDirection.UpRight:
-                return RailDirectionFlags.UpRight;
-            case RailDirection.Vertical:
-                return RailDirectionFlags.Vertical;
-            default:
-                return 0;
-        }
+            RailDirection.DownLeft => RailDirectionFlags.DownLeft,
+            RailDirection.DownRight => RailDirectionFlags.DownRight,
+            RailDirection.Horizontal => RailDirectionFlags.Horizontal,
+            RailDirection.UpLeft => RailDirectionFlags.UpLeft,
+            RailDirection.UpRight => RailDirectionFlags.UpRight,
+            RailDirection.Vertical => RailDirectionFlags.Vertical,
+            _ => 0,
+        };
     }
 
     public static VehicleDirection12 Reverse(VehicleDirection12 direction)
@@ -723,7 +716,7 @@ public enum TypingState
     Ready
 }
 
-public class Grenade_
+public class Grenade
 {
     internal float velocityX;
     internal float velocityY;
@@ -783,76 +776,6 @@ public class Draw2dData
     internal int color;
 }
 
-public class Chunk
-{
-    public Chunk()
-    {
-        baseLightDirty = true;
-    }
-
-    internal byte[] data;
-    internal int[] dataInt;
-    internal byte[] baseLight;
-    internal bool baseLightDirty;
-    internal RenderedChunk rendered;
-
-    public int GetBlockInChunk(int pos)
-    {
-        if (dataInt != null)
-        {
-            return dataInt[pos];
-        }
-        else
-        {
-            return data[pos];
-        }
-    }
-
-    public void SetBlockInChunk(int pos, int block)
-    {
-        if (dataInt == null)
-        {
-            if (block < 255)
-            {
-                data[pos] = (byte)(block);
-            }
-            else
-            {
-                int n = Game.chunksize * Game.chunksize * Game.chunksize;
-                dataInt = new int[n];
-                for (int i = 0; i < n; i++)
-                {
-                    dataInt[i] = data[i];
-                }
-                data = null;
-
-                dataInt[pos] = block;
-            }
-        }
-        else
-        {
-            dataInt[pos] = block;
-        }
-    }
-
-    public bool ChunkHasData()
-    {
-        return data != null || dataInt != null;
-    }
-}
-
-public class RenderedChunk
-{
-    public RenderedChunk()
-    {
-        dirty = true;
-    }
-    internal int[] ids;
-    internal int idsCount;
-    internal bool dirty;
-    internal byte[] light;
-}
-
 public class ITerrainTextures
 {
     internal Game game;
@@ -886,229 +809,6 @@ public class Config3d
     public void SetEnableMipmaps(bool value) { ENABLE_MIPMAPS = value; }
 }
 
-public abstract class ClientModManager
-{
-    public abstract void MakeScreenshot();
-    public abstract void SetLocalPosition(float glx, float gly, float glz);
-    public abstract float GetLocalPositionX();
-    public abstract float GetLocalPositionY();
-    public abstract float GetLocalPositionZ();
-    public abstract void SetLocalOrientation(float glx, float gly, float glz);
-    public abstract float GetLocalOrientationX();
-    public abstract float GetLocalOrientationY();
-    public abstract float GetLocalOrientationZ();
-    public abstract void DisplayNotification(string message);
-    public abstract void SendChatMessage(string message);
-    public abstract IGamePlatform GetPlatform();
-    public abstract void ShowGui(int level);
-    public abstract void SetFreemove(int level);
-    public abstract int GetFreemove();
-    public abstract Bitmap GrabScreenshot();
-    public abstract AviWriterCi AviWriterCreate();
-    public abstract int GetWindowWidth();
-    public abstract int GetWindowHeight();
-    public abstract bool IsFreemoveAllowed();
-    public abstract void EnableCameraControl(bool enable);
-    public abstract int WhiteTexture();
-    public abstract void Draw2dTexture(int textureid, float x1, float y1, float width, float height, int inAtlasId, int color);
-    public abstract void Draw2dTextures(Draw2dData[] todraw, int todrawLength, int textureId);
-    public abstract void Draw2dText(string text, float x, float y, float fontsize);
-    public abstract void OrthoMode();
-    public abstract void PerspectiveMode();
-    public abstract Dictionary<string, string> GetPerformanceInfo();
-}
-
-public class ClientModManager1 : ClientModManager
-{
-    internal Game game;
-
-    public override void MakeScreenshot()
-    {
-        game.platform.SaveScreenshot();
-    }
-
-    public override void SetLocalPosition(float glx, float gly, float glz)
-    {
-        game.player.position.x = glx;
-        game.player.position.y = gly;
-        game.player.position.z = glz;
-    }
-
-    public override float GetLocalPositionX()
-    {
-        return game.player.position.x;
-    }
-
-    public override float GetLocalPositionY()
-    {
-        return game.player.position.y;
-    }
-
-    public override float GetLocalPositionZ()
-    {
-        return game.player.position.z;
-    }
-
-    public override void SetLocalOrientation(float glx, float gly, float glz)
-    {
-        game.player.position.rotx = glx;
-        game.player.position.roty = gly;
-        game.player.position.rotz = glz;
-    }
-
-    public override float GetLocalOrientationX()
-    {
-        return game.player.position.rotx;
-    }
-
-    public override float GetLocalOrientationY()
-    {
-        return game.player.position.roty;
-    }
-
-    public override float GetLocalOrientationZ()
-    {
-        return game.player.position.rotz;
-    }
-
-    public override void DisplayNotification(string message)
-    {
-        game.AddChatline(message);
-    }
-
-    public override void SendChatMessage(string message)
-    {
-        game.SendChat(message);
-    }
-
-    public override IGamePlatform GetPlatform()
-    {
-        return game.platform;
-    }
-
-    public override void ShowGui(int level)
-    {
-        if (level == 0)
-        {
-            game.ENABLE_DRAW2D = false;
-        }
-        else
-        {
-            game.ENABLE_DRAW2D = true;
-        }
-    }
-
-    public override void SetFreemove(int level)
-    {
-        if (level == FreemoveLevelEnum.None)
-        {
-            game.controls.freemove = false;
-            game.controls.noclip = false;
-        }
-
-        if (level == FreemoveLevelEnum.Freemove)
-        {
-            game.controls.freemove = true;
-            game.controls.noclip = false;
-        }
-
-        if (level == FreemoveLevelEnum.Noclip)
-        {
-            game.controls.freemove = true;
-            game.controls.noclip = true;
-        }
-    }
-
-    public override int GetFreemove()
-    {
-        if (!game.controls.freemove)
-        {
-            return FreemoveLevelEnum.None;
-        }
-        if (game.controls.noclip)
-        {
-            return FreemoveLevelEnum.Noclip;
-        }
-        else
-        {
-            return FreemoveLevelEnum.Freemove;
-        }
-    }
-
-    public override Bitmap GrabScreenshot()
-    {
-        return game.platform.GrabScreenshot();
-    }
-
-    public override AviWriterCi AviWriterCreate()
-    {
-        return game.platform.AviWriterCreate();
-    }
-
-    public override int GetWindowWidth()
-    {
-        return game.platform.GetCanvasWidth();
-    }
-
-    public override int GetWindowHeight()
-    {
-        return game.platform.GetCanvasHeight();
-    }
-
-    public override bool IsFreemoveAllowed()
-    {
-        return game.AllowFreemove;
-    }
-
-    public override void EnableCameraControl(bool enable)
-    {
-        game.enableCameraControl = enable;
-    }
-
-    public override int WhiteTexture()
-    {
-        return game.WhiteTexture();
-    }
-
-    public override void Draw2dTexture(int textureid, float x1, float y1, float width, float height, int inAtlasId, int color)
-    {
-        int a = ColorUtils.ColorA(color);
-        int r = ColorUtils.ColorR(color);
-        int g = ColorUtils.ColorG(color);
-        int b = ColorUtils.ColorB(color);
-        game.Draw2dTexture(textureid, (int)(x1), (int)(y1),
-            (int)(width), (int)(height),
-             inAtlasId, 0, ColorUtils.ColorFromArgb(a, r, g, b), false);
-    }
-
-    public override void Draw2dTextures(Draw2dData[] todraw, int todrawLength, int textureId)
-    {
-        game.Draw2dTextures(todraw, todrawLength, textureId);
-    }
-
-
-    public override void Draw2dText(string text, float x, float y, float fontsize)
-    {
-        Font font = new("Arial", fontsize);
-        game.Draw2dText(text, font, x, y, null, false);
-    }
-
-    public override void OrthoMode()
-    {
-        game.OrthoMode(GetWindowWidth(), GetWindowHeight());
-    }
-
-    public override void PerspectiveMode()
-    {
-        game.PerspectiveMode();
-    }
-
-    public override Dictionary<string, string> GetPerformanceInfo()
-    {
-        return game.performanceinfo;
-    }
-}
-
 public abstract class AviWriterCi
 {
     public abstract void Open(string filename, int framerate, int width, int height);
@@ -1129,20 +829,6 @@ public class ModDrawMain : ModBase
     {
         game.MainThreadOnRenderFrame(dt);
     }
-}
-
-public class ModUpdateMain : ModBase
-{
-    // Should use ReadWrite to be correct but that would be too slow
-    public override void OnReadOnlyMainThread(Game game, float dt)
-    {
-        game.Update(dt);
-    }
-}
-
-public abstract class EntityScript
-{
-    public virtual void OnNewFrameFixed(Game game, int entity, float dt) { }
 }
 
 public class OnUseEntityArgs
@@ -1189,175 +875,6 @@ public class TextPart
 {
     internal int color;
     internal string text;
-}
-
-/// <summary>Renders multi-colored text into a single power-of-two <see cref="Bitmap"/>.</summary>
-public class TextColorRenderer
-{
-    internal IGamePlatform platform;
-
-    /// <summary>
-    /// Renders a <see cref="TextStyle"/> value (which may contain inline color codes) into a
-    /// <see cref="Bitmap"/> sized to the next power of two in each dimension.
-    /// Each color segment is rendered separately and composited into a single atlas.
-    /// </summary>
-    /// <param name="t">The text and style parameters to render.</param>
-    /// <returns>
-    /// A <see cref="Bitmap"/> containing the rendered text, with transparent pixels where
-    /// no glyph was drawn.
-    /// </returns>
-    internal Bitmap CreateTextTexture(TextStyle t)
-    {
-        TextPart[] parts = DecodeColors(t.Text, t.Color, out int partsCount);
-
-        float totalWidth = 0;
-        float totalHeight = 0;
-        int[] sizesX = new int[partsCount];
-        int[] sizesY = new int[partsCount];
-
-        for (int i = 0; i < partsCount; i++)
-        {
-            platform.TextSize(parts[i].text, t.FontSize, out int outWidth, out int outHeight);
-            sizesX[i] = outWidth;
-            sizesY[i] = outHeight;
-            totalWidth += outWidth;
-            totalHeight = Math.Max(totalHeight, outHeight);
-        }
-
-        int size2X = NextPowerOfTwo((int)totalWidth + 1);
-        int size2Y = NextPowerOfTwo((int)totalHeight + 1);
-        PixelBuffer atlas = PixelBuffer.Create(size2X, size2Y);
-
-        float currentWidth = 0;
-        for (int i = 0; i < partsCount; i++)
-        {
-            int sizeX = sizesX[i];
-            int sizeY = sizesY[i];
-            if (sizeX == 0 || sizeY == 0) continue;
-
-            TextStyle partText = new()
-            {
-                Text = parts[i].text,
-                Color = parts[i].color,
-                FontSize = t.FontSize,
-                FontStyle = t.FontStyle,
-                FontFamily = t.FontFamily
-            };
-
-            PixelBuffer part = PixelBuffer.FromBitmap(platform.CreateTextTexture(partText));
-
-            for (int y = 0; y < part.Height; y++)
-            {
-                for (int x = 0; x < part.Width; x++)
-                {
-                    if (x + currentWidth >= size2X || y >= size2Y) continue;
-
-                    int c = part.GetPixel(x, y);
-                    if (ColorUtils.ColorA(c) > 0)
-                        atlas.SetPixel((int)currentWidth + x, y, c);
-                }
-            }
-
-            currentWidth += sizeX;
-        }
-
-        return atlas.ToBitmap();
-    }
-
-    /// <summary>
-    /// Splits <paramref name="s"/> into colored segments by parsing inline color codes of the
-    /// form <c>&amp;X</c> where X is a hex digit (0–9, a–f). Unrecognised sequences are kept as-is.
-    /// </summary>
-    public static TextPart[] DecodeColors(string s, int defaultcolor, out int retLength)
-    {
-        List<TextPart> parts = [];
-        int currentcolor = defaultcolor;
-        StringBuilder currenttext = new();
-
-        for (int i = 0; i < s.Length; i++)
-        {
-            if (s[i] == '&' && i + 1 < s.Length)
-            {
-                int color = HexToInt(s[i + 1]);
-                if (color != -1)
-                {
-                    if (currenttext.Length > 0)
-                    {
-                        parts.Add(new TextPart { text = currenttext.ToString(), color = currentcolor });
-                        currenttext.Clear();
-                    }
-                    currentcolor = GetColor(color);
-                    i++; // skip the hex digit
-                    continue;
-                }
-            }
-            currenttext.Append(s[i]);
-        }
-
-        if (currenttext.Length > 0)
-        {
-            parts.Add(new TextPart { text = currenttext.ToString(), color = currentcolor });
-        }
-
-        retLength = parts.Count;
-        return parts.ToArray();
-    }
-
-    /// <summary>
-    /// Returns the smallest power of two that is greater than or equal to <paramref name="x"/>.
-    /// Handles values up to 2^31.
-    /// </summary>
-    private static int NextPowerOfTwo(int x)
-    {
-        x--;
-        x |= x >> 1;  // handle  2-bit numbers
-        x |= x >> 2;  // handle  4-bit numbers
-        x |= x >> 4;  // handle  8-bit numbers
-        x |= x >> 8;  // handle 16-bit numbers
-        x |= x >> 16; // handle 32-bit numbers
-        x++;
-        return x;
-    }
-
-    // ARGB color palette indexed by the hex digit in a color code sequence.
-    // Loosely follows the classic 16-color terminal palette.
-    private static readonly int[] ColorPalette =
-    [
-        ColorUtils.ColorFromArgb(255,   0,   0,   0), // 0 black
-        ColorUtils.ColorFromArgb(255,   0,   0, 191), // 1 dark blue
-        ColorUtils.ColorFromArgb(255,   0, 191,   0), // 2 dark green
-        ColorUtils.ColorFromArgb(255,   0, 191, 191), // 3 dark cyan
-        ColorUtils.ColorFromArgb(255, 191,   0,   0), // 4 dark red
-        ColorUtils.ColorFromArgb(255, 191,   0, 191), // 5 dark magenta
-        ColorUtils.ColorFromArgb(255, 191, 191,   0), // 6 dark yellow
-        ColorUtils.ColorFromArgb(255, 191, 191, 191), // 7 light grey
-        ColorUtils.ColorFromArgb(255,  40,  40,  40), // 8 dark grey
-        ColorUtils.ColorFromArgb(255,  64,  64, 255), // 9 blue
-        ColorUtils.ColorFromArgb(255,  64, 255,  64), // a green
-        ColorUtils.ColorFromArgb(255,  64, 255, 255), // b cyan
-        ColorUtils.ColorFromArgb(255, 255,  64,  64), // c red
-        ColorUtils.ColorFromArgb(255, 255,  64, 255), // d magenta
-        ColorUtils.ColorFromArgb(255, 255, 255,  64), // e yellow
-        ColorUtils.ColorFromArgb(255, 255, 255, 255), // f white
-    ];
-
-    private static int GetColor(int index)
-    {
-        if (index >= 0 && index < ColorPalette.Length)
-            return ColorPalette[index];
-        return ColorPalette[15]; // default white
-    }
-
-    /// <summary>
-    /// Converts a hex character (0–9, a–f, A–F) to its integer value, or -1 if not a hex digit.
-    /// </summary>
-    private static int HexToInt(char c)
-    {
-        if (c >= '0' && c <= '9') return c - '0';
-        if (c >= 'a' && c <= 'f') return c - 'a' + 10;
-        if (c >= 'A' && c <= 'F') return c - 'A' + 10;
-        return -1;
-    }
 }
 
 
@@ -1683,7 +1200,7 @@ public class GameData
     private static float DeserializeFloat(int p)
     {
         float one = 1;
-        return (one * p) / 32;
+        return one * p / 32;
     }
 }
 

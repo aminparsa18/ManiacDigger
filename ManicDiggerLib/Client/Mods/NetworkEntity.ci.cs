@@ -45,9 +45,9 @@ public class ClientPacketHandlerEntitySpawn : ClientPacketHandler
         float one = 1;
         EntityPosition_ p = new()
         {
-            x = (one * pos.X) / 32,
-            y = (one * pos.Y) / 32,
-            z = (one * pos.Z) / 32,
+            x = one * pos.X / 32,
+            y = one * pos.Y / 32,
+            z = one * pos.Z / 32,
             rotx = Angle256ToRad(pos.Pitch),
             roty = Angle256ToRad(pos.Heading)
         };

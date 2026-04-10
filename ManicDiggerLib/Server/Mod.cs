@@ -344,7 +344,7 @@ public class ModManager1 : IModManager
 
     public string GetPlayerIp(int player)
     {
-        return (server.GetClient(player).socket.RemoteEndPoint()).AddressToString();
+        return server.GetClient(player).socket.RemoteEndPoint().AddressToString();
     }
 
     public string GetPlayerName(int player)

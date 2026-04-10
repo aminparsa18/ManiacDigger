@@ -66,11 +66,11 @@ public class Quad
 
         float[] xyz = new float[PositionComponents * VertexCount];
         Array.Copy(QuadVertices, xyz, xyz.Length);
-        m.Xyz = (xyz);
+        m.Xyz = xyz;
 
         float[] uv = new float[UvComponents * VertexCount];
         Array.Copy(QuadTextureCoords, uv, uv.Length);
-        m.Uv = (uv);
+        m.Uv = uv;
         // white, fully opaque for all vertices
         byte[] rgba = new byte[4 * VertexCount];
         for (int i = 0; i < VertexCount; i++)
@@ -80,11 +80,11 @@ public class Quad
             rgba[i * 4 + 2] = 255; // B
             rgba[i * 4 + 3] = 255; // A
         }
-        m.Rgba = (rgba);
+        m.Rgba = rgba;
 
-        m.VerticesCount = (VertexCount);
-        m.Indices = (QuadVertexIndices);
-        m.IndicesCount = (IndexCount);
+        m.VerticesCount = VertexCount;
+        m.Indices = QuadVertexIndices;
+        m.IndicesCount = IndexCount;
 
         return m;
     }
@@ -121,7 +121,7 @@ public class Quad
             dx + dw, dy + dh, 0f,
             dx,      dy + dh, 0f,
         ];
-        m.Xyz = (xyz);
+        m.Xyz = xyz;
 
         float[] uv =
         [
@@ -130,7 +130,7 @@ public class Quad
             sx + sw, sy + sh,
             sx,      sy + sh,
         ];
-        m.Uv =(uv);
+        m.Uv =uv;
 
         // Apply the same flat colour to all 4 vertices.
         byte[] rgba = new byte[ColorComponents * VertexCount];
@@ -141,11 +141,11 @@ public class Quad
             rgba[i * ColorComponents + 2] = b;
             rgba[i * ColorComponents + 3] = a;
         }
-        m.Rgba = (rgba);
+        m.Rgba = rgba;
 
-        m.VerticesCount = (VertexCount);
-        m.Indices = (QuadVertexIndices);
-        m.IndicesCount = (IndexCount);
+        m.VerticesCount = VertexCount;
+        m.Indices = QuadVertexIndices;
+        m.IndicesCount = IndexCount;
         return m;
     }
 }

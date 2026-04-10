@@ -155,7 +155,7 @@ public class Noise2DWorldGeneratorWar : IMod
             getnoise += Noise(x * frequency / zoom, y / zoom * frequency, this.seed) * amplitude;//This uses our perlin noise functions. It calculates all our zoom and frequency and amplitude
         }
         double maxheight = 64;
-        int height = (int)(((getnoise + 1) / 2.0) * (maxheight - 5)) + 3;//(int)((getnoise * 128.0) + 128.0);
+        int height = (int)((getnoise + 1) / 2.0 * (maxheight - 5)) + 3;//(int)((getnoise * 128.0) + 128.0);
         if (height > maxheight - 1)
         {
             height = (int)maxheight - 1;

@@ -205,7 +205,7 @@ public partial class Server : ICurrentTime, IDropItem
         {
             DateTime start = DateTime.UtcNow;
             SaveGlobalData();
-            Console.WriteLine(language.ServerGameSaved(), (DateTime.UtcNow - start));
+            Console.WriteLine(language.ServerGameSaved(), DateTime.UtcNow - start);
             lastsave = DateTime.UtcNow;
         }
     }
@@ -461,7 +461,7 @@ public partial class Server : ICurrentTime, IDropItem
         Console.WriteLine("[SERVER] Saving data...");
         DateTime start = DateTime.UtcNow;
         SaveGlobalData();
-        Console.WriteLine(language.ServerGameSaved(), (DateTime.UtcNow - start));
+        Console.WriteLine(language.ServerGameSaved(), DateTime.UtcNow - start);
         Console.WriteLine("[SERVER] Stopped the server!");
     }
     public void Restart()
@@ -1183,7 +1183,7 @@ public partial class Server : ICurrentTime, IDropItem
         {
             case Packet_ClientIdEnum.PingReply:
                 clients[clientid].Ping.Receive(platform);
-                clients[clientid].LastPing = ((float)clients[clientid].Ping.RoundtripMilliseconds / 1000);
+                clients[clientid].LastPing = (float)clients[clientid].Ping.RoundtripMilliseconds / 1000;
                 this.NotifyPing(clientid, (int)clients[clientid].Ping.RoundtripMilliseconds);
                 break;
             case Packet_ClientIdEnum.PlayerIdentification:
@@ -1219,12 +1219,12 @@ public partial class Server : ICurrentTime, IDropItem
                     if (string.IsNullOrEmpty(username) || !allowedUsername.IsMatch(username))
                     {
                         SendPacket(clientid, ServerPackets.DisconnectPlayer(language.ServerUsernameInvalid()));
-                        ServerEventLog(string.Format("{0} can't join (invalid username: {1}).", (c.socket.RemoteEndPoint()).AddressToString(), username));
+                        ServerEventLog(string.Format("{0} can't join (invalid username: {1}).", c.socket.RemoteEndPoint().AddressToString(), username));
                         KillPlayer(clientid);
                         break;
                     }
 
-                    bool isClientLocalhost = ((c.socket.RemoteEndPoint()).AddressToString() == "127.0.0.1");
+                    bool isClientLocalhost = c.socket.RemoteEndPoint().AddressToString() == "127.0.0.1";
                     bool verificationFailed = false;
 
                     if ((ComputeMd5(config.Key.Replace("-", "") + username) != packet.Identification.VerificationKey)
@@ -1321,7 +1321,7 @@ public partial class Server : ICurrentTime, IDropItem
                     clients[clientid].PositionMul32GlY = position.Y + (int)(0.5 * 32);
                     clients[clientid].PositionMul32GlZ = position.Z;
 
-                    string ip = (clients[clientid].socket.RemoteEndPoint()).AddressToString();
+                    string ip = clients[clientid].socket.RemoteEndPoint().AddressToString();
                     SendMessageToAll(string.Format(language.ServerPlayerJoin(), clients[clientid].ColoredPlayername(colorNormal)));
                     ServerEventLog(string.Format("{0} {1} joins.", clients[clientid].playername, ip));
                     SendMessage(clientid, colorSuccess + config.WelcomeMessage);
@@ -1377,7 +1377,7 @@ public partial class Server : ICurrentTime, IDropItem
                         }
                         //Only log when building/destroying blocks. Prevents VandalFinder entries
                         if (packet.SetBlock.Mode != Packet_BlockSetModeEnum.UseWithTool)
-                            BuildLog(string.Format("{0} {1} {2} {3} {4} {5}", x, y, z, c.playername, (c.socket.RemoteEndPoint()).AddressToString(), d_Map.GetBlock(x, y, z)));
+                            BuildLog(string.Format("{0} {1} {2} {3} {4} {5}", x, y, z, c.playername, c.socket.RemoteEndPoint().AddressToString(), d_Map.GetBlock(x, y, z)));
                     }
                 }
                 break;
@@ -1411,7 +1411,7 @@ public partial class Server : ICurrentTime, IDropItem
                     this.DoFillArea(clientid, packet.FillArea, blockCount);
 
                     BuildLog(string.Format("{0} {1} {2} - {3} {4} {5} {6} {7} {8}", a.X, a.Y, a.Z, b.X, b.Y, b.Z,
-                        c.playername, (c.socket.RemoteEndPoint()).AddressToString(),
+                        c.playername, c.socket.RemoteEndPoint().AddressToString(),
                         d_Map.GetBlock(a.X, a.Y, a.Z)));
                 }
                 break;
@@ -1866,7 +1866,7 @@ public partial class Server : ICurrentTime, IDropItem
                 // All handlers must return true for operation to be permitted.
                 try
                 {
-                    retval = (retval && modEventHandlers.checkonbuild[i](player, x, y, z));
+                    retval = retval && modEventHandlers.checkonbuild[i](player, x, y, z);
                 }
                 catch (Exception ex)
                 {
@@ -1885,7 +1885,7 @@ public partial class Server : ICurrentTime, IDropItem
                 // All handlers must return true for operation to be permitted.
                 try
                 {
-                    retval = (retval && modEventHandlers.checkondelete[i](player, x, y, z));
+                    retval = retval && modEventHandlers.checkondelete[i](player, x, y, z);
                 }
                 catch (Exception ex)
                 {
@@ -1919,7 +1919,7 @@ public partial class Server : ICurrentTime, IDropItem
             // All handlers must return true for operation to be permitted.
             try
             {
-                retval = (retval && modEventHandlers.checkonuse[i](player, x, y, z));
+                retval = retval && modEventHandlers.checkonuse[i](player, x, y, z);
             }
             catch (Exception ex)
             {
@@ -2632,10 +2632,10 @@ public partial class Server : ICurrentTime, IDropItem
         if (d_Data.IsRailTile(oldblock))
         {
             oldrailcount = DirectionUtils.RailDirectionFlagsCount(
-                (oldblock - d_Data.BlockIdRailstart()));
+                oldblock - d_Data.BlockIdRailstart());
         }
         int newrailcount = DirectionUtils.RailDirectionFlagsCount(
-            (cmd.BlockType - d_Data.BlockIdRailstart()));
+            cmd.BlockType - d_Data.BlockIdRailstart());
         int blockstoput = newrailcount - oldrailcount;
 
         Item item = inventory.RightHand[cmd.MaterialSlot];
@@ -2683,7 +2683,7 @@ public partial class Server : ICurrentTime, IDropItem
         if (d_Data.IsRailTile(blocktype))
         {
             blockstopick = DirectionUtils.RailDirectionFlagsCount(
-                (blocktype - d_Data.BlockIdRailstart()));
+                blocktype - d_Data.BlockIdRailstart());
         }
 
         var item = new Item
@@ -2986,7 +2986,7 @@ public partial class Server : ICurrentTime, IDropItem
             {
                 SendLevelProgress(clientid,
                     (int)(((float)i / tosend.Count
-                                         + ((float)totalsent / blob.Length) / tosend.Count) * 100), language.ServerProgressDownloadingData());
+                                         + (float)totalsent / blob.Length / tosend.Count) * 100), language.ServerProgressDownloadingData());
                 SendBlobPart(clientid, part);
                 totalsent += part.Length;
             }
@@ -3711,8 +3711,8 @@ public class ClientOnServer
     internal int PositionMul32GlX { get { return (int)(entity.position.x * 32); } set { entity.position.x = (float)value / 32; } }
     internal int PositionMul32GlY { get { return (int)(entity.position.y * 32); } set { entity.position.y = (float)value / 32; } }
     internal int PositionMul32GlZ { get { return (int)(entity.position.z * 32); } set { entity.position.z = (float)value / 32; } }
-    internal int positionheading { get { return (entity.position.heading); } set { entity.position.heading = (byte)value; } }
-    internal int positionpitch { get { return (entity.position.pitch); } set { entity.position.pitch = (byte)value; } }
+    internal int positionheading { get { return entity.position.heading; } set { entity.position.heading = (byte)value; } }
+    internal int positionpitch { get { return entity.position.pitch; } set { entity.position.pitch = (byte)value; } }
     internal byte stance { get { return entity.position.stance; } set { entity.position.stance = (byte)value; } }
     internal string Model { get { return entity.drawModel.model; } set { entity.drawModel.model = value; } }
     internal string Texture { get { return entity.drawModel.texture; } set { entity.drawModel.texture = value; } }
@@ -3749,7 +3749,7 @@ public class ClientOnServer
         string ip = "";
         if (this.socket != null)
         {
-            ip = (this.socket.RemoteEndPoint()).AddressToString();
+            ip = this.socket.RemoteEndPoint().AddressToString();
         }
         // Format: Playername:Group:Privileges IP
         return string.Format("{0}:{1}:{2} {3}", this.playername, this.clientGroup.Name,
@@ -4145,7 +4145,7 @@ public static class MapUtil
     public static Vector3i Pos(int index, int sizex, int sizey)
     {
         int x = index % sizex;
-        int y = (index / sizex) % sizey;
+        int y = index / sizex % sizey;
         int h = index / (sizex * sizey);
         return new Vector3i(x, y, h);
     }
@@ -4259,8 +4259,8 @@ public static class MapUtil
     {
         int px = blockPosition.X;
         int py = blockPosition.Y;
-        int gridposx = (px / centerAreaSize) * centerAreaSize;
-        int gridposy = (py / centerAreaSize) * centerAreaSize;
+        int gridposx = px / centerAreaSize * centerAreaSize;
+        int gridposy = py / centerAreaSize * centerAreaSize;
         return new Point(gridposx, gridposy);
     }
 }
@@ -4337,7 +4337,7 @@ public class EntityHeading
         float deltaX = targetx - posx;
         float deltaY = targety - posy;
         //Angle to x-axis: cos(beta) = x / |length|
-        double headingDeg = (360.0 / (2.0 * Math.PI)) * Math.Acos(deltaX / Math.Sqrt(deltaX * deltaX + deltaY * deltaY)) + 90.0;
+        double headingDeg = 360.0 / (2.0 * Math.PI) * Math.Acos(deltaX / Math.Sqrt(deltaX * deltaX + deltaY * deltaY)) + 90.0;
         //Add 2 Pi if value is negative
         if (deltaY < 0)
         {
@@ -4352,7 +4352,7 @@ public class EntityHeading
             headingDeg -= 360.0;
         }
         //Convert to value between 0 and 255 and return
-        return (byte)((headingDeg / 360.0) * 256.0);
+        return (byte)(headingDeg / 360.0 * 256.0);
     }
 }
 

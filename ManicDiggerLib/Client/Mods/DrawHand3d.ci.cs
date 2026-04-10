@@ -223,7 +223,7 @@ public class ModDrawHand3d : ModBase
         float posy = game.player.position.y;
         float posz = game.player.position.z;
         int light = game.GetLight((int)posx, (int)posz, (int)posy);
-        return (_one * light) / MaxLight;
+        return _one * light / MaxLight;
     }
 
     /// <summary>

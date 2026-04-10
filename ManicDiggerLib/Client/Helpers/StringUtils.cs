@@ -11,10 +11,10 @@
         }
         else
         {
-            return (str != "0"
+            return str != "0"
                 && (str != "false")
                 && (str != "False")
-                && (str != "FALSE"));
+                && (str != "FALSE");
         }
     }
 }

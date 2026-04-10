@@ -13,9 +13,9 @@ public class VectorUtils
         float xRot = orientationx;
         float yRot = orientationy;
 
-        output.X = (dx * MathF.Cos(yRot) + dy * MathF.Sin(xRot) * MathF.Sin(yRot) - dz * MathF.Cos(xRot) * MathF.Sin(yRot));
-        output.Y = (dy * MathF.Cos(xRot) + dz * MathF.Sin(xRot));
-        output.Z = (dx * MathF.Sin(yRot) - dy * MathF.Sin(xRot) * MathF.Cos(yRot) + dz * MathF.Cos(xRot) * MathF.Cos(yRot));
+        output.X = dx * MathF.Cos(yRot) + dy * MathF.Sin(xRot) * MathF.Sin(yRot) - dz * MathF.Cos(xRot) * MathF.Sin(yRot);
+        output.Y = dy * MathF.Cos(xRot) + dz * MathF.Sin(xRot);
+        output.Z = dx * MathF.Sin(yRot) - dy * MathF.Sin(xRot) * MathF.Cos(yRot) + dz * MathF.Cos(xRot) * MathF.Cos(yRot);
     }
 
     public static bool UnProject(int winX, int winY, int winZ, Matrix4 model, Matrix4 proj, int[] view, out Vector3 objPos)
@@ -73,8 +73,8 @@ public class VectorUtils
     {
         RectangleF r = new()
         {
-            Y = (1 / texturesPacked * (textureId / texturesPacked)),
-            X = (1 / texturesPacked * (textureId % texturesPacked)),
+            Y = 1 / texturesPacked * (textureId / texturesPacked),
+            X = 1 / texturesPacked * (textureId % texturesPacked),
             Width = 1 / texturesPacked,
             Height = 1 / texturesPacked
         };

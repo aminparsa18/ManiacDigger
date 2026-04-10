@@ -188,12 +188,12 @@ public class ModDraw2dMisc : ModBase
     {
         float one = 1;
         float lagSeconds = one * (game.platform.TimeMillisecondsFromStart - game.LastReceivedMilliseconds) / 1000;
-        if ((lagSeconds >= Game.DISCONNECTED_ICON_AFTER_SECONDS && lagSeconds < 60 * 60 * 24)
+        if (lagSeconds >= Game.DISCONNECTED_ICON_AFTER_SECONDS && lagSeconds < 60 * 60 * 24
             && game.invalidVersionDrawMessage == null && !(game.issingleplayer && (!game.platform.SinglePlayerServerLoaded())))
         {
             game.Draw2dBitmapFile("disconnected.png", game.Width() - 100, 50, 50, 50);
             Font font = new("Arial", 12);
-            game.Draw2dText(((int)(lagSeconds)).ToString(), font, game.Width() - 100, 50 + 50 + 10, null, false);
+            game.Draw2dText(((int)lagSeconds).ToString(), font, game.Width() - 100, 50 + 50 + 10, null, false);
             game.Draw2dText("Press F6 to reconnect", font, game.Width() / 2 - 200 / 2, 50, null, false);
         }
     }

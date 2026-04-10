@@ -65,7 +65,7 @@ public class ModGuiCrafting : ModBase
         Vector3i[] table = d_CraftingTableTool.GetTable(posX, posY, posZ, out int tableCount);
         int[] onTable = d_CraftingTableTool.GetOnTable(table, tableCount, out int onTableCount);
         CraftingRecipesStart(game, d_CraftingRecipes, d_CraftingRecipesCount, onTable, onTableCount, posX, posY, posZ);
-        args.Handled=(true);
+        args.Handled=true;
     }
 
     internal void DrawCraftingRecipes(Game game)

@@ -97,8 +97,8 @@ public class NetworkInterpolation : INetworkInterpolation
         {
             float one = 1;
             result = req.Interpolate(received[p1].content, received[p2].content,
-                (one * (interpolationtimeMilliseconds - received[p1].timestampMilliseconds)
-                / (received[p2].timestampMilliseconds - received[p1].timestampMilliseconds)));
+                one * (interpolationtimeMilliseconds - received[p1].timestampMilliseconds)
+                / (received[p2].timestampMilliseconds - received[p1].timestampMilliseconds));
         }
         return result;
     }
@@ -165,6 +165,6 @@ public class AngleInterpolation
     /// <summary>Normalizes an angle to the range 0–360.</summary>
     private static float NormalizeAngle360(float v)
     {
-        return (v + (BiasValue / 2 / CircleFull360) * CircleFull360) % CircleFull360;
+        return (v + BiasValue / 2 / CircleFull360 * CircleFull360) % CircleFull360;
     }
 }

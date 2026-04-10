@@ -193,8 +193,8 @@ public class MainMenu
         p.TextSize(text, fontSize, out int textWidth, out int textHeight);
 
         textTexture.texture = texture;
-        textTexture.texturewidth = (int)(textBitmap.Width);
-        textTexture.textureheight = (int)(textBitmap.Height);
+        textTexture.texturewidth = (int)textBitmap.Width;
+        textTexture.textureheight = (int)textBitmap.Height;
         textTexture.text = text;
         textTexture.size = fontSize;
         textTexture.textwidth = textWidth;

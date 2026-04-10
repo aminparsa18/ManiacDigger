@@ -1,6 +1,11 @@
 ﻿using OpenTK.Mathematics;
 
-public class ScriptCharacterPhysics : EntityScript
+public interface IEntityScript
+{
+    void OnNewFrameFixed(Game game, int entity, float dt);
+}
+
+public class ScriptCharacterPhysics : IEntityScript
 {
     public ScriptCharacterPhysics()
     {
@@ -37,7 +42,7 @@ public class ScriptCharacterPhysics : EntityScript
     internal bool constEnableAcceleration;
     internal float constJump;
 
-    public override void OnNewFrameFixed(Game game_, int entity, float dt)
+    public void OnNewFrameFixed(Game game_, int entity, float dt)
     {
         game = game_;
         if (game.guistate == GuiState.MapLoading)
@@ -135,7 +140,7 @@ public class ScriptCharacterPhysics : EntityScript
         {
             loaded = true;
         }
-        if ((!(move.freemove)) && loaded)
+        if ((!move.freemove) && loaded)
         {
             if (!game.SwimmingBody())
             {
@@ -179,7 +184,7 @@ public class ScriptCharacterPhysics : EntityScript
             curspeed.Z = diff1.Z * movespeednow;
         }
         Vector3 newposition = Vector3.Zero;
-        if (!(move.freemove))
+        if (!move.freemove)
         {
             newposition.X = stateplayerposition.x + curspeed.X;
             newposition.Y = stateplayerposition.y + curspeed.Y;
@@ -229,14 +234,14 @@ public class ScriptCharacterPhysics : EntityScript
             stateplayerposition.y = newposition.Y;
             stateplayerposition.z = newposition.Z;
         }
-        if (!(move.freemove))
+        if (!move.freemove)
         {
-            if ((isplayeronground) || game.SwimmingBody())
+            if (isplayeronground || game.SwimmingBody())
             {
                 jumpacceleration = 0;
                 movedz = 0;
             }
-            if ((move.wantsjump || move.wantsjumphalf) && (((jumpacceleration == 0 && isplayeronground) || game.SwimmingBody()) && loaded) && (!game.SwimmingEyes()))
+            if ((move.wantsjump || move.wantsjumphalf) && ((jumpacceleration == 0 && isplayeronground) || game.SwimmingBody()) && loaded && (!game.SwimmingEyes()))
             {
                 jumpacceleration = move.wantsjumphalf ? jumpstartaccelerationhalf : jumpstartacceleration;
                 soundnow = true;
@@ -345,9 +350,9 @@ public class ScriptCharacterPhysics : EntityScript
 
     private bool StandingOnHalfBlock(float x, float y, float z)
     {
-        int under = game.VoxelMap.GetBlock((int)(x),
-            (int)(z),
-            (int)(y));
+        int under = game.VoxelMap.GetBlock((int)x,
+            (int)z,
+            (int)y);
         return game.blocktypes[under].DrawType == Packet_DrawTypeEnum.HalfHeight;
     }
 
@@ -373,9 +378,9 @@ public class ScriptCharacterPhysics : EntityScript
                         // Found a solid block
 
                         // Get bounding box of the block
-                        float minX = (x + xx - 1);
-                        float minY = (y + yy - 1);
-                        float minZ = (z + zz - 1);
+                        float minX = x + xx - 1;
+                        float minY = y + yy - 1;
+                        float minZ = z + zz - 1;
                         float maxX = minX + 1;
                         float maxY = minY + game.Getblockheight((int)(x + xx - 1), (int)(z + zz - 1), (int)(y + yy - 1));
                         float maxZ = minZ + 1;

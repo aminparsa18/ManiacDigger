@@ -357,8 +357,8 @@
             p.X = (int)(positionX * 32);
             p.Y = (int)(positionY * 32);
             p.Z = (int)(positionZ * 32);
-            p.Heading = (int)(RadToAngle256(orientationY));
-            p.Pitch = (int)(RadToAngle256(orientationX));
+            p.Heading = (int)RadToAngle256(orientationY);
+            p.Pitch = (int)RadToAngle256(orientationX);
             p.Stance = stance;
         }
         Packet_Client pp = new()

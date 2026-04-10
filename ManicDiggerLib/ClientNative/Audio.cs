@@ -155,7 +155,7 @@ public class AudioOpenAl
                     {
                         AL.SourcePause(source);
                     }
-                    if (state != (int)ALSourceState.Playing && (shouldplay))
+                    if (state != (int)ALSourceState.Playing && shouldplay)
                     {
                         if (restart)
                         {

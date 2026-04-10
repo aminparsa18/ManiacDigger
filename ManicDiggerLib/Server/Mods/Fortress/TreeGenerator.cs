@@ -41,10 +41,10 @@ public class TreeGenerator : IMod
     private void Init()
     {
         int Seed = m.Seed;
-        treenoise.Seed = (Seed + 2);
-        treenoise.OctaveCount = (6);
-        treenoise.Frequency = (1.0 / 180.0);
-        treenoise.Lacunarity = ((treeCount / 20.0) * (treeCount / 20.0) * 2.0);
+        treenoise.Seed = Seed + 2;
+        treenoise.OctaveCount = 6;
+        treenoise.Frequency = 1.0 / 180.0;
+        treenoise.Lacunarity = treeCount / 20.0 * (treeCount / 20.0) * 2.0;
     }
 
 

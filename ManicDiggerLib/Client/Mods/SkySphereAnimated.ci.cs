@@ -100,13 +100,13 @@ public class ModSkySphereAnimated : ModBase
         int i = 0;
         for (int y = 0; y < rings; y++)
         {
-            float phi = (y / (float)(rings - 1)) * MathF.PI;
+            float phi = y / (float)(rings - 1) * MathF.PI;
             float sinPhi = MathF.Sin(phi);
             float cosPhi = MathF.Cos(phi);
 
             for (int x = 0; x < segments; x++)
             {
-                float theta = (x / (float)(segments - 1)) * 2 * MathF.PI;
+                float theta = x / (float)(segments - 1) * 2 * MathF.PI;
                 float vx = radius * sinPhi * MathF.Cos(theta);
                 float vy = height * cosPhi;
                 float vz = radius * sinPhi * MathF.Sin(theta);

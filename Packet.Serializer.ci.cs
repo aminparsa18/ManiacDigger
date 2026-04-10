@@ -103,20 +103,20 @@ public class ProtocolParser
     public static Key ReadKey(CitoStream stream)
     {
         int n = ReadUInt32(stream);
-        return Key.Create(n >> 3, (n & 0x07));
+        return Key.Create(n >> 3, n & 0x07);
     }
 
     public static Key ReadKey_(byte firstByte, CitoStream stream)
     {
         if (firstByte < 128)
-            return Key.Create((firstByte >> 3), (firstByte & 0x07));
+            return Key.Create(firstByte >> 3, firstByte & 0x07);
         int fieldID = (ReadUInt32(stream) << 4) | ((firstByte >> 3) & 0x0F);
-        return Key.Create(fieldID, (firstByte & 0x07));
+        return Key.Create(fieldID, firstByte & 0x07);
     }
 
     public static void WriteKey(CitoStream stream, Key key)
     {
-        int n = (key.GetField() << 3) | (key.GetWireType());
+        int n = (key.GetField() << 3) | key.GetWireType();
         WriteUInt32_(stream, n);
     }
 
@@ -309,7 +309,7 @@ public class ProtocolParser
     /// </summary>
     public static void WriteZInt32(CitoStream stream, int val)
     {
-        WriteUInt32_(stream, ((val << 1) ^ (val >> 31)));
+        WriteUInt32_(stream, (val << 1) ^ (val >> 31));
     }
 
     /// <summary>
@@ -415,7 +415,7 @@ public class ProtocolParser
     /// </summary>
     public static void WriteZInt64(CitoStream stream, int val)
     {
-        WriteUInt64(stream, ((val << 1) ^ (val >> 63)));
+        WriteUInt64(stream, (val << 1) ^ (val >> 63));
     }
 
     /// <summary>

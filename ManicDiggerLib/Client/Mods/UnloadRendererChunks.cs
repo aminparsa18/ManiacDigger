@@ -57,13 +57,13 @@ public class ModUnloadRendererChunks : ModBase
             if (chunkFlatIndex == -1) { return; }
 
             RenderedChunk rendered = game.VoxelMap.chunks[chunkFlatIndex].rendered;
-            for (int k = 0; k < rendered.idsCount; k++)
+            for (int k = 0; k < rendered.IdsCount; k++)
             {
-                game.d_Batcher.Remove(rendered.ids[k]);
+                game.d_Batcher.Remove(rendered.Ids[k]);
             }
-            rendered.ids = null;
-            rendered.dirty = true;
-            rendered.light = null;
+            rendered.Ids = null;
+            rendered.Dirty = true;
+            rendered.Light = null;
         };
     }
 
@@ -108,7 +108,7 @@ public class ModUnloadRendererChunks : ModBase
             Chunk chunk = _game.VoxelMap.chunks[flatIndex];
 
             // Skip chunks that have no geometry to unload.
-            if (chunk?.rendered?.ids == null) { continue; }
+            if (chunk?.rendered?.Ids == null) { continue; }
 
             // If the chunk is outside the view-distance box, queue its geometry for removal.
             if (x < startX || y < startY || z < startZ

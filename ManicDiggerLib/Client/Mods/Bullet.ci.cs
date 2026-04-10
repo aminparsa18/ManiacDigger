@@ -12,7 +12,7 @@ public class ModBullet : ModBase
             Entity entity = game.entities[i];
             if (entity?.bullet == null) continue;
 
-            Bullet_ b = entity.bullet;
+            Bullet b = entity.bullet;
             b.progress = MathF.Max(b.progress, 1f);
 
             float dirX = b.toX - b.fromX;

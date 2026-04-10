@@ -370,8 +370,8 @@ public static class Misc
         }
         else
         {
-            return (str != "0"
-                && (!str.Equals(bool.FalseString, StringComparison.InvariantCultureIgnoreCase)));
+            return str != "0"
+                && (!str.Equals(bool.FalseString, StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }

@@ -50,7 +50,7 @@ public partial class Game
         SunMoonRenderer sunmoonrenderer = new();
         d_SunMoonRenderer = sunmoonrenderer;
 
-        d_Heightmap = new ChunkedMap2d(VoxelMap.MapSizeX, VoxelMap.MapSizeY);
+        d_Heightmap = new ChunkedMap2d<int>(VoxelMap.MapSizeX, VoxelMap.MapSizeY);
         d_TerrainChunkTesselator = terrainchunktesselator;
         terrainchunktesselator.game = this;
 

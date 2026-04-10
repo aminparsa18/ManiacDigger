@@ -24,7 +24,7 @@ public class ServerSystemHeartbeat : ServerSystem
         while (elapsed >= 60)
         {
             elapsed -= 60;
-            if ((server.Public) && (server.config.Public))
+            if (server.Public && server.config.Public)
             {
                 d_Heartbeat.GameMode = server.gameMode;
                 server.serverPlatform.QueueUserWorkItem(CreateSendHeartbeatAction(this, server));

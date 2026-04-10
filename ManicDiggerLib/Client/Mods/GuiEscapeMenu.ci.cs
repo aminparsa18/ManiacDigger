@@ -139,15 +139,15 @@ public class ModGuiEscapeMenu : ModBase
         };
         graphicsViewDistanceOption = new Button
         {
-            Text = string.Format(language.ViewDistanceOption(), ((int)(game.d_Config3d.viewdistance)).ToString())
+            Text = string.Format(language.ViewDistanceOption(), ((int)game.d_Config3d.viewdistance).ToString())
         };
         graphicsOptionFramerate = new Button
         {
-            Text = string.Format(language.OptionFramerate(), (VsyncString()))
+            Text = string.Format(language.OptionFramerate(), VsyncString())
         };
         graphicsOptionResolution = new Button
         {
-            Text = string.Format(language.OptionResolution(), (ResolutionString()))
+            Text = string.Format(language.OptionResolution(), ResolutionString())
         };
         graphicsOptionFullscreen = new Button
         {
@@ -155,11 +155,11 @@ public class ModGuiEscapeMenu : ModBase
         };
         graphicsUseServerTexturesOption = new Button
         {
-            Text = string.Format(language.UseServerTexturesOption(), (options.UseServerTextures ? language.On() : language.Off()))
+            Text = string.Format(language.UseServerTexturesOption(), options.UseServerTextures ? language.On() : language.Off())
         };
         graphicsFontOption = new Button
         {
-            Text = string.Format(language.FontOption(), (FontString()))
+            Text = string.Format(language.FontOption(), FontString())
         };
         graphicsReturnToOptionsMenu = new Button
         {
@@ -244,11 +244,11 @@ public class ModGuiEscapeMenu : ModBase
 
         otherSoundOption = new Button
         {
-            Text = string.Format(language.SoundOption(), (game.AudioEnabled ? language.On() : language.Off()))
+            Text = string.Format(language.SoundOption(), game.AudioEnabled ? language.On() : language.Off())
         };
         otherAutoJumpOption = new Button
         {
-            Text = string.Format(language.AutoJumpOption(), (game.AutoJumpEnabled ? language.On() : language.Off()))
+            Text = string.Format(language.AutoJumpOption(), game.AutoJumpEnabled ? language.On() : language.Off())
         };
         otherLanguageSetting = new Button
         {
@@ -469,7 +469,7 @@ public class ModGuiEscapeMenu : ModBase
             res.Width.ToString(),
             res.Height.ToString(),
             res.BitsPerPixel.ToString(),
-            ((int)(res.RefreshRate)).ToString());
+            ((int)res.RefreshRate).ToString());
     }
 
     private void ToggleResolution()
@@ -561,8 +561,8 @@ public class ModGuiEscapeMenu : ModBase
             string s = widgets[i].Text;
             float sizeWidth = game.TextSizeWidth(s, fontsize);
             float sizeHeight = game.TextSizeHeight(s, fontsize);
-            int Width = (int)(sizeWidth) + 10;
-            int Height = (int)(sizeHeight);
+            int Width = (int)sizeWidth + 10;
+            int Height = (int)sizeHeight;
             int X = game.Xcenter(sizeWidth);
             int Y = starty + textheight * i;
             widgets[i].x = X;
@@ -674,7 +674,7 @@ public class ModGuiEscapeMenu : ModBase
                 SetEscapeMenuState(EscapeMenuState.Main);
                 game.GuiStateBackToGame();
             }
-            args.Handled=(true);
+            args.Handled=true;
         }
         if (escapemenustate == EscapeMenuState.Keys)
         {
@@ -682,7 +682,7 @@ public class ModGuiEscapeMenu : ModBase
             {
                 game.options.Keys[keyhelps()[keyselectid].DefaultKey] = eKey;
                 keyselectid = -1;
-                args.Handled=(true);
+                args.Handled=true;
             }
         }
         if (eKey == game.GetKey(Keys.F11))
@@ -699,7 +699,7 @@ public class ModGuiEscapeMenu : ModBase
                 UseResolution();
                 SaveOptions();
             }
-            args.Handled=(true);
+            args.Handled=true;
         }
     }
     public void LoadOptions()
@@ -769,7 +769,7 @@ public class ModGuiEscapeMenu : ModBase
 
         options.Font = game.Font;
         options.Shadows = true; // game.d_CurrentShadows.ShadowsFull;
-        options.DrawDistance = (int)(game.d_Config3d.viewdistance);
+        options.DrawDistance = (int)game.d_Config3d.viewdistance;
         options.EnableSound = game.AudioEnabled;
         options.EnableAutoJump = game.AutoJumpEnabled;
         if (game.language.OverrideLanguage != null)

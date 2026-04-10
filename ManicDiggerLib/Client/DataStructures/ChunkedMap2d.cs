@@ -6,12 +6,12 @@
 /// <see cref="ServerMapStorage.ChunkSize"/> if used alongside it.
 /// </para>
 /// </summary>
-public class ChunkedMap2d
+public class ChunkedMap2d<T>
 {
     public const int ChunkSize = 16;
 
     private int _chunkGridWidth;   // map width in chunks
-    private int[][] _chunks;
+    private T[][] _chunks;
 
     /// <param name="mapSizeX">Map width in blocks. Must be a multiple of <see cref="ChunkSize"/>.</param>
     /// <param name="mapSizeY">Map height in blocks. Must be a multiple of <see cref="ChunkSize"/>.</param>
@@ -30,16 +30,16 @@ public class ChunkedMap2d
 
     // ── public API ────────────────────────────────────────────────────────
 
-    public int GetBlock(int x, int y)
+    public T GetBlock(int x, int y)
         => GetChunk(x, y)[BlockIndex(x, y)];
 
-    public void SetBlock(int x, int y, int blocktype)
+    public void SetBlock(int x, int y, T blocktype)
         => GetChunk(x, y)[BlockIndex(x, y)] = blocktype;
 
-    public int[] GetChunk(int x, int y)
+    public T[] GetChunk(int x, int y)
     {
         int index = ChunkIndex(x, y);
-        return _chunks[index] ??= new int[ChunkSize * ChunkSize];
+        return _chunks[index] ??= new T[ChunkSize * ChunkSize];
     }
 
     public void ClearChunk(int x, int y)
@@ -52,6 +52,6 @@ public class ChunkedMap2d
     {
         _chunkGridWidth = mapSizeX / ChunkSize;
         int n = _chunkGridWidth * (mapSizeY / ChunkSize);
-        _chunks = new int[n][];
+        _chunks = new T[n][];
     }
 }

@@ -24,7 +24,7 @@ public class ModGrenade : ModBase
     {
         Entity grenadeEntity = game.entities[grenadeEntityId];
         Sprite grenadeSprite = grenadeEntity.sprite;
-        Grenade_ grenade = grenadeEntity.grenade;
+        Grenade grenade = grenadeEntity.grenade;
 
         Vector3 oldPos = new(grenadeSprite.positionX, grenadeSprite.positionY, grenadeSprite.positionZ);
         Vector3 newPos = oldPos + new Vector3(grenade.velocityX, grenade.velocityY, grenade.velocityZ) * dt;

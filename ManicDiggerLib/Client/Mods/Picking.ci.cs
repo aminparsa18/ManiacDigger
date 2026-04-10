@@ -546,7 +546,7 @@ public class ModPicking : ModBase
                 positionY = pick.Start[1],
                 positionZ = pick.Start[2]
             },
-            grenade = new Grenade_
+            grenade = new Grenade
             {
                 velocityX = vX,
                 velocityY = vY,

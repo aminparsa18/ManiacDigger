@@ -47,7 +47,7 @@ public class ModAutoCamera : ModBase
     private bool _firstFrameDone;
 
     /// <summary>Reference to the client mod manager, set in <see cref="Start"/>.</summary>
-    private ClientModManager _m;
+    private IModManager _m;
 
     /// <summary>
     /// Floating-point literal <c>1.0f</c> stored in a field to prevent the Cito
@@ -68,7 +68,7 @@ public class ModAutoCamera : ModBase
     private float _playingTime;
 
     /// <inheritdoc/>
-    public override void Start(ClientModManager modmanager)
+    public override void Start(IModManager modmanager)
     {
         _m = modmanager;
         _one = 1;
@@ -462,7 +462,7 @@ public class ModAutoCamera : ModBase
     public static float CatmullRom(float t, float p0, float p1, float p2, float p3)
     {
         float one = 1;
-        return (one / 2) * (
+        return one / 2 * (
               (2 * p1)
             + (-p0 + p2) * t
             + (2 * p0 - 5 * p1 + 4 * p2 - p3) * (t * t)

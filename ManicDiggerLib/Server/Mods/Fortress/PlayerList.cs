@@ -214,12 +214,12 @@ public class PlayerList : IMod
 
     private static float Xcenter(float outerWidth, float innerWidth)
     {
-        return (outerWidth / 2 - innerWidth / 2);
+        return outerWidth / 2 - innerWidth / 2;
     }
 
     private static float Ycenter(float outerHeight, float innerHeight)
     {
-        return (outerHeight / 2 - innerHeight / 2);
+        return outerHeight / 2 - innerHeight / 2;
     }
 
     private float TextWidth(string text, DialogFont font)

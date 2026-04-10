@@ -15,7 +15,7 @@ public class ServerSimple
         clients = new ClientSimple[256];
         blockTypes = new Packet_BlockType[GlobalVar.MAX_BLOCKTYPES];
         mods = new ModSimple[128];
-        chunks = new ChunkSimple[(MapSizeX / ChunkSize) * (MapSizeY / ChunkSize)][];
+        chunks = new ChunkSimple[MapSizeX / ChunkSize * (MapSizeY / ChunkSize)][];
         _actions = new Queue<Action>();
         _mainThreadActions = new Queue<Action>();
 
@@ -112,7 +112,7 @@ public class ServerSimple
                     {
                         MainSocket = _server,
                         Connection = msg.SenderConnection,
-                        chunksseen = new bool[(MapSizeX / ChunkSize) * (MapSizeY / ChunkSize)][],
+                        chunksseen = new bool[MapSizeX / ChunkSize * (MapSizeY / ChunkSize)][],
                     };
                     clientsCount = 1;
                     break;
@@ -197,8 +197,8 @@ public class ServerSimple
                 DrawModel = new Packet_ServerEntityAnimatedModel
                 {
                     Model_ = "player.txt",
-                    ModelHeight = (int)((_one * 17 / 10) * 32),
-                    EyeHeight = (int)((_one * 15 / 10) * 32),
+                    ModelHeight = (int)(_one * 17 / 10 * 32),
+                    EyeHeight = (int)(_one * 15 / 10 * 32),
                 },
                 Position = pos,
             };

@@ -148,7 +148,7 @@ public class ModGuiTouchButtons : GameScreen
         if (e.GetId() == _touchIdMove)
         {
             game.touchMoveDx = e.GetX() - _touchMoveStartX;
-            game.touchMoveDy = -((e.GetY() - 1) - _touchMoveStartY);
+            game.touchMoveDy = -(e.GetY() - 1 - _touchMoveStartY);
 
             if (e.GetY() < game.Height() * 50 / 100)
             {

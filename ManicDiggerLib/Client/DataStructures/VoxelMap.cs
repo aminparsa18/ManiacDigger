@@ -38,7 +38,7 @@ public class VoxelMap
         else
         {
             int pos = Index3d(x & (Game.chunksize - 1), y & (Game.chunksize - 1), z & (Game.chunksize - 1), Game.chunksize, Game.chunksize);
-            return chunks[chunkpos].GetBlockInChunk(pos);
+            return chunks[chunkpos].GetBlock(pos);
         }
     }
 
@@ -85,7 +85,7 @@ public class VoxelMap
     {
         Chunk chunk = GetChunk(x, y, z);
         int pos = Index3d(x % Game.chunksize, y % Game.chunksize, z % Game.chunksize, Game.chunksize, Game.chunksize);
-        chunk.SetBlockInChunk(pos, tileType);
+        chunk.SetBlock(pos, tileType);
     }
 
     /// <summary>
@@ -120,7 +120,7 @@ public class VoxelMap
         MapSizeX = sizex;
         MapSizeY = sizey;
         MapSizeZ = sizez;
-        chunks = new Chunk[(sizex / Game.chunksize) * (sizey / Game.chunksize) * (sizez / Game.chunksize)];
+        chunks = new Chunk[sizex / Game.chunksize * (sizey / Game.chunksize) * (sizez / Game.chunksize)];
     }
 
     /// <summary>
@@ -156,7 +156,7 @@ public class VoxelMap
                         continue;
                     }
                     Chunk chunk = chunks[cpos];
-                    if (chunk == null || !chunk.ChunkHasData())
+                    if (chunk == null || !chunk.HasData())
                     {
                         continue;
                     }
@@ -164,13 +164,13 @@ public class VoxelMap
                     int chunkGlobalY = cy << Game.chunksizebits;
                     int chunkGlobalZ = cz << Game.chunksizebits;
 
-                    int inChunkX = (x + xx) - chunkGlobalX;
-                    int inChunkY = (y + yy) - chunkGlobalY;
-                    int inChunkZ = (z + zz) - chunkGlobalZ;
+                    int inChunkX = x + xx - chunkGlobalX;
+                    int inChunkY = y + yy - chunkGlobalY;
+                    int inChunkZ = z + zz - chunkGlobalZ;
 
                     int pos = (((inChunkZ << Game.chunksizebits) + inChunkY) << Game.chunksizebits) + inChunkX;
 
-                    int block = chunk.GetBlockInChunk(pos);
+                    int block = chunk.GetBlock(pos);
                     outPortion[(zz * portionsizey + yy) * portionsizex + xx] = block;
                 }
             }
@@ -231,7 +231,7 @@ public class VoxelMap
             return;
         }
         c.rendered ??= new RenderedChunk();
-        c.rendered.dirty = dirty;
+        c.rendered.Dirty = dirty;
         if (blockschanged)
         {
             c.baseLightDirty = true;
@@ -272,15 +272,15 @@ public class VoxelMap
         int chunksizey = sizeY;
         int chunksizez = sizeZ;
         int chunksize = Game.chunksize;
-        Chunk[] localchunks = new Chunk[(chunksizex / chunksize) * (chunksizey / chunksize) * (chunksizez / chunksize)];
+        Chunk[] localchunks = new Chunk[chunksizex / chunksize * (chunksizey / chunksize) * (chunksizez / chunksize)];
         for (int cx = 0; cx < chunksizex / chunksize; cx++)
         {
             for (int cy = 0; cy < chunksizey / chunksize; cy++)
             {
                 for (int cz = 0; cz < chunksizez / chunksize; cz++)
                 {
-                    localchunks[Index3d(cx, cy, cz, (chunksizex / chunksize), (chunksizey / chunksize))] = GetChunk(x + cx * chunksize, y + cy * chunksize, z + cz * chunksize);
-                    FillChunk(localchunks[Index3d(cx, cy, cz, (chunksizex / chunksize), (chunksizey / chunksize))], chunksize, cx * chunksize, cy * chunksize, cz * chunksize, chunk, sizeX, sizeY, sizeZ);
+                    localchunks[Index3d(cx, cy, cz, chunksizex / chunksize, chunksizey / chunksize)] = GetChunk(x + cx * chunksize, y + cy * chunksize, z + cz * chunksize);
+                    FillChunk(localchunks[Index3d(cx, cy, cz, chunksizex / chunksize, chunksizey / chunksize)], chunksize, cx * chunksize, cy * chunksize, cz * chunksize, chunk, sizeX, sizeY, sizeZ);
                 }
             }
         }
@@ -309,7 +309,7 @@ public class VoxelMap
             {
                 for (int z = 0; z < destinationchunksize; z++)
                 {
-                    destination.SetBlockInChunk(Index3d(x, y, z, destinationchunksize, destinationchunksize)
+                    destination.SetBlock(Index3d(x, y, z, destinationchunksize, destinationchunksize)
                         , source[Index3d(x + sourcex, y + sourcey, z + sourcez, sourcechunksizeX, sourcechunksizeY)]);
                 }
             }
@@ -333,13 +333,13 @@ public class VoxelMap
             Chunk c = chunks[VectorIndexUtil.Index3d(cx, cy, cz, Mapsizexchunks, Mapsizeychunks)];
             if (c == null
                 || c.rendered == null
-                || c.rendered.light == null)
+                || c.rendered.Light == null)
             {
                 light = -1;
             }
             else
             {
-                light = c.rendered.light[VectorIndexUtil.Index3d((x % Game.chunksize) + 1, (y % Game.chunksize) + 1, (z % Game.chunksize) + 1, Game.chunksize + 2, Game.chunksize + 2)];
+                light = c.rendered.Light[VectorIndexUtil.Index3d((x % Game.chunksize) + 1, (y % Game.chunksize) + 1, (z % Game.chunksize) + 1, Game.chunksize + 2, Game.chunksize + 2)];
             }
         }
         return light;
@@ -362,7 +362,7 @@ public class VoxelMap
             {
                 return;
             }
-            SetChunkDirty((xx / Game.chunksize), (yy / Game.chunksize), (zz / Game.chunksize), true, true);
+            SetChunkDirty(xx / Game.chunksize, yy / Game.chunksize, zz / Game.chunksize, true, true);
         }
     }
 
@@ -377,6 +377,6 @@ public class VoxelMap
         {
             return false;
         }
-        return c.rendered != null && c.rendered.ids != null;
+        return c.rendered != null && c.rendered.Ids != null;
     }
 }

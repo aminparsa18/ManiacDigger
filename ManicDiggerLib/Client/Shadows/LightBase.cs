@@ -52,7 +52,7 @@ public class LightBase
         // Copy block data into the working buffer via the chunk's unified accessor,
         // which handles both byte (data) and int (dataInt) storage transparently.
         for (int i = 0; i < ChunkVolume; i++)
-            _workData[i] = chunk.GetBlockInChunk(i);
+            _workData[i] = chunk.GetBlock(i);
 
         byte[] workLight = chunk.baseLight;
         Array.Clear(workLight, 0, workLight.Length);
@@ -115,7 +115,7 @@ public class LightBase
                 // Fill all blocks from the entry point upward with full sunlight.
                 for (int zz = z; zz < ChunkSize; zz++)
                 {
-                    workLight[pos] = (byte)(sunlight);
+                    workLight[pos] = (byte)sunlight;
                     pos += LightFlood.ZPlus;
                 }
             }
@@ -137,7 +137,7 @@ public class LightBase
     /// </returns>
     private static int GetLightHeight(Game game, int cx, int cy, int xx, int yy)
     {
-        int[] heightmapChunk = game.d_Heightmap.GetChunk(cx * ChunkedMap2d.ChunkSize, cy * ChunkedMap2d.ChunkSize);
+        int[] heightmapChunk = game.d_Heightmap.GetChunk(cx * ChunkedMap2d<int>.ChunkSize, cy * ChunkedMap2d<int>.ChunkSize);
 
         if (heightmapChunk == null)
             return 0;
@@ -227,7 +227,7 @@ public class LightBase
             int yy = VectorIndexUtil.PosY(pos, ChunkSize, ChunkSize);
             int zz = VectorIndexUtil.PosZ(pos, ChunkSize, ChunkSize);
 
-            workLight[pos] = (byte)(Math.Max(emitRadius, workLight[pos]));
+            workLight[pos] = (byte)Math.Max(emitRadius, workLight[pos]);
             _flood.FloodLight(workData, workLight, xx, yy, zz, dataLightRadius, dataTransparent);
         }
     }

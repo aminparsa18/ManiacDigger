@@ -75,7 +75,7 @@ public class ModDialog : ModBase
                 }
             }
             game.ShowEscapeMenu();
-            args.Handled=(true);
+            args.Handled=true;
             return;
         }
 
@@ -91,12 +91,12 @@ public class ModDialog : ModBase
                 }
                 game.SendPacketClient(ClientPackets.DialogClick("Esc", Empty, 0));
                 game.GuiStateBackToGame();
-                args.Handled=(true);
+                args.Handled=true;
             }
             else if (args.KeyChar == game.GetKey(Keys.Tab))
             {
                 game.SendPacketClient(ClientPackets.DialogClick("Tab", Empty, 0));
-                args.Handled=(true);
+                args.Handled=true;
             }
         }
     }

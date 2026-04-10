@@ -6,7 +6,7 @@
 public abstract class ModBase
 {
     /// <summary>Called once when the mod is loaded by the mod manager.</summary>
-    public virtual void Start(ClientModManager modManager) { }
+    public virtual void Start(IModManager modManager) { }
 
     /// <summary>Called each tick on the main thread; game state is read-only.</summary>
     public virtual void OnReadOnlyMainThread(Game game, float dt) { }
