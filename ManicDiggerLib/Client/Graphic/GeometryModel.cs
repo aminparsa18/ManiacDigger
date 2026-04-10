@@ -67,10 +67,10 @@ public class ModelDataTool
         model.Uv[ui] = u;
         model.Uv[ui + 1] = v;
 
-        model.Rgba[ri] = (byte)Game.ColorR(color);
-        model.Rgba[ri + 1] = (byte)Game.ColorG(color);
-        model.Rgba[ri + 2] = (byte)Game.ColorB(color);
-        model.Rgba[ri + 3] = (byte)Game.ColorA(color);
+        model.Rgba[ri] = (byte)ColorUtils.ColorR(color);
+        model.Rgba[ri + 1] = (byte)ColorUtils.ColorG(color);
+        model.Rgba[ri + 2] = (byte)ColorUtils.ColorB(color);
+        model.Rgba[ri + 3] = (byte)ColorUtils.ColorA(color);
 
         model.VerticesCount++;
     }

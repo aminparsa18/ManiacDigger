@@ -8,67 +8,50 @@
 /// </summary>
 public class ChunkedMap2d
 {
-    /// <summary>The <see cref="Game"/> instance, used to read map dimensions on <see cref="Restart"/>.</summary>
-    internal Game _game;
-
-    /// <summary>Number of blocks along one axis of a chunk. Must match the 3D map's chunk size.</summary>
     public const int ChunkSize = 16;
 
-    internal int[][] _chunks;
+    private int _chunkGridWidth;   // map width in chunks
+    private int[][] _chunks;
 
-    /// <summary>Returns the block value at block-space coordinates (<paramref name="x"/>, <paramref name="y"/>),
-    /// allocating the owning chunk if it does not yet exist.</summary>
-    public int GetBlock(int x, int y)
+    /// <param name="mapSizeX">Map width in blocks. Must be a multiple of <see cref="ChunkSize"/>.</param>
+    /// <param name="mapSizeY">Map height in blocks. Must be a multiple of <see cref="ChunkSize"/>.</param>
+    public ChunkedMap2d(int mapSizeX, int mapSizeY)
     {
-        int[] chunk = GetChunk(x, y);
-        return chunk[VectorIndexUtil.Index2d(x % ChunkSize, y % ChunkSize, ChunkSize)];
+        Restart(mapSizeX, mapSizeY);
     }
 
-    /// <summary>
-    /// Returns the chunk that contains block-space coordinates (<paramref name="x"/>, <paramref name="y"/>),
-    /// allocating a zero-filled chunk if one does not yet exist.
-    /// </summary>
+    // ── chunk-key helpers ──────────────────────────────────────────────────
+
+    private int ChunkIndex(int x, int y)
+        => VectorIndexUtil.Index2d(x / ChunkSize, y / ChunkSize, _chunkGridWidth);
+
+    private static int BlockIndex(int x, int y)
+        => VectorIndexUtil.Index2d(x % ChunkSize, y % ChunkSize, ChunkSize);
+
+    // ── public API ────────────────────────────────────────────────────────
+
+    public int GetBlock(int x, int y)
+        => GetChunk(x, y)[BlockIndex(x, y)];
+
+    public void SetBlock(int x, int y, int blocktype)
+        => GetChunk(x, y)[BlockIndex(x, y)] = blocktype;
+
     public int[] GetChunk(int x, int y)
     {
-        int kx = x / ChunkSize;
-        int ky = y / ChunkSize;
-        int index = VectorIndexUtil.Index2d(kx, ky, _game.VoxelMap.MapSizeX / ChunkSize);
-
-        if (_chunks[index] == null)
-        {
-            // int[] is zero-initialised by the runtime — no manual fill needed.
-            _chunks[index] = new int[ChunkSize * ChunkSize];
-        }
-
-        return _chunks[index];
+        int index = ChunkIndex(x, y);
+        return _chunks[index] ??= new int[ChunkSize * ChunkSize];
     }
 
-    /// <summary>Sets the block value at block-space coordinates (<paramref name="x"/>, <paramref name="y"/>),
-    /// allocating the owning chunk if it does not yet exist.</summary>
-    public void SetBlock(int x, int y, int blocktype)
-    {
-        GetChunk(x, y)[VectorIndexUtil.Index2d(x % ChunkSize, y % ChunkSize, ChunkSize)] = blocktype;
-    }
-
-    /// <summary>
-    /// Reinitialises the chunk array to match the current map dimensions, discarding all block data.
-    /// Must be called whenever the map is resized.
-    /// </summary>
-    public void Restart()
-    {
-        int n = (_game.VoxelMap.MapSizeX / ChunkSize) * (_game.VoxelMap.MapSizeY / ChunkSize);
-        // Array of reference types is null-initialised by the runtime — no manual fill needed.
-        _chunks = new int[n][];
-    }
-
-    /// <summary>
-    /// Discards the chunk that contains block-space coordinates (<paramref name="x"/>, <paramref name="y"/>),
-    /// freeing its memory. The chunk will be reallocated on the next access.
-    /// </summary>
     public void ClearChunk(int x, int y)
+        => _chunks[ChunkIndex(x, y)] = null;
+
+    /// <summary>
+    /// Reinitialises the map for new dimensions, discarding all block data.
+    /// </summary>
+    public void Restart(int mapSizeX, int mapSizeY)
     {
-        int px = x / ChunkSize;
-        int py = y / ChunkSize;
-        _chunks[VectorIndexUtil.Index2d(px, py, _game.VoxelMap.MapSizeX / ChunkSize)] = null;
+        _chunkGridWidth = mapSizeX / ChunkSize;
+        int n = _chunkGridWidth * (mapSizeY / ChunkSize);
+        _chunks = new int[n][];
     }
 }

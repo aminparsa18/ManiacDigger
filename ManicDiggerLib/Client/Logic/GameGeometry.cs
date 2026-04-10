@@ -32,18 +32,6 @@
     }
 
     // -------------------------------------------------------------------------
-    // Color helpers
-    // -------------------------------------------------------------------------
-
-    public static int ColorFromArgb(int a, int r, int g, int b) =>
-        (a << 24) | (r << 16) | (g << 8) | b;
-
-    public static int ColorA(int color) => (color >> 24) & 0xFF;
-    public static int ColorR(int color) => (color >> 16) & 0xFF;
-    public static int ColorG(int color) => (color >> 8) & 0xFF;
-    public static int ColorB(int color) => color & 0xFF;
-
-    // -------------------------------------------------------------------------
     // 2D drawing
     // -------------------------------------------------------------------------
 
@@ -51,7 +39,7 @@
 
     public void Draw2dTexture(int textureid, float x1, float y1, float width, float height, int? inAtlasId, int atlastextures, int color, bool enabledepthtest)
     {
-        if (color == ColorFromArgb(255, 255, 255, 255) && inAtlasId == null)
+        if (color == ColorUtils.ColorFromArgb(255, 255, 255, 255) && inAtlasId == null)
             Draw2dTextureSimple(textureid, x1, y1, width, height, enabledepthtest);
         else
             Draw2dTextureInAtlas(textureid, x1, y1, width, height, inAtlasId, atlastextures, color, enabledepthtest);
@@ -97,7 +85,7 @@
         GeometryModel data = Quad.CreateColored(
             rect.X, rect.Y, rect.Width, rect.Height,
             x1, y1, width, height,
-            (byte)ColorR(color), (byte)ColorG(color), (byte)ColorB(color), (byte)ColorA(color));
+            (byte)ColorUtils.ColorR(color), (byte)ColorUtils.ColorG(color), (byte)ColorUtils.ColorB(color), (byte)ColorUtils.ColorA(color));
         data.Mode=(int)DrawMode.Triangles;
         platform.UpdateModel(data);
         DrawModelData(data);
@@ -121,7 +109,7 @@
         GeometryModel data = Quad.CreateColored(
             rect.X, rect.Y, rect.Width, rect.Height,
             dstx, dsty, dstwidth, dstheight,
-            (byte)ColorR(color), (byte)ColorG(color), (byte)ColorB(color), (byte)ColorA(color));
+            (byte)ColorUtils.ColorR(color), (byte)ColorUtils.ColorG(color), (byte)ColorUtils.ColorB(color), (byte)ColorUtils.ColorA(color));
         data.Mode = (int)DrawMode.Triangles;
         platform.UpdateModel(data);
         DrawModelData(data);
@@ -145,7 +133,7 @@
             modelDatas[modelDatasCount++] = Quad.CreateColored(
                 rect.X, rect.Y, rect.Width, rect.Height,
                 d.x1, d.y1, d.width, d.height,
-                (byte)ColorR(d.color), (byte)ColorG(d.color), (byte)ColorB(d.color), (byte)ColorA(d.color));
+                (byte)ColorUtils.ColorR(d.color), (byte)ColorUtils.ColorG(d.color), (byte)ColorUtils.ColorB(d.color), (byte)ColorUtils.ColorA(d.color));
         }
 
         GeometryModel combined = CombineModelData(modelDatas, modelDatasCount);
@@ -281,7 +269,7 @@
         if (string.IsNullOrWhiteSpace(text))
             return;
 
-        color ??= ColorFromArgb(255, 255, 255, 255);
+        color ??= ColorUtils.ColorFromArgb(255, 255, 255, 255);
         Text_ t = new()
         {
             text = text,
@@ -301,9 +289,9 @@
         }
 
         CachedTexture cached = GetCachedTextTexture(t);
-        cached.lastuseMilliseconds = platform.TimeMillisecondsFromStart();
+        cached.lastuseMilliseconds = platform.TimeMillisecondsFromStart;
         platform.GLDisableAlphaTest();
-        Draw2dTexture(cached.textureId, x, y, cached.sizeX, cached.sizeY, null, 0, ColorFromArgb(255, 255, 255, 255), enabledepthtest);
+        Draw2dTexture(cached.textureId, x, y, cached.sizeX, cached.sizeY, null, 0, ColorUtils.ColorFromArgb(255, 255, 255, 255), enabledepthtest);
         platform.GLEnableAlphaTest();
         DeleteUnusedCachedTextTextures();
     }

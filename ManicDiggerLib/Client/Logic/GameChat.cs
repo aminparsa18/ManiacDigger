@@ -15,7 +15,7 @@
 
         string linkTarget = ExtractLink(s);
         bool containsLink = linkTarget != null;
-        int now = platform.TimeMillisecondsFromStart();
+        int now = platform.TimeMillisecondsFromStart;
 
         if (s.Length > ChatLines.Count && ChatLines.Count > 0)
         {

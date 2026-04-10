@@ -41,12 +41,12 @@ public class ModDrawPlayerNames : ModBase
 
         if (p.DrawHealth)
         {
-            game.Draw2dTexture(game.WhiteTexture(), -26, -11, 52, 12, null, 0, Game.ColorFromArgb(255, 0, 0, 0), false);
-            game.Draw2dTexture(game.WhiteTexture(), -25, -10, 50 * p.Health, 10, null, 0, Game.ColorFromArgb(255, 255, 0, 0), false);
+            game.Draw2dTexture(game.WhiteTexture(), -26, -11, 52, 12, null, 0, ColorUtils.ColorFromArgb(255, 0, 0, 0), false);
+            game.Draw2dTexture(game.WhiteTexture(), -25, -10, 50 * p.Health, 10, null, 0, ColorUtils.ColorFromArgb(255, 255, 0, 0), false);
         }
 
         Font font = new("Arial", 14);
-        game.Draw2dText(p.Name, font, -game.TextSizeWidth(p.Name, 14) / 2, 0, Game.ColorFromArgb(255, 255, 255, 255), true);
+        game.Draw2dText(p.Name, font, -game.TextSizeWidth(p.Name, 14) / 2, 0, ColorUtils.ColorFromArgb(255, 255, 255, 255), true);
 
         game.GLPopMatrix();
     }

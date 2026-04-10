@@ -76,7 +76,7 @@ public class Program
     private static void ReadArgs(MainMenu mainmenu, string[] args)
     {
         if (args.Length > 0)
-            mainmenu.StartGame(false, null, ConnectData.FromUri(new Uri(args[0])));
+            mainmenu.StartGame(false, null, ConnectionData.FromUri(new Uri(args[0])));
     }
 
     // -------------------------------------------------------------------------

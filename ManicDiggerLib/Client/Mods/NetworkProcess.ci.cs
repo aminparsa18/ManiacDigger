@@ -34,7 +34,7 @@ public class ModNetworkProcess : ModBase
 
     public void NetworkProcess()
     {
-        game.currentTimeMilliseconds = game.platform.TimeMillisecondsFromStart();
+        game.currentTimeMilliseconds = game.platform.TimeMillisecondsFromStart;
         if (game.main == null)
         {
             return;
@@ -179,7 +179,7 @@ public class ModNetworkProcess : ModBase
             case Packet_ServerIdEnum.Ping:
                 {
                     game.SendPingReply();
-                    game.ServerInfo.ServerPing.Send(game.platform);
+                    game.ServerInfo.ServerPing.Send(game.platform.TimeMillisecondsFromStart);
                 }
                 break;
             case Packet_ServerIdEnum.PlayerPing:

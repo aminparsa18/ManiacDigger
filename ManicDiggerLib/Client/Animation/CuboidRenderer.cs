@@ -116,7 +116,7 @@ public static class CuboidRenderer
     private static GeometryModel CreateCuboidBuffer(float light, out int color)
     {
         int light255 = (int)(light * 255);
-        color = Game.ColorFromArgb(255, light255, light255, light255);
+        color = ColorUtils.ColorFromArgb(255, light255, light255, light255);
         return new GeometryModel
         {
             Xyz = new float[VerticesPerFace * FaceCount * 3],
@@ -261,10 +261,10 @@ public static class CuboidRenderer
 
         model.Uv[uvOffset + 0] = u;
         model.Uv[uvOffset + 1] = v;
-        model.Rgba[rgbaOffset + 0] = (byte)Game.ColorR(color);
-        model.Rgba[rgbaOffset + 1] = (byte)Game.ColorG(color);
-        model.Rgba[rgbaOffset + 2] = (byte)Game.ColorB(color);
-        model.Rgba[rgbaOffset + 3] = (byte)Game.ColorA(color);
+        model.Rgba[rgbaOffset + 0] = (byte)ColorUtils.ColorR(color);
+        model.Rgba[rgbaOffset + 1] = (byte)ColorUtils.ColorG(color);
+        model.Rgba[rgbaOffset + 2] = (byte)ColorUtils.ColorB(color);
+        model.Rgba[rgbaOffset + 3] = (byte)ColorUtils.ColorA(color);
 
         model.VerticesCount++;
     }

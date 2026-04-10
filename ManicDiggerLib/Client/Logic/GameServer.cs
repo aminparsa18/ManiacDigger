@@ -9,7 +9,7 @@
     internal void ProcessServerIdentification(Packet_Server packet)
     {
         LocalPlayerId = packet.Identification.AssignedClientId;
-        ServerInfo.connectdata = connectdata;
+        ServerInfo.ConnectData = connectdata;
         ServerInfo.ServerName = packet.Identification.ServerName;
         ServerInfo.ServerMotd = packet.Identification.ServerMotd;
         d_TerrainChunkTesselator.ENABLE_TEXTURE_TILING = packet.Identification.RenderHint_ == RenderHintEnum.Fast;
@@ -62,7 +62,8 @@
             VoxelMap.Reset(packet.Identification.MapSizeX,
                 packet.Identification.MapSizeY,
                 packet.Identification.MapSizeZ);
-            d_Heightmap.Restart();
+            d_Heightmap.Restart(packet.Identification.MapSizeX,
+                packet.Identification.MapSizeY);
         }
 
         shadowssimple = packet.Identification.DisableShadows == 1;

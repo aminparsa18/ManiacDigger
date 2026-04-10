@@ -266,7 +266,7 @@ public partial class Game
     internal string blobdownloadmd5;
     internal CitoMemoryStream blobdownload;
 
-    internal ConnectData connectdata;
+    internal ConnectionData connectdata;
     internal bool issingleplayer;
     internal bool reconnect;
     internal bool exitToMainMenu;

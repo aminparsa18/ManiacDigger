@@ -396,11 +396,11 @@ public class ModRail : ModBase
 
         if (!railriding || soundRate <= 0) { return; }
 
-        if ((game.platform.TimeMillisecondsFromStart() - _lastRailSoundTimeMs) > 1000 / soundRate)
+        if ((game.platform.TimeMillisecondsFromStart - _lastRailSoundTimeMs) > 1000 / soundRate)
         {
             _lastRailSoundIndex = (_lastRailSoundIndex + 1) % 4;
             game.PlayAudio(string.Format("rail{0}.wav", _lastRailSoundIndex.ToString()));
-            _lastRailSoundTimeMs = game.platform.TimeMillisecondsFromStart();
+            _lastRailSoundTimeMs = game.platform.TimeMillisecondsFromStart;
         }
     }
 

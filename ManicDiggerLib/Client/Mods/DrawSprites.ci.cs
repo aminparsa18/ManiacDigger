@@ -28,7 +28,7 @@ public class ModDrawSprites : ModBase
             Billboard(game);
             game.GLScale(SpriteScale, SpriteScale, SpriteScale);
             game.GLTranslate(-b.size / 2, -b.size / 2, 0);
-            game.Draw2dTexture(game.GetTexture(b.image), 0, 0, b.size, b.size, frame, b.animationcount, Game.ColorFromArgb(255, 255, 255, 255), true);
+            game.Draw2dTexture(game.GetTexture(b.image), 0, 0, b.size, b.size, frame, b.animationcount, ColorUtils.ColorFromArgb(255, 255, 255, 255), true);
             game.GLPopMatrix();
         }
     }

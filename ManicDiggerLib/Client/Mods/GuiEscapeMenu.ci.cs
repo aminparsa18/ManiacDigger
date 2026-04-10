@@ -572,8 +572,8 @@ public class ModGuiEscapeMenu : ModBase
             widgets[i].fontsize = fontsize;
             if (i == keyselectid)
             {
-                widgets[i].fontcolor = Game.ColorFromArgb(255, 0, 255, 0);
-                widgets[i].fontcolorselected = Game.ColorFromArgb(255, 0, 255, 0);
+                widgets[i].fontcolor = ColorUtils.ColorFromArgb(255, 0, 255, 0);
+                widgets[i].fontcolorselected = ColorUtils.ColorFromArgb(255, 0, 255, 0);
             }
         }
     }
@@ -826,8 +826,8 @@ public class Button
 {
     public Button()
     {
-        fontcolor = Game.ColorFromArgb(255, 255, 255, 255);
-        fontcolorselected = Game.ColorFromArgb(255, 255, 0, 0);
+        fontcolor = ColorUtils.ColorFromArgb(255, 255, 255, 255);
+        fontcolorselected = ColorUtils.ColorFromArgb(255, 255, 0, 0);
         fontsize = 20;
     }
     internal int x;

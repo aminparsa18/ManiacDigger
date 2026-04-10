@@ -55,7 +55,7 @@ public class ModFallDamageToPlayer : ModBase
             _ => 1.0f
         };
 
-        int now = game.platform.TimeMillisecondsFromStart();
+        int now = game.platform.TimeMillisecondsFromStart;
         if ((now - lastFallDamageTimeMilliseconds) / 1000f < FallDamageCooldownSeconds) return;
 
         lastFallDamageTimeMilliseconds = now;

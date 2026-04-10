@@ -96,13 +96,13 @@ public class ServerSystemSign : ServerSystem
         };
         int widgetCount = 0;
         var font = new DialogFont("Verdana", 11f, DialogFontStyle.Bold);
-        d.Widgets[widgetCount++] = Widget.MakeSolid(0, 0, 300, 200, Game.ColorFromArgb(255, 50, 50, 50));
-        d.Widgets[widgetCount++] = Widget.MakeTextBox(e.sign.text, font, 50, 50, 200, 50, Game.ColorFromArgb(255, 0, 0, 0));
-        Widget okHandler = Widget.MakeSolid(100, 100, 100, 50, Game.ColorFromArgb(255, 100, 100, 100));
+        d.Widgets[widgetCount++] = Widget.MakeSolid(0, 0, 300, 200, ColorUtils.ColorFromArgb(255, 50, 50, 50));
+        d.Widgets[widgetCount++] = Widget.MakeTextBox(e.sign.text, font, 50, 50, 200, 50, ColorUtils.ColorFromArgb(255, 0, 0, 0));
+        Widget okHandler = Widget.MakeSolid(100, 100, 100, 50, ColorUtils.ColorFromArgb(255, 100, 100, 100));
         okHandler.ClickKey = (char)13;
         okHandler.Id = "UseSign_OK";
         d.Widgets[widgetCount++] = okHandler;
-        d.Widgets[widgetCount++] = Widget.MakeText("OK", font, 100, 100, Game.ColorFromArgb(255, 0, 0, 0));
+        d.Widgets[widgetCount++] = Widget.MakeText("OK", font, 100, 100, ColorUtils.ColorFromArgb(255, 0, 0, 0));
         ServerEntityId id_ = new()
         {
             chunkx = chunkx,

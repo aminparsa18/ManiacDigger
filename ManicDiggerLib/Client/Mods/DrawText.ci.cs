@@ -38,7 +38,7 @@ public class ModDrawText : ModBase
         game.GLRotate(180, 1, 0, 0);
         game.GLRotate(float.RadiansToDegrees(e.position.roty), 0, 1, 0);
         game.GLScale(TextScale, TextScale, TextScale);
-        game.Draw2dText(p.text, Font, -game.TextSizeWidth(p.text, 14) / 2, 0, Game.ColorFromArgb(255, 255, 255, 255), true);
+        game.Draw2dText(p.text, Font, -game.TextSizeWidth(p.text, 14) / 2, 0, ColorUtils.ColorFromArgb(255, 255, 255, 255), true);
         game.GLPopMatrix();
     }
 }

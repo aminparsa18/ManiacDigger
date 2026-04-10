@@ -137,8 +137,7 @@ public class LightBase
     /// </returns>
     private static int GetLightHeight(Game game, int cx, int cy, int xx, int yy)
     {
-        int[] heightmapChunk = game.d_Heightmap._chunks[
-            VectorIndexUtil.Index2d(cx, cy, game.VoxelMap.MapSizeX / Game.chunksize)];
+        int[] heightmapChunk = game.d_Heightmap.GetChunk(cx * ChunkedMap2d.ChunkSize, cy * ChunkedMap2d.ChunkSize);
 
         if (heightmapChunk == null)
             return 0;

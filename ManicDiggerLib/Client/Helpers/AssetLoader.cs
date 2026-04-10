@@ -34,7 +34,7 @@ public class AssetLoader
 
     public List<Asset> LoadAssetsAsync(out float progress)
     {
-        List<Asset> assets = new();
+        List<Asset> assets = [];
 
         foreach (string path in datapaths)
         {

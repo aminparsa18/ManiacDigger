@@ -101,7 +101,7 @@
 
     internal void GotoDraw2d(float dt)
     {
-        SetAmbientLight(ColorFromArgb(255, 255, 255, 255));
+        SetAmbientLight(ColorUtils.ColorFromArgb(255, 255, 255, 255));
         Draw2d(dt);
 
         for (int i = 0; i < clientmods.Count; i++)

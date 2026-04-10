@@ -192,7 +192,7 @@ public class LoginScreen : ScreenBase
                 {
                     SaveUsername();
                 }
-                menu.StartGame(false, null, new ConnectData
+                menu.StartGame(false, null, new ConnectionData
                 {
                     Ip = serverIp,
                     Port = serverPort,

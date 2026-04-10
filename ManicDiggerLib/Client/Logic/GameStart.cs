@@ -53,8 +53,7 @@ public partial class Game
         SunMoonRenderer sunmoonrenderer = new();
         d_SunMoonRenderer = sunmoonrenderer;
 
-        d_Heightmap = new ChunkedMap2d { _game = this };
-        d_Heightmap.Restart();
+        d_Heightmap = new ChunkedMap2d(VoxelMap.MapSizeX, VoxelMap.MapSizeY);
         d_TerrainChunkTesselator = terrainchunktesselator;
         terrainchunktesselator.game = this;
 
@@ -72,7 +71,7 @@ public partial class Game
         s = new();
 
         // Prevent loading screen from immediately displaying lag symbol.
-        LastReceivedMilliseconds = platform.TimeMillisecondsFromStart();
+        LastReceivedMilliseconds = platform.TimeMillisecondsFromStart;
         ENABLE_DRAW_TEST_CHARACTER = platform.IsDebuggerAttached();
 
         int detectedSize = platform.GlGetMaxTextureSize();

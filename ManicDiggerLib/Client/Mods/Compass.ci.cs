@@ -49,7 +49,7 @@ public class ModCompass : ModBase
         compassVelocity *= NeedleDamping;
         compassAngle += compassVelocity;
 
-        int white = Game.ColorFromArgb(255, 255, 255, 255);
+        int white = ColorUtils.ColorFromArgb(255, 255, 255, 255);
 
         // Compass rose
         game.Draw2dTexture(compassId, posX - CompassSize / 2, posY - CompassSize / 2, CompassSize, CompassSize, null, 0, white, false);

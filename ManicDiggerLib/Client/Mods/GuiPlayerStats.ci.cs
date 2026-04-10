@@ -7,9 +7,9 @@ public class ModGuiPlayerStats : ModBase
     private const int BarHeight = 32;
     private const int CenterOffset = 20;
 
-    private static readonly int White = Game.ColorFromArgb(255, 255, 255, 255);
-    private static readonly int Red = Game.ColorFromArgb(255, 255, 0, 0);
-    private static readonly int Blue = Game.ColorFromArgb(255, 0, 0, 255);
+    private static readonly int White = ColorUtils.ColorFromArgb(255, 255, 255, 255);
+    private static readonly int Red = ColorUtils.ColorFromArgb(255, 255, 0, 0);
+    private static readonly int Blue = ColorUtils.ColorFromArgb(255, 0, 0, 255);
 
     public override void OnNewFrameDraw2d(Game game, float deltaTime)
     {

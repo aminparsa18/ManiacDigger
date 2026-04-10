@@ -107,8 +107,8 @@ public class ModDraw2dMisc : ModBase
     internal static void DrawEnemyHealthUseInfo(Game game, string name, float progress, bool useInfo)
     {
         int y = useInfo ? 55 : 35;
-        game.Draw2dTexture(game.WhiteTexture(), game.Xcenter(300), 40, 300, y, null, 0, Game.ColorFromArgb(255, 0, 0, 0), false);
-        game.Draw2dTexture(game.WhiteTexture(), game.Xcenter(300), 40, 300 * progress, y, null, 0, Game.ColorFromArgb(255, 255, 0, 0), false);
+        game.Draw2dTexture(game.WhiteTexture(), game.Xcenter(300), 40, 300, y, null, 0, ColorUtils.ColorFromArgb(255, 0, 0, 0), false);
+        game.Draw2dTexture(game.WhiteTexture(), game.Xcenter(300), 40, 300 * progress, y, null, 0, ColorUtils.ColorFromArgb(255, 255, 0, 0), false);
         Font font = new("Arial", 14);
         game.platform.TextSize(name, 14, out int w, out int h);
         game.Draw2dText(name, font, game.Xcenter(w), 40, null, false);
@@ -150,14 +150,14 @@ public class ModDraw2dMisc : ModBase
                 string s = string.Format("{0}/{1}", loaded.ToString(), (total - loaded).ToString());
                 Font font = new("Arial", 18);
                 game.Draw2dText(s, font, game.Width() - game.TextSizeWidth(s, 18) - 50,
-                    game.Height() - game.TextSizeHeight(s, 18) - 50, loaded == 0 ? Game.ColorFromArgb(255, 255, 0, 0)
-                    : Game.ColorFromArgb(255, 255, 255, 255), false);
+                    game.Height() - game.TextSizeHeight(s, 18) - 50, loaded == 0 ? ColorUtils.ColorFromArgb(255, 255, 0, 0)
+                    : ColorUtils.ColorFromArgb(255, 255, 255, 255), false);
                 if (loaded == 0)
                 {
                     font = new("Arial", 14);
                     string pressR = "Press R to reload";
                     game.Draw2dText(pressR, font, game.Width() - game.TextSizeWidth(pressR, 14) - 50,
-                        game.Height() - game.TextSizeHeight(s, 14) - 80, Game.ColorFromArgb(255, 255, 0, 0), false);
+                        game.Height() - game.TextSizeHeight(s, 14) - 80, ColorUtils.ColorFromArgb(255, 255, 0, 0), false);
                 }
             }
         }
@@ -187,7 +187,7 @@ public class ModDraw2dMisc : ModBase
     private static void DrawDisconnected(Game game)
     {
         float one = 1;
-        float lagSeconds = one * (game.platform.TimeMillisecondsFromStart() - game.LastReceivedMilliseconds) / 1000;
+        float lagSeconds = one * (game.platform.TimeMillisecondsFromStart - game.LastReceivedMilliseconds) / 1000;
         if ((lagSeconds >= Game.DISCONNECTED_ICON_AFTER_SECONDS && lagSeconds < 60 * 60 * 24)
             && game.invalidVersionDrawMessage == null && !(game.issingleplayer && (!game.platform.SinglePlayerServerLoaded())))
         {

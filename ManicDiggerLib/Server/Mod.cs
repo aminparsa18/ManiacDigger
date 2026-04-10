@@ -823,7 +823,7 @@ public class ModManager1 : IModManager
         c.state = ClientStateOnServer.Playing;
         DummyNetwork network = new();
         c.socket = new DummyNetConnection(network);
-        c.Ping.SetTimeoutValue(int.MaxValue);
+        c.Ping.Timeout = TimeSpan.MaxValue;
         c.chunksseen = new bool[server.d_Map.MapSizeX / Server.chunksize
                                 * server.d_Map.MapSizeY / Server.chunksize * server.d_Map.MapSizeZ / Server.chunksize];
         c.AssignGroup(server.defaultGroupRegistered);

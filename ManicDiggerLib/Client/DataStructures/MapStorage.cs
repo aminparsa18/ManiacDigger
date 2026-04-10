@@ -9,17 +9,19 @@
 
 public class MapStorage : IMapStorage
 {
-    private readonly Game game;
+    private readonly VoxelMap _voxelMap;
+    private readonly Action<int, int, int, int> _setBlock;
 
-    public MapStorage(Game game)
+    public MapStorage(VoxelMap voxelMap, Action<int, int, int, int> setBlock)
     {
-        this.game = game;
+        _voxelMap = voxelMap;
+        _setBlock = setBlock;
     }
 
-    public int MapSizeX => game.VoxelMap.MapSizeX;
-    public int MapSizeY => game.VoxelMap.MapSizeY;
-    public int MapSizeZ => game.VoxelMap.MapSizeZ;
+    public int MapSizeX => _voxelMap.MapSizeX;
+    public int MapSizeY => _voxelMap.MapSizeY;
+    public int MapSizeZ => _voxelMap.MapSizeZ;
 
-    public int GetBlock(int x, int y, int z) => game.VoxelMap.GetBlock(x, y, z);
-    public void SetBlock(int x, int y, int z, int tileType) => game.SetBlock(x, y, z, tileType);
+    public int GetBlock(int x, int y, int z) => _voxelMap.GetBlock(x, y, z);
+    public void SetBlock(int x, int y, int z, int tileType) => _setBlock(x, y, z, tileType);
 }

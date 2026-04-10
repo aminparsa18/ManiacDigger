@@ -68,7 +68,7 @@ public class ModGuiChat : ModBase
     public void DrawChatLines(bool all)
     {
         chatlines2Count = 0;
-        int timeNow = game.platform.TimeMillisecondsFromStart();
+        int timeNow = game.platform.TimeMillisecondsFromStart;
         int scroll;
         if (!all)
         {

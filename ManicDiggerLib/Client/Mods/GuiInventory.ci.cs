@@ -198,7 +198,7 @@ public class ModGuiInventory : ModBase
         if (HitTest(mouse, ScrollUpButtonX(), ScrollUpButtonY(), ScrollButtonSize(), ScrollButtonSize()))
         {
             ScrollUp();
-            _scrollingUpTimeMs = game.platform.TimeMillisecondsFromStart();
+            _scrollingUpTimeMs = game.platform.TimeMillisecondsFromStart;
             args.SetHandled(true);
             return;
         }
@@ -207,7 +207,7 @@ public class ModGuiInventory : ModBase
         if (HitTest(mouse, ScrollDownButtonX(), ScrollDownButtonY(), ScrollButtonSize(), ScrollButtonSize()))
         {
             ScrollDown();
-            _scrollingDownTimeMs = game.platform.TimeMillisecondsFromStart();
+            _scrollingDownTimeMs = game.platform.TimeMillisecondsFromStart;
             args.SetHandled(true);
             return;
         }
@@ -370,7 +370,7 @@ public class ModGuiInventory : ModBase
             game.Draw2dTexture(game.terrainTexture, screenposX, screenposY,
                 drawsizeX, drawsizeY,
                 dataItems.TextureIdForInventory()[item.BlockId],
-                Game.                TexturesPacked, Game.ColorFromArgb(255, 255, 255, 255), false);
+                Game.                TexturesPacked, ColorUtils.ColorFromArgb(255, 255, 255, 255), false);
 
             if (item.BlockCount > 1)
             {
@@ -405,8 +405,8 @@ public class ModGuiInventory : ModBase
         screenposY = Math.Clamp(screenposY, h + 20, game.Height() - (h + 20));
 
         // Black border, grey fill.
-        game.Draw2dTexture(game.WhiteTexture(), screenposX - w, screenposY - h, w, h, null, 0, Game.ColorFromArgb(255, 0, 0, 0), false);
-        game.Draw2dTexture(game.WhiteTexture(), screenposX - w + 2, screenposY - h + 2, w - 4, h - 4, null, 0, Game.ColorFromArgb(255, 105, 105, 105), false);
+        game.Draw2dTexture(game.WhiteTexture(), screenposX - w, screenposY - h, w, h, null, 0, ColorUtils.ColorFromArgb(255, 0, 0, 0), false);
+        game.Draw2dTexture(game.WhiteTexture(), screenposX - w + 2, screenposY - h + 2, w - 4, h - 4, null, 0, ColorUtils.ColorFromArgb(255, 105, 105, 105), false);
 
         game.Draw2dText(dataItems.ItemInfo(item),
             new Font("Arial", 10),
@@ -455,8 +455,8 @@ public class ModGuiInventory : ModBase
                     cellInPage.Value.X, cellInPage.Value.Y + ScrollLine, sizex, sizey);
 
                 int color = (itemsAtArea == null || itemsAtArea.Count > 1)
-                    ? Game.ColorFromArgb(100, 255, 0, 0)   // red — blocked
-                    : Game.ColorFromArgb(100, 0, 255, 0);  // green — free
+                    ? ColorUtils.ColorFromArgb(100, 255, 0, 0)   // red — blocked
+                    : ColorUtils.ColorFromArgb(100, 0, 255, 0);  // green — free
 
                 game.Draw2dTexture(game.WhiteTexture(),
                     cellInPage.Value.X * CellDrawSize + CellsStartX(),
@@ -474,8 +474,8 @@ public class ModGuiInventory : ModBase
             Point cells = _wearPlaceCells[wearSlot.Value];
 
             int color = InventoryUtils.CanWear((WearPlace)wearSlot.Value, game.d_Inventory.DragDropItem)
-                ? Game.ColorFromArgb(100, 0, 255, 0)   // green — can equip
-                : Game.ColorFromArgb(100, 255, 0, 0);  // red — cannot equip
+                ? ColorUtils.ColorFromArgb(100, 0, 255, 0)   // green — can equip
+                : ColorUtils.ColorFromArgb(100, 255, 0, 0);  // red — cannot equip
 
             game.Draw2dTexture(game.WhiteTexture(),
                 origin.X, origin.Y,
@@ -542,7 +542,7 @@ public class ModGuiInventory : ModBase
     /// </summary>
     private void AdvanceAutoScroll()
     {
-        int now = game.platform.TimeMillisecondsFromStart();
+        int now = game.platform.TimeMillisecondsFromStart;
         if (_scrollingUpTimeMs != 0 && now - _scrollingUpTimeMs > 250)
         {
             _scrollingUpTimeMs = now;
