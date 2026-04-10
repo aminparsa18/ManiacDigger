@@ -112,6 +112,6 @@
     internal void ChatLog(string p)
     {
         if (!platform.ChatLog(ServerInfo.ServerName, p))
-            platform.ConsoleWriteLine(string.Format(language.CannotWriteChatLog(), ServerInfo.ServerName));
+            Console.WriteLine(string.Format(language.CannotWriteChatLog(), ServerInfo.ServerName));
     }
 }

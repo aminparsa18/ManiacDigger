@@ -121,11 +121,6 @@ public class GamePlatformNative : IGamePlatform
 
     public int TimeMillisecondsFromStart => (int)start.ElapsedMilliseconds;
 
-    public void ThrowException(string message)
-    {
-        throw new Exception(message);
-    }
-
     public bool IsMono = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
     
     public int LoadTextureFromBitmap(Bitmap bmp)
@@ -144,26 +139,6 @@ public class GamePlatformNative : IGamePlatform
     public void SetTextRendererFont(int fontID)
     {
         textrenderer.SetFont(fontID);
-    }
-
-    public void ConsoleWriteLine(string s)
-    {
-        Console.WriteLine(s);
-    }
-
-    public MonitorObject MonitorCreate()
-    {
-        return new MonitorObject();
-    }
-
-    public void MonitorEnter(MonitorObject monitorObject)
-    {
-        Monitor.Enter(monitorObject);
-    }
-
-    public void MonitorExit(MonitorObject monitorObject)
-    {
-        Monitor.Exit(monitorObject);
     }
 
     public AviWriterCi AviWriterCreate()
@@ -992,14 +967,14 @@ public class GamePlatformNative : IGamePlatform
 
     public void DrawModel(GeometryModel model)
     {
-        DrawModelData((GeometryModel)model);
+        DrawModelData(model);
     }
 
     public void DrawModels(List<GeometryModel> models, int count)
     {
         for (int i = 0; i < count; i++)
         {
-            DrawModelData((GeometryModel)models[i]);
+            DrawModelData(models[i]);
         }
     }
 
@@ -1199,7 +1174,7 @@ public class GamePlatformNative : IGamePlatform
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, linearMag ? (int)TextureMagFilter.Linear : (int)TextureMagFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, 4);
         }
-        System.Drawing.Imaging.BitmapData bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+        BitmapData bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmp_data.Width, bmp_data.Height, 0,
             OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, bmp_data.Scan0);
@@ -1243,7 +1218,7 @@ public class GamePlatformNative : IGamePlatform
 
     public void DeleteModel(GeometryModel model)
     {
-        GeometryModel m = (GeometryModel)model;
+        GeometryModel m = model;
         GL.DeleteVertexArray(m.VaoId);
         GL.DeleteBuffer(m.VertexVboId);
         GL.DeleteBuffer(m.ColorVboId);
@@ -1251,24 +1226,9 @@ public class GamePlatformNative : IGamePlatform
         GL.DeleteBuffer(m.IndexVboId);
     }
 
-    public void GlEnableTexture2d()
-    {
-        // GL.Enable(EnableCap.Texture2D);
-    }
-
     public void GLLineWidth(int width)
     {
         GL.LineWidth(width);
-    }
-
-    public void GLDisableAlphaTest()
-    {
-        // TODO: alpha test moved to fragment shader (discard if alpha < 0.5)
-    }
-
-    public void GLEnableAlphaTest()
-    {
-        // TODO: alpha test moved to fragment shader (discard if alpha < 0.5)
     }
 
     public void GLDeleteTexture(int id)

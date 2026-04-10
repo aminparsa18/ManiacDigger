@@ -61,8 +61,7 @@ public partial class Game
                 break;
 
             default:
-                platform.ThrowException("");
-                break;
+                throw new ArgumentException($"Camera type is unknown in: {nameof(Game)} - {nameof(CameraChange)}");
         }
     }
 

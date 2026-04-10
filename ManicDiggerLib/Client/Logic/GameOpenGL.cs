@@ -91,7 +91,7 @@ public partial class Game
         }
         else
         {
-            platform.ThrowException("GLOrtho");
+           throw new ArgumentException("GLOrtho");
         }
     }
 

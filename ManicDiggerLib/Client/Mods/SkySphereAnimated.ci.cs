@@ -31,10 +31,8 @@ public class ModSkySphereAnimated : ModBase
             LoadPixels(game, "glow.png", ref glowPixels);
         }
 
-        game.platform.GLDisableAlphaTest();
         game.platform.GlDisableDepthTest();
         Draw(game, game.CurrentFov());
-        game.platform.GLEnableAlphaTest();
         game.platform.GlEnableDepthTest();
     }
 

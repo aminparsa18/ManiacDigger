@@ -122,7 +122,7 @@
 
     public AviWriterCi AviWriterCreate()
     {
-        return game.platform.AviWriterCreate();
+        return new AviWriterCiCs();
     }
 
     public int GetWindowWidth()

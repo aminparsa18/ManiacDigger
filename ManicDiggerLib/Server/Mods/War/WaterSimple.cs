@@ -139,8 +139,8 @@ public class WaterSimple : IMod
         //water around
         foreach (var vv in BlocksAround(new Vector3i(x, y, z)))
         {
-            if (m.IsValidPos((int)vv.X, (int)vv.Y, (int)vv.Z) &&
-                IsWater(m.GetBlock((int)vv.X, (int)vv.Y, (int)vv.Z)))
+            if (m.IsValidPos(vv.X, vv.Y, vv.Z) &&
+                IsWater(m.GetBlock(vv.X, vv.Y, vv.Z)))
             {
                 Flood(vv);
                 return;
@@ -156,7 +156,7 @@ public class WaterSimple : IMod
 
     private void Flood(Vector3i v)
     {
-        if (!m.IsValidPos((int)v.X, (int)v.Y, (int)v.Z))
+        if (!m.IsValidPos(v.X, v.Y, v.Z))
         {
             return;
         }
@@ -167,12 +167,12 @@ public class WaterSimple : IMod
         flooded.Add(v, v);
         foreach (Vector3i vv in BlocksAround(v))
         {
-            if (!m.IsValidPos((int)vv.X, (int)vv.Y, (int)vv.Z))
+            if (!m.IsValidPos(vv.X, vv.Y, vv.Z))
             {
                 continue;
             }
-            var type = m.GetBlock((int)vv.X, (int)vv.Y, (int)vv.Z);
-            if (type == 0 && (!IsSpongeNear((int)vv.X, (int)vv.Y, (int)vv.Z)))
+            var type = m.GetBlock(vv.X, vv.Y, vv.Z);
+            if (type == 0 && (!IsSpongeNear(vv.X, vv.Y, vv.Z)))
             {
                 //tosetwater.Add(vv);
                 m.SetBlock(vv.X, vv.Y, vv.Z, Water);

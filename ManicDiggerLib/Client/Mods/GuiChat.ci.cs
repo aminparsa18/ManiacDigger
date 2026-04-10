@@ -196,7 +196,7 @@ public class ModGuiChat : ModBase
             }
             else if (game.GuiTyping == TypingState.Ready)
             {
-                game.platform.ConsoleWriteLine("Keyboard_KeyDown ready");
+                Console.WriteLine("Keyboard_KeyDown ready");
             }
             args.Handled=true;
             return;

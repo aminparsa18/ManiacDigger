@@ -276,7 +276,7 @@
             Color = color.Value,
             FontSize = font.Size,
             FontFamily = font.FontFamily.Name,
-            FontStyle = (int)font.Style
+            FontStyle = font.Style
         };
 
         if (GetCachedTextTexture(t) == null)
@@ -290,9 +290,7 @@
 
         CachedTexture cached = GetCachedTextTexture(t);
         cached.lastuseMilliseconds = platform.TimeMillisecondsFromStart;
-        platform.GLDisableAlphaTest();
         Draw2dTexture(cached.textureId, x, y, cached.sizeX, cached.sizeY, null, 0, ColorUtils.ColorFromArgb(255, 255, 255, 255), enabledepthtest);
-        platform.GLEnableAlphaTest();
         DeleteUnusedCachedTextTextures();
     }
 }

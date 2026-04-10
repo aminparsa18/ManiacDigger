@@ -28,7 +28,7 @@
         string file_ = file.Replace(".wav", ".ogg");
         if (GetAssetFileLength(file_) == 0)
         {
-            platform.ConsoleWriteLine(string.Format("File not found: {0}", file));
+            Console.WriteLine(string.Format("File not found: {0}", file));
             return;
         }
 
@@ -50,7 +50,7 @@
         string file_ = file.Replace(".wav", ".ogg");
         if (GetAssetFileLength(file_) == 0)
         {
-            platform.ConsoleWriteLine(string.Format("File not found: {0}", file));
+            Console.WriteLine(string.Format("File not found: {0}", file));
             return;
         }
 

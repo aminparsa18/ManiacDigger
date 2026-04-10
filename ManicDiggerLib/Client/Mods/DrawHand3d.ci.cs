@@ -334,7 +334,6 @@ public class ModDrawHand3d : ModBase
         AdvanceBobAnimation(dt);
         AdvanceSwingAnimation(dt);
 
-        game.platform.GlEnableTexture2d();
         game.platform.BindTexture2d(TerrainTexture);
         game.DrawModelData(_modelData);
 

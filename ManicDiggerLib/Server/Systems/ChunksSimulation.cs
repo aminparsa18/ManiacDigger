@@ -65,7 +65,7 @@ public class ServerSystemChunksSimulation : ServerSystem
                     ChunkUpdate(server, oldestpos, oldesttime);
                     ServerChunk c = server.d_Map.GetChunkValid(Server.invertChunk(oldestpos.X), Server.invertChunk(oldestpos.Y), Server.invertChunk(oldestpos.Z));
                     //ServerChunk c = server.d_Map.GetChunkValid(oldestpos.x / Server.chunksize, oldestpos.y / Server.chunksize, oldestpos.z / Server.chunksize);
-                    c.LastUpdate = (int)server.simulationcurrentframe;
+                    c.LastUpdate = server.simulationcurrentframe;
                     return;
                 }
             }

@@ -263,7 +263,7 @@ public class VegetationGrowth : IMod
                     dir += 45;
                     for (int k = 1; k < 2; k++)
                     {
-                        int length = dir % 90 == 0 ? k : (int)(k / 2);
+                        int length = dir % 90 == 0 ? k : k / 2;
                         xx = length * (int)Math.Round(Math.Cos(dir * Math.PI / 180));
                         yy = length * (int)Math.Round(Math.Sin(dir * Math.PI / 180));
 

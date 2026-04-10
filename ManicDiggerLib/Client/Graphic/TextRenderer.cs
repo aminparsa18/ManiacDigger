@@ -16,7 +16,7 @@ public class TextRenderer
         float oldfontsize = t.FontSize;
         t.FontSize = Math.Max(t.FontSize, 9);
         t.FontSize *= 1.65f;
-        Font font = new("Arial", t.FontSize, (FontStyle)t.FontStyle);
+        Font font = new("Arial", t.FontSize, t.FontStyle);
 
         SizeF size;
         using (Bitmap bmp = new(1, 1))
@@ -60,7 +60,7 @@ public class TextRenderer
 
     private static Bitmap BlackBackgroundFont(TextStyle t)
     {
-        Font font = new("Verdana", t.FontSize, (FontStyle)t.FontStyle);
+        Font font = new("Verdana", t.FontSize, t.FontStyle);
         SizeF size;
         using (Bitmap bmp = new(1, 1))
         {
@@ -90,7 +90,7 @@ public class TextRenderer
         float fontsize = t.FontSize;
         fontsize = Math.Max(t.FontSize, 9);
         fontsize *= 1.1f;
-        Font font = new("Arial", (float)t.FontSize, (FontStyle)t.FontStyle);
+        Font font = new("Arial", (float)t.FontSize, t.FontStyle);
 
         SizeF size;
         using (Bitmap bmp = new(1, 1))
@@ -126,7 +126,7 @@ public class TextRenderer
         fontsize *= 1.1f;
         try
         {
-            font = new Font(t.FontFamily, fontsize, (FontStyle)t.FontStyle);
+            font = new Font(t.FontFamily, fontsize, t.FontStyle);
         }
         catch
         {

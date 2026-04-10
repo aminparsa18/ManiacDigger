@@ -218,7 +218,7 @@ public class ModPicking : ModBase
 
         if (left && game.d_Inventory.RightHand[game.ActiveMaterial] == null)
         {
-            game.SendPacketClient(ClientPackets.MonsterHit((int)(2 + game.rnd.Next() * 4)));
+            game.SendPacketClient(ClientPackets.MonsterHit(2 + game.rnd.Next() * 4));
         }
 
         if ((left || right || middle) && !isGrenade)
@@ -306,7 +306,7 @@ public class ModPicking : ModBase
 
             if (!game.VoxelMap.IsValidPos(newtileX, newtileZ, newtileY))
             {
-                game.platform.ThrowException("Error in picking - NextBullet()");
+                throw new ArgumentException("Error in picking - NextBullet()");
             }
             OnPick(game,
                 newtileX, newtileZ, newtileY,

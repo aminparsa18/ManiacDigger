@@ -37,7 +37,7 @@ public class ModSkySphereStatic : ModBase
     public void Draw(Game game, float fov)
     {
         if (SkyTexture == -1)
-            game.platform.ThrowException("InvalidOperationException");
+            throw new InvalidOperationException($"error in {nameof(ModSkySphereStatic)} - {nameof(DrawSkySphere)}");
 
         skyModel ??= game.platform.CreateModel(Sphere.Create(SphereSize, SphereSize, SphereSegments, SphereSegments));
 

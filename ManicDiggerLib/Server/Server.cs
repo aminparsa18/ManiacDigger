@@ -1184,7 +1184,7 @@ public partial class Server : ICurrentTime, IDropItem
             case Packet_ClientIdEnum.PingReply:
                 clients[clientid].Ping.Receive(platform);
                 clients[clientid].LastPing = (float)clients[clientid].Ping.RoundtripMilliseconds / 1000;
-                this.NotifyPing(clientid, (int)clients[clientid].Ping.RoundtripMilliseconds);
+                this.NotifyPing(clientid, clients[clientid].Ping.RoundtripMilliseconds);
                 break;
             case Packet_ClientIdEnum.PlayerIdentification:
                 {
@@ -2424,8 +2424,8 @@ public partial class Server : ICurrentTime, IDropItem
     {
         // TODO: better to send a chunk?
 
-        Vector3i v = new((int)(a.X / chunksize), (int)(a.Y / chunksize), (int)(a.Z / chunksize));
-        Vector3i w = new((int)(b.X / chunksize), (int)(b.Y / chunksize), (int)(b.Z / chunksize));
+        Vector3i v = new(a.X / chunksize, a.Y / chunksize, a.Z / chunksize);
+        Vector3i w = new(b.X / chunksize, b.Y / chunksize, b.Z / chunksize);
 
         // TODO: Is it sufficient to regard only start- and endpoint?
         if (!ClientSeenChunk(clientid, v.X, v.Y, v.Z) && !ClientSeenChunk(clientid, w.X, w.Y, w.Z))
@@ -2537,7 +2537,7 @@ public partial class Server : ICurrentTime, IDropItem
         {
             return DoCommandBuildRail(player_id, execute, cmd);
         }
-        if (cmd.Mode == (int)Packet_BlockSetModeEnum.Destroy
+        if (cmd.Mode == Packet_BlockSetModeEnum.Destroy
             && d_Data.Rail()[d_Map.GetBlock(cmd.X, cmd.Y, cmd.Z)] != 0)
         {
             return DoCommandRemoveRail(player_id, execute, cmd);
@@ -2820,7 +2820,7 @@ public partial class Server : ICurrentTime, IDropItem
     }
     private void SendSetBlock(int clientid, int x, int y, int z, int blocktype)
     {
-    	if (!ClientSeenChunk(clientid, (int)(x / chunksize), (int)(y / chunksize), (int)(z / chunksize)))
+    	if (!ClientSeenChunk(clientid, x / chunksize, y / chunksize, z / chunksize))
         {
     		// don't send block updates for chunks a player can not see
             return;
@@ -2918,7 +2918,7 @@ public partial class Server : ICurrentTime, IDropItem
             {
                 for (int x = 0; x <= chunk.GetUpperBound(0); x++)
                 {
-                    bw.Write((byte)chunk[x, y, z]);
+                    bw.Write(chunk[x, y, z]);
                 }
             }
         }
@@ -3481,7 +3481,7 @@ public partial class Server : ICurrentTime, IDropItem
             {
                 continue;
             }
-            int distance = DistanceSquared(new Vector3i((int)k.Value.PositionMul32GlX / 32, (int)k.Value.PositionMul32GlZ / 32, (int)k.Value.PositionMul32GlY / 32), pos);
+            int distance = DistanceSquared(new Vector3i(k.Value.PositionMul32GlX / 32, k.Value.PositionMul32GlZ / 32, k.Value.PositionMul32GlY / 32), pos);
             if (distance < 64 * 64)
             {
                 SendSound(k.Key, sound, pos.X, posy, posz);
@@ -3502,7 +3502,7 @@ public partial class Server : ICurrentTime, IDropItem
             {
                 continue;
             }
-            int distance = DistanceSquared(new Vector3i((int)k.Value.PositionMul32GlX / 32, (int)k.Value.PositionMul32GlZ / 32, (int)k.Value.PositionMul32GlY / 32), pos);
+            int distance = DistanceSquared(new Vector3i(k.Value.PositionMul32GlX / 32, k.Value.PositionMul32GlZ / 32, k.Value.PositionMul32GlY / 32), pos);
             if (distance < range)
             {
                 SendSound(k.Key, sound, pos.X, posy, posz);
@@ -3713,7 +3713,7 @@ public class ClientOnServer
     internal int PositionMul32GlZ { get { return (int)(entity.position.z * 32); } set { entity.position.z = (float)value / 32; } }
     internal int positionheading { get { return entity.position.heading; } set { entity.position.heading = (byte)value; } }
     internal int positionpitch { get { return entity.position.pitch; } set { entity.position.pitch = (byte)value; } }
-    internal byte stance { get { return entity.position.stance; } set { entity.position.stance = (byte)value; } }
+    internal byte stance { get { return entity.position.stance; } set { entity.position.stance = value; } }
     internal string Model { get { return entity.drawModel.model; } set { entity.drawModel.model = value; } }
     internal string Texture { get { return entity.drawModel.texture; } set { entity.drawModel.texture = value; } }
     internal Dictionary<int, int> chunksseenTime;

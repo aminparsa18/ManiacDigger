@@ -40,13 +40,8 @@ public interface IPlatformMisc
     int GetCanvasHeight();
     int TimeMillisecondsFromStart { get; }
 
-    void ThrowException(string message);
     Bitmap CreateTextTexture(TextStyle t);
     void SetTextRendererFont(int fontID);
-    void ConsoleWriteLine(string p);
-    MonitorObject MonitorCreate();
-    void MonitorEnter(MonitorObject monitorObject);
-    void MonitorExit(MonitorObject monitorObject);
     void SaveScreenshot();
     Bitmap GrabScreenshot();
     AviWriterCi AviWriterCreate();
@@ -149,10 +144,7 @@ public interface IPlatformOpenGl
     void GlEnableDepthTest();
     void GlDisableCullFace();
     void GlEnableCullFace();
-    void GlEnableTexture2d();
     void GLLineWidth(int width);
-    void GLDisableAlphaTest();
-    void GLEnableAlphaTest();
     void GLDeleteTexture(int id);
     void GlClearDepthBuffer();
     void GlLightModelAmbient(int r, int g, int b);

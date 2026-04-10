@@ -16,7 +16,7 @@ public class TextStyle
     public string FontFamily { get; set; }
 
     /// <summary>Font style flags (e.g. bold, italic). Interpretation is platform-defined.</summary>
-    public int FontStyle { get; set; }
+    public FontStyle FontStyle { get; set; }
 
     /// <summary>
     /// Returns <see langword="true"/> if all fields of this instance equal those of <paramref name="other"/>.

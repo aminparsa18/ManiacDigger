@@ -86,7 +86,7 @@ public class DefaultWorldGenerator : IMod
                     toplayer = BLOCK_CLAY;
                 }
 
-                int stoneHeight = (int)currentHeight - ((64 - (currentHeight % 64)) / 8) + 1;
+                int stoneHeight = currentHeight - ((64 - (currentHeight % 64)) / 8) + 1;
 
                 if (ymax < seaLevel)
                 {

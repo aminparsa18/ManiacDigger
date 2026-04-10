@@ -1494,7 +1494,7 @@ public class TerrainChunkTesselatorCi
         }
 
         if (x < 0 || y < 0 || z < 0) { retCount = 0; return []; }
-        if (!started) { game.platform.ThrowException("not started"); }
+        if (!started) { throw new ArgumentException("not started"); }
         if (x >= mapsizex / chunksize
             || y >= mapsizey / chunksize
             || z >= mapsizez / chunksize) { retCount = 0; return []; }
