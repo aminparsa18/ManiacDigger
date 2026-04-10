@@ -42,13 +42,11 @@ public interface IPlatformMisc
         Action<TouchEventArgs> onTouchEnd);
     int GetCanvasWidth();
     int GetCanvasHeight();
-    int TimeMillisecondsFromStart();
+    int TimeMillisecondsFromStart { get; }
+
     void ThrowException(string message);
-    void BitmapSetPixelsArgb(Bitmap bmp, int[] pixels);
     Bitmap CreateTextTexture(Text_ t);
     void SetTextRendererFont(int fontID);
-    float BitmapGetWidth(Bitmap bmp);
-    float BitmapGetHeight(Bitmap bmp);
     void BitmapDelete(Bitmap bmp);
     void ConsoleWriteLine(string p);
     MonitorObject MonitorCreate();
@@ -66,7 +64,6 @@ public interface IPlatformMisc
     void WindowExit();
     void MessageBoxShowError(string text, string caption);
     Bitmap BitmapCreateFromPng(byte[] data, int dataLength);
-    void BitmapGetPixelsArgb(Bitmap bitmap, int[] bmpPixels);
     void SetTitle(string applicationname);
     bool Focused();
     void AddOnCrash(OnCrashHandler handler);

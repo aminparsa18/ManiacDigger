@@ -259,7 +259,7 @@ public partial class Game
         // F6 outside of Normal state: reconnect if lagging or map loading.
         if (eKey.KeyChar == GetKey(Keys.F6))
         {
-            float lagSeconds = one * (platform.TimeMillisecondsFromStart() - LastReceivedMilliseconds) / 1000;
+            float lagSeconds = one * (platform.TimeMillisecondsFromStart - LastReceivedMilliseconds) / 1000;
             if (lagSeconds >= DISCONNECTED_ICON_AFTER_SECONDS || guistate == GuiState.MapLoading)
                 Reconnect();
         }

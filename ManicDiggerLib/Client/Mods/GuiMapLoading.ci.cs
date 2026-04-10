@@ -10,9 +10,9 @@ public class ModGuiMapLoading : ModBase
 
     private static readonly int[] ProgressBarColors =
     [
-        Game.ColorFromArgb(255, 255, 0,   0),  // red
-        Game.ColorFromArgb(255, 255, 255, 0),  // yellow
-        Game.ColorFromArgb(255, 0,   255, 0),  // green
+        ColorUtils.ColorFromArgb(255, 255, 0,   0),  // red
+        ColorUtils.ColorFromArgb(255, 255, 255, 0),  // yellow
+        ColorUtils.ColorFromArgb(255, 0,   255, 0),  // green
     ];
 
     public override void OnNewFrameDraw2d(Game game, float deltaTime)
@@ -43,7 +43,7 @@ public class ModGuiMapLoading : ModBase
         DrawCentered(game, status, centerY - 50);
 
         if (game.maploadingprogress.ProgressPercent > 0)
-            DrawProgress(game, platform, width, height, centerY);
+            DrawProgress(game, centerY);
     }
 
     private static string GetConnectionStatus(Game game, IGamePlatform platform)
@@ -55,7 +55,7 @@ public class ModGuiMapLoading : ModBase
         return game.language.Connecting();
     }
 
-    private void DrawProgress(Game game, IGamePlatform platform, int width, int height, int centerY)
+    private static void DrawProgress(Game game, int centerY)
     {
         string progress = string.Format(game.language.ConnectingProgressPercent(), game.maploadingprogress.ProgressPercent.ToString());
         string progress1 = string.Format(game.language.ConnectingProgressKilobytes(), (game.maploadingprogress.ProgressBytes / 1024).ToString());
@@ -66,13 +66,13 @@ public class ModGuiMapLoading : ModBase
         float ratio = game.maploadingprogress.ProgressPercent / 100f;
         int barX = game.Xcenter(ProgressBarWidth);
         int barY = centerY + 70;
-        int color = InterpolationCi.InterpolateColor(platform, ratio, ProgressBarColors, ProgressBarColors.Length);
+        int color = ColorUtils.InterpolateColor(ratio, ProgressBarColors, ProgressBarColors.Length);
 
-        game.Draw2dTexture(game.WhiteTexture(), barX, barY, ProgressBarWidth, ProgressBarHeight, null, 0, Game.ColorFromArgb(255, 0, 0, 0), false);
+        game.Draw2dTexture(game.WhiteTexture(), barX, barY, ProgressBarWidth, ProgressBarHeight, null, 0, ColorUtils.ColorFromArgb(255, 0, 0, 0), false);
         game.Draw2dTexture(game.WhiteTexture(), barX, barY, ratio * ProgressBarWidth, ProgressBarHeight, null, 0, color, false);
     }
 
-    private void DrawCentered(Game game, string text, int y)
+    private static void DrawCentered(Game game, string text, int y)
     {
         game.platform.TextSize(text, FontSize, out int textWidth, out _);
         game.Draw2dText(text, game.fontMapLoading, game.Xcenter(textWidth), y, null, false);
@@ -83,7 +83,7 @@ public class ModGuiMapLoading : ModBase
         int countX = width / BackgroundTileSize + 1;
         int countY = height / BackgroundTileSize + 1;
         int tex = game.GetTexture("background.png");
-        int white = Game.ColorFromArgb(255, 255, 255, 255);
+        int white = ColorUtils.ColorFromArgb(255, 255, 255, 255);
 
         for (int x = 0; x < countX; x++)
             for (int y = 0; y < countY; y++)

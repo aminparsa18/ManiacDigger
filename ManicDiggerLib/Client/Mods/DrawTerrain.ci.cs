@@ -583,11 +583,11 @@ public class ModDrawTerrain : ModBase
     internal void UpdatePerformanceInfo()
     {
         const float MsToSeconds = 1f / 1000f;
-        float elapsed = (_game.platform.TimeMillisecondsFromStart() - _lastPerfUpdateMs) * MsToSeconds;
+        float elapsed = (_game.platform.TimeMillisecondsFromStart - _lastPerfUpdateMs) * MsToSeconds;
 
         if (elapsed < 1f) { return; }
 
-        _lastPerfUpdateMs = _game.platform.TimeMillisecondsFromStart();
+        _lastPerfUpdateMs = _game.platform.TimeMillisecondsFromStart;
 
         int updatesThisPeriod = _chunkUpdates - _lastChunkUpdatesSnapshot;
         _lastChunkUpdatesSnapshot = _chunkUpdates;

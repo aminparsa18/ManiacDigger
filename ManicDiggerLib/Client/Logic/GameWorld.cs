@@ -166,7 +166,7 @@
             y = y,
             z = z,
             blocktype = VoxelMap.GetBlock(x, y, z),
-            timeMilliseconds = platform.TimeMillisecondsFromStart()
+            timeMilliseconds = platform.TimeMillisecondsFromStart
         });
         SetBlock(x, y, z, blockid);
         RedrawBlock(x, y, z);
@@ -192,7 +192,7 @@
             Speculative s_ = speculative[i];
             if (s_ == null) continue;
 
-            if ((platform.TimeMillisecondsFromStart() - s_.timeMilliseconds) / 1000f > 2)
+            if ((platform.TimeMillisecondsFromStart - s_.timeMilliseconds) / 1000f > 2)
             {
                 RedrawBlock(s_.x, s_.y, s_.z);
                 speculative[i] = null;

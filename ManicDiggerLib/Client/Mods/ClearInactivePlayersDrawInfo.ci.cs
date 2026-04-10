@@ -7,7 +7,7 @@ public class ModClearInactivePlayersDrawInfo : ModBase
 
     public override void OnNewFrameFixed(Game game, float args)
     {
-        int now = game.platform.TimeMillisecondsFromStart();
+        int now = game.platform.TimeMillisecondsFromStart;
 
         for (int i = 0; i < game.entities.Count; i++)
         {

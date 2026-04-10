@@ -184,7 +184,7 @@ public class MainMenu
             text = text,
             fontsize = fontSize,
             fontfamily = "Arial",
-            color = Game.ColorFromArgb(255, 255, 255, 255)
+            color = ColorUtils.ColorFromArgb(255, 255, 255, 255)
         };
         Bitmap textBitmap = textColorRenderer.CreateTextTexture(text_);
 
@@ -193,8 +193,8 @@ public class MainMenu
         p.TextSize(text, fontSize, out int textWidth, out int textHeight);
 
         textTexture.texture = texture;
-        textTexture.texturewidth = (int)(p.BitmapGetWidth(textBitmap));
-        textTexture.textureheight = (int)(p.BitmapGetHeight(textBitmap));
+        textTexture.texturewidth = (int)(textBitmap.Width);
+        textTexture.textureheight = (int)(textBitmap.Height);
         textTexture.text = text;
         textTexture.size = fontSize;
         textTexture.textwidth = textWidth;
@@ -539,7 +539,7 @@ public class MainMenu
     {
     }
 
-    public void StartGame(bool singleplayer, string singleplayerSavePath, ConnectData connectData)
+    public void StartGame(bool singleplayer, string singleplayerSavePath, ConnectionData connectData)
     {
         ScreenGame screenGame = new()
         {
@@ -551,7 +551,7 @@ public class MainMenu
 
     internal void ConnectToGame(LoginData loginResultData, string username)
     {
-        ConnectData connectData = new()
+        ConnectionData connectData = new()
         {
             Ip = loginResultData.ServerAddress,
             Port = loginResultData.Port,

@@ -42,7 +42,7 @@ public class SunMoonRenderer : ModBase
         game.GLTranslate(bodyX, bodyY, bodyZ);
         ModDrawSprites.Billboard(game);
         game.GLScale(SpriteScale, SpriteScale, SpriteScale);
-        game.Draw2dTexture(game.isNight ? moonTexture : sunTexture, 0, 0, ImageSize, ImageSize, null, 0, Game.ColorFromArgb(255, 255, 255, 255), false);
+        game.Draw2dTexture(game.isNight ? moonTexture : sunTexture, 0, 0, ImageSize, ImageSize, null, 0, ColorUtils.ColorFromArgb(255, 255, 255, 255), false);
         game.GLPopMatrix();
     }
 

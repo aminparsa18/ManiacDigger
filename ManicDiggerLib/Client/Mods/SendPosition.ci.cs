@@ -8,9 +8,9 @@ public class ModSendPosition : ModBase
     public override void OnNewFrame(Game game, float args)
     {
         if (!game.spawned) return;
-        if (game.platform.TimeMillisecondsFromStart() - game.lastpositionsentMilliseconds <= SendIntervalMs) return;
+        if (game.platform.TimeMillisecondsFromStart - game.lastpositionsentMilliseconds <= SendIntervalMs) return;
 
-        game.lastpositionsentMilliseconds = game.platform.TimeMillisecondsFromStart();
+        game.lastpositionsentMilliseconds = game.platform.TimeMillisecondsFromStart;
 
         var pos = game.player.position;
         game.SendPacketClient(ClientPackets.PositionAndOrientation(

@@ -16,7 +16,6 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 using Monitor = System.Threading.Monitor;
-using PixelFormat = System.Drawing.Imaging.PixelFormat;
 using Vector3 = OpenTK.Mathematics.Vector3;
 using Vector4 = OpenTK.Mathematics.Vector4;
 
@@ -140,54 +139,14 @@ public class GamePlatformNative : IGamePlatform
 
     private readonly Stopwatch start = new();
 
-    public int TimeMillisecondsFromStart()
-    {
-        return (int)start.ElapsedMilliseconds;
-    }
+    public int TimeMillisecondsFromStart => (int)start.ElapsedMilliseconds;
 
     public void ThrowException(string message)
     {
         throw new Exception(message);
     }
 
-    public void BitmapSetPixelsArgb(Bitmap bmp, int[] pixels)
-    {
-        if (IsMono)
-        {
-            SetPixelsSafe(bmp, pixels);
-        }
-        else
-        {
-            SetPixelsFast(bmp, pixels);
-        }
-    }
-
-    private static void SetPixelsSafe(Bitmap bmp, int[] pixels)
-    {
-        int width = bmp.Width;
-        int height = bmp.Height;
-        for (int y = 0; y < height; y++)
-            for (int x = 0; x < width; x++)
-            {
-                bmp.SetPixel(x, y, Color.FromArgb(pixels[y * width + x]));
-            }
-    }
-
-    private static void SetPixelsFast(Bitmap bmp, int[] pixels)
-    {
-        BitmapData bmd = bmp.LockBits(
-            new Rectangle(0, 0, bmp.Width, bmp.Height),
-            ImageLockMode.WriteOnly,
-            PixelFormat.Format32bppArgb);
-        try
-        {
-            Marshal.Copy(pixels, 0, bmd.Scan0, bmp.Width * bmp.Height);
-        }
-        finally
-        {
-            bmp.UnlockBits(bmd);
-        }
-    }
+    
 
     public Bitmap BitmapCreateFromPng(byte[] data, int dataLength)
     {
@@ -206,64 +165,7 @@ public class GamePlatformNative : IGamePlatform
 
     public bool IsMono = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
-    public void BitmapGetPixelsArgb(Bitmap bitmap, int[] bmpPixels)
-    {
-        if (IsMono)
-        {
-            GetPixelsSafe(bitmap, bmpPixels);
-        }
-        else
-        {
-            GetPixelsFast(bitmap, bmpPixels);
-        }
-    }
-
-    /// <summary>
-    /// Slow but portable pixel read using <see cref="Bitmap.GetPixel"/>.
-    /// Used on platforms where pointer access into locked bitmap memory is unsafe.
-    /// </summary>
-    private static void GetPixelsSafe(Bitmap bmp, int[] bmpPixels)
-    {
-        int width = bmp.Width;
-        int height = bmp.Height;
-        for (int y = 0; y < height; y++)
-            for (int x = 0; x < width; x++)
-            {
-                bmpPixels[y * width + x] = bmp.GetPixel(x, y).ToArgb();
-            }
-    }
-
-    /// <summary>
-    /// Fast pixel read using <see cref="BitmapData"/> and <see cref="Marshal.Copy"/>.
-    /// Converts to <see cref="PixelFormat.Format32bppArgb"/> first if needed.
-    /// </summary>
-    private static void GetPixelsFast(Bitmap bmp, int[] bmpPixels)
-    {
-        // Ensure the bitmap is in the format we expect before locking.
-        Bitmap source = bmp.PixelFormat == PixelFormat.Format32bppArgb
-            ? bmp
-            : new Bitmap(bmp.Width, bmp.Height, PixelFormat.Format32bppArgb);
-
-        if (!ReferenceEquals(source, bmp))
-        {
-            using Graphics g = Graphics.FromImage(source);
-            g.DrawImage(bmp, 0, 0);
-        }
-
-        BitmapData bmd = source.LockBits(
-            new Rectangle(0, 0, source.Width, source.Height),
-            ImageLockMode.ReadOnly,
-            PixelFormat.Format32bppArgb);
-        try
-        {
-            Marshal.Copy(bmd.Scan0, bmpPixels, 0, source.Width * source.Height);
-        }
-        finally
-        {
-            source.UnlockBits(bmd);
-            if (!ReferenceEquals(source, bmp)) { source.Dispose(); }
-        }
-    }
+    
 
     public int LoadTextureFromBitmap(Bitmap bmp)
     {
@@ -281,16 +183,6 @@ public class GamePlatformNative : IGamePlatform
     public void SetTextRendererFont(int fontID)
     {
         textrenderer.SetFont(fontID);
-    }
-
-    public float BitmapGetWidth(Bitmap bmp)
-    {
-        return bmp.Width;
-    }
-
-    public float BitmapGetHeight(Bitmap bmp)
-    {
-        return bmp.Height;
     }
 
     public void BitmapDelete(Bitmap bmp)
@@ -1378,7 +1270,7 @@ public class GamePlatformNative : IGamePlatform
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, linearMag ? (int)TextureMagFilter.Linear : (int)TextureMagFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, 4);
         }
-        BitmapData bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+        System.Drawing.Imaging.BitmapData bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmp_data.Width, bmp_data.Height, 0,
             OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, bmp_data.Scan0);

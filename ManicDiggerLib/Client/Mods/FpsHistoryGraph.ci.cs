@@ -73,7 +73,7 @@ public class ModFpsHistoryGraph : ModBase
         fpsCount++;
         longestFrameDt = Math.Max(longestFrameDt, dt);
 
-        int now = p.TimeMillisecondsFromStart();
+        int now = p.TimeMillisecondsFromStart;
         float elapsed = (now - lasttitleUpdateMilliseconds) / 1000f;
         if (elapsed < 1f) return;
 
@@ -117,15 +117,15 @@ public class ModFpsHistoryGraph : ModBase
 
         int[] colors =
         [
-            Game.ColorFromArgb(255, 0,   0, 0),
-            Game.ColorFromArgb(255, 255, 0, 0)
+            ColorUtils.ColorFromArgb(255, 0,   0, 0),
+            ColorUtils.ColorFromArgb(255, 255, 0, 0)
         ];
-        int lineColor = Game.ColorFromArgb(255, 255, 255, 255);
+        int lineColor = ColorUtils.ColorFromArgb(255, 255, 255, 255);
 
         for (int i = 0; i < MaxCount; i++)
         {
             float barHeight = dtHistory[i] * 60 * GraphHeight;
-            int color = InterpolationCi.InterpolateColor(m.GetPlatform(), (float)i / MaxCount, colors, 2);
+            int color = ColorUtils.InterpolateColor((float)i / MaxCount, colors, 2);
             todraw[i].x1 = posx + i;
             todraw[i].y1 = posy - barHeight;
             todraw[i].width = 1;

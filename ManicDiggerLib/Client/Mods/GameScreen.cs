@@ -230,7 +230,7 @@ public class GameScreen : ModBase
 
             if (w.type == WidgetType.Label)
             {
-                game.Draw2dText(text, w.font, screenx + w.x, screeny + w.y, Game.ColorFromArgb(255, 0, 0, 0), false);
+                game.Draw2dText(text, w.font, screenx + w.x, screeny + w.y, ColorUtils.ColorFromArgb(255, 0, 0, 0), false);
             }
         }
     }

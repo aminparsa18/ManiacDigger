@@ -247,7 +247,7 @@ public class ServerSimple
 
     private void NotifyPing()
     {
-        int now = platform.TimeMillisecondsFromStart();
+        int now = platform.TimeMillisecondsFromStart;
         for (int i = 0; i < clientsCount; i++)
         {
             if (clients[i] == null) continue;
@@ -314,7 +314,7 @@ public class ServerSimple
         for (int i = 0; i < modsCount; i++)
             mods[i].GenerateChunk(x, y, z, chunk);
 
-        byte[] chunkBytes = MiscCi.UshortArrayToByteArray(chunk, 32 * 32 * 32);
+        byte[] chunkBytes = FileHelper.IntArrayToByteArray(chunk, 32 * 32 * 32);
         byte[] chunkCompressed = platform.GzipCompress(chunkBytes, 32 * 32 * 32 * 2, out int _);
 
         QueueMainThreadAction(() => SendPacket(clientId, ServerPackets.ChunkPart(chunkCompressed)));

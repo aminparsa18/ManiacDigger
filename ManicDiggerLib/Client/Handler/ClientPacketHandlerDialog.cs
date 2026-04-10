@@ -80,11 +80,11 @@
             b.text = a.Text;
             if (b.text != null)
             {
-                b.text = b.text.Replace("!SERVER_IP!", game.ServerInfo.connectdata.Ip);
+                b.text = b.text.Replace("!SERVER_IP!", game.ServerInfo.ConnectData.Ip);
             }
             if (b.text != null)
             {
-                b.text = b.text.Replace("!SERVER_PORT!", game.ServerInfo.connectdata.Port.ToString());
+                b.text = b.text.Replace("!SERVER_PORT!", game.ServerInfo.ConnectData.Port.ToString());
             }
             b.color = a.Color;
             if (a.Font != null)

@@ -24,7 +24,7 @@ public class ModInterpolatePositions : ModBase
             EnsureInterpolation(game, e);
 
             e.playerDrawInfo.interpolation.DELAYMILLISECONDS =
-                Math.Max(MinDelayMs, game.ServerInfo.ServerPing.RoundtripTimeTotalMilliseconds());
+                Math.Max(MinDelayMs, game.ServerInfo.ServerPing.RoundtripMilliseconds);
 
             UpdateInterpolation(game, i, e);
         }

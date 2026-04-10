@@ -63,7 +63,7 @@ public partial class Game
 
     public void Draw2dBitmapFile(string filename, float x, float y, float w, float h)
     {
-        Draw2dTexture(GetTexture(filename), x, y, w, h, null, 0, ColorFromArgb(255, 255, 255, 255), false);
+        Draw2dTexture(GetTexture(filename), x, y, w, h, null, 0, ColorUtils.ColorFromArgb(255, 255, 255, 255), false);
     }
 
     internal string ValidFont(string family)
@@ -206,23 +206,23 @@ public partial class Game
     {
         if (WaterSwimmingCamera())
         {
-            return ColorFromArgb(255, 78, 95, 140);
+            return ColorUtils.ColorFromArgb(255, 78, 95, 140);
         }
         else if (LavaSwimmingCamera())
         {
-            return ColorFromArgb(255, 222, 101, 46);
+            return ColorUtils.ColorFromArgb(255, 222, 101, 46);
         }
         else
         {
-            return ColorFromArgb(255, 255, 255, 255);
+            return ColorUtils.ColorFromArgb(255, 255, 255, 255);
         }
     }
 
     internal void SetAmbientLight(int color)
     {
-        int r = ColorR(color);
-        int g = ColorG(color);
-        int b = ColorB(color);
+        int r = ColorUtils.ColorR(color);
+        int g = ColorUtils.ColorG(color);
+        int b = ColorUtils.ColorB(color);
         platform.GlLightModelAmbient(r, g, b);
     }
 

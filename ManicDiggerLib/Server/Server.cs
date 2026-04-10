@@ -730,7 +730,7 @@ public partial class Server : ICurrentTime, IDropItem
                     mainSocket = mainSocket,
                     socket = client1
                 };
-                c.Ping.SetTimeoutValue(config.ClientConnectionTimeout);
+                c.Ping.Timeout = TimeSpan.FromSeconds(config.ClientConnectionTimeout);
                 c.chunksseen = new bool[d_Map.MapSizeX / chunksize * d_Map.MapSizeY / chunksize * d_Map.MapSizeZ / chunksize];
                 lock (clients)
                 {
@@ -1183,8 +1183,8 @@ public partial class Server : ICurrentTime, IDropItem
         {
             case Packet_ClientIdEnum.PingReply:
                 clients[clientid].Ping.Receive(platform);
-                clients[clientid].LastPing = ((float)clients[clientid].Ping.RoundtripTimeTotalMilliseconds() / 1000);
-                this.NotifyPing(clientid, (int)clients[clientid].Ping.RoundtripTimeTotalMilliseconds());
+                clients[clientid].LastPing = ((float)clients[clientid].Ping.RoundtripMilliseconds / 1000);
+                this.NotifyPing(clientid, (int)clients[clientid].Ping.RoundtripMilliseconds);
                 break;
             case Packet_ClientIdEnum.PlayerIdentification:
                 {
@@ -3677,7 +3677,7 @@ public class ClientOnServer
         state = ClientStateOnServer.Connecting;
         queryClient = true;
         received = new List<byte>();
-        Ping = new Ping_();
+        Ping = new Ping();
         playername = Server.invalidplayername;
         Model = "player.txt";
         chunksseenTime = new Dictionary<int, int>();
@@ -3705,7 +3705,7 @@ public class ClientOnServer
     internal NetServer mainSocket;
     internal NetConnection socket;
     internal List<byte> received;
-    internal Ping_ Ping;
+    internal Ping Ping;
     internal float LastPing;
     internal string playername { get { return entity.drawName.name; } set { entity.drawName.name = value; } }
     internal int PositionMul32GlX { get { return (int)(entity.position.x * 32); } set { entity.position.x = (float)value / 32; } }

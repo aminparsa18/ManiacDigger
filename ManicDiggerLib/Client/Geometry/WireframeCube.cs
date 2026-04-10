@@ -16,7 +16,7 @@ public class WireframeCube
     private const int IndicesPerFace = 8;
 
     /// <summary>Full white, fully opaque vertex colour.</summary>
-    private static readonly int White = Game.ColorFromArgb(255, 255, 255, 255);
+    private static readonly int White = ColorUtils.ColorFromArgb(255, 255, 255, 255);
 
     /// <summary>
     /// Builds a wireframe unit cube <see cref="GeometryModel"/> centred at the origin,
@@ -94,10 +94,10 @@ public class WireframeCube
         m.Uv[uvOffset] = 0f;
         m.Uv[uvOffset + 1] = 0f;
 
-        m.Rgba[rgbaOffset] = (byte)Game.ColorR(White);
-        m.Rgba[rgbaOffset + 1] = (byte)Game.ColorG(White);
-        m.Rgba[rgbaOffset + 2] = (byte)Game.ColorB(White);
-        m.Rgba[rgbaOffset + 3] = (byte)Game.ColorA(White);
+        m.Rgba[rgbaOffset] = (byte)ColorUtils.ColorR(White);
+        m.Rgba[rgbaOffset + 1] = (byte)ColorUtils.ColorG(White);
+        m.Rgba[rgbaOffset + 2] = (byte)ColorUtils.ColorB(White);
+        m.Rgba[rgbaOffset + 3] = (byte)ColorUtils.ColorA(White);
 
         m.VerticesCount++;
     }

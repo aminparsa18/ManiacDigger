@@ -70,7 +70,7 @@ public class TerrainChunkTesselatorCi
         EnableSmoothLight = true;
         ENABLE_TEXTURE_TILING = true;
         //option_HardWaterTesselation = true;
-        _colorWhite = Game.ColorFromArgb(255, 255, 255, 255);
+        _colorWhite = ColorUtils.ColorFromArgb(255, 255, 255, 255);
         BlockShadow = 0.6f;
         option_DarkenBlockSides = true;
         option_DoNotDrawEdges = true;
@@ -620,10 +620,10 @@ public class TerrainChunkTesselatorCi
 
     private int ColorMultiply(int color, float fValue)
     {
-        return Game.ColorFromArgb(Game.ColorA(color),
-            (int)(Game.ColorR(color) * fValue),
-            (int)(Game.ColorG(color) * fValue),
-            (int)(Game.ColorB(color) * fValue));
+        return ColorUtils.ColorFromArgb(ColorUtils.ColorA(color),
+            (int)(ColorUtils.ColorR(color) * fValue),
+            (int)(ColorUtils.ColorG(color) * fValue),
+            (int)(ColorUtils.ColorB(color) * fValue));
     }
 
     internal float occ;
@@ -1120,10 +1120,10 @@ public class TerrainChunkTesselatorCi
         model.Uv[uvOffset] = u;
         model.Uv[uvOffset + 1] = v;
 
-        model.Rgba[rgbaOffset] = (byte)Game.ColorR(color);
-        model.Rgba[rgbaOffset + 1] = (byte)Game.ColorG(color);
-        model.Rgba[rgbaOffset + 2] = (byte)Game.ColorB(color);
-        model.Rgba[rgbaOffset + 3] = (byte)Game.ColorA(color);
+        model.Rgba[rgbaOffset] = (byte)ColorUtils.ColorR(color);
+        model.Rgba[rgbaOffset + 1] = (byte)ColorUtils.ColorG(color);
+        model.Rgba[rgbaOffset + 2] = (byte)ColorUtils.ColorB(color);
+        model.Rgba[rgbaOffset + 3] = (byte)ColorUtils.ColorA(color);
 
         model.VerticesCount++;
     }

@@ -8,7 +8,7 @@ public class ModScreenshot : ModBase
     private const string ScreenshotText = "&0Screenshot";
 
     private static readonly Font FlashFont = new Font("Arial", FlashFontSize);
-    private static readonly int White = Game.ColorFromArgb(255, 255, 255, 255);
+    private static readonly int White = ColorUtils.ColorFromArgb(255, 255, 255, 255);
 
     private bool takeScreenshot;
     private int screenshotFlashFramesLeft;

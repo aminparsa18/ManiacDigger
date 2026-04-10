@@ -26,7 +26,7 @@ public class ModDrawHand2d : ModBase
             }
         }
 
-        game.Draw2dTexture(game.handTexture, game.Width() / 2, game.Height() - 512, 512, 512, null, 0, Game.ColorFromArgb(255, 255, 255, 255), false);
+        game.Draw2dTexture(game.handTexture, game.Width() / 2, game.Height() - 512, 512, 512, null, 0, ColorUtils.ColorFromArgb(255, 255, 255, 255), false);
         game.PerspectiveMode();
     }
 

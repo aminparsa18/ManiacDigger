@@ -62,7 +62,7 @@ public class ClientPacketHandlerEntitySpawn : ClientPacketHandler
             {
                 old.networkPosition = ToClientEntityPosition(entity.Position);
                 old.networkPosition.PositionLoaded = true;
-                old.networkPosition.LastUpdateMilliseconds = game.platform.TimeMillisecondsFromStart();
+                old.networkPosition.LastUpdateMilliseconds = game.platform.TimeMillisecondsFromStart;
                 old.position = ToClientEntityPosition(entity.Position);
             }
         }
@@ -159,7 +159,7 @@ public class ClientPacketHandlerEntityPosition : ClientPacketHandler
         EntityPosition_ pos = ClientPacketHandlerEntitySpawn.ToClientEntityPosition(packet.EntityPosition.PositionAndOrientation);
         entity.networkPosition = pos;
         entity.networkPosition.PositionLoaded = true;
-        entity.networkPosition.LastUpdateMilliseconds = game.platform.TimeMillisecondsFromStart();
+        entity.networkPosition.LastUpdateMilliseconds = game.platform.TimeMillisecondsFromStart;
         if (packet.EntityPosition.Id == game.LocalPlayerId)
         {
             // Override local player position if necessary (teleport)

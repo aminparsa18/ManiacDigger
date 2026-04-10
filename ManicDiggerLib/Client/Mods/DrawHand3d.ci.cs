@@ -371,7 +371,7 @@ public class ModDrawHand3d : ModBase
         }
         else
         {
-            DrawCube(_modelData, x, y, z, Game.ColorFromArgb(255, lightByte, lightByte, lightByte));
+            DrawCube(_modelData, x, y, z, ColorUtils.ColorFromArgb(255, lightByte, lightByte, lightByte));
         }
     }
 
@@ -591,10 +591,10 @@ public class ModDrawHand3d : ModBase
 
         model.Uv[uvOffset] = u;
         model.Uv[uvOffset + 1] = v;
-        model.Rgba[rgbaOffset] = (byte)Game.ColorR(color);
-        model.Rgba[rgbaOffset + 1] = (byte)Game.ColorG(color);
-        model.Rgba[rgbaOffset + 2] = (byte)Game.ColorB(color);
-        model.Rgba[rgbaOffset + 3] = (byte)Game.ColorA(color);
+        model.Rgba[rgbaOffset] = (byte)ColorUtils.ColorR(color);
+        model.Rgba[rgbaOffset + 1] = (byte)ColorUtils.ColorG(color);
+        model.Rgba[rgbaOffset + 2] = (byte)ColorUtils.ColorB(color);
+        model.Rgba[rgbaOffset + 3] = (byte)ColorUtils.ColorA(color);
 
         model.VerticesCount++;
     }
@@ -649,7 +649,7 @@ public class BlockRendererTorch
     private const float TiltDrop = 1f / 10f;
 
     /// <summary>Fully opaque white, used as the default vertex colour for the torch.</summary>
-    private static readonly int White = Game.ColorFromArgb(255, 255, 255, 255);
+    private static readonly int White = ColorUtils.ColorFromArgb(255, 255, 255, 255);
 
     /// <summary>Atlas texture index used for the top (flame) cap of the torch.</summary>
     internal int TopTexture;
@@ -895,10 +895,10 @@ public class BlockRendererTorch
         model.Uv[uvOffset] = u;
         model.Uv[uvOffset + 1] = v;
 
-        model.Rgba[rgbaOffset] = (byte)Game.ColorR(color);
-        model.Rgba[rgbaOffset + 1] = (byte)Game.ColorG(color);
-        model.Rgba[rgbaOffset + 2] = (byte)Game.ColorB(color);
-        model.Rgba[rgbaOffset + 3] = (byte)Game.ColorA(color);
+        model.Rgba[rgbaOffset] = (byte)ColorUtils.ColorR(color);
+        model.Rgba[rgbaOffset + 1] = (byte)ColorUtils.ColorG(color);
+        model.Rgba[rgbaOffset + 2] = (byte)ColorUtils.ColorB(color);
+        model.Rgba[rgbaOffset + 3] = (byte)ColorUtils.ColorA(color);
 
         model.VerticesCount++;
     }

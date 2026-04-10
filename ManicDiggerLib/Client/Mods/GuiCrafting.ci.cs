@@ -35,7 +35,7 @@ public class ModGuiCrafting : ModBase
     {
         d_CraftingTableTool ??= new CraftingTableTool
         {
-            d_Map = new MapStorage(game),
+            d_Map = new MapStorage(game.VoxelMap, game.SetBlock),
             d_Data = game.d_Data
         };
 
@@ -108,9 +108,9 @@ public class ModGuiCrafting : ModBase
             Packet_CraftingRecipe r = craftingRecipes2[currentRecipes[i]];
             int rowY = menuY + i * RecipeRowHeight;
             int color = i == craftingSelectedRecipe
-                ? Game.ColorFromArgb(255, 255, 0, 0)
-                : Game.ColorFromArgb(255, 255, 255, 255);
-            int white = Game.ColorFromArgb(255, 255, 255, 255);
+                ? ColorUtils.ColorFromArgb(255, 255, 0, 0)
+                : ColorUtils.ColorFromArgb(255, 255, 255, 255);
+            int white = ColorUtils.ColorFromArgb(255, 255, 255, 255);
 
             for (int ii = 0; ii < r.IngredientsCount; ii++)
             {

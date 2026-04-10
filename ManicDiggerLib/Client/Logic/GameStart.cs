@@ -71,7 +71,7 @@ public partial class Game
         s = new();
 
         // Prevent loading screen from immediately displaying lag symbol.
-        LastReceivedMilliseconds = platform.TimeMillisecondsFromStart();
+        LastReceivedMilliseconds = platform.TimeMillisecondsFromStart;
         ENABLE_DRAW_TEST_CHARACTER = platform.IsDebuggerAttached();
 
         int detectedSize = platform.GlGetMaxTextureSize();

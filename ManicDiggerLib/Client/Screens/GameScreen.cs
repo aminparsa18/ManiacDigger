@@ -11,7 +11,7 @@ public class ScreenGame : ScreenBase
     private readonly Game game = new();
 
     private IGamePlatform platform;
-    private ConnectData connectData;
+    private ConnectionData connectData;
     private bool singleplayer;
     private string singleplayerSavePath;
 
@@ -34,7 +34,7 @@ public class ScreenGame : ScreenBase
     /// </param>
     /// <param name="singleplayerSavePath_">Path to the singleplayer save directory.</param>
     /// <param name="connectData_">Remote server address and credentials (multiplayer only).</param>
-    public void Start(IGamePlatform platform_, bool singleplayer_, string singleplayerSavePath_, ConnectData connectData_)
+    public void Start(IGamePlatform platform_, bool singleplayer_, string singleplayerSavePath_, ConnectionData connectData_)
     {
         platform = platform_;
         singleplayer = singleplayer_;
@@ -81,7 +81,7 @@ public class ScreenGame : ScreenBase
             // Prime the server inbox so the handshake starts immediately.
             network.ServerInbox.Enqueue([]);
             game.main = new DummyNetClient(network);
-            game.connectdata = connectData = new ConnectData { Username = "Local" };
+            game.connectdata = connectData = new ConnectionData { Username = "Local" };
         }
         else
         {

@@ -7,7 +7,7 @@ public class ModReloadAmmo : ModBase
     {
         if (game.reloadstartMilliseconds == 0) return;
 
-        float elapsed = (game.platform.TimeMillisecondsFromStart() - game.reloadstartMilliseconds) / 1000f;
+        float elapsed = (game.platform.TimeMillisecondsFromStart - game.reloadstartMilliseconds) / 1000f;
         float reloadDelay = game.DecodeFixedPoint(game.blocktypes[game.reloadblock].ReloadDelayFloat);
         if (elapsed <= reloadDelay) return;
 
@@ -30,7 +30,7 @@ public class ModReloadAmmo : ModBase
         var sounds = game.blocktypes[item.BlockId].Sounds;
         int sound = game.rnd.Next() % sounds.ReloadCount;
         game.PlayAudio(sounds.Reload[sound] + ".ogg");
-        game.reloadstartMilliseconds = game.platform.TimeMillisecondsFromStart();
+        game.reloadstartMilliseconds = game.platform.TimeMillisecondsFromStart;
         game.reloadblock = item.BlockId;
         game.SendPacketClient(ClientPackets.Reload());
     }

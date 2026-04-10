@@ -38,12 +38,18 @@ public class ModSkySphereAnimated : ModBase
         game.platform.GlEnableDepthTest();
     }
 
+    /// <summary>
+    /// Loads a PNG asset into a flat ARGB pixel array.
+    /// </summary>
+    /// <param name="game">Used to access the platform and asset file system.</param>
+    /// <param name="filename">Asset filename including extension (e.g. <c>"terrain.png"</c>).</param>
+    /// <param name="pixels">Receives the loaded ARGB pixel data.</param>
     private void LoadPixels(Game game, string filename, ref int[] pixels)
     {
         Bitmap bmp = game.platform.BitmapCreateFromPng(game.GetAssetFile(filename), game.GetAssetFileLength(filename));
-        pixels = new int[TextureSize * TextureSize * 4];
-        game.platform.BitmapGetPixelsArgb(bmp, pixels);
-        game.platform.BitmapDelete(bmp);
+        PixelBuffer buffer = PixelBuffer.FromBitmap(bmp);
+        bmp.Dispose();
+        pixels = buffer.Argb;
     }
 
     public void Draw(Game game, float fov)
@@ -119,14 +125,14 @@ public class ModSkySphereAnimated : ModBase
                 int skyColor = Texture2d(platform, skyPixels, (sunYN + 2f) / 4f, 1f - (vyN + 1f) / 2f);
                 int glowColor = Texture2d(platform, glowPixels, (sunYN + 1f) / 2f, 1f - proximityToSun);
 
-                float skyA = Game.ColorA(skyColor) / 255f;
-                float skyR = Game.ColorR(skyColor) / 255f;
-                float skyG = Game.ColorG(skyColor) / 255f;
-                float skyB = Game.ColorB(skyColor) / 255f;
-                float glowA = Game.ColorA(glowColor) / 255f;
-                float glowR = Game.ColorR(glowColor) / 255f;
-                float glowG = Game.ColorG(glowColor) / 255f;
-                float glowB = Game.ColorB(glowColor) / 255f;
+                float skyA = ColorUtils.ColorA(skyColor) / 255f;
+                float skyR = ColorUtils.ColorR(skyColor) / 255f;
+                float skyG = ColorUtils.ColorG(skyColor) / 255f;
+                float skyB = ColorUtils.ColorB(skyColor) / 255f;
+                float glowA = ColorUtils.ColorA(glowColor) / 255f;
+                float glowR = ColorUtils.ColorR(glowColor) / 255f;
+                float glowG = ColorUtils.ColorG(glowColor) / 255f;
+                float glowB = ColorUtils.ColorB(glowColor) / 255f;
 
                 // Blend sky and glow
                 data.Rgba[i * 4] = (byte)(Math.Min(1f, skyR + glowR * glowA) * 255);

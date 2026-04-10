@@ -93,7 +93,7 @@ public class AviWriter
         width_ = (uint)width;
         height_ = (uint)height;
         bmp_ = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-        BitmapData bmpDat = bmp_.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+        System.Drawing.Imaging.BitmapData bmpDat = bmp_.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
         stride_ = (uint)bmpDat.Stride;
         bmp_.UnlockBits(bmpDat);
         AVIFileInit();
@@ -112,7 +112,7 @@ public class AviWriter
     public void AddFrame()
     {
 
-        BitmapData bmpDat = bmp_.LockBits(
+        System.Drawing.Imaging.BitmapData bmpDat = bmp_.LockBits(
           new Rectangle(0, 0, (int)width_, (int)height_), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
 
         int hr = AVIStreamWrite(psCompressed_, count_, 1,

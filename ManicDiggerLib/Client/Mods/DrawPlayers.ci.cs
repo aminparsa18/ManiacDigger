@@ -8,7 +8,7 @@ public class ModDrawPlayers : ModBase
 {
     public override void OnNewFrameDraw3d(Game game, float deltaTime)
     {
-        game.totaltimeMilliseconds = game.platform.TimeMillisecondsFromStart();
+        game.totaltimeMilliseconds = game.platform.TimeMillisecondsFromStart;
 
         for (int i = 0; i < game.entities.Count; i++)
         {

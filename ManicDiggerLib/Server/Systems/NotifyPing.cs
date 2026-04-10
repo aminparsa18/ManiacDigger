@@ -17,9 +17,9 @@ public class ServerSystemNotifyPing : ServerSystem
             foreach (var k in server.clients)
             {
                 // Check if client is alive. Detect half-dropped connections.
-                if (!k.Value.Ping.Send(server.platform)/*&& k.Value.state == ClientStateOnServer.Playing*/)
+                if (!k.Value.Ping.Send(server.platform.TimeMillisecondsFromStart)/*&& k.Value.state == ClientStateOnServer.Playing*/)
                 {
-                    if (k.Value.Ping.Timeout(server.platform))
+                    if (k.Value.Ping.CheckTimeout(server.platform.TimeMillisecondsFromStart))
                     {
                         Console.WriteLine(k.Key + ": ping timeout. Disconnecting...");
                         keysToDelete.Add(k.Key);

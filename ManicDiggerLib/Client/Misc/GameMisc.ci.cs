@@ -1072,13 +1072,13 @@ public class ClientModManager1 : ClientModManager
 
     public override void Draw2dTexture(int textureid, float x1, float y1, float width, float height, int inAtlasId, int color)
     {
-        int a = Game.ColorA(color);
-        int r = Game.ColorR(color);
-        int g = Game.ColorG(color);
-        int b = Game.ColorB(color);
+        int a = ColorUtils.ColorA(color);
+        int r = ColorUtils.ColorR(color);
+        int g = ColorUtils.ColorG(color);
+        int b = ColorUtils.ColorB(color);
         game.Draw2dTexture(textureid, (int)(x1), (int)(y1),
             (int)(width), (int)(height),
-             inAtlasId, 0, Game.ColorFromArgb(a, r, g, b), false);
+             inAtlasId, 0, ColorUtils.ColorFromArgb(a, r, g, b), false);
     }
 
     public override void Draw2dTextures(Draw2dData[] todraw, int todrawLength, int textureId)
@@ -1220,16 +1220,27 @@ public class TextPart
     internal string text;
 }
 
+/// <summary>Renders multi-colored text into a single power-of-two <see cref="Bitmap"/>.</summary>
 public class TextColorRenderer
 {
     internal IGamePlatform platform;
 
+    /// <summary>
+    /// Renders a <see cref="Text_"/> value (which may contain inline color codes) into a
+    /// <see cref="Bitmap"/> sized to the next power of two in each dimension.
+    /// Each color segment is rendered separately and composited into a single atlas.
+    /// </summary>
+    /// <param name="t">The text and style parameters to render.</param>
+    /// <returns>
+    /// A <see cref="Bitmap"/> containing the rendered text, with transparent pixels where
+    /// no glyph was drawn.
+    /// </returns>
     internal Bitmap CreateTextTexture(Text_ t)
     {
         TextPart[] parts = DecodeColors(t.text, t.color, out int partsCount);
 
-        float totalwidth = 0;
-        float totalheight = 0;
+        float totalWidth = 0;
+        float totalHeight = 0;
         int[] sizesX = new int[partsCount];
         int[] sizesY = new int[partsCount];
 
@@ -1238,21 +1249,20 @@ public class TextColorRenderer
             platform.TextSize(parts[i].text, t.fontsize, out int outWidth, out int outHeight);
             sizesX[i] = outWidth;
             sizesY[i] = outHeight;
-            totalwidth += outWidth;
-            totalheight = Math.Max(totalheight, outHeight);
+            totalWidth += outWidth;
+            totalHeight = Math.Max(totalHeight, outHeight);
         }
 
-        int size2X = NextPowerOfTwo((int)totalwidth + 1);
-        int size2Y = NextPowerOfTwo((int)totalheight + 1);
-        Bitmap bmp2 = new(size2X, size2Y);
-        int[] bmp2Pixels = new int[size2X * size2Y];
+        int size2X = NextPowerOfTwo((int)totalWidth + 1);
+        int size2Y = NextPowerOfTwo((int)totalHeight + 1);
+        PixelBuffer atlas = PixelBuffer.Create(size2X, size2Y);
 
-        float currentwidth = 0;
+        float currentWidth = 0;
         for (int i = 0; i < partsCount; i++)
         {
-            int sizeiX = sizesX[i];
-            int sizeiY = sizesY[i];
-            if (sizeiX == 0 || sizeiY == 0) { continue; }
+            int sizeX = sizesX[i];
+            int sizeY = sizesY[i];
+            if (sizeX == 0 || sizeY == 0) continue;
 
             Text_ partText = new()
             {
@@ -1263,29 +1273,24 @@ public class TextColorRenderer
                 fontfamily = t.fontfamily
             };
 
-            Bitmap partBmp = platform.CreateTextTexture(partText);
-            int partWidth = (int)platform.BitmapGetWidth(partBmp);
-            int partHeight = (int)platform.BitmapGetHeight(partBmp);
-            int[] partBmpPixels = new int[partWidth * partHeight];
-            platform.BitmapGetPixelsArgb(partBmp, partBmpPixels);
+            PixelBuffer part = PixelBuffer.FromBitmap(platform.CreateTextTexture(partText));
 
-            for (int x = 0; x < partWidth; x++)
+            for (int y = 0; y < part.Height; y++)
             {
-                for (int y = 0; y < partHeight; y++)
+                for (int x = 0; x < part.Width; x++)
                 {
-                    if (x + currentwidth >= size2X || y >= size2Y) { continue; }
-                    int c = partBmpPixels[VectorIndexUtil.Index2d(x, y, partWidth)];
-                    if (Game.ColorA(c) > 0)
-                    {
-                        bmp2Pixels[VectorIndexUtil.Index2d((int)currentwidth + x, y, size2X)] = c;
-                    }
+                    if (x + currentWidth >= size2X || y >= size2Y) continue;
+
+                    int c = part.GetPixel(x, y);
+                    if (ColorUtils.ColorA(c) > 0)
+                        atlas.SetPixel((int)currentWidth + x, y, c);
                 }
             }
-            currentwidth += sizeiX;
+
+            currentWidth += sizeX;
         }
 
-        platform.BitmapSetPixelsArgb(bmp2, bmp2Pixels);
-        return bmp2;
+        return atlas.ToBitmap();
     }
 
     /// <summary>
@@ -1347,22 +1352,22 @@ public class TextColorRenderer
     // Loosely follows the classic 16-color terminal palette.
     private static readonly int[] ColorPalette =
     [
-        Game.ColorFromArgb(255,   0,   0,   0), // 0 black
-        Game.ColorFromArgb(255,   0,   0, 191), // 1 dark blue
-        Game.ColorFromArgb(255,   0, 191,   0), // 2 dark green
-        Game.ColorFromArgb(255,   0, 191, 191), // 3 dark cyan
-        Game.ColorFromArgb(255, 191,   0,   0), // 4 dark red
-        Game.ColorFromArgb(255, 191,   0, 191), // 5 dark magenta
-        Game.ColorFromArgb(255, 191, 191,   0), // 6 dark yellow
-        Game.ColorFromArgb(255, 191, 191, 191), // 7 light grey
-        Game.ColorFromArgb(255,  40,  40,  40), // 8 dark grey
-        Game.ColorFromArgb(255,  64,  64, 255), // 9 blue
-        Game.ColorFromArgb(255,  64, 255,  64), // a green
-        Game.ColorFromArgb(255,  64, 255, 255), // b cyan
-        Game.ColorFromArgb(255, 255,  64,  64), // c red
-        Game.ColorFromArgb(255, 255,  64, 255), // d magenta
-        Game.ColorFromArgb(255, 255, 255,  64), // e yellow
-        Game.ColorFromArgb(255, 255, 255, 255), // f white
+        ColorUtils.ColorFromArgb(255,   0,   0,   0), // 0 black
+        ColorUtils.ColorFromArgb(255,   0,   0, 191), // 1 dark blue
+        ColorUtils.ColorFromArgb(255,   0, 191,   0), // 2 dark green
+        ColorUtils.ColorFromArgb(255,   0, 191, 191), // 3 dark cyan
+        ColorUtils.ColorFromArgb(255, 191,   0,   0), // 4 dark red
+        ColorUtils.ColorFromArgb(255, 191,   0, 191), // 5 dark magenta
+        ColorUtils.ColorFromArgb(255, 191, 191,   0), // 6 dark yellow
+        ColorUtils.ColorFromArgb(255, 191, 191, 191), // 7 light grey
+        ColorUtils.ColorFromArgb(255,  40,  40,  40), // 8 dark grey
+        ColorUtils.ColorFromArgb(255,  64,  64, 255), // 9 blue
+        ColorUtils.ColorFromArgb(255,  64, 255,  64), // a green
+        ColorUtils.ColorFromArgb(255,  64, 255, 255), // b cyan
+        ColorUtils.ColorFromArgb(255, 255,  64,  64), // c red
+        ColorUtils.ColorFromArgb(255, 255,  64, 255), // d magenta
+        ColorUtils.ColorFromArgb(255, 255, 255,  64), // e yellow
+        ColorUtils.ColorFromArgb(255, 255, 255, 255), // f white
     ];
 
     private static int GetColor(int index)
