@@ -405,7 +405,7 @@ public partial class Game
   
     public void QueueActionCommit(Action action)
     {
-        commitActions.Add(action);
+        commitActions.Enqueue(action);
     }
 
     public void DrawModel(GeometryModel model)

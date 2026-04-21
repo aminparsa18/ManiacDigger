@@ -569,8 +569,20 @@ public class ModDrawTerrain : ModBase
                         int cz1 = cz + zz - 1;
                         if (!_game.VoxelMap.IsValidChunkPos(cx1, cy1, cz1)) continue;
 
-                        Chunk neighbour = _game.VoxelMap.GetChunk(
-                            cx1 * chunksize, cy1 * chunksize, cz1 * chunksize);
+                        // ── Direct array access instead of GetChunk() ────────────
+                        // GetChunk() → GetChunk_() allocates a data+baseLight pair
+                        // for every neighbour that hasn't arrived from the server
+                        // yet. These phantom chunks accumulate without bound because
+                        // they have no rendered.Ids and were previously invisible to
+                        // the unloader. Skip missing neighbours instead — their base
+                        // light will be computed when the server delivers them.
+                        int nIdx = VectorIndexUtil.Index3d(
+                            cx1, cy1, cz1,
+                            _game.VoxelMap.Mapsizexchunks,
+                            _game.VoxelMap.Mapsizeychunks);
+                        Chunk neighbour = _game.VoxelMap.chunks[nIdx];
+                        if (neighbour == null) { continue; }
+
                         if (neighbour.baseLightDirty)
                         {
                             _lightBase.CalculateChunkBaseLight(

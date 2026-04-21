@@ -1,5 +1,6 @@
 ﻿using ManicDigger.Mods;
 using OpenTK.Mathematics;
+using System.Collections.Concurrent;
 
 /// <summary>
 /// Partial class containing field declarations and constructor initialization
@@ -343,7 +344,7 @@ public partial class Game
     private float accumulator;
     private TaskScheduler taskScheduler;
 
-    internal List<Action> commitActions;
+    internal ConcurrentQueue<Action> commitActions;
 
     internal int SelectedBlockPositionX;
     internal int SelectedBlockPositionY;
@@ -388,7 +389,7 @@ public partial class Game
         Set3dProjectionTempMat4 = Matrix4.Identity;
         PlayerStats = new Packet_ServerPlayerStats();
         taskScheduler = new TaskScheduler();
-        commitActions = new List<Action>();
+        commitActions = new();
         entities = new List<Entity>(entitiesMax);
     }
 

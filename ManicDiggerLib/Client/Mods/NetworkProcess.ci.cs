@@ -105,9 +105,15 @@ public class ModNetworkProcess : ModBase
                 {
                     byte[] arr = packet.ChunkPart.CompressedChunkPart;
 
-                    // ── Buffer.BlockCopy replaces the byte-by-byte loop ───────────
-                    // The old loop copied one byte at a time; BlockCopy uses the
-                    // runtime's native memory-copy path (typically a SIMD memmove).
+                    // ── Guard against CurrentChunk overflow ───────────────────────
+                    // If accumulated parts would exceed the buffer, discard and reset.
+                    // The matching Chunk_ packet will receive CurrentChunkCount == 0
+                    // and zero-fill receivedchunk, which is safer than a corrupt decompress.
+                    if (CurrentChunkCount + arr.Length > CurrentChunk.Length)
+                    {
+                        CurrentChunkCount = 0;
+                        break;
+                    }
                     Buffer.BlockCopy(arr, 0, CurrentChunk, CurrentChunkCount, arr.Length);
                     CurrentChunkCount += arr.Length;
                     break;
@@ -116,24 +122,42 @@ public class ModNetworkProcess : ModBase
             case Packet_ServerIdEnum.Chunk_:
                 {
                     Packet_ServerChunk p = packet.Chunk_;
-                    if (CurrentChunkCount != 0)
+
+                    // ── Always reset CurrentChunkCount, even on decompression failure ──
+                    // Previously, a ZLibException from GzipDecompress left CurrentChunkCount
+                    // non-zero. The next Chunk_ packet would then try to decompress the same
+                    // stale bytes → second ZLibException → cascade under memory pressure.
+                    // We capture the count, reset immediately, then attempt decompression.
+                    int compressedLength = CurrentChunkCount;
+                    CurrentChunkCount = 0;
+
+                    if (compressedLength != 0)
                     {
-                        game.platform.GzipDecompress(CurrentChunk, CurrentChunkCount, decompressedchunk);
+                        try
                         {
-                            int i = 0;
-                            for (int zz = 0; zz < p.SizeZ; zz++)
+                            game.platform.GzipDecompress(CurrentChunk, compressedLength, decompressedchunk);
+                        }
+                        catch (Exception ex)
+                        {
+                            // Decompression failed — log and skip this chunk.
+                            // CurrentChunkCount is already 0 so the next Chunk_ is clean.
+                            game.ChatLog(string.Format("[NET] Chunk decompression failed: {0}", ex.Message));
+                            break;
+                        }
+
+                        int i = 0;
+                        for (int zz = 0; zz < p.SizeZ; zz++)
+                        {
+                            for (int yy = 0; yy < p.SizeY; yy++)
                             {
-                                for (int yy = 0; yy < p.SizeY; yy++)
+                                for (int xx = 0; xx < p.SizeX; xx++)
                                 {
-                                    for (int xx = 0; xx < p.SizeX; xx++)
+                                    int block = (decompressedchunk[i + 1] << 8) + decompressedchunk[i];
+                                    if (block < GlobalVar.MAX_BLOCKTYPES)
                                     {
-                                        int block = (decompressedchunk[i + 1] << 8) + decompressedchunk[i];
-                                        if (block < GlobalVar.MAX_BLOCKTYPES)
-                                        {
-                                            receivedchunk[Index3d(xx, yy, zz, p.SizeX, p.SizeY)] = block;
-                                        }
-                                        i += 2;
+                                        receivedchunk[Index3d(xx, yy, zz, p.SizeX, p.SizeY)] = block;
                                     }
+                                    i += 2;
                                 }
                             }
                         }
@@ -143,21 +167,9 @@ public class ModNetworkProcess : ModBase
                         int size = p.SizeX * p.SizeY * p.SizeZ;
                         for (int i = 0; i < size; i++) { receivedchunk[i] = 0; }
                     }
-                    {
-                        game.VoxelMap.SetMapPortion(p.X, p.Y, p.Z, receivedchunk, p.SizeX, p.SizeY, p.SizeZ);
-                        for (int xx = 0; xx < 2; xx++)
-                        {
-                            for (int yy = 0; yy < 2; yy++)
-                            {
-                                for (int zz = 0; zz < 2; zz++)
-                                {
-                                    // d_Shadows.OnSetChunk(p.X + 16 * xx, p.Y + 16 * yy, p.Z + 16 * zz);
-                                }
-                            }
-                        }
-                    }
-                    game.ReceivedMapLength += CurrentChunkCount;
-                    CurrentChunkCount = 0;
+
+                    game.VoxelMap.SetMapPortion(p.X, p.Y, p.Z, receivedchunk, p.SizeX, p.SizeY, p.SizeZ);
+                    game.ReceivedMapLength += compressedLength;
                     break;
                 }
 

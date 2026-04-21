@@ -10,6 +10,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing.Imaging;
+using System.IO.Compression;
 using System.Net;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -157,20 +158,21 @@ public class GamePlatformNative : IGamePlatform
         return GameVersion.Version;
     }
 
-    private readonly ICompression compression = new CompressionGzip();
     public void GzipDecompress(byte[] compressed, int compressedLength, byte[] ret)
     {
-        byte[] data = new byte[compressedLength];
-        for (int i = 0; i < compressedLength; i++)
-        {
-            data[i] = compressed[i];
-        }
-        byte[] decompressed = compression.Decompress(data);
-        for (int i = 0; i < decompressed.Length; i++)
-        {
-            ret[i] = decompressed[i];
-        }
+        // MemoryStream(byte[], int, int) wraps the existing array without copying.
+        // GZipStream reads from it and writes the decompressed bytes directly into
+        // ret via the Read loop — no intermediate byte[] allocation at any point.
+        using var source = new MemoryStream(compressed, 0, compressedLength, writable: false);
+        using var gz = new GZipStream(source, CompressionMode.Decompress);
+
+        int totalRead = 0;
+        int bytesRead;
+        while ((bytesRead = gz.Read(ret, totalRead, ret.Length - totalRead)) > 0)
+            totalRead += bytesRead;
     }
+
+    private readonly ICompression compression = new CompressionGzip();
     public byte[] GzipCompress(byte[] data, int dataLength, out int retLength)
     {
         byte[] data_ = new byte[dataLength];
@@ -182,6 +184,7 @@ public class GamePlatformNative : IGamePlatform
         retLength = compressed.Length;
         return compressed;
     }
+
     public bool ENABLE_CHATLOG = true;
     public string gamepathlogs() { return Path.Combine(PathStorage(), "Logs"); }
     private static string MakeValidFileName(string name)

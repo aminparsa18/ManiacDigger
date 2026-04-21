@@ -75,7 +75,7 @@ public class ModUnloadRendererChunks : ModBase
                 }
                 rendered.Ids = null;
                 rendered.Dirty = true;
-                rendered.ReleaseLight();  // ← returns rented array to pool
+                rendered.Light = null;
             }
 
             // ── CPU block data ────────────────────────────────────────────────
@@ -130,15 +130,32 @@ public class ModUnloadRendererChunks : ModBase
             int flatIndex = VectorIndexUtil.Index3d(x, y, z, _mapSizeXChunks, _mapSizeYChunks);
             Chunk chunk = _game.VoxelMap.chunks[flatIndex];
 
-            // Skip chunks that have no geometry to unload.
-            if (chunk?.rendered?.Ids == null) { continue; }
+            // Skip empty slots — nothing to free.
+            if (chunk == null) { continue; }
 
-            // If the chunk is outside the view-distance box, queue its geometry for removal.
+            // Determine whether this chunk holds any state worth freeing.
+            // Previously only rendered chunks (rendered.Ids != null) were unloaded.
+            // That left two invisible sources of unbounded memory growth:
+            //   1. Chunks received from the server but outside render distance —
+            //      they have block data but are never tessellated, so Ids stays null.
+            //   2. Phantom chunks allocated by CalculateShadows when it called
+            //      GetChunk() on 26 neighbours to check base-light: those neighbours
+            //      may not exist yet so GetChunk_ rents two byte[4096] arrays each.
+            // Both categories must be unloaded when outside the view-distance box.
+            bool hasRenderedGeometry = chunk.rendered?.Ids != null;
+            bool hasBlockData = chunk.HasData();
+            if (!hasRenderedGeometry && !hasBlockData) { continue; }
+
+            // If the chunk is outside the view-distance box, queue its removal.
             if (x < startX || y < startY || z < startZ
              || x > endX || y > endY || z > endZ)
             {
                 _game.QueueActionCommit(CreateUnloadCommit(_game, flatIndex));
-                break;
+                // Rate-limit only for rendered chunks (GPU removal needed).
+                // Data-only chunks are CPU-only and cheap — continue scanning
+                // so we can drain multiple per tick and keep pace with the
+                // server's chunk send rate during fast exploration.
+                if (hasRenderedGeometry) { break; }
             }
         }
     }
