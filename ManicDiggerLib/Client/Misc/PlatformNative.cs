@@ -141,7 +141,7 @@ public class GamePlatformNative : IGamePlatform
         textrenderer.SetFont(fontID);
     }
 
-    public AviWriterCi AviWriterCreate()
+    public IAviWriter AviWriterCreate()
     {
         AviWriterCiCs avi = new();
         return avi;
@@ -1699,7 +1699,7 @@ public class GamePlatformNative : IGamePlatform
     #endregion
 }
 
-public class AviWriterCiCs : AviWriterCi
+public class AviWriterCiCs : IAviWriter
 {
     public AviWriterCiCs()
     {
@@ -1709,12 +1709,12 @@ public class AviWriterCiCs : AviWriterCi
     public AviWriter avi;
     public Bitmap openbmp;
 
-    public override void Open(string filename, int framerate, int width, int height)
+    public void Open(string filename, int framerate, int width, int height)
     {
         openbmp = avi.Open(filename, (uint)framerate, width, height);
     }
 
-    public override void AddFrame(Bitmap bitmap)
+    public void AddFrame(Bitmap bitmap)
     {
         var bmp_ = bitmap;
 
@@ -1727,7 +1727,7 @@ public class AviWriterCiCs : AviWriterCi
         avi.AddFrame();
     }
 
-    public override void Close()
+    public void Close()
     {
         avi.Close();
     }

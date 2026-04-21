@@ -120,11 +120,6 @@
         return game.platform.GrabScreenshot();
     }
 
-    public AviWriterCi AviWriterCreate()
-    {
-        return new AviWriterCiCs();
-    }
-
     public int GetWindowWidth()
     {
         return game.platform.GetCanvasWidth();

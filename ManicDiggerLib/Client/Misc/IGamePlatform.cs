@@ -44,7 +44,7 @@ public interface IPlatformMisc
     void SetTextRendererFont(int fontID);
     void SaveScreenshot();
     Bitmap GrabScreenshot();
-    AviWriterCi AviWriterCreate();
+    IAviWriter AviWriterCreate();
     string PathStorage();
     void SetVSync(bool enabled);
     string GetGameVersion();

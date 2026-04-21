@@ -116,13 +116,13 @@ public class ServerSystemSign : ServerSystem
 
     private void OnDialogClick(DialogClickArgs args)
     {
-        if (args.GetWidgetId() != "UseSign_OK")
+        if (args.WidgetId != "UseSign_OK")
         {
             //Return when dialog is not a sign
             return;
         }
-        var c = server.clients[args.GetPlayer()];
-        string newText = args.GetTextBoxValue()[1];
+        var c = server.clients[args.Player];
+        string newText = args.TextBoxValue[1];
         ServerEntityId id = c.editingSign;
         if (newText != "")
         {
@@ -135,6 +135,6 @@ public class ServerSystemSign : ServerSystem
         {
             server.DespawnEntity(id);
         }
-        server.SendDialog(args.GetPlayer(), "UseSign", null);
+        server.SendDialog(args.Player, "UseSign", null);
     }
 }

@@ -1,12 +1,12 @@
 System.OutOfMemoryException: Exception of type 'System.OutOfMemoryException' was thrown.
-   at CitoMemoryStream..ctor() in C:\Users\aminp\source\repos\manicdigger\Packet.Serializer.ci.cs:line 711
-   at CitoMemoryStream.Create(Byte[] buffer, Int32 length) in C:\Users\aminp\source\repos\manicdigger\Packet.Serializer.ci.cs:line 729
-   at Packet_ServerSerializer.DeserializeBuffer(Byte[] buffer, Int32 length, Packet_Server instance) in C:\Users\aminp\source\repos\manicdigger\Packet.Serializer.ci.cs:line 21046
-   at ManicDigger.Mods.ModNetworkProcess.TryReadPacket(Byte[] data, Int32 dataLength) in C:\Users\aminp\source\repos\manicdigger\ManicDiggerLib\Client\Mods\NetworkProcess.ci.cs:line 61
+   at CompressionGzip.Decompress(Byte[] fi) in C:\Users\aminp\source\repos\manicdigger\ManicDiggerLib\ClientNative\Misc.cs:line 302
+   at GamePlatformNative.GzipDecompress(Byte[] compressed, Int32 compressedLength, Byte[] ret) in C:\Users\aminp\source\repos\manicdigger\ManicDiggerLib\Client\Misc\PlatformNative.cs:line 168
+   at ManicDigger.Mods.ModNetworkProcess.ProcessInBackground(Packet_Server packet) in C:\Users\aminp\source\repos\manicdigger\ManicDiggerLib\Client\Mods\NetworkProcess.ci.cs:line 135
+   at ManicDigger.Mods.ModNetworkProcess.TryReadPacket(Byte[] data, Int32 dataLength) in C:\Users\aminp\source\repos\manicdigger\ManicDiggerLib\Client\Mods\NetworkProcess.ci.cs:line 63
    at ManicDigger.Mods.ModNetworkProcess.NetworkProcess() in C:\Users\aminp\source\repos\manicdigger\ManicDiggerLib\Client\Mods\NetworkProcess.ci.cs:line 54
    at ManicDigger.Mods.ModNetworkProcess.OnReadOnlyBackgroundThread(Game game_, Single dt) in C:\Users\aminp\source\repos\manicdigger\ManicDiggerLib\Client\Mods\NetworkProcess.ci.cs:line 32
    at TaskScheduler.<>c__DisplayClass10_0.<CreateBackgroundAction>b__0() in C:\Users\aminp\source\repos\manicdigger\ManicDiggerLib\Client\Misc\TaskScheduler.ci.cs:line 150
-   at GamePlatformNative.<>c__DisplayClass54_0.<QueueUserWorkItem>b__0(Object a) in C:\Users\aminp\source\repos\manicdigger\ManicDiggerLib\Client\Misc\PlatformNative.cs:line 437
+   at GamePlatformNative.<>c__DisplayClass49_0.<QueueUserWorkItem>b__0(Object a) in C:\Users\aminp\source\repos\manicdigger\ManicDiggerLib\Client\Misc\PlatformNative.cs:line 412
    at System.Threading.QueueUserWorkItemCallbackDefaultContext.Execute()
    at System.Threading.ThreadPoolWorkQueue.Dispatch()
    at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()

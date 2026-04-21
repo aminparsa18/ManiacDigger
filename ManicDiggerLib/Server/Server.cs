@@ -1564,9 +1564,9 @@ public partial class Server : ICurrentTime, IDropItem
                     try
                     {
                         DialogClickArgs args = new();
-                        args.SetPlayer(clientid);
-                        args.SetWidgetId(packet.DialogClick_.WidgetId);
-                        args.SetTextBoxValue(packet.DialogClick_.TextBoxValue);
+                        args.Player = clientid;
+                        args.WidgetId = packet.DialogClick_.WidgetId;
+                        args.TextBoxValue = packet.DialogClick_.TextBoxValue;
                         modEventHandlers.ondialogclick2[i](args);
                     }
                     catch (Exception ex)

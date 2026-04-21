@@ -16,7 +16,6 @@
     public void SetFreemove(int level);
     public int GetFreemove();
     public Bitmap GrabScreenshot();
-    public AviWriterCi AviWriterCreate();
     public int GetWindowWidth();
     public int GetWindowHeight();
     public bool IsFreemoveAllowed();

@@ -809,11 +809,11 @@ public class Config3d
     public void SetEnableMipmaps(bool value) { ENABLE_MIPMAPS = value; }
 }
 
-public abstract class AviWriterCi
+public interface IAviWriter
 {
-    public abstract void Open(string filename, int framerate, int width, int height);
-    public abstract void AddFrame(Bitmap bitmap);
-    public abstract void Close();
+    void Open(string filename, int framerate, int width, int height);
+    void AddFrame(Bitmap bitmap);
+    void Close();
 }
 
 public class FreemoveLevelEnum

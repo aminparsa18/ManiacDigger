@@ -175,9 +175,9 @@ public class ServerSystemPermissionSign : ServerSystem
     {
         string name = null;
         PermissionSignType type = PermissionSignType.Player;
-        if (args.GetWidgetId() == "UsePermissionSign_OK")
+        if (args.WidgetId == "UsePermissionSign_OK")
         {
-            name = args.GetTextBoxValue()[1];
+            name = args.TextBoxValue[1];
             type = PermissionSignType.Player;
 
             for (int i = 0; i < server.serverClient.Groups.Count; i++)
@@ -189,12 +189,12 @@ public class ServerSystemPermissionSign : ServerSystem
                 }
             }
         }
-        else if (args.GetWidgetId().StartsWith("PermissionSignGroup"))
+        else if (args.WidgetId.StartsWith("PermissionSignGroup"))
         {
             for (int i = 0; i < server.serverClient.Groups.Count; i++)
             {
                 Group g = server.serverClient.Groups[i];
-                if (args.GetWidgetId() == "PermissionSignGroup" + g.Name)
+                if (args.WidgetId == "PermissionSignGroup" + g.Name)
                 {
                     name = g.Name;
                     type = PermissionSignType.Group;
@@ -207,7 +207,7 @@ public class ServerSystemPermissionSign : ServerSystem
             return;
         }
 
-        ClientOnServer c = server.clients[args.GetPlayer()];
+        ClientOnServer c = server.clients[args.Player];
         ServerEntityId id = c.editingSign;
         if (name != "")
         {
@@ -221,7 +221,7 @@ public class ServerSystemPermissionSign : ServerSystem
         {
             server.DespawnEntity(id);
         }
-        server.SendDialog(args.GetPlayer(), "UseSign", null);
+        server.SendDialog(args.Player, "UseSign", null);
     }
 
     private void OnPermission(PermissionArgs args)

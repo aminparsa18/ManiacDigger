@@ -14,7 +14,7 @@ public class ModAutoCamera : ModBase
     /// <summary>
     /// Active AVI writer. <see langword="null"/> when not recording.
     /// </summary>
-    private AviWriterCi _avi;
+    private IAviWriter _avi;
 
     /// <summary>Freemove level that was active before playback started, restored on stop.</summary>
     private int _previousFreemove;
@@ -238,7 +238,7 @@ public class ModAutoCamera : ModBase
                 totalRecTime = float.Parse(arguments[2]);
             }
 
-            _avi = _m.AviWriterCreate();
+            _avi = new AviWriterCiCs();
             _avi.Open(
                 string.Format("{0}.avi", string.Format("{0:yyyy-MM-dd_HH-mm-ss}", DateTime.Now)),
                 Framerate,
