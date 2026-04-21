@@ -595,7 +595,7 @@ public interface IModManager
     /// <param name="name">Internal name of the module. Displayed on module overview page.</param>
     /// <param name="description">Description of the module</param>
     /// <param name="module">The actual module</param>
-    void InstallHttpModule(string name, Func<string> description, FragLabs.HTTP.IHttpModule module);
+    void InstallHttpModule(string name, Func<string> description, IHttpModule module);
 
     int MaxPlayers { get; }
 

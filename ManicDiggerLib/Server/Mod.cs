@@ -961,7 +961,7 @@ public class ModManager1 : IModManager
         return server.GetGroupName(player);
     }
 
-    public void InstallHttpModule(string name, Func<string> description, FragLabs.HTTP.IHttpModule module)
+    public void InstallHttpModule(string name, Func<string> description, IHttpModule module)
     {
         server.InstallHttpModule(name, description, module);
     }

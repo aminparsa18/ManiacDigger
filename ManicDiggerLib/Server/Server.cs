@@ -3560,7 +3560,7 @@ public partial class Server : ICurrentTime, IDropItem
         return GetClient(playerid).clientGroup.Name;
     }
 
-    internal void InstallHttpModule(string name, Func<string> description, FragLabs.HTTP.IHttpModule module)
+    internal void InstallHttpModule(string name, Func<string> description, IHttpModule module)
     {
         ActiveHttpModule m = new()
         {
