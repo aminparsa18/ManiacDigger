@@ -280,9 +280,9 @@ public class ServerSystemPermissionSign : ServerSystem
     /// </summary>
     private void OnPermission(PermissionArgs args)
     {
-        int blockX = args.GetX();
-        int blockY = args.GetY();
-        int blockZ = args.GetZ();
+        int blockX = args.X;
+        int blockY = args.Y;
+        int blockZ = args.Z;
 
         for (int dx = -1; dx <= 1; dx++)
             for (int dy = -1; dy <= 1; dy++)
@@ -307,7 +307,7 @@ public class ServerSystemPermissionSign : ServerSystem
                                 e.drawArea.sizex, e.drawArea.sizez, e.drawArea.sizey))
                             continue;
 
-                        ClientOnServer client = server.clients[args.GetPlayer()];
+                        ClientOnServer client = server.clients[args.Player];
 
                         bool allowed = e.permissionSign.type switch
                         {
@@ -318,7 +318,7 @@ public class ServerSystemPermissionSign : ServerSystem
 
                         if (allowed)
                         {
-                            args.SetAllowed(true);
+                            args.Allowed=(true);
                             return;
                         }
                     }

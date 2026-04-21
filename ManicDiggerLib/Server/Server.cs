@@ -1,5 +1,4 @@
 using ManicDigger;
-using OpenTK;
 using OpenTK.Mathematics;
 using ProtoBuf;
 using System.Diagnostics;
@@ -1841,13 +1840,15 @@ public partial class Server : ICurrentTime, IDropItem
         }
         for (int i = 0; i < server.modEventHandlers.onpermission.Count; i++)
         {
-            PermissionArgs args = new();
-            args.SetPlayer(player);
-            args.SetX(x);
-            args.SetY(y);
-            args.SetZ(z);
+            PermissionArgs args = new()
+            {
+                Player = (player),
+                X = (x),
+                Y = (y),
+                Z = (z)
+            };
             server.modEventHandlers.onpermission[i](args);
-            if (args.GetAllowed())
+            if (args.Allowed)
             {
                 return true;
             }
