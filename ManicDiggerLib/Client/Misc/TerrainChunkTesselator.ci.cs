@@ -36,7 +36,11 @@ public class TerrainChunkTesselatorCi
     internal int[] currentChunk18;
     internal byte[] currentChunkShadows18;
     internal byte[] currentChunkDraw16;
-    internal byte[][] currentChunkDrawCount16;
+    // Flat layout: index = blockPos * 6 + sideIndex
+    // Replaces the jagged byte[][] which caused ~4,096 separate small heap
+    // allocations. One contiguous allocation is faster to clear and friendlier
+    // to the CPU cache.
+    internal byte[] currentChunkDrawCount16Flat;
 
     internal bool started;
     internal int mapsizex; //cache
@@ -54,6 +58,10 @@ public class TerrainChunkTesselatorCi
 
     internal GeometryModel[] toreturnatlas1d;
     internal GeometryModel[] toreturnatlas1dtransparent;
+    // Pre-allocated return buffer for GetFinalVerticesIndices.
+    // Avoids allocating a new VerticesIndicesToLoad[] and new VerticesIndicesToLoad
+    // objects on every single chunk tessellation.
+    private VerticesIndicesToLoad[] _verticesReturnBuffer;
 
     internal float BlockShadow;
     internal bool option_DarkenBlockSides;
@@ -194,7 +202,7 @@ public class TerrainChunkTesselatorCi
         currentChunk18 = new int[(chunksize + 2) * (chunksize + 2) * (chunksize + 2)];
         currentChunkShadows18 = new byte[(chunksize + 2) * (chunksize + 2) * (chunksize + 2)];
         currentChunkDraw16 = new byte[chunksize * chunksize * chunksize];
-        currentChunkDrawCount16 = new byte[chunksize * chunksize * chunksize][];
+        currentChunkDrawCount16Flat = new byte[chunksize * chunksize * chunksize * 6];
         mapsizex = game.VoxelMap.MapSizeX;
         mapsizey = game.VoxelMap.MapSizeY;
         mapsizez = game.VoxelMap.MapSizeZ;
@@ -257,6 +265,13 @@ public class TerrainChunkTesselatorCi
                 Indices = new int[max]
             };
         }
+
+        // Pre-allocate every VerticesIndicesToLoad slot once. GetFinalVerticesIndices
+        // will overwrite fields in-place rather than newing objects per chunk build.
+        int returnBufferSize = toreturnatlas1dLength * 2;
+        _verticesReturnBuffer = new VerticesIndicesToLoad[returnBufferSize];
+        for (int i = 0; i < returnBufferSize; i++)
+            _verticesReturnBuffer[i] = new VerticesIndicesToLoad();
     }
     private int toreturnatlas1dLength;
 
@@ -434,19 +449,9 @@ public class TerrainChunkTesselatorCi
 
     public void CalculateTilingCount(int[] currentChunk, int startx, int starty, int startz)
     {
-        for (int i = 0; i < chunksize * chunksize * chunksize; i++)
-        {
-            if (currentChunkDrawCount16[i] == null)
-            {
-                currentChunkDrawCount16[i] = new byte[6];
-            }
-            currentChunkDrawCount16[i][0] = 0;
-            currentChunkDrawCount16[i][1] = 0;
-            currentChunkDrawCount16[i][2] = 0;
-            currentChunkDrawCount16[i][3] = 0;
-            currentChunkDrawCount16[i][4] = 0;
-            currentChunkDrawCount16[i][5] = 0;
-        }
+        // Single bulk clear — no null checks, no per-slot allocation.
+        currentChunkDrawCount16Flat.AsSpan(0, chunksize * chunksize * chunksize * 6).Clear();
+
         //unsafe
         {
             int[] currentChunk_ = currentChunk;
@@ -457,6 +462,8 @@ public class TerrainChunkTesselatorCi
                     int pos = Index3d(0, yy, zz, chunksize + 2, chunksize + 2);
                     for (int xx = 1; xx < chunksize + 1; xx++)
                     {
+                        int _drawCountBase = Index3d(xx - 1, yy - 1, zz - 1, chunksize, chunksize) * 6;
+
                         int tt = currentChunk_[pos + xx];
                         if (tt == 0) { continue; } //faster
                         int x = startx + xx - 1;
@@ -467,33 +474,27 @@ public class TerrainChunkTesselatorCi
 
                         if ((draw & TileSideFlagsEnum.Top) != 0)
                         {
-                            int shadowratioTop = GetShadowRatio(xx, yy, zz + 1);
-                            currentChunkDrawCount16[Index3d(xx - 1, yy - 1, zz - 1, chunksize, chunksize)][TileSideEnum.Top] = 1;
+                            currentChunkDrawCount16Flat[_drawCountBase + TileSideEnum.Top] = 1;
                         }
                         if ((draw & TileSideFlagsEnum.Bottom) != 0)
                         {
-                            int shadowratioTop = GetShadowRatio(xx, yy, zz - 1);
-                            currentChunkDrawCount16[Index3d(xx - 1, yy - 1, zz - 1, chunksize, chunksize)][TileSideEnum.Bottom] = 1;
+                            currentChunkDrawCount16Flat[_drawCountBase + TileSideEnum.Bottom] = 1;
                         }
                         if ((draw & TileSideFlagsEnum.Right) != 0)
                         {
-                            int shadowratioTop = GetShadowRatio(xx - 1, yy, zz);
-                            currentChunkDrawCount16[Index3d(xx - 1, yy - 1, zz - 1, chunksize, chunksize)][TileSideEnum.Left] = 1;
+                            currentChunkDrawCount16Flat[_drawCountBase + TileSideEnum.Left] = 1;
                         }
                         if ((draw & TileSideFlagsEnum.Left) != 0)
                         {
-                            int shadowratioTop = GetShadowRatio(xx + 1, yy, zz);
-                            currentChunkDrawCount16[Index3d(xx - 1, yy - 1, zz - 1, chunksize, chunksize)][TileSideEnum.Right] = 1;
+                            currentChunkDrawCount16Flat[_drawCountBase + TileSideEnum.Right] = 1;
                         }
                         if ((draw & TileSideFlagsEnum.Front) != 0)
                         {
-                            int shadowratioTop = GetShadowRatio(xx, yy - 1, zz);
-                            currentChunkDrawCount16[Index3d(xx - 1, yy - 1, zz - 1, chunksize, chunksize)][TileSideEnum.Back] = 1;
+                            currentChunkDrawCount16Flat[_drawCountBase + TileSideEnum.Back] = 1;
                         }
                         if ((draw & TileSideFlagsEnum.Back) != 0)
                         {
-                            int shadowratioTop = GetShadowRatio(xx, yy + 1, zz);
-                            currentChunkDrawCount16[Index3d(xx - 1, yy - 1, zz - 1, chunksize, chunksize)][TileSideEnum.Front] = 1;
+                            currentChunkDrawCount16Flat[_drawCountBase + TileSideEnum.Front] = 1;
                         }
 
                     }
@@ -525,7 +526,7 @@ public class TerrainChunkTesselatorCi
                 int shadowratio2 = GetShadowRatioOld(newxx, yy, zz + shadowz, x + (newxx - xx), y, z + shadowz);
                 if (shadowratio != shadowratio2) { break; }
                 if ((currentChunkDraw16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)] & dirflags) == 0) { break; } // fixes water and rail problem (chunk-long stripes)
-                currentChunkDrawCount16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)][dir] = 0;
+                currentChunkDrawCount16Flat[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize) * 6 + dir] = 0;
                 currentChunkDraw16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)] &= (byte)~dirflags;
                 newxx++;
             }
@@ -542,7 +543,7 @@ public class TerrainChunkTesselatorCi
                 int shadowratio2 = GetShadowRatioOld(xx + shadowx, newyy, zz, x + shadowx, y + (newyy - yy), z);
                 if (shadowratio != shadowratio2) { break; }
                 if ((currentChunkDraw16[Index3d(xx - 1, newyy - 1, zz - 1, chunksize, chunksize)] & dirflags) == 0) { break; } // fixes water and rail problem (chunk-long stripes)
-                currentChunkDrawCount16[Index3d(xx - 1, newyy - 1, zz - 1, chunksize, chunksize)][dir] = 0;
+                currentChunkDrawCount16Flat[Index3d(xx - 1, newyy - 1, zz - 1, chunksize, chunksize) * 6 + dir] = 0;
                 currentChunkDraw16[Index3d(xx - 1, newyy - 1, zz - 1, chunksize, chunksize)] &= (byte)~dirflags;
                 newyy++;
             }
@@ -559,7 +560,7 @@ public class TerrainChunkTesselatorCi
                 int shadowratio2 = GetShadowRatioOld(newxx, yy + shadowy, zz, x + (newxx - xx), y + shadowy, z);
                 if (shadowratio != shadowratio2) { break; }
                 if ((currentChunkDraw16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)] & dirflags) == 0) { break; } // fixes water and rail problem (chunk-long stripes)
-                currentChunkDrawCount16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)][dir] = 0;
+                currentChunkDrawCount16Flat[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize) * 6 + dir] = 0;
                 currentChunkDraw16[Index3d(newxx - 1, yy - 1, zz - 1, chunksize, chunksize)] &= (byte)~dirflags;
                 newxx++;
             }
@@ -780,7 +781,9 @@ public class TerrainChunkTesselatorCi
     {
         int nToDraw = TileSideFlagsEnum.None;
 
-        byte[] drawFlags = currentChunkDrawCount16[Index3d(xx - 1, yy - 1, zz - 1, chunksize, chunksize)];
+        // Slice 6 bytes from the flat array — zero allocation, stack-only Span.
+        int baseIdx = Index3d(xx - 1, yy - 1, zz - 1, chunksize, chunksize) * 6;
+        ReadOnlySpan<byte> drawFlags = currentChunkDrawCount16Flat.AsSpan(baseIdx, 6);
 
         nToDraw = SetVisibleFlag(drawFlags, TileSideEnum.Top, nToDraw, TileSideFlagsEnum.Top);
         nToDraw = SetVisibleFlag(drawFlags, TileSideEnum.Bottom, nToDraw, TileSideFlagsEnum.Bottom);
@@ -795,7 +798,7 @@ public class TerrainChunkTesselatorCi
     // <summary>
     // Sets the visible flag in the nCurrentFlags if this side needs to be drawn
     // </summary>
-    private static int SetVisibleFlag(byte[] drawFlags, int tileSideIndex, int nCurrentFlags, int nFlagToSet)
+    private static int SetVisibleFlag(ReadOnlySpan<byte> drawFlags, int tileSideIndex, int nCurrentFlags, int nFlagToSet)
     {
         if (drawFlags[tileSideIndex] > 0)
         {
@@ -1450,24 +1453,44 @@ public class TerrainChunkTesselatorCi
 
     public VerticesIndicesToLoad[] GetFinalVerticesIndices(int x, int y, int z, out int retCount)
     {
-        VerticesIndicesToLoad[] ret = new VerticesIndicesToLoad[toreturnatlas1dLength + toreturnatlas1dLength];
         retCount = 0;
+        // World-space chunk origin — computed once, shared by all slots.
+        float posX = x * chunksize;
+        float posY = y * chunksize;
+        float posZ = z * chunksize;
+
         for (int i = 0; i < toreturnatlas1dLength; i++)
         {
             if (toreturnatlas1d[i].IndicesCount > 0)
             {
-                ret[retCount++] = GetVerticesIndices(toreturnatlas1d[i], x, y, z, game.d_TerrainTextures.TerrainTextures1d[i % game.d_TerrainTextures.TerrainTexturesPerAtlas], false);
+                // Overwrite a pre-allocated slot — zero heap allocation.
+                VerticesIndicesToLoad v = _verticesReturnBuffer[retCount];
+                v.modelData = toreturnatlas1d[i];
+                v.positionX = posX;
+                v.positionY = posY;
+                v.positionZ = posZ;
+                v.texture = game.d_TerrainTextures.TerrainTextures1d[i % game.d_TerrainTextures.TerrainTexturesPerAtlas];
+                v.transparent = false;
+                retCount++;
             }
         }
         for (int i = 0; i < toreturnatlas1dLength; i++)
         {
             if (toreturnatlas1dtransparent[i].IndicesCount > 0)
             {
-                ret[retCount++] = GetVerticesIndices(toreturnatlas1dtransparent[i], x, y, z, game.d_TerrainTextures.TerrainTextures1d[i % game.d_TerrainTextures.TerrainTexturesPerAtlas], true);
+                VerticesIndicesToLoad v = _verticesReturnBuffer[retCount];
+                v.modelData = toreturnatlas1dtransparent[i];
+                v.positionX = posX;
+                v.positionY = posY;
+                v.positionZ = posZ;
+                v.texture = game.d_TerrainTextures.TerrainTextures1d[i % game.d_TerrainTextures.TerrainTexturesPerAtlas];
+                v.transparent = true;
+                retCount++;
             }
         }
-
-        return ret;
+        // Return the same pre-allocated array every time.
+        // The caller MUST only read indices [0..retCount-1].
+        return _verticesReturnBuffer;
     }
 
     public VerticesIndicesToLoad[] MakeChunk(int x, int y, int z,

@@ -1,5 +1,26 @@
 ﻿public class ClientPackets
 {
+    private static readonly Packet_ClientPingReply s_pingReplyInner = new();
+    private static readonly Packet_Client s_pingReplyPacket = new()
+    {
+        Id = Packet_ClientIdEnum.PingReply,
+        PingReply = s_pingReplyInner
+    };
+
+    private static readonly Packet_ClientServerQuery s_serverQueryInner = new();
+    private static readonly Packet_Client s_serverQueryPacket = new()
+    {
+        Id = Packet_ClientIdEnum.ServerQuery,
+        Query = s_serverQueryInner
+    };
+
+    private static readonly Packet_ClientPositionAndOrientation s_positionPayload = new();
+    private static readonly Packet_Client s_positionPacket = new()
+    {
+        Id = Packet_ClientIdEnum.PositionandOrientation,
+        PositionAndOrientation = s_positionPayload
+    };
+
     public static Packet_Client CreateLoginPacket(IGamePlatform platform, string username, string verificationKey)
     {
         Packet_ClientIdentification p = new();
@@ -71,16 +92,7 @@
         return pp;
     }
 
-    public static Packet_Client PingReply()
-    {
-        Packet_ClientPingReply p = new();
-        Packet_Client pp = new()
-        {
-            Id = Packet_ClientIdEnum.PingReply,
-            PingReply = p
-        };
-        return pp;
-    }
+    public static Packet_Client PingReply() => s_pingReplyPacket;
 
     public static Packet_Client SetBlock(int x, int y, int z, int mode, int type, int materialslot)
     {
@@ -349,36 +361,23 @@
         return packet;
     }
 
-    public static Packet_Client PositionAndOrientation(Game game, int playerId, float positionX, float positionY, float positionZ, float orientationX, float orientationY, float orientationZ, byte stance)
+    public static Packet_Client PositionAndOrientation(Game game, int playerId,
+     float positionX, float positionY, float positionZ,
+     float orientationX, float orientationY, float orientationZ, byte stance)
     {
-        Packet_ClientPositionAndOrientation p = new();
-        {
-            p.PlayerId = playerId;
-            p.X = (int)(positionX * 32);
-            p.Y = (int)(positionY * 32);
-            p.Z = (int)(positionZ * 32);
-            p.Heading = (int)RadToAngle256(orientationY);
-            p.Pitch = (int)RadToAngle256(orientationX);
-            p.Stance = stance;
-        }
-        Packet_Client pp = new()
-        {
-            Id = Packet_ClientIdEnum.PositionandOrientation,
-            PositionAndOrientation = p
-        };
-        return pp;
+        // Overwrite the cached payload in-place — zero allocations.
+        // Safe because the caller serialises this packet before the next tick.
+        s_positionPayload.PlayerId = playerId;
+        s_positionPayload.X = (int)(positionX * 32);
+        s_positionPayload.Y = (int)(positionY * 32);
+        s_positionPayload.Z = (int)(positionZ * 32);
+        s_positionPayload.Heading = (int)RadToAngle256(orientationY);
+        s_positionPayload.Pitch = (int)RadToAngle256(orientationX);
+        s_positionPayload.Stance = stance;
+        return s_positionPacket;
     }
 
-    public static Packet_Client ServerQuery()
-    {
-        Packet_ClientServerQuery p1 = new();
-        Packet_Client pp = new()
-        {
-            Id = Packet_ClientIdEnum.ServerQuery,
-            Query = p1
-        };
-        return pp;
-    }
+    public static Packet_Client ServerQuery() => s_serverQueryPacket;
 
     internal static float RadToAngle256(float value) => value / (2 * MathF.PI) * 255;
 

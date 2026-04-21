@@ -44,6 +44,12 @@ public class ModUnloadRendererChunks : ModBase
     /// geometry from the batcher and resets its render state so it can be
     /// re-tessellated when the player approaches again.
     /// </summary>
+    /// <remarks>
+    /// Block data arrays (<c>data</c>, <c>dataInt</c>, <c>baseLight</c>) are returned to
+    /// <see cref="System.Buffers.ArrayPool{T}.Shared"/> via <see cref="Chunk.Release"/> so
+    /// they can be reused for incoming chunks rather than being garbage-collected.
+    /// The chunk slot is then nulled so the <see cref="Chunk"/> object itself can be GC'd.
+    /// </remarks>
     /// <param name="game">Game instance used to access the batcher and chunk map.</param>
     /// <param name="chunkFlatIndex">
     /// Flat index into <c>game.map.chunks</c> of the chunk to unload.
@@ -59,7 +65,7 @@ public class ModUnloadRendererChunks : ModBase
             Chunk chunk = game.VoxelMap.chunks[chunkFlatIndex];
             if (chunk == null) { return; }
 
-            // Existing: unload GPU geometry
+            // ── GPU geometry ─────────────────────────────────────────────────
             RenderedChunk rendered = chunk.rendered;
             if (rendered != null)
             {
@@ -72,12 +78,14 @@ public class ModUnloadRendererChunks : ModBase
                 rendered.Light = null;
             }
 
-            // NEW: also free the raw block data so GC can reclaim the memory
-            chunk.data = null;
-            chunk.dataInt = null;
-            chunk.baseLight = null;
+            // ── CPU block data ────────────────────────────────────────────────
+            // Return all rented arrays to ArrayPool before nulling the chunk slot.
+            // Without this call the rented byte[]/int[] arrays would be silently
+            // leaked — never returned to the pool and never collected by the GC
+            // because the pool still holds internal references to them.
+            chunk.Release();
 
-            // Null the slot itself so the chunk object is also GC'd
+            // Null the slot so the (now empty) Chunk object itself can be GC'd.
             game.VoxelMap.chunks[chunkFlatIndex] = null;
         };
     }

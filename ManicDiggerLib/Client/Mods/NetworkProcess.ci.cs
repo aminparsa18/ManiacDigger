@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Buffers;
+using System.Runtime.InteropServices;
 
 namespace ManicDigger.Mods;
 
@@ -11,10 +12,23 @@ public class ModNetworkProcess : ModBase
         receivedchunk = new int[32 * 32 * 32];
         decompressedchunk = new byte[32 * 32 * 32 * 2];
     }
+
     internal byte[] CurrentChunk;
     internal int CurrentChunkCount;
     private readonly int[] receivedchunk;
     private readonly byte[] decompressedchunk;
+
+    // ── Scratch buffers ──────────────────────────────────────────────────────
+    // Static so they are shared across all calls to the static ProcessPacket.
+    // Each is only touched on the main thread, so there is no concurrency risk.
+
+    /// <summary>
+    /// Scratch buffer used when building the per-block-type texture ID list in
+    /// <see cref="ProcessPacket"/> (BlockTypes case).
+    /// Avoids allocating <c>new string[7]</c> for each of the 1,024 block types
+    /// every time block-type data arrives from the server.
+    /// </summary>
+    private static readonly string[] s_textureIdScratch = new string[7];
 
 #if CITO
     macro Index3d(x, y, h, sizex, sizey) ((((((h) * (sizey)) + (y))) * (sizex)) + (x))
@@ -39,19 +53,35 @@ public class ModNetworkProcess : ModBase
         {
             return;
         }
+
         NetIncomingMessage msg;
         for (; ; )
         {
-            if (game.invalidVersionPacketIdentification != null)
-            {
-                break;
-            }
+            if (game.invalidVersionPacketIdentification != null) { break; }
+
             msg = game.main.ReadMessage();
-            if (msg == null)
+            if (msg == null) { break; }
+
+            // ── Payload copy via ArrayPool ────────────────────────────────────
+            // msg.Payload.ToArray() previously allocated a new byte[] on every
+            // received message. We instead rent a buffer from the shared pool,
+            // copy the payload into it, and return it immediately after
+            // TryReadPacket completes (deserialization is synchronous).
+            int payloadLength = msg.Payload.Length;
+            byte[] rentedPayload = ArrayPool<byte>.Shared.Rent(payloadLength);
+            try
             {
-                break;
+                // CopyTo works for both ArraySegment<byte> and byte[].
+                msg.Payload.CopyTo(rentedPayload);
+                TryReadPacket(rentedPayload, payloadLength);
             }
-            TryReadPacket(msg.Payload.ToArray(), msg.Payload.Length);
+            finally
+            {
+                // Safe to return here: DeserializeBuffer in TryReadPacket is
+                // synchronous and the Packet_Server it populates lives in the
+                // closure — not in rentedPayload.
+                ArrayPool<byte>.Shared.Return(rentedPayload);
+            }
         }
     }
 
@@ -65,7 +95,6 @@ public class ModNetworkProcess : ModBase
         game.QueueActionCommit(CreateProcessPacketTask(game, packet));
 
         game.LastReceivedMilliseconds = game.currentTimeMilliseconds;
-        //return lengthPrefixLength + packetLength;
     }
 
     private void ProcessInBackground(Packet_Server packet)
@@ -73,12 +102,17 @@ public class ModNetworkProcess : ModBase
         switch (packet.Id)
         {
             case Packet_ServerIdEnum.ChunkPart:
-                byte[] arr = packet.ChunkPart.CompressedChunkPart;
-                for (int i = 0; i < arr.Length; i++)
                 {
-                    CurrentChunk[CurrentChunkCount++] = arr[i];
+                    byte[] arr = packet.ChunkPart.CompressedChunkPart;
+
+                    // ── Buffer.BlockCopy replaces the byte-by-byte loop ───────────
+                    // The old loop copied one byte at a time; BlockCopy uses the
+                    // runtime's native memory-copy path (typically a SIMD memmove).
+                    Buffer.BlockCopy(arr, 0, CurrentChunk, CurrentChunkCount, arr.Length);
+                    CurrentChunkCount += arr.Length;
+                    break;
                 }
-                break;
+
             case Packet_ServerIdEnum.Chunk_:
                 {
                     Packet_ServerChunk p = packet.Chunk_;
@@ -107,10 +141,7 @@ public class ModNetworkProcess : ModBase
                     else
                     {
                         int size = p.SizeX * p.SizeY * p.SizeZ;
-                        for (int i = 0; i < size; i++)
-                        {
-                            receivedchunk[i] = 0;
-                        }
+                        for (int i = 0; i < size; i++) { receivedchunk[i] = 0; }
                     }
                     {
                         game.VoxelMap.SetMapPortion(p.X, p.Y, p.Z, receivedchunk, p.SizeX, p.SizeY, p.SizeZ);
@@ -120,20 +151,22 @@ public class ModNetworkProcess : ModBase
                             {
                                 for (int zz = 0; zz < 2; zz++)
                                 {
-                                    //d_Shadows.OnSetChunk(p.X + 16 * xx, p.Y + 16 * yy, p.Z + 16 * zz);//todo
+                                    // d_Shadows.OnSetChunk(p.X + 16 * xx, p.Y + 16 * yy, p.Z + 16 * zz);
                                 }
                             }
                         }
                     }
-                    game.ReceivedMapLength += CurrentChunkCount;// lengthPrefixLength + packetLength;
+                    game.ReceivedMapLength += CurrentChunkCount;
                     CurrentChunkCount = 0;
+                    break;
                 }
-                break;
+
             case Packet_ServerIdEnum.HeightmapChunk:
                 {
                     Packet_ServerHeightmapChunk p = packet.HeightmapChunk;
                     game.platform.GzipDecompress(p.CompressedHeightmap, p.CompressedHeightmap.Length, decompressedchunk);
-                    ReadOnlySpan<ushort> decompressedchunk1 = MemoryMarshal.Cast<byte, ushort>(decompressedchunk.AsSpan(0, p.SizeX * p.SizeY * 2));
+                    ReadOnlySpan<ushort> decompressedchunk1 = MemoryMarshal.Cast<byte, ushort>(
+                        decompressedchunk.AsSpan(0, p.SizeX * p.SizeY * 2));
                     for (int xx = 0; xx < p.SizeX; xx++)
                     {
                         for (int yy = 0; yy < p.SizeY; yy++)
@@ -142,13 +175,17 @@ public class ModNetworkProcess : ModBase
                             game.d_Heightmap.SetBlock(p.X + xx, p.Y + yy, height);
                         }
                     }
+                    break;
                 }
-                break;
         }
     }
 
     public static Action CreateProcessPacketTask(Game game, Packet_Server packet_)
     {
+        // NOTE: this lambda allocates a new Action delegate per packet because it
+        // closes over packet_. If packet throughput becomes a bottleneck, replace
+        // QueueActionCommit with a ConcurrentQueue<Packet_Server> drained by the
+        // main thread — that would eliminate this allocation entirely.
         return () => ProcessPacket(packet_);
     }
 
@@ -160,7 +197,6 @@ public class ModNetworkProcess : ModBase
             case Packet_ServerIdEnum.ServerIdentification:
                 {
                     string invalidversionstr = game.language.InvalidVersionConnectAnyway();
-
                     game.serverGameVersion = packet.Identification.MdProtocolVersion;
                     if (game.serverGameVersion != game.platform.GetGameVersion())
                     {
@@ -174,49 +210,44 @@ public class ModNetworkProcess : ModBase
                         game.ProcessServerIdentification(packet);
                     }
                     game.ReceivedMapLength = 0;
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.Ping:
                 {
                     game.SendPingReply();
                     game.ServerInfo.ServerPing.Send(game.platform.TimeMillisecondsFromStart);
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.PlayerPing:
                 {
                     game.ServerInfo.ServerPing.Receive(game.platform);
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.LevelInitialize:
                 {
                     game.ChatLog("[GAME] Initialized map loading");
                     game.ReceivedMapLength = 0;
                     game.InvokeMapLoadingProgress(0, 0, game.language.Connecting());
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.LevelDataChunk:
                 {
-                    game.InvokeMapLoadingProgress(packet.LevelDataChunk.PercentComplete, game.ReceivedMapLength, packet.LevelDataChunk.Status);
+                    game.InvokeMapLoadingProgress(
+                        packet.LevelDataChunk.PercentComplete,
+                        game.ReceivedMapLength,
+                        packet.LevelDataChunk.Status);
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.LevelFinalize:
                 {
                     game.ChatLog("[GAME] Finished map loading");
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.SetBlock:
                 {
-                    int x = packet.SetBlock.X;
-                    int y = packet.SetBlock.Y;
-                    int z = packet.SetBlock.Z;
-                    int type = packet.SetBlock.BlockType;
-                    //try
-                    {
-                        game.SetTileAndUpdate(x, y, z, type);
-                    }
-                    //catch { Console.WriteLine("Cannot update tile!"); }
+                    game.SetTileAndUpdate(packet.SetBlock.X, packet.SetBlock.Y, packet.SetBlock.Z, packet.SetBlock.BlockType);
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.FillArea:
                 {
                     int ax = packet.FillArea.X1;
@@ -234,42 +265,25 @@ public class ModNetworkProcess : ModBase
                     int endz = Math.Max(az, bz);
 
                     int blockCount = packet.FillArea.BlockCount;
+                    for (int x = startx; x <= endx; x++)
                     {
-                        for (int x = startx; x <= endx; x++)
+                        for (int y = starty; y <= endy; y++)
                         {
-                            for (int y = starty; y <= endy; y++)
+                            for (int z = startz; z <= endz; z++)
                             {
-                                for (int z = startz; z <= endz; z++)
-                                {
-                                    // if creative mode is off and player run out of blocks
-                                    if (blockCount == 0)
-                                    {
-                                        return;
-                                    }
-                                    //try
-                                    {
-                                        game.SetTileAndUpdate(x, y, z, packet.FillArea.BlockType);
-                                    }
-                                    //catch
-                                    //{
-                                    //    Console.WriteLine("Cannot update tile!");
-                                    //}
-                                    blockCount--;
-                                }
+                                if (blockCount == 0) { return; }
+                                game.SetTileAndUpdate(x, y, z, packet.FillArea.BlockType);
+                                blockCount--;
                             }
                         }
                     }
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.FillAreaLimit:
                 {
-                    game.fillAreaLimit = packet.FillAreaLimit.Limit;
-                    if (game.fillAreaLimit > 100000)
-                    {
-                        game.fillAreaLimit = 100000;
-                    }
+                    game.fillAreaLimit = Math.Min(packet.FillAreaLimit.Limit, 100000);
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.Freemove:
                 {
                     game.AllowFreemove = packet.Freemove.IsEnabled != 0;
@@ -280,8 +294,8 @@ public class ModNetworkProcess : ModBase
                         game.movespeed = game.basemovespeed;
                         game.Log(game.language.MoveNormal());
                     }
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.PlayerSpawnPosition:
                 {
                     int x = packet.PlayerSpawnPosition.X;
@@ -290,56 +304,44 @@ public class ModNetworkProcess : ModBase
                     game.playerPositionSpawnX = x;
                     game.playerPositionSpawnY = z;
                     game.playerPositionSpawnZ = y;
-                    game.Log(string.Format(game.language.SpawnPositionSetTo(), string.Format("{0},{1},{2}", x.ToString(), y.ToString(), z.ToString())));
+                    game.Log(string.Format(game.language.SpawnPositionSetTo(),
+                        string.Format("{0},{1},{2}", x, y, z)));
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.Message:
                 {
                     game.AddChatline(packet.Message.Message);
                     game.ChatLog(packet.Message.Message);
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.DisconnectPlayer:
                 {
                     game.ChatLog(string.Format("[GAME] Disconnected by the server ({0})", packet.DisconnectPlayer.DisconnectReason));
-                    //Exit mouse pointer lock if necessary
                     if (game.platform.IsMousePointerLocked())
                     {
                         game.platform.ExitMousePointerLock();
                     }
-                    //When server disconnects player, return to main menu
                     game.platform.MessageBoxShowError(packet.DisconnectPlayer.DisconnectReason, "Disconnected from server");
                     game.ExitToMainMenu_();
                     break;
                 }
             case Packet_ServerIdEnum.PlayerStats:
                 {
-                    Packet_ServerPlayerStats p = packet.PlayerStats;
-                    game.PlayerStats = p;
+                    game.PlayerStats = packet.PlayerStats;
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.FiniteInventory:
                 {
-                    //check for null so it's possible to connect
-                    //to old versions of game (before 2011-05-05)
                     if (packet.Inventory.Inventory != null)
                     {
-                        //d_Inventory.CopyFrom(ConvertInventory(packet.Inventory.Inventory));
                         game.UseInventory(packet.Inventory.Inventory);
                     }
-                    //FiniteInventory = packet.FiniteInventory.BlockTypeAmount;
-                    //ENABLE_FINITEINVENTORY = packet.FiniteInventory.IsFinite;
-                    //FiniteInventoryMax = packet.FiniteInventory.Max;
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.Season:
                 {
                     packet.Season.Hour -= 1;
-                    if (packet.Season.Hour < 0)
-                    {
-                        //shouldn't happen
-                        packet.Season.Hour = 12 * Game.HourDetail;
-                    }
+                    if (packet.Season.Hour < 0) { packet.Season.Hour = 12 * Game.HourDetail; }
                     int sunlight = game.NightLevels[packet.Season.Hour];
                     game.SkySphereNight = sunlight < 8;
                     game.d_SunMoonRenderer.day_length_in_seconds = 60 * 60 * 24 / packet.Season.DayNightCycleSpeedup;
@@ -348,54 +350,50 @@ public class ModNetworkProcess : ModBase
                     {
                         game.d_SunMoonRenderer.SetHour(hour);
                     }
-
                     if (game.sunlight_ != sunlight)
                     {
                         game.sunlight_ = sunlight;
-                        //d_Shadows.ResetShadows();
                         game.RedrawAllBlocks();
                     }
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.BlobInitialize:
                 {
                     game.blobdownload = new CitoMemoryStream();
-                    //blobdownloadhash = ByteArrayToString(packet.BlobInitialize.hash);
                     game.blobdownloadname = packet.BlobInitialize.Name;
                     game.blobdownloadmd5 = packet.BlobInitialize.Md5;
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.BlobPart:
                 {
                     int length = packet.BlobPart.Data.Length;
                     game.blobdownload.Write(packet.BlobPart.Data, 0, length);
                     game.ReceivedMapLength += length;
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.BlobFinalize:
                 {
                     byte[] downloaded = game.blobdownload.ToArray();
-
-                    if (game.blobdownloadname != null) // old servers
+                    if (game.blobdownloadname != null)
                     {
                         game.SetFile(game.blobdownloadname, game.blobdownloadmd5, downloaded, game.blobdownload.Length());
                     }
                     game.blobdownload = null;
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.Sound:
                 {
                     game.PlayAudio(packet.Sound.Name, packet.Sound.X, packet.Sound.Y, packet.Sound.Z);
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.RemoveMonsters:
                 {
                     for (int i = Game.entityMonsterIdStart; i < Game.entityMonsterIdStart + Game.entityMonsterIdCount; i++)
                     {
                         game.entities[i] = null;
                     }
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.Translation:
                 game.language.Override(packet.Translation.Lang, packet.Translation.Id, packet.Translation.Translation);
                 break;
@@ -412,7 +410,6 @@ public class ModNetworkProcess : ModBase
                 }
                 break;
             case Packet_ServerIdEnum.Follow:
-                var oldFollowId = game.FollowId();
                 game.Follow = packet.Follow.Client;
                 if (packet.Follow.Tpp != 0)
                 {
@@ -427,47 +424,53 @@ public class ModNetworkProcess : ModBase
                 break;
             case Packet_ServerIdEnum.Bullet:
                 game.EntityAddLocal(Game.CreateBulletEntity(
-                   game.DecodeFixedPoint(packet.Bullet.FromXFloat),
-                   game.DecodeFixedPoint(packet.Bullet.FromYFloat),
-                   game.DecodeFixedPoint(packet.Bullet.FromZFloat),
-                   game.DecodeFixedPoint(packet.Bullet.ToXFloat),
-                   game.DecodeFixedPoint(packet.Bullet.ToYFloat),
-                   game.DecodeFixedPoint(packet.Bullet.ToZFloat),
-                   game.DecodeFixedPoint(packet.Bullet.SpeedFloat)));
+                    game.DecodeFixedPoint(packet.Bullet.FromXFloat),
+                    game.DecodeFixedPoint(packet.Bullet.FromYFloat),
+                    game.DecodeFixedPoint(packet.Bullet.FromZFloat),
+                    game.DecodeFixedPoint(packet.Bullet.ToXFloat),
+                    game.DecodeFixedPoint(packet.Bullet.ToYFloat),
+                    game.DecodeFixedPoint(packet.Bullet.ToZFloat),
+                    game.DecodeFixedPoint(packet.Bullet.SpeedFloat)));
                 break;
             case Packet_ServerIdEnum.Ammo:
-                if (!game.ammostarted)
                 {
-                    game.ammostarted = true;
+                    if (!game.ammostarted)
+                    {
+                        game.ammostarted = true;
+                        for (int i = 0; i < packet.Ammo.TotalAmmoCount; i++)
+                        {
+                            Packet_IntInt k = packet.Ammo.TotalAmmo[i];
+                            game.LoadedAmmo[k.Key_] = Math.Min(k.Value_, game.blocktypes[k.Key_].AmmoMagazine);
+                        }
+                    }
+
+                    // ── Reuse TotalAmmo array instead of allocating a new one ────
+                    // The old code did `game.TotalAmmo = new int[MAX_BLOCKTYPES]` every
+                    // Ammo packet. We allocate once and clear-in-place thereafter.
+                    if (game.TotalAmmo == null)
+                        game.TotalAmmo = new int[GlobalVar.MAX_BLOCKTYPES];
+                    else
+                        Array.Clear(game.TotalAmmo, 0, GlobalVar.MAX_BLOCKTYPES);
+
                     for (int i = 0; i < packet.Ammo.TotalAmmoCount; i++)
                     {
-                        Packet_IntInt k = packet.Ammo.TotalAmmo[i];
-                        game.LoadedAmmo[k.Key_] = Math.Min(k.Value_, game.blocktypes[k.Key_].AmmoMagazine);
+                        game.TotalAmmo[packet.Ammo.TotalAmmo[i].Key_] = packet.Ammo.TotalAmmo[i].Value_;
                     }
+                    break;
                 }
-                game.TotalAmmo = new int[GlobalVar.MAX_BLOCKTYPES];
-                for (int i = 0; i < packet.Ammo.TotalAmmoCount; i++)
-                {
-                    game.TotalAmmo[packet.Ammo.TotalAmmo[i].Key_] = packet.Ammo.TotalAmmo[i].Value_;
-                }
-                break;
             case Packet_ServerIdEnum.Explosion:
                 {
                     Entity entity = new()
                     {
-                        expires = new Expires
-                        {
-                            timeLeft = game.DecodeFixedPoint(packet.Explosion.TimeFloat)
-                        },
+                        expires = new Expires { timeLeft = game.DecodeFixedPoint(packet.Explosion.TimeFloat) },
                         push = packet.Explosion
                     };
                     game.EntityAddLocal(entity);
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.Projectile:
                 {
                     Entity entity = new();
-
                     Sprite sprite = new()
                     {
                         image = "ChemicalGreen.png",
@@ -478,7 +481,6 @@ public class ModNetworkProcess : ModBase
                         positionZ = game.DecodeFixedPoint(packet.Projectile.FromZFloat)
                     };
                     entity.sprite = sprite;
-
                     Grenade grenade = new()
                     {
                         velocityX = game.DecodeFixedPoint(packet.Projectile.VelocityXFloat),
@@ -488,89 +490,85 @@ public class ModNetworkProcess : ModBase
                         sourcePlayer = packet.Projectile.SourcePlayerID
                     };
                     entity.grenade = grenade;
-
                     entity.expires = Expires.Create(game.DecodeFixedPoint(packet.Projectile.ExplodesAfterFloat));
-
                     game.EntityAddLocal(entity);
+                    break;
                 }
-                break;
             case Packet_ServerIdEnum.BlockTypes:
-                game.blocktypes = game.NewBlockTypes;
-                game.NewBlockTypes = new Packet_BlockType[GlobalVar.MAX_BLOCKTYPES];
-
-                int textureInAtlasIdsCount = 1024;
-                string[] textureInAtlasIds = new string[textureInAtlasIdsCount];
-                int lastTextureId = 0;
-                for (int i = 0; i < GlobalVar.MAX_BLOCKTYPES; i++)
                 {
-                    if (game.blocktypes[i] != null)
+                    game.blocktypes = game.NewBlockTypes;
+                    game.NewBlockTypes = new Packet_BlockType[GlobalVar.MAX_BLOCKTYPES];
+
+                    string[] textureInAtlasIds = new string[1024];
+                    int textureInAtlasIdsCount = 1024;
+                    int lastTextureId = 0;
+
+                    // ── Use static scratch buffer instead of new string[7] per block ──
+                    // The old code allocated a fresh string[7] inside this loop for
+                    // every block type — up to 1,024 temporary arrays from one packet.
+                    // s_textureIdScratch is a static field reused each iteration.
+                    string[] scratch = s_textureIdScratch;
+
+                    for (int i = 0; i < GlobalVar.MAX_BLOCKTYPES; i++)
                     {
-                        string[] to_load = new string[7];
-                        int to_loadLength = 7;
+                        if (game.blocktypes[i] != null)
                         {
-                            to_load[0] = game.blocktypes[i].TextureIdLeft;
-                            to_load[1] = game.blocktypes[i].TextureIdRight;
-                            to_load[2] = game.blocktypes[i].TextureIdFront;
-                            to_load[3] = game.blocktypes[i].TextureIdBack;
-                            to_load[4] = game.blocktypes[i].TextureIdTop;
-                            to_load[5] = game.blocktypes[i].TextureIdBottom;
-                            to_load[6] = game.blocktypes[i].TextureIdForInventory;
-                        }
-                        for (int k = 0; k < to_loadLength; k++)
-                        {
-                            if (!Contains(textureInAtlasIds, textureInAtlasIdsCount, to_load[k]))
+                            scratch[0] = game.blocktypes[i].TextureIdLeft;
+                            scratch[1] = game.blocktypes[i].TextureIdRight;
+                            scratch[2] = game.blocktypes[i].TextureIdFront;
+                            scratch[3] = game.blocktypes[i].TextureIdBack;
+                            scratch[4] = game.blocktypes[i].TextureIdTop;
+                            scratch[5] = game.blocktypes[i].TextureIdBottom;
+                            scratch[6] = game.blocktypes[i].TextureIdForInventory;
+
+                            for (int k = 0; k < 7; k++)
                             {
-                                textureInAtlasIds[lastTextureId++] = to_load[k];
+                                if (!Contains(textureInAtlasIds, textureInAtlasIdsCount, scratch[k]))
+                                {
+                                    textureInAtlasIds[lastTextureId++] = scratch[k];
+                                }
                             }
                         }
                     }
-                }
-                game.d_Data.UseBlockTypes(game.platform, game.blocktypes, GlobalVar.MAX_BLOCKTYPES);
-                for (int i = 0; i < GlobalVar.MAX_BLOCKTYPES; i++)
-                {
-                    Packet_BlockType b = game.blocktypes[i];
-                    if (b == null)
+
+                    game.d_Data.UseBlockTypes(game.platform, game.blocktypes, GlobalVar.MAX_BLOCKTYPES);
+                    for (int i = 0; i < GlobalVar.MAX_BLOCKTYPES; i++)
                     {
-                        continue;
+                        Packet_BlockType b = game.blocktypes[i];
+                        if (b == null) { continue; }
+                        if (textureInAtlasIds != null)
+                        {
+                            game.TextureId[i][0] = IndexOf(textureInAtlasIds, textureInAtlasIdsCount, b.TextureIdTop);
+                            game.TextureId[i][1] = IndexOf(textureInAtlasIds, textureInAtlasIdsCount, b.TextureIdBottom);
+                            game.TextureId[i][2] = IndexOf(textureInAtlasIds, textureInAtlasIdsCount, b.TextureIdFront);
+                            game.TextureId[i][3] = IndexOf(textureInAtlasIds, textureInAtlasIdsCount, b.TextureIdBack);
+                            game.TextureId[i][4] = IndexOf(textureInAtlasIds, textureInAtlasIdsCount, b.TextureIdLeft);
+                            game.TextureId[i][5] = IndexOf(textureInAtlasIds, textureInAtlasIdsCount, b.TextureIdRight);
+                            game.TextureIdForInventory[i] = IndexOf(textureInAtlasIds, textureInAtlasIdsCount, b.TextureIdForInventory);
+                        }
                     }
-                    //Indexed by block id and TileSide.
-                    if (textureInAtlasIds != null)
-                    {
-                        game.TextureId[i][0] = IndexOf(textureInAtlasIds, textureInAtlasIdsCount, b.TextureIdTop);
-                        game.TextureId[i][1] = IndexOf(textureInAtlasIds, textureInAtlasIdsCount, b.TextureIdBottom);
-                        game.TextureId[i][2] = IndexOf(textureInAtlasIds, textureInAtlasIdsCount, b.TextureIdFront);
-                        game.TextureId[i][3] = IndexOf(textureInAtlasIds, textureInAtlasIdsCount, b.TextureIdBack);
-                        game.TextureId[i][4] = IndexOf(textureInAtlasIds, textureInAtlasIdsCount, b.TextureIdLeft);
-                        game.TextureId[i][5] = IndexOf(textureInAtlasIds, textureInAtlasIdsCount, b.TextureIdRight);
-                        game.TextureIdForInventory[i] = IndexOf(textureInAtlasIds, textureInAtlasIdsCount, b.TextureIdForInventory);
-                    }
+                    game.UseTerrainTextures(textureInAtlasIds, textureInAtlasIdsCount);
+                    game.handRedraw = true;
+                    game.RedrawAllBlocks();
+                    break;
                 }
-                game.UseTerrainTextures(textureInAtlasIds, textureInAtlasIdsCount);
-                game.handRedraw = true;
-                game.RedrawAllBlocks();
-                break;
             case Packet_ServerIdEnum.ServerRedirect:
                 game.ChatLog("[GAME] Received server redirect");
-                //Leave current server
                 game.SendLeave(Packet_LeaveReasonEnum.Leave);
-                //Exit game screen and create new game instance
                 game.ExitAndSwitchServer(packet.Redirect);
                 break;
         }
     }
+
     private static bool Contains(string[] arr, int arrLength, string value)
-    {
-        return IndexOf(arr, arrLength, value) != -1;
-    }
+        => IndexOf(arr, arrLength, value) != -1;
 
     private static int IndexOf(string[] arr, int arrLength, string value)
     {
         for (int i = 0; i < arrLength; i++)
         {
             if (string.Equals(arr[i], value))
-            {
                 return i;
-            }
         }
         return -1;
     }
