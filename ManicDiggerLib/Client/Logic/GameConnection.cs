@@ -9,23 +9,22 @@
     // Packet serialization / sending
     // -------------------------------------------------------------------------
 
-    public static byte[] Serialize(Packet_Client packet, out int retLength)
+    public static byte[] Serialize(Packet_Client packet)
     {
-        CitoMemoryStream ms = new();
+        MemoryStream ms = new();
         Packet_ClientSerializer.Serialize(ms, packet);
-        retLength = ms.Length();
         return ms.ToArray();
     }
 
-    public void SendPacket(byte[] packet, int packetLength)
+    public void SendPacket(byte[] packet)
     {
-        main.SendMessage(packet.AsMemory(0, packetLength), MyNetDeliveryMethod.ReliableOrdered);
+        main.SendMessage(packet.AsMemory(0, packet.Length), MyNetDeliveryMethod.ReliableOrdered);
     }
 
     public void SendPacketClient(Packet_Client packetClient)
     {
-        byte[] packet = Serialize(packetClient, out packetLen);
-        SendPacket(packet, packetLen);
+        byte[] packet = Serialize(packetClient);
+        SendPacket(packet);
     }
 
     // -------------------------------------------------------------------------

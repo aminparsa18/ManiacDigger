@@ -41,9 +41,9 @@ public sealed class QueryClient
 
     private static void SendRequest(NetClient client)
     {
-        CitoMemoryStream ms = new();
+        MemoryStream ms = new();
         Packet_ClientSerializer.Serialize(ms, ClientPackets.ServerQuery());
-        client.SendMessage(ms.ToArray().AsMemory(0, ms.Length()), MyNetDeliveryMethod.ReliableOrdered);
+        client.SendMessage(ms.ToArray().AsMemory(0, (int)ms.Length), MyNetDeliveryMethod.ReliableOrdered);
     }
 
     private static async Task<(QueryResult? result, string serverMessage)> ReadResponseAsync(

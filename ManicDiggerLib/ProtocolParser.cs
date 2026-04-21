@@ -2,7 +2,7 @@
 
 public class ProtocolParser
 {
-    public static string ReadString(CitoStream stream)
+    public static string ReadString(Stream stream)
     {
         byte[] bytes = ReadBytes(stream);
         return Encoding.UTF8.GetString(bytes, 0, bytes.Length);
@@ -11,7 +11,7 @@ public class ProtocolParser
     /// <summary>
     /// Reads a length delimited byte array
     /// </summary>
-    public static byte[] ReadBytes(CitoStream stream)
+    public static byte[] ReadBytes(Stream stream)
     {
         //VarInt length
         int length = ReadUInt32(stream);
@@ -36,13 +36,13 @@ public class ProtocolParser
     /// <summary>
     /// Writes length delimited byte array
     /// </summary>
-    public static void WriteBytes(CitoStream stream, byte[] val)
+    public static void WriteBytes(Stream stream, byte[] val)
     {
         WriteUInt32_(stream, val.Length);
         stream.Write(val, 0, val.Length);
     }
    
-    public static Key ReadKey_(byte firstByte, CitoStream stream)
+    public static Key ReadKey_(byte firstByte, Stream stream)
     {
         if (firstByte < 128)
             return Key.Create(firstByte >> 3, firstByte & 0x07);
@@ -53,18 +53,18 @@ public class ProtocolParser
     /// <summary>
     /// Seek past the value for the previously read key.
     /// </summary>
-    public static void SkipKey(CitoStream stream, Key key)
+    public static void SkipKey(Stream stream, Key key)
     {
         switch (key.GetWireType())
         {
             case Wire.Fixed32:
-                stream.Seek(4, CitoSeekOrigin.Current);
+                stream.Seek(4, SeekOrigin.Current);
                 return;
             case Wire.Fixed64:
-                stream.Seek(8, CitoSeekOrigin.Current);
+                stream.Seek(8, SeekOrigin.Current);
                 return;
             case Wire.LengthDelimited:
-                stream.Seek(ReadUInt32(stream), CitoSeekOrigin.Current);
+                stream.Seek(ReadUInt32(stream), SeekOrigin.Current);
                 return;
             case Wire.Varint:
                 ReadSkipVarInt(stream);
@@ -85,7 +85,7 @@ public class ProtocolParser
     /// <summary>
     /// Reads past a varint for an unknown field.
     /// </summary>
-    public static void ReadSkipVarInt(CitoStream stream)
+    public static void ReadSkipVarInt(Stream stream)
     {
         while (true)
         {
@@ -106,7 +106,7 @@ public class ProtocolParser
     /// Unsigned VarInt format
     /// Do not use to read int32, use ReadUint64 for that.
     /// </summary>
-    public static int ReadUInt32(CitoStream stream)
+    public static int ReadUInt32(Stream stream)
     {
         int b;
         int val = 0;
@@ -146,7 +146,7 @@ public class ProtocolParser
     /// <summary>
     /// Unsigned VarInt format
     /// </summary>
-    public static void WriteUInt32_(CitoStream stream, int val)
+    public static void WriteUInt32_(Stream stream, int val)
     {
         byte[] buffer = new byte[5];
         int count = 0;
@@ -174,7 +174,7 @@ public class ProtocolParser
     /// <summary>
     /// Unsigned VarInt format
     /// </summary>
-    public static int ReadUInt64(CitoStream stream)
+    public static int ReadUInt64(Stream stream)
     {
         int b;
         int val = 0;
@@ -215,7 +215,7 @@ public class ProtocolParser
     /// <summary>
     /// Unsigned VarInt format
     /// </summary>
-    public static void WriteUInt64(CitoStream stream, int val)
+    public static void WriteUInt64(Stream stream, int val)
     {
         byte[] buffer = new byte[10];
         int count = 0;
@@ -241,7 +241,7 @@ public class ProtocolParser
 
     //#endregion
     //#region Varint: bool
-    public static bool ReadBool(CitoStream stream)
+    public static bool ReadBool(Stream stream)
     {
         int b = stream.ReadByte();
         if (b < 0)
@@ -261,7 +261,7 @@ public class ProtocolParser
 #endif
     }
 
-    public static void WriteBool(CitoStream stream, bool val)
+    public static void WriteBool(Stream stream, bool val)
     {
         byte ret = 0;
         if (val)

@@ -465,10 +465,10 @@ public class ServerPackets
     }
     public static byte[] Serialize(Packet_Server packet, out int retLength)
     {
-        CitoMemoryStream ms = new();
+        MemoryStream ms = new();
         Packet_ServerSerializer.Serialize(ms, packet);
         byte[] data = ms.ToArray();
-        retLength = ms.Length();
+        retLength = (int)ms.Length;
         return data;
     }
 

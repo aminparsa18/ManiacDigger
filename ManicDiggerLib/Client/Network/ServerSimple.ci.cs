@@ -1,8 +1,6 @@
 ﻿// lightweight single-player / embedded server.
 // Runs on a background thread via ModServerSimple.OnReadOnlyBackgroundThread.
 
-using ManicDigger.Mods;
-
 public class ServerSimple
 {
     // -------------------------------------------------------------------------

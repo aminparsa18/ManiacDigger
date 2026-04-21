@@ -371,7 +371,7 @@ public class ModNetworkProcess : ModBase
                 }
             case Packet_ServerIdEnum.BlobInitialize:
                 {
-                    game.blobdownload = new CitoMemoryStream();
+                    game.blobdownload = new MemoryStream();
                     game.blobdownloadname = packet.BlobInitialize.Name;
                     game.blobdownloadmd5 = packet.BlobInitialize.Md5;
                     break;
@@ -388,7 +388,7 @@ public class ModNetworkProcess : ModBase
                     byte[] downloaded = game.blobdownload.ToArray();
                     if (game.blobdownloadname != null)
                     {
-                        game.SetFile(game.blobdownloadname, game.blobdownloadmd5, downloaded, game.blobdownload.Length());
+                        game.SetFile(game.blobdownloadname, game.blobdownloadmd5, downloaded, (int)game.blobdownload.Length);
                     }
                     game.blobdownload = null;
                     break;
