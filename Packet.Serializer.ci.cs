@@ -1,68 +1,30 @@
-#if !CITO
-using System;
-using System.IO;
+using ManicDigger;
 using System.Text;
-#endif
 
-public class Wire
+public enum Wire
 {
-    public const int Varint = 0;
+    Varint = 0,
     //int32, int64, UInt32, UInt64, SInt32, SInt64, bool, enum
-    public const int Fixed64 = 1;
+    Fixed64 = 1,
     //fixed64, sfixed64, double
-    public const int LengthDelimited = 2;
+    LengthDelimited = 2,
     //string, bytes, embedded messages, packed repeated fields
     //Start = 3,        //  groups (deprecated)
     //End = 4,      //  groups (deprecated)
-    public const int Fixed32 = 5;
+    Fixed32 = 5,
     //32-bit    fixed32, SFixed32, float
 }
 
 public class Key
 {
-    int Field;
-    public int GetField() { return Field; }
-    public void SetField(int value) { Field = value; }
+    public int Field { get; }
+    public Wire WireType { get; }
 
-    int WireType;
-    public int GetWireType() { return WireType; }
-    public void SetWireType(int value) { WireType = value; }
-
-    public static Key Create(int field, int wireType)
+    public Key(int field, Wire wireType)
     {
-        Key k = new Key();
-        k.Field = field;
-        k.WireType = wireType;
-        return k;
+        Field = field;
+        WireType = wireType;
     }
-
-    //public override string ToString()
-    //{
-    //    return string.Format("[Key: {0}, {1}]", Field, WireType);
-    //}
-}
-
-/// <summary>
-/// Storage of unknown fields
-/// </summary>
-public class KeyValue
-{
-    Key Key_;
-
-    byte[] Value;
-
-    public static KeyValue Create(Key key, byte[] value)
-    {
-        KeyValue k = new KeyValue();
-        k.Key_ = key;
-        k.Value = value;
-        return k;
-    }
-
-    //public override string ToString()
-    //{
-    //    return string.Format("[KeyValue: {0}, {1}, {2} bytes]", Key.Field, Key.WireType, Value.Length);
-    //}
 }
 
 // Classes and structures being serialized
@@ -83,624 +45,141 @@ public class KeyValue
 
 public class Packet_ClientIdentification
 {
-
-#if !CITO
-    internal
-#endif
-    string MdProtocolVersion;
-
-    public string GetMdProtocolVersion() { return MdProtocolVersion; }
-
-    public void SetMdProtocolVersion(string value) { MdProtocolVersion = value; }
+    internal string MdProtocolVersion;
 
 
+    internal string Username;
+
+    internal string VerificationKey;
 
 
-#if !CITO
-    internal
-#endif
-    string Username;
-
-    public string GetUsername() { return Username; }
-
-    public void SetUsername(string value) { Username = value; }
+    internal string ServerPassword;
 
 
-
-
-#if !CITO
-    internal
-#endif
-    string VerificationKey;
-
-    public string GetVerificationKey() { return VerificationKey; }
-
-    public void SetVerificationKey(string value) { VerificationKey = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string ServerPassword;
-
-    public string GetServerPassword() { return ServerPassword; }
-
-    public void SetServerPassword(string value) { ServerPassword = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_PositionAndOrientation RequestPosition;
-
-    public Packet_PositionAndOrientation GetRequestPosition() { return RequestPosition; }
-
-    public void SetRequestPosition(Packet_PositionAndOrientation value) { RequestPosition = value; }
-
-
+    internal Packet_PositionAndOrientation RequestPosition;
 
 }
 
 public class Packet_ClientRequestBlob
 {
-
-#if !CITO
-    internal
-#endif
-    Packet_StringList RequestedMd5;
-
-    public Packet_StringList GetRequestedMd5() { return RequestedMd5; }
-
-    public void SetRequestedMd5(Packet_StringList value) { RequestedMd5 = value; }
-
-
+    internal Packet_StringList RequestedMd5;
 
 }
 
 public class Packet_ClientSetBlock
 {
-
-#if !CITO
-    internal
-#endif
-    int X;
-
-    public int GetX() { return X; }
-
-    public void SetX(int value) { X = value; }
+    internal int X;
 
 
+    internal int Y;
 
+    internal int Z;
 
-#if !CITO
-    internal
-#endif
-    int Y;
+    internal PacketBlockSetMode Mode;
 
-    public int GetY() { return Y; }
-
-    public void SetY(int value) { Y = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Z;
-
-    public int GetZ() { return Z; }
-
-    public void SetZ(int value) { Z = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Mode;
-
-    public int GetMode() { return Mode; }
-
-    public void SetMode(int value) { Mode = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int BlockType;
-
-    public int GetBlockType() { return BlockType; }
-
-    public void SetBlockType(int value) { BlockType = value; }
-
-
+    internal int BlockType;
 
     /// <summary> obsolete</summary>
 
-#if !CITO
-    internal
-#endif
-    int MaterialSlot;
-
-    public int GetMaterialSlot() { return MaterialSlot; }
-
-    public void SetMaterialSlot(int value) { MaterialSlot = value; }
-
-
-
+    internal int MaterialSlot;
 }
 
 public class Packet_ClientFillArea
 {
+    internal int X1;
 
-#if !CITO
-    internal
-#endif
-    int X1;
-
-    public int GetX1() { return X1; }
-
-    public void SetX1(int value) { X1 = value; }
+    internal int X2;
 
 
+    internal int Y1;
 
+    internal int Y2;
 
-#if !CITO
-    internal
-#endif
-    int X2;
+    internal int Z1;
 
-    public int GetX2() { return X2; }
+    internal int Z2;
 
-    public void SetX2(int value) { X2 = value; }
+    internal int BlockType;
 
-
-
-
-#if !CITO
-    internal
-#endif
-    int Y1;
-
-    public int GetY1() { return Y1; }
-
-    public void SetY1(int value) { Y1 = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Y2;
-
-    public int GetY2() { return Y2; }
-
-    public void SetY2(int value) { Y2 = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Z1;
-
-    public int GetZ1() { return Z1; }
-
-    public void SetZ1(int value) { Z1 = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Z2;
-
-    public int GetZ2() { return Z2; }
-
-    public void SetZ2(int value) { Z2 = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int BlockType;
-
-    public int GetBlockType() { return BlockType; }
-
-    public void SetBlockType(int value) { BlockType = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int MaterialSlot;
-
-    public int GetMaterialSlot() { return MaterialSlot; }
-
-    public void SetMaterialSlot(int value) { MaterialSlot = value; }
-
-
+    internal int MaterialSlot;
 
 }
 
 public class Packet_ClientPositionAndOrientation
 {
+    internal int PlayerId;
 
-#if !CITO
-    internal
-#endif
-    int PlayerId;
+    internal int X;
 
-    public int GetPlayerId() { return PlayerId; }
+    internal int Y;
 
-    public void SetPlayerId(int value) { PlayerId = value; }
+    internal int Z;
 
+    internal int Heading;
 
+    internal int Pitch;
 
-
-#if !CITO
-    internal
-#endif
-    int X;
-
-    public int GetX() { return X; }
-
-    public void SetX(int value) { X = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Y;
-
-    public int GetY() { return Y; }
-
-    public void SetY(int value) { Y = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Z;
-
-    public int GetZ() { return Z; }
-
-    public void SetZ(int value) { Z = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Heading;
-
-    public int GetHeading() { return Heading; }
-
-    public void SetHeading(int value) { Heading = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Pitch;
-
-    public int GetPitch() { return Pitch; }
-
-    public void SetPitch(int value) { Pitch = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Stance;
-
-    public int GetStance() { return Stance; }
-
-    public void SetStance(int value) { Stance = value; }
-
-
-
+    internal int Stance;
 }
 
 public class Packet_ClientMessage
 {
+    internal string Message;
 
-#if !CITO
-    internal
-#endif
-    string Message;
-
-    public string GetMessage() { return Message; }
-
-    public void SetMessage(string value) { Message = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int IsTeamchat;
-
-    public int GetIsTeamchat() { return IsTeamchat; }
-
-    public void SetIsTeamchat(int value) { IsTeamchat = value; }
-
-
-
+    internal int IsTeamchat;
 }
 
 public class Packet_ClientInventoryAction
 {
+    internal PacketInventoryActionType Action;
 
-#if !CITO
-    internal
-#endif
-    int Action;
+    internal Packet_InventoryPosition A;
 
-    public int GetAction() { return Action; }
-
-    public void SetAction(int value) { Action = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_InventoryPosition A;
-
-    public Packet_InventoryPosition GetA() { return A; }
-
-    public void SetA(Packet_InventoryPosition value) { A = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_InventoryPosition B;
-
-    public Packet_InventoryPosition GetB() { return B; }
-
-    public void SetB(Packet_InventoryPosition value) { B = value; }
-
-
-
+    internal Packet_InventoryPosition B;
 }
 
 public class Packet_InventoryPosition
 {
+    internal PacketInventoryPositionType Type;
 
-#if !CITO
-    internal
-#endif
-    int Type;
+    internal int AreaX;
 
-    public int GetType() { return Type; }
+    internal int AreaY;
 
-    public void SetType(int value) { Type = value; }
+    internal int MaterialId;
 
+    internal int WearPlace;
 
+    internal int ActiveMaterial;
 
+    internal int GroundPositionX;
 
-#if !CITO
-    internal
-#endif
-    int AreaX;
+    internal int GroundPositionY;
 
-    public int GetAreaX() { return AreaX; }
-
-    public void SetAreaX(int value) { AreaX = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int AreaY;
-
-    public int GetAreaY() { return AreaY; }
-
-    public void SetAreaY(int value) { AreaY = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int MaterialId;
-
-    public int GetMaterialId() { return MaterialId; }
-
-    public void SetMaterialId(int value) { MaterialId = value; }
-
-
-
-    /// <summary>WearPlace</summary>
-
-#if !CITO
-    internal
-#endif
-    int WearPlace;
-
-    public int GetWearPlace() { return WearPlace; }
-
-    public void SetWearPlace(int value) { WearPlace = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int ActiveMaterial;
-
-    public int GetActiveMaterial() { return ActiveMaterial; }
-
-    public void SetActiveMaterial(int value) { ActiveMaterial = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int GroundPositionX;
-
-    public int GetGroundPositionX() { return GroundPositionX; }
-
-    public void SetGroundPositionX(int value) { GroundPositionX = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int GroundPositionY;
-
-    public int GetGroundPositionY() { return GroundPositionY; }
-
-    public void SetGroundPositionY(int value) { GroundPositionY = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int GroundPositionZ;
-
-    public int GetGroundPositionZ() { return GroundPositionZ; }
-
-    public void SetGroundPositionZ(int value) { GroundPositionZ = value; }
-
-
-
+    internal int GroundPositionZ;
 }
 
 public class Packet_PositionAndOrientation
 {
+    internal int X;
 
-#if !CITO
-    internal
-#endif
-    int X;
+    internal int Y;
 
-    public int GetX() { return X; }
+    internal int Z;
 
-    public void SetX(int value) { X = value; }
+    internal int Heading;
 
+    internal int Pitch;
 
-
-
-#if !CITO
-    internal
-#endif
-    int Y;
-
-    public int GetY() { return Y; }
-
-    public void SetY(int value) { Y = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Z;
-
-    public int GetZ() { return Z; }
-
-    public void SetZ(int value) { Z = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Heading;
-
-    public int GetHeading() { return Heading; }
-
-    public void SetHeading(int value) { Heading = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Pitch;
-
-    public int GetPitch() { return Pitch; }
-
-    public void SetPitch(int value) { Pitch = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Stance;
-
-    public int GetStance() { return Stance; }
-
-    public void SetStance(int value) { Stance = value; }
-
-
-
+    internal int Stance;
 }
 
 public class Packet_ClientReload
-{
-}
+{ }
 
 public class Packet_ClientLeave
 {
-
-#if !CITO
-    internal
-#endif
-    int Reason;
-
-    public int GetReason() { return Reason; }
-
-    public void SetReason(int value) { Reason = value; }
-
-
-
+    internal PacketLeaveReason Reason;
 }
 
 /// <summary>
@@ -709,75 +188,25 @@ public class Packet_ClientLeave
 /// </summary>
 public class Packet_ClientHealth
 {
-
-#if !CITO
-    internal
-#endif
-    int CurrentHealth;
-
-    public int GetCurrentHealth() { return CurrentHealth; }
-
-    public void SetCurrentHealth(int value) { CurrentHealth = value; }
-
-
-
+    internal int CurrentHealth;
 }
 
 public class Packet_ClientOxygen
 {
-
-#if !CITO
-    internal
-#endif
-    int CurrentOxygen;
-
-    public int GetCurrentOxygen() { return CurrentOxygen; }
-
-    public void SetCurrentOxygen(int value) { CurrentOxygen = value; }
-
-
-
+    internal int CurrentOxygen;
 }
 
 public class Packet_ClientDialogClick
 {
+    internal string WidgetId;
 
-#if !CITO
-    internal
-#endif
-    string WidgetId;
-
-    public string GetWidgetId() { return WidgetId; }
-
-    public void SetWidgetId(string value) { WidgetId = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string[] TextBoxValue;
-
-    public string[] GetTextBoxValue() { return TextBoxValue; }
+    internal string[] TextBoxValue;
 
     public void SetTextBoxValue(string[] value, int count, int length) { TextBoxValue = value; TextBoxValueCount = count; TextBoxValueLength = length; }
 
+    internal int TextBoxValueCount;
 
-#if !CITO
-    internal
-#endif
-    int TextBoxValueCount;
-
-    public int GetTextBoxValueCount() { return TextBoxValueCount; }
-
-
-#if !CITO
-    internal
-#endif
-    int TextBoxValueLength;
-
-    public int GetTextBoxValueLength() { return TextBoxValueLength; }
+    internal int TextBoxValueLength;
 
     public void TextBoxValueAdd(string value)
     {
@@ -794,606 +223,135 @@ public class Packet_ClientDialogClick
         TextBoxValue[TextBoxValueCount] = value;
         TextBoxValueCount++;
     }
-
-
-
 }
 
 public class Packet_ClientPingReply
-{
-}
+{ }
 
 public class Packet_ClientCraft
 {
+    internal int X;
 
-#if !CITO
-    internal
-#endif
-    int X;
+    internal int Y;
 
-    public int GetX() { return X; }
+    internal int Z;
 
-    public void SetX(int value) { X = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Y;
-
-    public int GetY() { return Y; }
-
-    public void SetY(int value) { Y = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Z;
-
-    public int GetZ() { return Z; }
-
-    public void SetZ(int value) { Z = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int RecipeId;
-
-    public int GetRecipeId() { return RecipeId; }
-
-    public void SetRecipeId(int value) { RecipeId = value; }
-
-
-
+    internal int RecipeId;
 }
 
 public class Packet_ClientShot
 {
+    internal int FromX;
 
-#if !CITO
-    internal
-#endif
-    int FromX;
+    internal int FromY;
 
-    public int GetFromX() { return FromX; }
+    internal int FromZ;
 
-    public void SetFromX(int value) { FromX = value; }
+    internal int ToX;
 
+    internal int ToY;
 
+    internal int ToZ;
 
+    internal int WeaponBlock;
 
-#if !CITO
-    internal
-#endif
-    int FromY;
+    internal int HitPlayer;
 
-    public int GetFromY() { return FromY; }
+    internal int IsHitHead;
 
-    public void SetFromY(int value) { FromY = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int FromZ;
-
-    public int GetFromZ() { return FromZ; }
-
-    public void SetFromZ(int value) { FromZ = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int ToX;
-
-    public int GetToX() { return ToX; }
-
-    public void SetToX(int value) { ToX = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int ToY;
-
-    public int GetToY() { return ToY; }
-
-    public void SetToY(int value) { ToY = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int ToZ;
-
-    public int GetToZ() { return ToZ; }
-
-    public void SetToZ(int value) { ToZ = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int WeaponBlock;
-
-    public int GetWeaponBlock() { return WeaponBlock; }
-
-    public void SetWeaponBlock(int value) { WeaponBlock = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int HitPlayer;
-
-    public int GetHitPlayer() { return HitPlayer; }
-
-    public void SetHitPlayer(int value) { HitPlayer = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int IsHitHead;
-
-    public int GetIsHitHead() { return IsHitHead; }
-
-    public void SetIsHitHead(int value) { IsHitHead = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int ExplodesAfter;
-
-    public int GetExplodesAfter() { return ExplodesAfter; }
-
-    public void SetExplodesAfter(int value) { ExplodesAfter = value; }
-
-
-
+    internal int ExplodesAfter;
 }
 
 public class Packet_ClientSpecialKey
 {
-
-#if !CITO
-    internal
-#endif
-    int Key_;
-
-    public int GetKey_() { return Key_; }
-
-    public void SetKey_(int value) { Key_ = value; }
-
-
-
+    internal PacketSpecialKey Key_;
 }
 
 public class Packet_ClientActiveMaterialSlot
 {
-
-#if !CITO
-    internal
-#endif
-    int ActiveMaterialSlot;
-
-    public int GetActiveMaterialSlot() { return ActiveMaterialSlot; }
-
-    public void SetActiveMaterialSlot(int value) { ActiveMaterialSlot = value; }
-
-
-
+    internal int ActiveMaterialSlot;
 }
 
 public class Packet_ClientDeath
 {
+    internal DeathReason Reason;
 
-#if !CITO
-    internal
-#endif
-    int Reason;
-
-    public int GetReason() { return Reason; }
-
-    public void SetReason(int value) { Reason = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int SourcePlayer;
-
-    public int GetSourcePlayer() { return SourcePlayer; }
-
-    public void SetSourcePlayer(int value) { SourcePlayer = value; }
-
-
-
+    internal int SourcePlayer;
 }
 
 public class Packet_ClientServerQuery
-{
-}
+{ }
 
 public class Packet_ClientGameResolution
 {
+    internal int Width;
 
-#if !CITO
-    internal
-#endif
-    int Width;
-
-    public int GetWidth() { return Width; }
-
-    public void SetWidth(int value) { Width = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Height;
-
-    public int GetHeight() { return Height; }
-
-    public void SetHeight(int value) { Height = value; }
-
-
-
+    internal int Height;
 }
 
 public class Packet_Client
 {
+    internal PacketType Id;
 
-#if !CITO
-    internal
-#endif
-    int Id;
+    internal Packet_ClientIdentification Identification;
 
-    public int GetId() { return Id; }
+    internal Packet_ClientSetBlock SetBlock;
 
-    public void SetId(int value) { Id = value; }
+    internal Packet_ClientFillArea FillArea;
 
+    internal Packet_ClientPositionAndOrientation PositionAndOrientation;
 
+    internal Packet_ClientMessage Message;
 
+    internal Packet_ClientCraft Craft;
 
-#if !CITO
-    internal
-#endif
-    Packet_ClientIdentification Identification;
+    internal Packet_ClientRequestBlob RequestBlob;
 
-    public Packet_ClientIdentification GetIdentification() { return Identification; }
+    internal Packet_ClientInventoryAction InventoryAction;
 
-    public void SetIdentification(Packet_ClientIdentification value) { Identification = value; }
+    internal Packet_ClientHealth Health;
 
+    internal Packet_ClientPingReply PingReply;
 
+    internal Packet_ClientDialogClick DialogClick_;
 
+    internal Packet_ClientShot Shot;
 
-#if !CITO
-    internal
-#endif
-    Packet_ClientSetBlock SetBlock;
+    internal Packet_ClientSpecialKey SpecialKey_;
 
-    public Packet_ClientSetBlock GetSetBlock() { return SetBlock; }
+    internal Packet_ClientActiveMaterialSlot ActiveMaterialSlot;
 
-    public void SetSetBlock(Packet_ClientSetBlock value) { SetBlock = value; }
+    internal Packet_ClientLeave Leave;
 
+    internal Packet_ClientReload Reload;
 
+    internal Packet_ClientOxygen Oxygen;
 
+    internal Packet_ClientDeath Death;
 
-#if !CITO
-    internal
-#endif
-    Packet_ClientFillArea FillArea;
+    internal Packet_ClientServerQuery Query;
 
-    public Packet_ClientFillArea GetFillArea() { return FillArea; }
+    internal Packet_ClientGameResolution GameResolution;
 
-    public void SetFillArea(Packet_ClientFillArea value) { FillArea = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ClientPositionAndOrientation PositionAndOrientation;
-
-    public Packet_ClientPositionAndOrientation GetPositionAndOrientation() { return PositionAndOrientation; }
-
-    public void SetPositionAndOrientation(Packet_ClientPositionAndOrientation value) { PositionAndOrientation = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ClientMessage Message;
-
-    public Packet_ClientMessage GetMessage() { return Message; }
-
-    public void SetMessage(Packet_ClientMessage value) { Message = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ClientCraft Craft;
-
-    public Packet_ClientCraft GetCraft() { return Craft; }
-
-    public void SetCraft(Packet_ClientCraft value) { Craft = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ClientRequestBlob RequestBlob;
-
-    public Packet_ClientRequestBlob GetRequestBlob() { return RequestBlob; }
-
-    public void SetRequestBlob(Packet_ClientRequestBlob value) { RequestBlob = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ClientInventoryAction InventoryAction;
-
-    public Packet_ClientInventoryAction GetInventoryAction() { return InventoryAction; }
-
-    public void SetInventoryAction(Packet_ClientInventoryAction value) { InventoryAction = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ClientHealth Health;
-
-    public Packet_ClientHealth GetHealth() { return Health; }
-
-    public void SetHealth(Packet_ClientHealth value) { Health = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ClientPingReply PingReply;
-
-    public Packet_ClientPingReply GetPingReply() { return PingReply; }
-
-    public void SetPingReply(Packet_ClientPingReply value) { PingReply = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ClientDialogClick DialogClick_;
-
-    public Packet_ClientDialogClick GetDialogClick_() { return DialogClick_; }
-
-    public void SetDialogClick_(Packet_ClientDialogClick value) { DialogClick_ = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ClientShot Shot;
-
-    public Packet_ClientShot GetShot() { return Shot; }
-
-    public void SetShot(Packet_ClientShot value) { Shot = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ClientSpecialKey SpecialKey_;
-
-    public Packet_ClientSpecialKey GetSpecialKey_() { return SpecialKey_; }
-
-    public void SetSpecialKey_(Packet_ClientSpecialKey value) { SpecialKey_ = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ClientActiveMaterialSlot ActiveMaterialSlot;
-
-    public Packet_ClientActiveMaterialSlot GetActiveMaterialSlot() { return ActiveMaterialSlot; }
-
-    public void SetActiveMaterialSlot(Packet_ClientActiveMaterialSlot value) { ActiveMaterialSlot = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ClientLeave Leave;
-
-    public Packet_ClientLeave GetLeave() { return Leave; }
-
-    public void SetLeave(Packet_ClientLeave value) { Leave = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ClientReload Reload;
-
-    public Packet_ClientReload GetReload() { return Reload; }
-
-    public void SetReload(Packet_ClientReload value) { Reload = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ClientOxygen Oxygen;
-
-    public Packet_ClientOxygen GetOxygen() { return Oxygen; }
-
-    public void SetOxygen(Packet_ClientOxygen value) { Oxygen = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ClientDeath Death;
-
-    public Packet_ClientDeath GetDeath() { return Death; }
-
-    public void SetDeath(Packet_ClientDeath value) { Death = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ClientServerQuery Query;
-
-    public Packet_ClientServerQuery GetQuery() { return Query; }
-
-    public void SetQuery(Packet_ClientServerQuery value) { Query = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ClientGameResolution GameResolution;
-
-    public Packet_ClientGameResolution GetGameResolution() { return GameResolution; }
-
-    public void SetGameResolution(Packet_ClientGameResolution value) { GameResolution = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ClientEntityInteraction EntityInteraction;
-
-    public Packet_ClientEntityInteraction GetEntityInteraction() { return EntityInteraction; }
-
-    public void SetEntityInteraction(Packet_ClientEntityInteraction value) { EntityInteraction = value; }
-
-
-
+    internal Packet_ClientEntityInteraction EntityInteraction;
 }
 
 public class Packet_ClientEntityInteraction
 {
+    internal int EntityId;
 
-#if !CITO
-    internal
-#endif
-    int EntityId;
-
-    public int GetEntityId() { return EntityId; }
-
-    public void SetEntityId(int value) { EntityId = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int InteractionType;
-
-    public int GetInteractionType() { return InteractionType; }
-
-    public void SetInteractionType(int value) { InteractionType = value; }
-
-
-
+    internal PacketEntityInteractionType InteractionType;
 }
 
 public class Packet_SoundSet
 {
-
-#if !CITO
-    internal
-#endif
-    string[] Walk;
-
-    public string[] GetWalk() { return Walk; }
+    internal string[] Walk;
 
     public void SetWalk(string[] value, int count, int length) { Walk = value; WalkCount = count; WalkLength = length; }
 
+    internal int WalkCount;
 
-#if !CITO
-    internal
-#endif
-    int WalkCount;
-
-    public int GetWalkCount() { return WalkCount; }
-
-
-#if !CITO
-    internal
-#endif
-    int WalkLength;
-
-    public int GetWalkLength() { return WalkLength; }
+    internal int WalkLength;
 
     public void WalkAdd(string value)
     {
@@ -1411,33 +369,14 @@ public class Packet_SoundSet
         WalkCount++;
     }
 
-
-
-
-#if !CITO
-    internal
-#endif
-    string[] Break1;
-
-    public string[] GetBreak1() { return Break1; }
+    internal string[] Break1;
 
     public void SetBreak1(string[] value, int count, int length) { Break1 = value; Break1Count = count; Break1Length = length; }
 
 
-#if !CITO
-    internal
-#endif
-    int Break1Count;
+    internal int Break1Count;
 
-    public int GetBreak1Count() { return Break1Count; }
-
-
-#if !CITO
-    internal
-#endif
-    int Break1Length;
-
-    public int GetBreak1Length() { return Break1Length; }
+    internal int Break1Length;
 
     public void Break1Add(string value)
     {
@@ -1455,33 +394,13 @@ public class Packet_SoundSet
         Break1Count++;
     }
 
-
-
-
-#if !CITO
-    internal
-#endif
-    string[] Build;
-
-    public string[] GetBuild() { return Build; }
+    internal string[] Build;
 
     public void SetBuild(string[] value, int count, int length) { Build = value; BuildCount = count; BuildLength = length; }
 
+    internal int BuildCount;
 
-#if !CITO
-    internal
-#endif
-    int BuildCount;
-
-    public int GetBuildCount() { return BuildCount; }
-
-
-#if !CITO
-    internal
-#endif
-    int BuildLength;
-
-    public int GetBuildLength() { return BuildLength; }
+    internal int BuildLength;
 
     public void BuildAdd(string value)
     {
@@ -1499,33 +418,13 @@ public class Packet_SoundSet
         BuildCount++;
     }
 
-
-
-
-#if !CITO
-    internal
-#endif
-    string[] Clone;
-
-    public string[] GetClone() { return Clone; }
+    internal string[] Clone;
 
     public void SetClone(string[] value, int count, int length) { Clone = value; CloneCount = count; CloneLength = length; }
 
+    internal int CloneCount;
 
-#if !CITO
-    internal
-#endif
-    int CloneCount;
-
-    public int GetCloneCount() { return CloneCount; }
-
-
-#if !CITO
-    internal
-#endif
-    int CloneLength;
-
-    public int GetCloneLength() { return CloneLength; }
+    internal int CloneLength;
 
     public void CloneAdd(string value)
     {
@@ -1543,33 +442,13 @@ public class Packet_SoundSet
         CloneCount++;
     }
 
-
-
-
-#if !CITO
-    internal
-#endif
-    string[] Shoot;
-
-    public string[] GetShoot() { return Shoot; }
+    internal string[] Shoot;
 
     public void SetShoot(string[] value, int count, int length) { Shoot = value; ShootCount = count; ShootLength = length; }
 
+    internal int ShootCount;
 
-#if !CITO
-    internal
-#endif
-    int ShootCount;
-
-    public int GetShootCount() { return ShootCount; }
-
-
-#if !CITO
-    internal
-#endif
-    int ShootLength;
-
-    public int GetShootLength() { return ShootLength; }
+    internal int ShootLength;
 
     public void ShootAdd(string value)
     {
@@ -1587,33 +466,13 @@ public class Packet_SoundSet
         ShootCount++;
     }
 
-
-
-
-#if !CITO
-    internal
-#endif
-    string[] ShootEnd;
-
-    public string[] GetShootEnd() { return ShootEnd; }
+    internal string[] ShootEnd;
 
     public void SetShootEnd(string[] value, int count, int length) { ShootEnd = value; ShootEndCount = count; ShootEndLength = length; }
 
+    internal int ShootEndCount;
 
-#if !CITO
-    internal
-#endif
-    int ShootEndCount;
-
-    public int GetShootEndCount() { return ShootEndCount; }
-
-
-#if !CITO
-    internal
-#endif
-    int ShootEndLength;
-
-    public int GetShootEndLength() { return ShootEndLength; }
+    internal int ShootEndLength;
 
     public void ShootEndAdd(string value)
     {
@@ -1631,33 +490,13 @@ public class Packet_SoundSet
         ShootEndCount++;
     }
 
-
-
-
-#if !CITO
-    internal
-#endif
-    string[] Reload;
-
-    public string[] GetReload() { return Reload; }
+    internal string[] Reload;
 
     public void SetReload(string[] value, int count, int length) { Reload = value; ReloadCount = count; ReloadLength = length; }
 
+    internal int ReloadCount;
 
-#if !CITO
-    internal
-#endif
-    int ReloadCount;
-
-    public int GetReloadCount() { return ReloadCount; }
-
-
-#if !CITO
-    internal
-#endif
-    int ReloadLength;
-
-    public int GetReloadLength() { return ReloadLength; }
+    internal int ReloadLength;
 
     public void ReloadAdd(string value)
     {
@@ -1674,731 +513,141 @@ public class Packet_SoundSet
         Reload[ReloadCount] = value;
         ReloadCount++;
     }
-
-
-
 }
 
 public class Packet_BlockType
 {
+    internal string TextureIdTop;
 
-#if !CITO
-    internal
-#endif
-    string TextureIdTop;
+    internal string TextureIdBottom;
 
-    public string GetTextureIdTop() { return TextureIdTop; }
+    internal string TextureIdFront;
 
-    public void SetTextureIdTop(string value) { TextureIdTop = value; }
+    internal string TextureIdBack;
 
+    internal string TextureIdLeft;
 
+    internal string TextureIdRight;
 
+    internal string TextureIdForInventory;
 
-#if !CITO
-    internal
-#endif
-    string TextureIdBottom;
+    internal DrawType DrawType;
 
-    public string GetTextureIdBottom() { return TextureIdBottom; }
+    internal int WalkableType;
 
-    public void SetTextureIdBottom(string value) { TextureIdBottom = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string TextureIdFront;
-
-    public string GetTextureIdFront() { return TextureIdFront; }
-
-    public void SetTextureIdFront(string value) { TextureIdFront = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string TextureIdBack;
-
-    public string GetTextureIdBack() { return TextureIdBack; }
-
-    public void SetTextureIdBack(string value) { TextureIdBack = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string TextureIdLeft;
-
-    public string GetTextureIdLeft() { return TextureIdLeft; }
-
-    public void SetTextureIdLeft(string value) { TextureIdLeft = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string TextureIdRight;
-
-    public string GetTextureIdRight() { return TextureIdRight; }
-
-    public void SetTextureIdRight(string value) { TextureIdRight = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string TextureIdForInventory;
-
-    public string GetTextureIdForInventory() { return TextureIdForInventory; }
-
-    public void SetTextureIdForInventory(string value) { TextureIdForInventory = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int DrawType;
-
-    public int GetDrawType() { return DrawType; }
-
-    public void SetDrawType(int value) { DrawType = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int WalkableType;
-
-    public int GetWalkableType() { return WalkableType; }
-
-    public void SetWalkableType(int value) { WalkableType = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Rail;
+    internal int Rail;
 
     public int GetRail() { return Rail; }
 
-    public void SetRail(int value) { Rail = value; }
+    internal int WalkSpeedFloat;
 
+    internal bool IsSlipperyWalk;
 
+    internal Packet_SoundSet Sounds;
 
+    internal int LightRadius;
 
-#if !CITO
-    internal
-#endif
-    int WalkSpeedFloat;
+    internal int StartInventoryAmount;
 
-    public int GetWalkSpeedFloat() { return WalkSpeedFloat; }
+    internal int Strength;
 
-    public void SetWalkSpeedFloat(int value) { WalkSpeedFloat = value; }
+    internal string Name;
 
+    internal bool IsBuildable;
 
+    internal bool IsUsable;
 
+    internal bool IsTool;
 
-#if !CITO
-    internal
-#endif
-    bool IsSlipperyWalk;
+    internal string Handimage;
 
-    public bool GetIsSlipperyWalk() { return IsSlipperyWalk; }
+    internal bool IsPistol;
 
-    public void SetIsSlipperyWalk(bool value) { IsSlipperyWalk = value; }
+    internal int AimRadiusFloat;
 
+    internal int RecoilFloat;
 
+    internal int DelayFloat;
 
+    internal int BulletsPerShotFloat;
 
-#if !CITO
-    internal
-#endif
-    Packet_SoundSet Sounds;
+    internal int WalkSpeedWhenUsedFloat;
 
-    public Packet_SoundSet GetSounds() { return Sounds; }
+    internal bool IronSightsEnabled;
 
-    public void SetSounds(Packet_SoundSet value) { Sounds = value; }
+    internal int IronSightsMoveSpeedFloat;
 
+    internal string IronSightsImage;
 
+    internal int IronSightsAimRadiusFloat;
 
+    internal int IronSightsFovFloat;
 
-#if !CITO
-    internal
-#endif
-    int LightRadius;
+    internal int AmmoMagazine;
 
-    public int GetLightRadius() { return LightRadius; }
+    internal int AmmoTotal;
 
-    public void SetLightRadius(int value) { LightRadius = value; }
+    internal int ReloadDelayFloat;
 
+    internal int ExplosionRangeFloat;
 
+    internal int ExplosionTimeFloat;
 
-
-#if !CITO
-    internal
-#endif
-    int StartInventoryAmount;
-
-    public int GetStartInventoryAmount() { return StartInventoryAmount; }
-
-    public void SetStartInventoryAmount(int value) { StartInventoryAmount = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Strength;
-
-    public int GetStrength() { return Strength; }
-
-    public void SetStrength(int value) { Strength = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string Name;
-
-    public string GetName() { return Name; }
-
-    public void SetName(string value) { Name = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    bool IsBuildable;
-
-    public bool GetIsBuildable() { return IsBuildable; }
-
-    public void SetIsBuildable(bool value) { IsBuildable = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    bool IsUsable;
-
-    public bool GetIsUsable() { return IsUsable; }
-
-    public void SetIsUsable(bool value) { IsUsable = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    bool IsTool;
-
-    public bool GetIsTool() { return IsTool; }
-
-    public void SetIsTool(bool value) { IsTool = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string Handimage;
-
-    public string GetHandimage() { return Handimage; }
-
-    public void SetHandimage(string value) { Handimage = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    bool IsPistol;
-
-    public bool GetIsPistol() { return IsPistol; }
-
-    public void SetIsPistol(bool value) { IsPistol = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int AimRadiusFloat;
-
-    public int GetAimRadiusFloat() { return AimRadiusFloat; }
-
-    public void SetAimRadiusFloat(int value) { AimRadiusFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int RecoilFloat;
-
-    public int GetRecoilFloat() { return RecoilFloat; }
-
-    public void SetRecoilFloat(int value) { RecoilFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int DelayFloat;
-
-    public int GetDelayFloat() { return DelayFloat; }
-
-    public void SetDelayFloat(int value) { DelayFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int BulletsPerShotFloat;
-
-    public int GetBulletsPerShotFloat() { return BulletsPerShotFloat; }
-
-    public void SetBulletsPerShotFloat(int value) { BulletsPerShotFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int WalkSpeedWhenUsedFloat;
-
-    public int GetWalkSpeedWhenUsedFloat() { return WalkSpeedWhenUsedFloat; }
-
-    public void SetWalkSpeedWhenUsedFloat(int value) { WalkSpeedWhenUsedFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    bool IronSightsEnabled;
-
-    public bool GetIronSightsEnabled() { return IronSightsEnabled; }
-
-    public void SetIronSightsEnabled(bool value) { IronSightsEnabled = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int IronSightsMoveSpeedFloat;
-
-    public int GetIronSightsMoveSpeedFloat() { return IronSightsMoveSpeedFloat; }
-
-    public void SetIronSightsMoveSpeedFloat(int value) { IronSightsMoveSpeedFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string IronSightsImage;
-
-    public string GetIronSightsImage() { return IronSightsImage; }
-
-    public void SetIronSightsImage(string value) { IronSightsImage = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int IronSightsAimRadiusFloat;
-
-    public int GetIronSightsAimRadiusFloat() { return IronSightsAimRadiusFloat; }
-
-    public void SetIronSightsAimRadiusFloat(int value) { IronSightsAimRadiusFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int IronSightsFovFloat;
-
-    public int GetIronSightsFovFloat() { return IronSightsFovFloat; }
-
-    public void SetIronSightsFovFloat(int value) { IronSightsFovFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int AmmoMagazine;
-
-    public int GetAmmoMagazine() { return AmmoMagazine; }
-
-    public void SetAmmoMagazine(int value) { AmmoMagazine = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int AmmoTotal;
-
-    public int GetAmmoTotal() { return AmmoTotal; }
-
-    public void SetAmmoTotal(int value) { AmmoTotal = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int ReloadDelayFloat;
-
-    public int GetReloadDelayFloat() { return ReloadDelayFloat; }
-
-    public void SetReloadDelayFloat(int value) { ReloadDelayFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int ExplosionRangeFloat;
-
-    public int GetExplosionRangeFloat() { return ExplosionRangeFloat; }
-
-    public void SetExplosionRangeFloat(int value) { ExplosionRangeFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int ExplosionTimeFloat;
-
-    public int GetExplosionTimeFloat() { return ExplosionTimeFloat; }
-
-    public void SetExplosionTimeFloat(int value) { ExplosionTimeFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int ProjectileSpeedFloat;
-
-    public int GetProjectileSpeedFloat() { return ProjectileSpeedFloat; }
-
-    public void SetProjectileSpeedFloat(int value) { ProjectileSpeedFloat = value; }
-
-
-
+    internal int ProjectileSpeedFloat;
     /// <summary> 0 is infinite</summary>
 
-#if !CITO
-    internal
-#endif
-    bool ProjectileBounce;
+    internal bool ProjectileBounce;
 
-    public bool GetProjectileBounce() { return ProjectileBounce; }
+    internal int DamageBodyFloat;
 
-    public void SetProjectileBounce(bool value) { ProjectileBounce = value; }
+    internal int DamageHeadFloat;
 
+    internal int PistolType;
 
+    internal int DamageToPlayer;
 
+    internal int WhenPlacedGetsConvertedTo;
 
-#if !CITO
-    internal
-#endif
-    int DamageBodyFloat;
-
-    public int GetDamageBodyFloat() { return DamageBodyFloat; }
-
-    public void SetDamageBodyFloat(int value) { DamageBodyFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int DamageHeadFloat;
-
-    public int GetDamageHeadFloat() { return DamageHeadFloat; }
-
-    public void SetDamageHeadFloat(int value) { DamageHeadFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int PistolType;
-
-    public int GetPistolType() { return PistolType; }
-
-    public void SetPistolType(int value) { PistolType = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int DamageToPlayer;
-
-    public int GetDamageToPlayer() { return DamageToPlayer; }
-
-    public void SetDamageToPlayer(int value) { DamageToPlayer = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int WhenPlacedGetsConvertedTo;
-
-    public int GetWhenPlacedGetsConvertedTo() { return WhenPlacedGetsConvertedTo; }
-
-    public void SetWhenPlacedGetsConvertedTo(int value) { WhenPlacedGetsConvertedTo = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int PickDistanceWhenUsedFloat;
-
-    public int GetPickDistanceWhenUsedFloat() { return PickDistanceWhenUsedFloat; }
-
-    public void SetPickDistanceWhenUsedFloat(int value) { PickDistanceWhenUsedFloat = value; }
-
-
-
+    internal int PickDistanceWhenUsedFloat;
 }
 
 public class Packet_ServerIdentification
 {
+    internal string MdProtocolVersion;
 
-#if !CITO
-    internal
-#endif
-    string MdProtocolVersion;
+    internal int AssignedClientId;
 
-    public string GetMdProtocolVersion() { return MdProtocolVersion; }
+    internal string ServerName;
 
-    public void SetMdProtocolVersion(string value) { MdProtocolVersion = value; }
+    internal string ServerMotd;
 
+    internal int MapSizeX;
 
+    internal int MapSizeY;
 
+    internal int MapSizeZ;
 
-#if !CITO
-    internal
-#endif
-    int AssignedClientId;
+    internal int DisableShadows;
 
-    public int GetAssignedClientId() { return AssignedClientId; }
+    internal int PlayerAreaSize;
 
-    public void SetAssignedClientId(int value) { AssignedClientId = value; }
+    internal int RenderHint_;
 
+    internal Packet_StringList RequiredBlobMd5;
 
-
-
-#if !CITO
-    internal
-#endif
-    string ServerName;
-
-    public string GetServerName() { return ServerName; }
-
-    public void SetServerName(string value) { ServerName = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string ServerMotd;
-
-    public string GetServerMotd() { return ServerMotd; }
-
-    public void SetServerMotd(string value) { ServerMotd = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int MapSizeX;
-
-    public int GetMapSizeX() { return MapSizeX; }
-
-    public void SetMapSizeX(int value) { MapSizeX = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int MapSizeY;
-
-    public int GetMapSizeY() { return MapSizeY; }
-
-    public void SetMapSizeY(int value) { MapSizeY = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int MapSizeZ;
-
-    public int GetMapSizeZ() { return MapSizeZ; }
-
-    public void SetMapSizeZ(int value) { MapSizeZ = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int DisableShadows;
-
-    public int GetDisableShadows() { return DisableShadows; }
-
-    public void SetDisableShadows(int value) { DisableShadows = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int PlayerAreaSize;
-
-    public int GetPlayerAreaSize() { return PlayerAreaSize; }
-
-    public void SetPlayerAreaSize(int value) { PlayerAreaSize = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int RenderHint_;
-
-    public int GetRenderHint_() { return RenderHint_; }
-
-    public void SetRenderHint_(int value) { RenderHint_ = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_StringList RequiredBlobMd5;
-
-    public Packet_StringList GetRequiredBlobMd5() { return RequiredBlobMd5; }
-
-    public void SetRequiredBlobMd5(Packet_StringList value) { RequiredBlobMd5 = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_StringList RequiredBlobName;
-
-    public Packet_StringList GetRequiredBlobName() { return RequiredBlobName; }
-
-    public void SetRequiredBlobName(Packet_StringList value) { RequiredBlobName = value; }
-
-
-
+    internal Packet_StringList RequiredBlobName;
 }
 
 public class Packet_StringList
 {
-
-#if !CITO
-    internal
-#endif
-    string[] Items;
-
-    public string[] GetItems() { return Items; }
+    internal string[] Items;
 
     public void SetItems(string[] value, int count, int length) { Items = value; ItemsCount = count; ItemsLength = length; }
 
 
-#if !CITO
-    internal
-#endif
-    int ItemsCount;
+    internal int ItemsCount;
 
-    public int GetItemsCount() { return ItemsCount; }
-
-
-#if !CITO
-    internal
-#endif
-    int ItemsLength;
-
-    public int GetItemsLength() { return ItemsLength; }
+    internal int ItemsLength;
 
     public void ItemsAdd(string value)
     {
@@ -2415,206 +664,60 @@ public class Packet_StringList
         Items[ItemsCount] = value;
         ItemsCount++;
     }
-
-
-
-}
-
-public class Packet_IntString
-{
-
-#if !CITO
-    internal
-#endif
-    int Key_;
-
-    public int GetKey_() { return Key_; }
-
-    public void SetKey_(int value) { Key_ = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string Value_;
-
-    public string GetValue_() { return Value_; }
-
-    public void SetValue_(string value) { Value_ = value; }
-
-
-
 }
 
 public class Packet_ServerPlayerSpawnPosition
 {
+    internal int X;
 
-#if !CITO
-    internal
-#endif
-    int X;
+    internal int Y;
 
-    public int GetX() { return X; }
-
-    public void SetX(int value) { X = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Y;
-
-    public int GetY() { return Y; }
-
-    public void SetY(int value) { Y = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Z;
-
-    public int GetZ() { return Z; }
-
-    public void SetZ(int value) { Z = value; }
-
-
-
+    internal int Z;
 }
 
 public class Packet_ServerLevelInitialize
-{
-}
+{ }
 
 public class Packet_ServerBlobInitialize
-{
-    /// <summary>
-    /// <para>[ProtoMember(1, IsRequired = false)]</para>
-    /// <para>optional byte[] hash; //todo, currently ignored.</para>
-    /// </summary>
+{    /// <summary>
+     /// <para>[ProtoMember(1, IsRequired = false)]</para>
+     /// <para>optional byte[] hash; //todo, currently ignored.</para>
+     /// </summary>
 
-#if !CITO
-    internal
-#endif
-    string Name;
+    internal string Name;
 
-    public string GetName() { return Name; }
-
-    public void SetName(string value) { Name = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string Md5;
-
-    public string GetMd5() { return Md5; }
-
-    public void SetMd5(string value) { Md5 = value; }
-
-
-
+    internal string Md5;
 }
 
 public class Packet_ServerBlobPart
 {
+    internal byte[] Data;
 
-#if !CITO
-    internal
-#endif
-    byte[] Data;
-
-    public byte[] GetData() { return Data; }
-
-    public void SetData(byte[] value) { Data = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Islastpart;
-
-    public int GetIslastpart() { return Islastpart; }
-
-    public void SetIslastpart(int value) { Islastpart = value; }
-
-
-
+    internal int Islastpart;
 }
 
 public class Packet_ServerBlobFinalize
-{
-}
+{ }
 
 public class Packet_ServerBlockTypes
-{
-}
+{ }
 
 public class Packet_ServerBlockType
 {
+    internal int Id;
 
-#if !CITO
-    internal
-#endif
-    int Id;
-
-    public int GetId() { return Id; }
-
-    public void SetId(int value) { Id = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_BlockType Blocktype;
-
-    public Packet_BlockType GetBlocktype() { return Blocktype; }
-
-    public void SetBlocktype(Packet_BlockType value) { Blocktype = value; }
-
-
-
+    internal Packet_BlockType Blocktype;
 }
 
 public class Packet_ServerSunLevels
 {
-
-#if !CITO
-    internal
-#endif
-    int[] Sunlevels;
-
-    public int[] GetSunlevels() { return Sunlevels; }
+    internal int[] Sunlevels;
 
     public void SetSunlevels(int[] value, int count, int length) { Sunlevels = value; SunlevelsCount = count; SunlevelsLength = length; }
 
+    internal int SunlevelsCount;
 
-#if !CITO
-    internal
-#endif
-    int SunlevelsCount;
-
-    public int GetSunlevelsCount() { return SunlevelsCount; }
-
-
-#if !CITO
-    internal
-#endif
-    int SunlevelsLength;
-
-    public int GetSunlevelsLength() { return SunlevelsLength; }
+    internal int SunlevelsLength;
 
     public void SunlevelsAdd(int value)
     {
@@ -2631,38 +734,17 @@ public class Packet_ServerSunLevels
         Sunlevels[SunlevelsCount] = value;
         SunlevelsCount++;
     }
-
-
-
 }
 
 public class Packet_ServerLightLevels
 {
-
-#if !CITO
-    internal
-#endif
-    int[] Lightlevels;
-
-    public int[] GetLightlevels() { return Lightlevels; }
+    internal int[] Lightlevels;
 
     public void SetLightlevels(int[] value, int count, int length) { Lightlevels = value; LightlevelsCount = count; LightlevelsLength = length; }
 
+    internal int LightlevelsCount;
 
-#if !CITO
-    internal
-#endif
-    int LightlevelsCount;
-
-    public int GetLightlevelsCount() { return LightlevelsCount; }
-
-
-#if !CITO
-    internal
-#endif
-    int LightlevelsLength;
-
-    public int GetLightlevelsLength() { return LightlevelsLength; }
+    internal int LightlevelsLength;
 
     public void LightlevelsAdd(int value)
     {
@@ -2679,38 +761,17 @@ public class Packet_ServerLightLevels
         Lightlevels[LightlevelsCount] = value;
         LightlevelsCount++;
     }
-
-
-
 }
 
 public class Packet_ServerCraftingRecipes
 {
-
-#if !CITO
-    internal
-#endif
-    Packet_CraftingRecipe[] CraftingRecipes;
-
-    public Packet_CraftingRecipe[] GetCraftingRecipes() { return CraftingRecipes; }
+    internal Packet_CraftingRecipe[] CraftingRecipes;
 
     public void SetCraftingRecipes(Packet_CraftingRecipe[] value, int count, int length) { CraftingRecipes = value; CraftingRecipesCount = count; CraftingRecipesLength = length; }
 
+    internal int CraftingRecipesCount;
 
-#if !CITO
-    internal
-#endif
-    int CraftingRecipesCount;
-
-    public int GetCraftingRecipesCount() { return CraftingRecipesCount; }
-
-
-#if !CITO
-    internal
-#endif
-    int CraftingRecipesLength;
-
-    public int GetCraftingRecipesLength() { return CraftingRecipesLength; }
+    internal int CraftingRecipesLength;
 
     public void CraftingRecipesAdd(Packet_CraftingRecipe value)
     {
@@ -2727,66 +788,22 @@ public class Packet_ServerCraftingRecipes
         CraftingRecipes[CraftingRecipesCount] = value;
         CraftingRecipesCount++;
     }
-
-
-
 }
 
 public class Packet_Ingredient
 {
+    internal int Type;
 
-#if !CITO
-    internal
-#endif
-    int Type;
-
-    public int GetType() { return Type; }
-
-    public void SetType(int value) { Type = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Amount;
-
-    public int GetAmount() { return Amount; }
-
-    public void SetAmount(int value) { Amount = value; }
-
-
-
+    internal int Amount;
 }
 
 public class Packet_CraftingRecipe
 {
+    internal Packet_Ingredient[] Ingredients;
 
-#if !CITO
-    internal
-#endif
-    Packet_Ingredient[] Ingredients;
+    internal int IngredientsCount;
 
-    public Packet_Ingredient[] GetIngredients() { return Ingredients; }
-
-    public void SetIngredients(Packet_Ingredient[] value, int count, int length) { Ingredients = value; IngredientsCount = count; IngredientsLength = length; }
-
-
-#if !CITO
-    internal
-#endif
-    int IngredientsCount;
-
-    public int GetIngredientsCount() { return IngredientsCount; }
-
-
-#if !CITO
-    internal
-#endif
-    int IngredientsLength;
-
-    public int GetIngredientsLength() { return IngredientsLength; }
+    internal int IngredientsLength;
 
     public void IngredientsAdd(Packet_Ingredient value)
     {
@@ -2804,1914 +821,398 @@ public class Packet_CraftingRecipe
         IngredientsCount++;
     }
 
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_Ingredient Output;
-
-    public Packet_Ingredient GetOutput() { return Output; }
-
-    public void SetOutput(Packet_Ingredient value) { Output = value; }
-
-
-
+    internal Packet_Ingredient Output;
 }
 
 public class Packet_ServerLevelProgress
-{
-    /// <summary>
-    /// <para>[ProtoMember(1, IsRequired = false)]</para>
-    /// <para>optional byte[] Chunk;</para>
-    /// </summary>
+{    /// <summary>
+     /// <para>[ProtoMember(1, IsRequired = false)]</para>
+     /// <para>optional byte[] Chunk;</para>
+     /// </summary>
 
-#if !CITO
-    internal
-#endif
-    int PercentComplete;
+    internal int PercentComplete;
 
-    public int GetPercentComplete() { return PercentComplete; }
+    internal string Status;
 
-    public void SetPercentComplete(int value) { PercentComplete = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string Status;
-
-    public string GetStatus() { return Status; }
-
-    public void SetStatus(string value) { Status = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int PercentCompleteSubitem;
-
-    public int GetPercentCompleteSubitem() { return PercentCompleteSubitem; }
-
-    public void SetPercentCompleteSubitem(int value) { PercentCompleteSubitem = value; }
-
-
-
+    internal int PercentCompleteSubitem;
 }
 
 public class Packet_ServerLevelFinalize
-{
-}
+{ }
 
 public class Packet_ServerSetBlock
 {
+    internal int X;
 
-#if !CITO
-    internal
-#endif
-    int X;
+    internal int Y;
 
-    public int GetX() { return X; }
+    internal int Z;
 
-    public void SetX(int value) { X = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Y;
-
-    public int GetY() { return Y; }
-
-    public void SetY(int value) { Y = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Z;
-
-    public int GetZ() { return Z; }
-
-    public void SetZ(int value) { Z = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int BlockType;
-
-    public int GetBlockType() { return BlockType; }
-
-    public void SetBlockType(int value) { BlockType = value; }
-
-
-
+    internal int BlockType;
 }
 
 public class Packet_ServerFillArea
 {
+    internal int X1;
 
-#if !CITO
-    internal
-#endif
-    int X1;
+    internal int X2;
 
-    public int GetX1() { return X1; }
+    internal int Y1;
 
-    public void SetX1(int value) { X1 = value; }
+    internal int Y2;
 
+    internal int Z1;
 
+    internal int Z2;
 
+    internal int BlockType;
 
-#if !CITO
-    internal
-#endif
-    int X2;
-
-    public int GetX2() { return X2; }
-
-    public void SetX2(int value) { X2 = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Y1;
-
-    public int GetY1() { return Y1; }
-
-    public void SetY1(int value) { Y1 = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Y2;
-
-    public int GetY2() { return Y2; }
-
-    public void SetY2(int value) { Y2 = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Z1;
-
-    public int GetZ1() { return Z1; }
-
-    public void SetZ1(int value) { Z1 = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Z2;
-
-    public int GetZ2() { return Z2; }
-
-    public void SetZ2(int value) { Z2 = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int BlockType;
-
-    public int GetBlockType() { return BlockType; }
-
-    public void SetBlockType(int value) { BlockType = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int BlockCount;
-
-    public int GetBlockCount() { return BlockCount; }
-
-    public void SetBlockCount(int value) { BlockCount = value; }
-
-
-
+    internal int BlockCount;
 }
 
 public class Packet_ServerFillAreaLimit
 {
-
-#if !CITO
-    internal
-#endif
-    int Limit;
-
-    public int GetLimit() { return Limit; }
-
-    public void SetLimit(int value) { Limit = value; }
-
-
-
+    internal int Limit;
 }
 
 public class Packet_ServerFreemove
 {
-
-#if !CITO
-    internal
-#endif
-    int IsEnabled;
-
-    public int GetIsEnabled() { return IsEnabled; }
-
-    public void SetIsEnabled(int value) { IsEnabled = value; }
-
-
-
+    internal int IsEnabled;
 }
 
 public class Packet_ServerMessage
-{
-    /// <summary> optional int32 playerId = 1;</summary>
+{    /// <summary> optional int32 playerId = 1;</summary>
 
-#if !CITO
-    internal
-#endif
-    string Message;
-
-    public string GetMessage() { return Message; }
-
-    public void SetMessage(string value) { Message = value; }
-
-
-
+    internal string Message;
 }
 
 public class Packet_ServerDisconnectPlayer
 {
-
-#if !CITO
-    internal
-#endif
-    string DisconnectReason;
-
-    public string GetDisconnectReason() { return DisconnectReason; }
-
-    public void SetDisconnectReason(string value) { DisconnectReason = value; }
-
-
-
+    internal string DisconnectReason;
 }
 
 public class Packet_ServerSound
 {
+    internal string Name;
 
-#if !CITO
-    internal
-#endif
-    string Name;
+    internal int X;
 
-    public string GetName() { return Name; }
+    internal int Y;
 
-    public void SetName(string value) { Name = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int X;
-
-    public int GetX() { return X; }
-
-    public void SetX(int value) { X = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Y;
-
-    public int GetY() { return Y; }
-
-    public void SetY(int value) { Y = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Z;
-
-    public int GetZ() { return Z; }
-
-    public void SetZ(int value) { Z = value; }
-
-
-
+    internal int Z;
 }
 
 public class Packet_ServerFollow
 {
+    internal string Client;
 
-#if !CITO
-    internal
-#endif
-    string Client;
-
-    public string GetClient() { return Client; }
-
-    public void SetClient(string value) { Client = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Tpp;
-
-    public int GetTpp() { return Tpp; }
-
-    public void SetTpp(int value) { Tpp = value; }
-
-
-
+    internal int Tpp;
 }
 
 public class Packet_ServerBullet
 {
+    internal int FromXFloat;
 
-#if !CITO
-    internal
-#endif
-    int FromXFloat;
+    internal int FromYFloat;
 
-    public int GetFromXFloat() { return FromXFloat; }
+    internal int FromZFloat;
 
-    public void SetFromXFloat(int value) { FromXFloat = value; }
+    internal int ToXFloat;
 
+    internal int ToYFloat;
 
+    internal int ToZFloat;
 
-
-#if !CITO
-    internal
-#endif
-    int FromYFloat;
-
-    public int GetFromYFloat() { return FromYFloat; }
-
-    public void SetFromYFloat(int value) { FromYFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int FromZFloat;
-
-    public int GetFromZFloat() { return FromZFloat; }
-
-    public void SetFromZFloat(int value) { FromZFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int ToXFloat;
-
-    public int GetToXFloat() { return ToXFloat; }
-
-    public void SetToXFloat(int value) { ToXFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int ToYFloat;
-
-    public int GetToYFloat() { return ToYFloat; }
-
-    public void SetToYFloat(int value) { ToYFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int ToZFloat;
-
-    public int GetToZFloat() { return ToZFloat; }
-
-    public void SetToZFloat(int value) { ToZFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int SpeedFloat;
-
-    public int GetSpeedFloat() { return SpeedFloat; }
-
-    public void SetSpeedFloat(int value) { SpeedFloat = value; }
-
-
-
+    internal int SpeedFloat;
 }
 
 public class Packet_ServerProjectile
 {
+    internal int FromXFloat;
 
-#if !CITO
-    internal
-#endif
-    int FromXFloat;
+    internal int FromYFloat;
 
-    public int GetFromXFloat() { return FromXFloat; }
+    internal int FromZFloat;
 
-    public void SetFromXFloat(int value) { FromXFloat = value; }
+    internal int VelocityXFloat;
 
+    internal int VelocityYFloat;
 
+    internal int VelocityZFloat;
 
+    internal int BlockId;
 
-#if !CITO
-    internal
-#endif
-    int FromYFloat;
+    internal int ExplodesAfterFloat;
 
-    public int GetFromYFloat() { return FromYFloat; }
-
-    public void SetFromYFloat(int value) { FromYFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int FromZFloat;
-
-    public int GetFromZFloat() { return FromZFloat; }
-
-    public void SetFromZFloat(int value) { FromZFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int VelocityXFloat;
-
-    public int GetVelocityXFloat() { return VelocityXFloat; }
-
-    public void SetVelocityXFloat(int value) { VelocityXFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int VelocityYFloat;
-
-    public int GetVelocityYFloat() { return VelocityYFloat; }
-
-    public void SetVelocityYFloat(int value) { VelocityYFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int VelocityZFloat;
-
-    public int GetVelocityZFloat() { return VelocityZFloat; }
-
-    public void SetVelocityZFloat(int value) { VelocityZFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int BlockId;
-
-    public int GetBlockId() { return BlockId; }
-
-    public void SetBlockId(int value) { BlockId = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int ExplodesAfterFloat;
-
-    public int GetExplodesAfterFloat() { return ExplodesAfterFloat; }
-
-    public void SetExplodesAfterFloat(int value) { ExplodesAfterFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int SourcePlayerID;
-
-    public int GetSourcePlayerID() { return SourcePlayerID; }
-
-    public void SetSourcePlayerID(int value) { SourcePlayerID = value; }
-
-
-
+    internal int SourcePlayerID;
 }
 
 public class Packet_ServerExplosion
 {
+    internal int XFloat;
 
-#if !CITO
-    internal
-#endif
-    int XFloat;
+    internal int YFloat;
 
-    public int GetXFloat() { return XFloat; }
+    internal int ZFloat;
 
-    public void SetXFloat(int value) { XFloat = value; }
+    internal int IsRelativeToPlayerPosition;
 
+    internal int RangeFloat;
 
-
-
-#if !CITO
-    internal
-#endif
-    int YFloat;
-
-    public int GetYFloat() { return YFloat; }
-
-    public void SetYFloat(int value) { YFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int ZFloat;
-
-    public int GetZFloat() { return ZFloat; }
-
-    public void SetZFloat(int value) { ZFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int IsRelativeToPlayerPosition;
-
-    public int GetIsRelativeToPlayerPosition() { return IsRelativeToPlayerPosition; }
-
-    public void SetIsRelativeToPlayerPosition(int value) { IsRelativeToPlayerPosition = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int RangeFloat;
-
-    public int GetRangeFloat() { return RangeFloat; }
-
-    public void SetRangeFloat(int value) { RangeFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int TimeFloat;
-
-    public int GetTimeFloat() { return TimeFloat; }
-
-    public void SetTimeFloat(int value) { TimeFloat = value; }
-
-
-
+    internal int TimeFloat;
 }
 
 public class Packet_ServerQueryAnswer
 {
+    internal string Name;
 
-#if !CITO
-    internal
-#endif
-    string Name;
+    internal string MOTD;
 
-    public string GetName() { return Name; }
+    internal int PlayerCount;
 
-    public void SetName(string value) { Name = value; }
+    internal int MaxPlayers;
 
+    internal string PlayerList;
 
+    internal int Port;
 
+    internal string GameMode;
 
-#if !CITO
-    internal
-#endif
-    string MOTD;
+    internal bool Password;
 
-    public string GetMOTD() { return MOTD; }
+    internal string PublicHash;
 
-    public void SetMOTD(string value) { MOTD = value; }
+    internal string ServerVersion;
 
+    internal int MapSizeX;
 
+    internal int MapSizeY;
 
+    internal int MapSizeZ;
 
-#if !CITO
-    internal
-#endif
-    int PlayerCount;
-
-    public int GetPlayerCount() { return PlayerCount; }
-
-    public void SetPlayerCount(int value) { PlayerCount = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int MaxPlayers;
-
-    public int GetMaxPlayers() { return MaxPlayers; }
-
-    public void SetMaxPlayers(int value) { MaxPlayers = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string PlayerList;
-
-    public string GetPlayerList() { return PlayerList; }
-
-    public void SetPlayerList(string value) { PlayerList = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Port;
-
-    public int GetPort() { return Port; }
-
-    public void SetPort(int value) { Port = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string GameMode;
-
-    public string GetGameMode() { return GameMode; }
-
-    public void SetGameMode(string value) { GameMode = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    bool Password;
-
-    public bool GetPassword() { return Password; }
-
-    public void SetPassword(bool value) { Password = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string PublicHash;
-
-    public string GetPublicHash() { return PublicHash; }
-
-    public void SetPublicHash(string value) { PublicHash = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string ServerVersion;
-
-    public string GetServerVersion() { return ServerVersion; }
-
-    public void SetServerVersion(string value) { ServerVersion = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int MapSizeX;
-
-    public int GetMapSizeX() { return MapSizeX; }
-
-    public void SetMapSizeX(int value) { MapSizeX = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int MapSizeY;
-
-    public int GetMapSizeY() { return MapSizeY; }
-
-    public void SetMapSizeY(int value) { MapSizeY = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int MapSizeZ;
-
-    public int GetMapSizeZ() { return MapSizeZ; }
-
-    public void SetMapSizeZ(int value) { MapSizeZ = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    byte[] ServerThumbnail;
-
-    public byte[] GetServerThumbnail() { return ServerThumbnail; }
-
-    public void SetServerThumbnail(byte[] value) { ServerThumbnail = value; }
-
-
-
+    internal byte[] ServerThumbnail;
 }
 
 public class Packet_ServerRedirect
 {
-
-#if !CITO
-    internal
-#endif
-    string IP;
+    internal string IP;
 
     public string GetIP() { return IP; }
 
-    public void SetIP(string value) { IP = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Port;
+    internal int Port;
 
     public int GetPort() { return Port; }
-
-    public void SetPort(int value) { Port = value; }
-
-
-
 }
 
 public class Packet_Server
 {
+    internal int Id;
 
-#if !CITO
-    internal
-#endif
-    int Id;
+    internal Packet_ServerIdentification Identification;
 
-    public int GetId() { return Id; }
+    internal Packet_ServerLevelInitialize LevelInitialize;
 
-    public void SetId(int value) { Id = value; }
+    internal Packet_ServerLevelProgress LevelDataChunk;
 
+    internal Packet_ServerLevelFinalize LevelFinalize;
 
+    internal Packet_ServerSetBlock SetBlock;
 
+    internal Packet_ServerFillArea FillArea;
 
-#if !CITO
-    internal
-#endif
-    Packet_ServerIdentification Identification;
+    internal Packet_ServerFillAreaLimit FillAreaLimit;
 
-    public Packet_ServerIdentification GetIdentification() { return Identification; }
+    internal Packet_ServerFreemove Freemove;
 
-    public void SetIdentification(Packet_ServerIdentification value) { Identification = value; }
+    internal Packet_ServerMessage Message;
 
+    internal Packet_ServerDisconnectPlayer DisconnectPlayer;
 
+    internal Packet_ServerChunk Chunk_;
 
+    internal Packet_ServerInventory Inventory;
 
-#if !CITO
-    internal
-#endif
-    Packet_ServerLevelInitialize LevelInitialize;
+    internal Packet_ServerSeason Season;
 
-    public Packet_ServerLevelInitialize GetLevelInitialize() { return LevelInitialize; }
+    internal Packet_ServerBlobInitialize BlobInitialize;
 
-    public void SetLevelInitialize(Packet_ServerLevelInitialize value) { LevelInitialize = value; }
+    internal Packet_ServerBlobPart BlobPart;
 
+    internal Packet_ServerBlobFinalize BlobFinalize;
 
+    internal Packet_ServerHeightmapChunk HeightmapChunk;
 
+    internal Packet_ServerPing Ping;
 
-#if !CITO
-    internal
-#endif
-    Packet_ServerLevelProgress LevelDataChunk;
+    internal Packet_ServerPlayerPing PlayerPing;
 
-    public Packet_ServerLevelProgress GetLevelDataChunk() { return LevelDataChunk; }
+    internal Packet_ServerSound Sound;
 
-    public void SetLevelDataChunk(Packet_ServerLevelProgress value) { LevelDataChunk = value; }
+    internal Packet_ServerPlayerStats PlayerStats;
 
+    internal Packet_ServerMonsters Monster;
 
+    internal Packet_ServerPlayerSpawnPosition PlayerSpawnPosition;
 
+    internal Packet_ServerBlockTypes BlockTypes;
 
-#if !CITO
-    internal
-#endif
-    Packet_ServerLevelFinalize LevelFinalize;
+    internal Packet_ServerSunLevels SunLevels;
 
-    public Packet_ServerLevelFinalize GetLevelFinalize() { return LevelFinalize; }
+    internal Packet_ServerLightLevels LightLevels;
 
-    public void SetLevelFinalize(Packet_ServerLevelFinalize value) { LevelFinalize = value; }
+    internal Packet_ServerCraftingRecipes CraftingRecipes;
 
+    internal Packet_ServerDialog Dialog;
 
+    internal Packet_ServerFollow Follow;
 
+    internal Packet_ServerBullet Bullet;
 
-#if !CITO
-    internal
-#endif
-    Packet_ServerSetBlock SetBlock;
+    internal Packet_ServerAmmo Ammo;
 
-    public Packet_ServerSetBlock GetSetBlock() { return SetBlock; }
+    internal Packet_ServerBlockType BlockType;
 
-    public void SetSetBlock(Packet_ServerSetBlock value) { SetBlock = value; }
+    internal Packet_ServerChunkPart ChunkPart;
 
+    internal Packet_ServerExplosion Explosion;
 
+    internal Packet_ServerProjectile Projectile;
 
+    internal Packet_ServerTranslatedString Translation;
 
-#if !CITO
-    internal
-#endif
-    Packet_ServerFillArea FillArea;
+    internal Packet_ServerQueryAnswer QueryAnswer;
 
-    public Packet_ServerFillArea GetFillArea() { return FillArea; }
+    internal Packet_ServerRedirect Redirect;
 
-    public void SetFillArea(Packet_ServerFillArea value) { FillArea = value; }
+    internal Packet_ServerEntitySpawn EntitySpawn;
 
+    internal Packet_ServerEntityPositionAndOrientation EntityPosition;
 
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerFillAreaLimit FillAreaLimit;
-
-    public Packet_ServerFillAreaLimit GetFillAreaLimit() { return FillAreaLimit; }
-
-    public void SetFillAreaLimit(Packet_ServerFillAreaLimit value) { FillAreaLimit = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerFreemove Freemove;
-
-    public Packet_ServerFreemove GetFreemove() { return Freemove; }
-
-    public void SetFreemove(Packet_ServerFreemove value) { Freemove = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerMessage Message;
-
-    public Packet_ServerMessage GetMessage() { return Message; }
-
-    public void SetMessage(Packet_ServerMessage value) { Message = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerDisconnectPlayer DisconnectPlayer;
-
-    public Packet_ServerDisconnectPlayer GetDisconnectPlayer() { return DisconnectPlayer; }
-
-    public void SetDisconnectPlayer(Packet_ServerDisconnectPlayer value) { DisconnectPlayer = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerChunk Chunk_;
-
-    public Packet_ServerChunk GetChunk_() { return Chunk_; }
-
-    public void SetChunk_(Packet_ServerChunk value) { Chunk_ = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerInventory Inventory;
-
-    public Packet_ServerInventory GetInventory() { return Inventory; }
-
-    public void SetInventory(Packet_ServerInventory value) { Inventory = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerSeason Season;
-
-    public Packet_ServerSeason GetSeason() { return Season; }
-
-    public void SetSeason(Packet_ServerSeason value) { Season = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerBlobInitialize BlobInitialize;
-
-    public Packet_ServerBlobInitialize GetBlobInitialize() { return BlobInitialize; }
-
-    public void SetBlobInitialize(Packet_ServerBlobInitialize value) { BlobInitialize = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerBlobPart BlobPart;
-
-    public Packet_ServerBlobPart GetBlobPart() { return BlobPart; }
-
-    public void SetBlobPart(Packet_ServerBlobPart value) { BlobPart = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerBlobFinalize BlobFinalize;
-
-    public Packet_ServerBlobFinalize GetBlobFinalize() { return BlobFinalize; }
-
-    public void SetBlobFinalize(Packet_ServerBlobFinalize value) { BlobFinalize = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerHeightmapChunk HeightmapChunk;
-
-    public Packet_ServerHeightmapChunk GetHeightmapChunk() { return HeightmapChunk; }
-
-    public void SetHeightmapChunk(Packet_ServerHeightmapChunk value) { HeightmapChunk = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerPing Ping;
-
-    public Packet_ServerPing GetPing() { return Ping; }
-
-    public void SetPing(Packet_ServerPing value) { Ping = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerPlayerPing PlayerPing;
-
-    public Packet_ServerPlayerPing GetPlayerPing() { return PlayerPing; }
-
-    public void SetPlayerPing(Packet_ServerPlayerPing value) { PlayerPing = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerSound Sound;
-
-    public Packet_ServerSound GetSound() { return Sound; }
-
-    public void SetSound(Packet_ServerSound value) { Sound = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerPlayerStats PlayerStats;
-
-    public Packet_ServerPlayerStats GetPlayerStats() { return PlayerStats; }
-
-    public void SetPlayerStats(Packet_ServerPlayerStats value) { PlayerStats = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerMonsters Monster;
-
-    public Packet_ServerMonsters GetMonster() { return Monster; }
-
-    public void SetMonster(Packet_ServerMonsters value) { Monster = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerPlayerSpawnPosition PlayerSpawnPosition;
-
-    public Packet_ServerPlayerSpawnPosition GetPlayerSpawnPosition() { return PlayerSpawnPosition; }
-
-    public void SetPlayerSpawnPosition(Packet_ServerPlayerSpawnPosition value) { PlayerSpawnPosition = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerBlockTypes BlockTypes;
-
-    public Packet_ServerBlockTypes GetBlockTypes() { return BlockTypes; }
-
-    public void SetBlockTypes(Packet_ServerBlockTypes value) { BlockTypes = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerSunLevels SunLevels;
-
-    public Packet_ServerSunLevels GetSunLevels() { return SunLevels; }
-
-    public void SetSunLevels(Packet_ServerSunLevels value) { SunLevels = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerLightLevels LightLevels;
-
-    public Packet_ServerLightLevels GetLightLevels() { return LightLevels; }
-
-    public void SetLightLevels(Packet_ServerLightLevels value) { LightLevels = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerCraftingRecipes CraftingRecipes;
-
-    public Packet_ServerCraftingRecipes GetCraftingRecipes() { return CraftingRecipes; }
-
-    public void SetCraftingRecipes(Packet_ServerCraftingRecipes value) { CraftingRecipes = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerDialog Dialog;
-
-    public Packet_ServerDialog GetDialog() { return Dialog; }
-
-    public void SetDialog(Packet_ServerDialog value) { Dialog = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerFollow Follow;
-
-    public Packet_ServerFollow GetFollow() { return Follow; }
-
-    public void SetFollow(Packet_ServerFollow value) { Follow = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerBullet Bullet;
-
-    public Packet_ServerBullet GetBullet() { return Bullet; }
-
-    public void SetBullet(Packet_ServerBullet value) { Bullet = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerAmmo Ammo;
-
-    public Packet_ServerAmmo GetAmmo() { return Ammo; }
-
-    public void SetAmmo(Packet_ServerAmmo value) { Ammo = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerBlockType BlockType;
-
-    public Packet_ServerBlockType GetBlockType() { return BlockType; }
-
-    public void SetBlockType(Packet_ServerBlockType value) { BlockType = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerChunkPart ChunkPart;
-
-    public Packet_ServerChunkPart GetChunkPart() { return ChunkPart; }
-
-    public void SetChunkPart(Packet_ServerChunkPart value) { ChunkPart = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerExplosion Explosion;
-
-    public Packet_ServerExplosion GetExplosion() { return Explosion; }
-
-    public void SetExplosion(Packet_ServerExplosion value) { Explosion = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerProjectile Projectile;
-
-    public Packet_ServerProjectile GetProjectile() { return Projectile; }
-
-    public void SetProjectile(Packet_ServerProjectile value) { Projectile = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerTranslatedString Translation;
-
-    public Packet_ServerTranslatedString GetTranslation() { return Translation; }
-
-    public void SetTranslation(Packet_ServerTranslatedString value) { Translation = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerQueryAnswer QueryAnswer;
-
-    public Packet_ServerQueryAnswer GetQueryAnswer() { return QueryAnswer; }
-
-    public void SetQueryAnswer(Packet_ServerQueryAnswer value) { QueryAnswer = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerRedirect Redirect;
-
-    public Packet_ServerRedirect GetRedirect() { return Redirect; }
-
-    public void SetRedirect(Packet_ServerRedirect value) { Redirect = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerEntitySpawn EntitySpawn;
-
-    public Packet_ServerEntitySpawn GetEntitySpawn() { return EntitySpawn; }
-
-    public void SetEntitySpawn(Packet_ServerEntitySpawn value) { EntitySpawn = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerEntityPositionAndOrientation EntityPosition;
-
-    public Packet_ServerEntityPositionAndOrientation GetEntityPosition() { return EntityPosition; }
-
-    public void SetEntityPosition(Packet_ServerEntityPositionAndOrientation value) { EntityPosition = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerEntityDespawn EntityDespawn;
-
-    public Packet_ServerEntityDespawn GetEntityDespawn() { return EntityDespawn; }
-
-    public void SetEntityDespawn(Packet_ServerEntityDespawn value) { EntityDespawn = value; }
-
-
-
+    internal Packet_ServerEntityDespawn EntityDespawn;
 }
 
 public class Packet_ServerEntitySpawn
 {
+    internal int Id;
 
-#if !CITO
-    internal
-#endif
-    int Id;
-
-    public int GetId() { return Id; }
-
-    public void SetId(int value) { Id = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerEntity Entity_;
-
-    public Packet_ServerEntity GetEntity_() { return Entity_; }
-
-    public void SetEntity_(Packet_ServerEntity value) { Entity_ = value; }
-
-
-
+    internal Packet_ServerEntity Entity_;
 }
 
 public class Packet_ServerEntityPositionAndOrientation
 {
+    internal int Id;
 
-#if !CITO
-    internal
-#endif
-    int Id;
-
-    public int GetId() { return Id; }
-
-    public void SetId(int value) { Id = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_PositionAndOrientation PositionAndOrientation;
-
-    public Packet_PositionAndOrientation GetPositionAndOrientation() { return PositionAndOrientation; }
-
-    public void SetPositionAndOrientation(Packet_PositionAndOrientation value) { PositionAndOrientation = value; }
-
-
-
+    internal Packet_PositionAndOrientation PositionAndOrientation;
 }
 
 public class Packet_ServerEntityDespawn
 {
-
-#if !CITO
-    internal
-#endif
-    int Id;
-
-    public int GetId() { return Id; }
-
-    public void SetId(int value) { Id = value; }
-
-
-
+    internal int Id;
 }
 
 public class Packet_ServerEntity
 {
+    internal Packet_PositionAndOrientation Position;
 
-#if !CITO
-    internal
-#endif
-    Packet_PositionAndOrientation Position;
+    internal Packet_ServerEntityAnimatedModel DrawModel;
 
-    public Packet_PositionAndOrientation GetPosition() { return Position; }
+    internal Packet_ServerEntityDrawName DrawName_;
 
-    public void SetPosition(Packet_PositionAndOrientation value) { Position = value; }
+    internal Packet_ServerEntityDrawText DrawText;
 
+    internal Packet_ServerEntityDrawBlock DrawBlock;
 
+    internal Packet_ServerEntityPush Push;
 
+    internal bool Usable;
 
-#if !CITO
-    internal
-#endif
-    Packet_ServerEntityAnimatedModel DrawModel;
+    internal Packet_ServerPlayerStats PlayerStats;
 
-    public Packet_ServerEntityAnimatedModel GetDrawModel() { return DrawModel; }
-
-    public void SetDrawModel(Packet_ServerEntityAnimatedModel value) { DrawModel = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerEntityDrawName DrawName_;
-
-    public Packet_ServerEntityDrawName GetDrawName_() { return DrawName_; }
-
-    public void SetDrawName_(Packet_ServerEntityDrawName value) { DrawName_ = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerEntityDrawText DrawText;
-
-    public Packet_ServerEntityDrawText GetDrawText() { return DrawText; }
-
-    public void SetDrawText(Packet_ServerEntityDrawText value) { DrawText = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerEntityDrawBlock DrawBlock;
-
-    public Packet_ServerEntityDrawBlock GetDrawBlock() { return DrawBlock; }
-
-    public void SetDrawBlock(Packet_ServerEntityDrawBlock value) { DrawBlock = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerEntityPush Push;
-
-    public Packet_ServerEntityPush GetPush() { return Push; }
-
-    public void SetPush(Packet_ServerEntityPush value) { Push = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    bool Usable;
-
-    public bool GetUsable() { return Usable; }
-
-    public void SetUsable(bool value) { Usable = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerPlayerStats PlayerStats;
-
-    public Packet_ServerPlayerStats GetPlayerStats() { return PlayerStats; }
-
-    public void SetPlayerStats(Packet_ServerPlayerStats value) { PlayerStats = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_ServerEntityDrawArea DrawArea;
-
-    public Packet_ServerEntityDrawArea GetDrawArea() { return DrawArea; }
-
-    public void SetDrawArea(Packet_ServerEntityDrawArea value) { DrawArea = value; }
-
-
-
+    internal Packet_ServerEntityDrawArea DrawArea;
 }
 
 public class Packet_ServerEntityDrawArea
 {
+    internal int X;
 
-#if !CITO
-    internal
-#endif
-    int X;
+    internal int Y;
 
-    public int GetX() { return X; }
+    internal int Z;
 
-    public void SetX(int value) { X = value; }
+    internal int Sizex;
 
+    internal int Sizey;
 
+    internal int Sizez;
 
-
-#if !CITO
-    internal
-#endif
-    int Y;
-
-    public int GetY() { return Y; }
-
-    public void SetY(int value) { Y = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Z;
-
-    public int GetZ() { return Z; }
-
-    public void SetZ(int value) { Z = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Sizex;
-
-    public int GetSizex() { return Sizex; }
-
-    public void SetSizex(int value) { Sizex = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Sizey;
-
-    public int GetSizey() { return Sizey; }
-
-    public void SetSizey(int value) { Sizey = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Sizez;
-
-    public int GetSizez() { return Sizez; }
-
-    public void SetSizez(int value) { Sizez = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int VisibleToClientId;
-
-    public int GetVisibleToClientId() { return VisibleToClientId; }
-
-    public void SetVisibleToClientId(int value) { VisibleToClientId = value; }
-
-
-
+    internal int VisibleToClientId;
 }
 
 public class Packet_ServerEntityAnimatedModel
 {
+    internal string Model_;
 
-#if !CITO
-    internal
-#endif
-    string Model_;
+    internal string Texture_;
 
-    public string GetModel_() { return Model_; }
+    internal int EyeHeight;
 
-    public void SetModel_(string value) { Model_ = value; }
+    internal int ModelHeight;
 
-
-
-
-#if !CITO
-    internal
-#endif
-    string Texture_;
-
-    public string GetTexture_() { return Texture_; }
-
-    public void SetTexture_(string value) { Texture_ = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int EyeHeight;
-
-    public int GetEyeHeight() { return EyeHeight; }
-
-    public void SetEyeHeight(int value) { EyeHeight = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int ModelHeight;
-
-    public int GetModelHeight() { return ModelHeight; }
-
-    public void SetModelHeight(int value) { ModelHeight = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int DownloadSkin;
-
-    public int GetDownloadSkin() { return DownloadSkin; }
-
-    public void SetDownloadSkin(int value) { DownloadSkin = value; }
-
-
-
+    internal int DownloadSkin;
 }
 
 public class Packet_ServerEntityDrawName
 {
+    internal string Name;
 
-#if !CITO
-    internal
-#endif
-    string Name;
+    internal bool OnlyWhenSelected;
 
-    public string GetName() { return Name; }
+    internal bool ClientAutoComplete;
 
-    public void SetName(string value) { Name = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    bool OnlyWhenSelected;
-
-    public bool GetOnlyWhenSelected() { return OnlyWhenSelected; }
-
-    public void SetOnlyWhenSelected(bool value) { OnlyWhenSelected = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    bool ClientAutoComplete;
-
-    public bool GetClientAutoComplete() { return ClientAutoComplete; }
-
-    public void SetClientAutoComplete(bool value) { ClientAutoComplete = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string Color;
-
-    public string GetColor() { return Color; }
-
-    public void SetColor(string value) { Color = value; }
-
-
-
+    internal string Color;
 }
 
 public class Packet_ServerEntityDrawText
 {
+    internal string Text;
 
-#if !CITO
-    internal
-#endif
-    string Text;
+    internal int Dx;
 
-    public string GetText() { return Text; }
+    internal int Dy;
 
-    public void SetText(string value) { Text = value; }
+    internal int Dz;
 
+    internal int Rotx;
 
+    internal int Roty;
 
-
-#if !CITO
-    internal
-#endif
-    int Dx;
-
-    public int GetDx() { return Dx; }
-
-    public void SetDx(int value) { Dx = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Dy;
-
-    public int GetDy() { return Dy; }
-
-    public void SetDy(int value) { Dy = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Dz;
-
-    public int GetDz() { return Dz; }
-
-    public void SetDz(int value) { Dz = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Rotx;
-
-    public int GetRotx() { return Rotx; }
-
-    public void SetRotx(int value) { Rotx = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Roty;
-
-    public int GetRoty() { return Roty; }
-
-    public void SetRoty(int value) { Roty = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Rotz;
-
-    public int GetRotz() { return Rotz; }
-
-    public void SetRotz(int value) { Rotz = value; }
-
-
-
+    internal int Rotz;
 }
 
 public class Packet_ServerEntityDrawBlock
 {
-
-#if !CITO
-    internal
-#endif
-    int BlockType;
-
-    public int GetBlockType() { return BlockType; }
-
-    public void SetBlockType(int value) { BlockType = value; }
-
-
-
+    internal int BlockType;
 }
 
 public class Packet_ServerEntityPush
 {
-
-#if !CITO
-    internal
-#endif
-    int RangeFloat;
-
-    public int GetRangeFloat() { return RangeFloat; }
-
-    public void SetRangeFloat(int value) { RangeFloat = value; }
-
-
-
+    internal int RangeFloat;
 }
 
 public class Packet_IntInt
 {
+    internal int Key_;
 
-#if !CITO
-    internal
-#endif
-    int Key_;
-
-    public int GetKey_() { return Key_; }
-
-    public void SetKey_(int value) { Key_ = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Value_;
-
-    public int GetValue_() { return Value_; }
-
-    public void SetValue_(int value) { Value_ = value; }
-
-
-
+    internal int Value_;
 }
 
 public class Packet_ServerAmmo
 {
+    internal Packet_IntInt[] TotalAmmo;
 
-#if !CITO
-    internal
-#endif
-    Packet_IntInt[] TotalAmmo;
+    internal int TotalAmmoCount;
 
-    public Packet_IntInt[] GetTotalAmmo() { return TotalAmmo; }
-
-    public void SetTotalAmmo(Packet_IntInt[] value, int count, int length) { TotalAmmo = value; TotalAmmoCount = count; TotalAmmoLength = length; }
-
-
-#if !CITO
-    internal
-#endif
-    int TotalAmmoCount;
-
-    public int GetTotalAmmoCount() { return TotalAmmoCount; }
-
-
-#if !CITO
-    internal
-#endif
-    int TotalAmmoLength;
-
-    public int GetTotalAmmoLength() { return TotalAmmoLength; }
+    internal int TotalAmmoLength;
 
     public void TotalAmmoAdd(Packet_IntInt value)
     {
@@ -4729,100 +1230,26 @@ public class Packet_ServerAmmo
         TotalAmmoCount++;
     }
 
-
-
 }
 
 public class Packet_ServerChunkPart
 {
-
-#if !CITO
-    internal
-#endif
-    byte[] CompressedChunkPart;
-
-    public byte[] GetCompressedChunkPart() { return CompressedChunkPart; }
-
-    public void SetCompressedChunkPart(byte[] value) { CompressedChunkPart = value; }
-
-
-
+    internal byte[] CompressedChunkPart;
 }
 
 public class Packet_ServerChunk
 {
+    internal int X;
 
-#if !CITO
-    internal
-#endif
-    int X;
+    internal int Y;
 
-    public int GetX() { return X; }
+    internal int Z;
 
-    public void SetX(int value) { X = value; }
+    internal int SizeX;
 
+    internal int SizeY;
 
-
-
-#if !CITO
-    internal
-#endif
-    int Y;
-
-    public int GetY() { return Y; }
-
-    public void SetY(int value) { Y = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Z;
-
-    public int GetZ() { return Z; }
-
-    public void SetZ(int value) { Z = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int SizeX;
-
-    public int GetSizeX() { return SizeX; }
-
-    public void SetSizeX(int value) { SizeX = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int SizeY;
-
-    public int GetSizeY() { return SizeY; }
-
-    public void SetSizeY(int value) { SizeY = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int SizeZ;
-
-    public int GetSizeZ() { return SizeZ; }
-
-    public void SetSizeZ(int value) { SizeZ = value; }
-
-
-
+    internal int SizeZ;
 }
 
 /// <summary>
@@ -4831,163 +1258,40 @@ public class Packet_ServerChunk
 /// </summary>
 public class Packet_ServerHeightmapChunk
 {
+    internal int X;
 
-#if !CITO
-    internal
-#endif
-    int X;
+    internal int Y;
 
-    public int GetX() { return X; }
+    internal int SizeX;
 
-    public void SetX(int value) { X = value; }
+    internal int SizeY;
 
-
-
-
-#if !CITO
-    internal
-#endif
-    int Y;
-
-    public int GetY() { return Y; }
-
-    public void SetY(int value) { Y = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int SizeX;
-
-    public int GetSizeX() { return SizeX; }
-
-    public void SetSizeX(int value) { SizeX = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int SizeY;
-
-    public int GetSizeY() { return SizeY; }
-
-    public void SetSizeY(int value) { SizeY = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    byte[] CompressedHeightmap;
-
-    public byte[] GetCompressedHeightmap() { return CompressedHeightmap; }
-
-    public void SetCompressedHeightmap(byte[] value) { CompressedHeightmap = value; }
-
-
-
+    internal byte[] CompressedHeightmap;
 }
 
 public class Packet_ServerInventory
 {
-
-#if !CITO
-    internal
-#endif
-    Packet_Inventory Inventory;
-
-    public Packet_Inventory GetInventory() { return Inventory; }
-
-    public void SetInventory(Packet_Inventory value) { Inventory = value; }
-
-
-
+    internal Packet_Inventory Inventory;
 }
 
 public class Packet_ServerPlayerStats
 {
+    internal int CurrentHealth;
 
-#if !CITO
-    internal
-#endif
-    int CurrentHealth;
+    internal int MaxHealth;
 
-    public int GetCurrentHealth() { return CurrentHealth; }
+    internal int CurrentOxygen;
 
-    public void SetCurrentHealth(int value) { CurrentHealth = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int MaxHealth;
-
-    public int GetMaxHealth() { return MaxHealth; }
-
-    public void SetMaxHealth(int value) { MaxHealth = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int CurrentOxygen;
-
-    public int GetCurrentOxygen() { return CurrentOxygen; }
-
-    public void SetCurrentOxygen(int value) { CurrentOxygen = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int MaxOxygen;
-
-    public int GetMaxOxygen() { return MaxOxygen; }
-
-    public void SetMaxOxygen(int value) { MaxOxygen = value; }
-
-
-
+    internal int MaxOxygen;
 }
 
 public class Packet_ServerMonsters
 {
+    internal Packet_ServerMonster[] Monsters;
 
-#if !CITO
-    internal
-#endif
-    Packet_ServerMonster[] Monsters;
+    internal int MonstersCount;
 
-    public Packet_ServerMonster[] GetMonsters() { return Monsters; }
-
-    public void SetMonsters(Packet_ServerMonster[] value, int count, int length) { Monsters = value; MonstersCount = count; MonstersLength = length; }
-
-
-#if !CITO
-    internal
-#endif
-    int MonstersCount;
-
-    public int GetMonstersCount() { return MonstersCount; }
-
-
-#if !CITO
-    internal
-#endif
-    int MonstersLength;
-
-    public int GetMonstersLength() { return MonstersLength; }
+    internal int MonstersLength;
 
     public void MonstersAdd(Packet_ServerMonster value)
     {
@@ -5004,281 +1308,73 @@ public class Packet_ServerMonsters
         Monsters[MonstersCount] = value;
         MonstersCount++;
     }
-
-
-
 }
 
 public class Packet_ServerMonster
 {
+    internal int Id;
 
-#if !CITO
-    internal
-#endif
-    int Id;
+    internal int MonsterType;
 
-    public int GetId() { return Id; }
+    internal Packet_PositionAndOrientation PositionAndOrientation;
 
-    public void SetId(int value) { Id = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int MonsterType;
-
-    public int GetMonsterType() { return MonsterType; }
-
-    public void SetMonsterType(int value) { MonsterType = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_PositionAndOrientation PositionAndOrientation;
-
-    public Packet_PositionAndOrientation GetPositionAndOrientation() { return PositionAndOrientation; }
-
-    public void SetPositionAndOrientation(Packet_PositionAndOrientation value) { PositionAndOrientation = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Health;
-
-    public int GetHealth() { return Health; }
-
-    public void SetHealth(int value) { Health = value; }
-
-
-
+    internal int Health;
 }
 
 public class Packet_ServerSeason
-{
-    /// <summary>optional int32 Season;</summary>
+{    /// <summary>optional int32 Season;</summary>
 
-#if !CITO
-    internal
-#endif
-    int Hour;
-
-    public int GetHour() { return Hour; }
-
-    public void SetHour(int value) { Hour = value; }
-
-
-
+    internal int Hour;
     /// <summary>1-24*4</summary>
 
-#if !CITO
-    internal
-#endif
-    int DayNightCycleSpeedup;
-
-    public int GetDayNightCycleSpeedup() { return DayNightCycleSpeedup; }
-
-    public void SetDayNightCycleSpeedup(int value) { DayNightCycleSpeedup = value; }
-
-
+    internal int DayNightCycleSpeedup;
 
     /// <summary>used for predicting sun speed.</summary>
 
-#if !CITO
-    internal
-#endif
-    int Moon;
-
-    public int GetMoon() { return Moon; }
-
-    public void SetMoon(int value) { Moon = value; }
-
-
-
+    internal int Moon;
 }
 
 public class Packet_ServerDialog
 {
+    internal string DialogId;
 
-#if !CITO
-    internal
-#endif
-    string DialogId;
-
-    public string GetDialogId() { return DialogId; }
-
-    public void SetDialogId(string value) { DialogId = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_Dialog Dialog;
-
-    public Packet_Dialog GetDialog() { return Dialog; }
-
-    public void SetDialog(Packet_Dialog value) { Dialog = value; }
-
-
-
+    internal Packet_Dialog Dialog;
 }
 
 public class Packet_ServerPing
-{
-}
+{ }
 
 public class Packet_ServerPlayerPing
 {
+    internal int ClientId;
 
-#if !CITO
-    internal
-#endif
-    int ClientId;
-
-    public int GetClientId() { return ClientId; }
-
-    public void SetClientId(int value) { ClientId = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Ping;
-
-    public int GetPing() { return Ping; }
-
-    public void SetPing(int value) { Ping = value; }
-
-
-
+    internal int Ping;
 }
 
 public class Packet_ServerTranslatedString
 {
+    internal string Lang;
 
-#if !CITO
-    internal
-#endif
-    string Lang;
+    internal string Id;
 
-    public string GetLang() { return Lang; }
-
-    public void SetLang(string value) { Lang = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string Id;
-
-    public string GetId() { return Id; }
-
-    public void SetId(string value) { Id = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string Translation;
-
-    public string GetTranslation() { return Translation; }
-
-    public void SetTranslation(string value) { Translation = value; }
-
-
-
+    internal string Translation;
 }
 
 public class Packet_Inventory
 {
+    internal Packet_Item MainArmor;
 
-#if !CITO
-    internal
-#endif
-    Packet_Item MainArmor;
+    internal Packet_Item Boots;
 
-    public Packet_Item GetMainArmor() { return MainArmor; }
+    internal Packet_Item Helmet;
 
-    public void SetMainArmor(Packet_Item value) { MainArmor = value; }
+    internal Packet_Item Gauntlet;
 
+    internal Packet_PositionItem[] Items;
 
+    internal int ItemsCount;
 
-
-#if !CITO
-    internal
-#endif
-    Packet_Item Boots;
-
-    public Packet_Item GetBoots() { return Boots; }
-
-    public void SetBoots(Packet_Item value) { Boots = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_Item Helmet;
-
-    public Packet_Item GetHelmet() { return Helmet; }
-
-    public void SetHelmet(Packet_Item value) { Helmet = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_Item Gauntlet;
-
-    public Packet_Item GetGauntlet() { return Gauntlet; }
-
-    public void SetGauntlet(Packet_Item value) { Gauntlet = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_PositionItem[] Items;
-
-    public Packet_PositionItem[] GetItems() { return Items; }
-
-    public void SetItems(Packet_PositionItem[] value, int count, int length) { Items = value; ItemsCount = count; ItemsLength = length; }
-
-
-#if !CITO
-    internal
-#endif
-    int ItemsCount;
-
-    public int GetItemsCount() { return ItemsCount; }
-
-
-#if !CITO
-    internal
-#endif
-    int ItemsLength;
-
-    public int GetItemsLength() { return ItemsLength; }
+    internal int ItemsLength;
 
     public void ItemsAdd(Packet_PositionItem value)
     {
@@ -5296,45 +1392,15 @@ public class Packet_Inventory
         ItemsCount++;
     }
 
+    internal Packet_Item DragDropItem;
 
-
-
-#if !CITO
-    internal
-#endif
-    Packet_Item DragDropItem;
-
-    public Packet_Item GetDragDropItem() { return DragDropItem; }
-
-    public void SetDragDropItem(Packet_Item value) { DragDropItem = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_Item[] RightHand;
-
-    public Packet_Item[] GetRightHand() { return RightHand; }
+    internal Packet_Item[] RightHand;
 
     public void SetRightHand(Packet_Item[] value, int count, int length) { RightHand = value; RightHandCount = count; RightHandLength = length; }
 
+    internal int RightHandCount;
 
-#if !CITO
-    internal
-#endif
-    int RightHandCount;
-
-    public int GetRightHandCount() { return RightHandCount; }
-
-
-#if !CITO
-    internal
-#endif
-    int RightHandLength;
-
-    public int GetRightHandLength() { return RightHandLength; }
+    internal int RightHandLength;
 
     public void RightHandAdd(Packet_Item value)
     {
@@ -5351,142 +1417,39 @@ public class Packet_Inventory
         RightHand[RightHandCount] = value;
         RightHandCount++;
     }
-
-
-
 }
 
 public class Packet_Item
 {
+    internal int ItemClass;
 
-#if !CITO
-    internal
-#endif
-    int ItemClass;
+    internal string ItemId;
 
-    public int GetItemClass() { return ItemClass; }
+    internal int BlockId;
 
-    public void SetItemClass(int value) { ItemClass = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string ItemId;
-
-    public string GetItemId() { return ItemId; }
-
-    public void SetItemId(string value) { ItemId = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int BlockId;
-
-    public int GetBlockId() { return BlockId; }
-
-    public void SetBlockId(int value) { BlockId = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int BlockCount;
-
-    public int GetBlockCount() { return BlockCount; }
-
-    public void SetBlockCount(int value) { BlockCount = value; }
-
-
-
+    internal int BlockCount;
 }
 
 public class Packet_PositionItem
 {
+    internal string Key_;
 
-#if !CITO
-    internal
-#endif
-    string Key_;
+    internal Packet_Item Value_;
 
-    public string GetKey_() { return Key_; }
+    internal int X;
 
-    public void SetKey_(string value) { Key_ = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    Packet_Item Value_;
-
-    public Packet_Item GetValue_() { return Value_; }
-
-    public void SetValue_(Packet_Item value) { Value_ = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int X;
-
-    public int GetX() { return X; }
-
-    public void SetX(int value) { X = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Y;
-
-    public int GetY() { return Y; }
-
-    public void SetY(int value) { Y = value; }
-
-
-
+    internal int Y;
 }
 
 public class Packet_Dialog
 {
-
-#if !CITO
-    internal
-#endif
-    Packet_Widget[] Widgets;
-
-    public Packet_Widget[] GetWidgets() { return Widgets; }
+    internal Packet_Widget[] Widgets;
 
     public void SetWidgets(Packet_Widget[] value, int count, int length) { Widgets = value; WidgetsCount = count; WidgetsLength = length; }
 
+    internal int WidgetsCount;
 
-#if !CITO
-    internal
-#endif
-    int WidgetsCount;
-
-    public int GetWidgetsCount() { return WidgetsCount; }
-
-
-#if !CITO
-    internal
-#endif
-    int WidgetsLength;
-
-    public int GetWidgetsLength() { return WidgetsLength; }
+    internal int WidgetsLength;
 
     public void WidgetsAdd(Packet_Widget value)
     {
@@ -5504,340 +1467,118 @@ public class Packet_Dialog
         WidgetsCount++;
     }
 
+    internal int Width;
 
+    internal int Height_;
 
-
-#if !CITO
-    internal
-#endif
-    int Width;
-
-    public int GetWidth() { return Width; }
-
-    public void SetWidth(int value) { Width = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Height_;
-
-    public int GetHeight_() { return Height_; }
-
-    public void SetHeight_(int value) { Height_ = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int IsModal;
-
-    public int GetIsModal() { return IsModal; }
-
-    public void SetIsModal(int value) { IsModal = value; }
-
-
-
+    internal int IsModal;
 }
 
 public class Packet_Widget
 {
+    internal string Id;
 
-#if !CITO
-    internal
-#endif
-    string Id;
+    internal int Click;
 
-    public string GetId() { return Id; }
+    internal int X;
 
-    public void SetId(string value) { Id = value; }
+    internal int Y;
 
+    internal int Width;
 
+    internal int Height_;
 
+    internal string Text;
 
-#if !CITO
-    internal
-#endif
-    int Click;
+    internal int ClickKey;
 
-    public int GetClick() { return Click; }
+    internal string Image;
 
-    public void SetClick(int value) { Click = value; }
+    internal int Color;
 
+    internal Packet_DialogFont Font;
 
-
-
-#if !CITO
-    internal
-#endif
-    int X;
-
-    public int GetX() { return X; }
-
-    public void SetX(int value) { X = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Y;
-
-    public int GetY() { return Y; }
-
-    public void SetY(int value) { Y = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Width;
-
-    public int GetWidth() { return Width; }
-
-    public void SetWidth(int value) { Width = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Height_;
-
-    public int GetHeight_() { return Height_; }
-
-    public void SetHeight_(int value) { Height_ = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string Text;
-
-    public string GetText() { return Text; }
-
-    public void SetText(string value) { Text = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int ClickKey;
-
-    public int GetClickKey() { return ClickKey; }
-
-    public void SetClickKey(int value) { ClickKey = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    string Image;
-
-    public string GetImage() { return Image; }
-
-    public void SetImage(string value) { Image = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Color;
-
-    public int GetColor() { return Color; }
-
-    public void SetColor(int value) { Color = value; }
-
-
-
-    /// <summary>white</summary>
-
-#if !CITO
-    internal
-#endif
-    Packet_DialogFont Font;
-
-    public Packet_DialogFont GetFont() { return Font; }
-
-    public void SetFont(Packet_DialogFont value) { Font = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int Type;
-
-    public int GetType() { return Type; }
-
-    public void SetType(int value) { Type = value; }
-
-
-
+    internal int Type;
 }
 
 public class Packet_DialogFont
 {
+    internal string FamilyName;
 
-#if !CITO
-    internal
-#endif
-    string FamilyName;
+    internal int SizeFloat;
 
-    public string GetFamilyName() { return FamilyName; }
-
-    public void SetFamilyName(string value) { FamilyName = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int SizeFloat;
-
-    public int GetSizeFloat() { return SizeFloat; }
-
-    public void SetSizeFloat(int value) { SizeFloat = value; }
-
-
-
-
-#if !CITO
-    internal
-#endif
-    int FontStyle;
-
-    public int GetFontStyle() { return FontStyle; }
-
-    public void SetFontStyle(int value) { FontStyle = value; }
-
-
-
+    internal int FontStyle;
 }
 
-public class Packet_ClientIdEnum
+public enum PacketType
 {
-    public const int PlayerIdentification = 0;
-    public const int PingReply = 1;
-    public const int SetBlock = 5;
-    public const int FillArea = 510;
-    public const int PositionandOrientation = 8;
-    public const int Craft = 9;
-    public const int Message = 13;
-    public const int DialogClick = 14;
-    public const int RequestBlob = 50;
-    public const int InventoryAction = 51;
-    public const int Health = 52;
-    public const int MonsterHit = 53;
-    public const int Shot = 54;
-    public const int SpecialKey = 55;
-    public const int ActiveMaterialSlot = 56;
-    public const int Leave = 57;
-    public const int Reload = 58;
-    public const int Oxygen = 59;
-    public const int Death = 60;
-    public const int EntityInteraction = 61;
-    public const int ServerQuery = 64;
-    public const int GameResolution = 10;
-    public const int ExtendedPacketCommand = 100;
+    PlayerIdentification = 0,
+    PingReply = 1,
+    SetBlock = 5,
+    FillArea = 510,
+    PositionAndOrientation = 8,
+    Craft = 9,
+    Message = 13,
+    DialogClick = 14,
+    RequestBlob = 50,
+    InventoryAction = 51,
+    Health = 52,
+    MonsterHit = 53,
+    Shot = 54,
+    SpecialKey = 55,
+    ActiveMaterialSlot = 56,
+    Leave = 57,
+    Reload = 58,
+    Oxygen = 59,
+    Death = 60,
+    EntityInteraction = 61,
+    ServerQuery = 64,
+    GameResolution = 10,
+    ExtendedPacketCommand = 100
 }
 
-
-public class Packet_InventoryActionTypeEnum
+public enum PacketInventoryActionType
 {
-    public const int Click = 0;
-    public const int WearItem = 1;
-    public const int MoveToInventory = 2;
+    Click = 0,
+    WearItem = 1,
+    MoveToInventory = 2
 }
 
-
-public class Packet_InventoryPositionTypeEnum
+public enum PacketInventoryPositionType
 {
-    public const int MainArea = 0;
-    public const int Ground = 1;
-    public const int MaterialSelector = 2;
-    public const int WearPlace = 3;
+    MainArea = 0,
+    Ground = 1,
+    MaterialSelector = 2,
+    WearPlace = 3
 }
 
-
-public class Packet_BlockSetModeEnum
+public enum PacketBlockSetMode
 {
-    public const int Destroy = 0;
-    public const int Create = 1;
-    public const int Use = 2;
-    /// <summary>open doors, use crafting table, etc.</summary>
-    public const int UseWithTool = 3;
+    Destroy = 0,
+    Create = 1,
+    Use = 2,
+    UseWithTool = 3
 }
 
-
-public class Packet_LeaveReasonEnum
+public enum PacketLeaveReason
 {
-    public const int Leave = 0;
-    public const int Crash = 1;
+    Leave = 0,
+    Crash = 1
 }
 
-
-public class Packet_SpecialKeyEnum
+public enum PacketSpecialKey
 {
-    public const int Respawn = 0;
-    public const int SetSpawn = 1;
-    public const int TabPlayerList = 2;
-    public const int SelectTeam = 3;
+    Respawn = 0,
+    SetSpawn = 1,
+    TabPlayerList = 2,
+    SelectTeam = 3
 }
 
-
-public class Packet_DeathReasonEnum
+public enum PacketEntityInteractionType
 {
-    public const int FallDamage = 0;
-    public const int BlockDamage = 1;
-    public const int Drowning = 2;
-    public const int Explosion = 3;
+    Use = 0,
+    Hit = 1
 }
-
-
-public class Packet_EntityInteractionTypeEnum
-{
-    public const int Use = 0;
-    public const int Hit = 1;
-}
-
-
-public class Packet_DrawTypeEnum
-{
-    public const int Empty = 0;
-    public const int Solid = 1;
-    public const int Transparent = 2;
-    public const int Fluid = 3;
-    public const int Torch = 4;
-    public const int Plant = 5;
-    public const int OpenDoorLeft = 6;
-    public const int OpenDoorRight = 7;
-    public const int ClosedDoor = 8;
-    public const int Ladder = 9;
-    public const int Fence = 10;
-    public const int HalfHeight = 11;
-    public const int Flat = 12;
-    public const int Cactus = 13;
-}
-
 
 public class Packet_WalkableTypeEnum
 {
@@ -5846,13 +1587,11 @@ public class Packet_WalkableTypeEnum
     public const int Solid = 2;
 }
 
-
 public class Packet_PistolTypeEnum
 {
     public const int Normal = 0;
     public const int Grenade = 1;
 }
-
 
 public class Packet_ServerIdEnum
 {
@@ -5903,7 +1642,6 @@ public class Packet_ServerIdEnum
     public const int ExtendedPacketTick = 101;
 }
 
-
 public class Packet_ItemClassEnum
 {
     public const int Block = 0;
@@ -5916,14 +1654,12 @@ public class Packet_ItemClassEnum
     public const int Other = 7;
 }
 
-
 public class Packet_WidgetTypeEnum
 {
     public const int Image = 0;
     public const int Text = 1;
     public const int TextBox = 2;
 }
-
 
 public class Packet_DialogFontStyleEnum
 {
@@ -5933,7 +1669,6 @@ public class Packet_DialogFontStyleEnum
     public const int Underline = 4;
     public const int Strikeout = 8;
 }
-
 
 // This is the backend code for reading and writing
 
@@ -5948,8 +1683,7 @@ public class Packet_DialogFontStyleEnum
 // This file will be overwritten when CodeGenerator is run.
 
 public class Packet_ClientIdentificationSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientIdentification DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientIdentification instance = new Packet_ClientIdentification();
@@ -5978,8 +1712,7 @@ public class Packet_ClientIdentificationSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.MdProtocolVersion = ProtocolParser.ReadString(stream);
                     continue;
@@ -6005,14 +1738,10 @@ public class Packet_ClientIdentificationSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -6030,32 +1759,27 @@ public class Packet_ClientIdentificationSerializer
     public static void Serialize(Stream stream, Packet_ClientIdentification instance)
     {
         if (instance.MdProtocolVersion != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.MdProtocolVersion));
         }
         if (instance.Username != null)
-        {
-            // Key for field: 2, LengthDelimited
+        {            // Key for field: 2, LengthDelimited
             stream.WriteByte(18);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Username));
         }
         if (instance.VerificationKey != null)
-        {
-            // Key for field: 3, LengthDelimited
+        {            // Key for field: 3, LengthDelimited
             stream.WriteByte(26);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.VerificationKey));
         }
         if (instance.ServerPassword != null)
-        {
-            // Key for field: 4, LengthDelimited
+        {            // Key for field: 4, LengthDelimited
             stream.WriteByte(34);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.ServerPassword));
         }
         if (instance.RequestPosition != null)
-        {
-            // Key for field: 5, LengthDelimited
+        {            // Key for field: 5, LengthDelimited
             stream.WriteByte(42);
             MemoryStream ms5 = new MemoryStream();
 
@@ -6073,15 +1797,14 @@ public class Packet_ClientIdentificationSerializer
 }
 
 public class Packet_ClientRequestBlobSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientRequestBlob DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientRequestBlob instance = new Packet_ClientRequestBlob();
         DeserializeLengthDelimited(stream, instance);
         return instance;
     }
-   
+
     /// <summary>Read the VarInt length prefix and the given number of bytes from the stream and deserialze it into the instance.</summary>
     public static Packet_ClientRequestBlob DeserializeLengthDelimited(Stream stream, Packet_ClientRequestBlob instance)
     {
@@ -6103,8 +1826,7 @@ public class Packet_ClientRequestBlobSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     if (instance.RequestedMd5 == null)
                         instance.RequestedMd5 = Packet_StringListSerializer.DeserializeLengthDelimitedNew(stream);
@@ -6114,14 +1836,10 @@ public class Packet_ClientRequestBlobSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -6139,8 +1857,7 @@ public class Packet_ClientRequestBlobSerializer
     public static void Serialize(Stream stream, Packet_ClientRequestBlob instance)
     {
         if (instance.RequestedMd5 != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             MemoryStream ms1 = new MemoryStream();
 
@@ -6158,8 +1875,7 @@ public class Packet_ClientRequestBlobSerializer
 }
 
 public class Packet_ClientSetBlockSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientSetBlock DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientSetBlock instance = new Packet_ClientSetBlock();
@@ -6170,7 +1886,7 @@ public class Packet_ClientSetBlockSerializer
     /// <summary>Read the VarInt length prefix and the given number of bytes from the stream and deserialze it into the instance.</summary>
     public static Packet_ClientSetBlock DeserializeLengthDelimited(Stream stream, Packet_ClientSetBlock instance)
     {
-        instance.Mode = Packet_BlockSetModeEnum.Destroy;
+        instance.Mode = PacketBlockSetMode.Destroy;
         long limit = ProtocolParser.ReadUInt32(stream);
         limit += stream.Position;
         while (true)
@@ -6189,8 +1905,7 @@ public class Packet_ClientSetBlockSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.X = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -6204,7 +1919,7 @@ public class Packet_ClientSetBlockSerializer
                     continue;
                 // Field 4 Varint
                 case 32:
-                    instance.Mode = ProtocolParser.ReadUInt64(stream);
+                    instance.Mode = (PacketBlockSetMode)ProtocolParser.ReadUInt64(stream);
                     continue;
                 // Field 5 Varint
                 case 40:
@@ -6217,14 +1932,10 @@ public class Packet_ClientSetBlockSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -6240,8 +1951,7 @@ public class Packet_ClientSetBlockSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ClientSetBlock instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.X);
         // Key for field: 2, Varint
@@ -6250,11 +1960,10 @@ public class Packet_ClientSetBlockSerializer
         // Key for field: 3, Varint
         stream.WriteByte(24);
         ProtocolParser.WriteUInt64(stream, instance.Z);
-        if (instance.Mode != Packet_BlockSetModeEnum.Destroy)
-        {
-            // Key for field: 4, Varint
+        if (instance.Mode != PacketBlockSetMode.Destroy)
+        {            // Key for field: 4, Varint
             stream.WriteByte(32);
-            ProtocolParser.WriteUInt64(stream, instance.Mode);
+            ProtocolParser.WriteUInt64(stream, (int)instance.Mode);
         }
         // Key for field: 5, Varint
         stream.WriteByte(40);
@@ -6266,8 +1975,7 @@ public class Packet_ClientSetBlockSerializer
 }
 
 public class Packet_ClientFillAreaSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientFillArea DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientFillArea instance = new Packet_ClientFillArea();
@@ -6296,8 +2004,7 @@ public class Packet_ClientFillAreaSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.X1 = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -6332,14 +2039,10 @@ public class Packet_ClientFillAreaSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -6355,8 +2058,7 @@ public class Packet_ClientFillAreaSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ClientFillArea instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.X1);
         // Key for field: 2, Varint
@@ -6384,8 +2086,7 @@ public class Packet_ClientFillAreaSerializer
 }
 
 public class Packet_ClientPositionAndOrientationSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientPositionAndOrientation DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientPositionAndOrientation instance = new Packet_ClientPositionAndOrientation();
@@ -6414,8 +2115,7 @@ public class Packet_ClientPositionAndOrientationSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.PlayerId = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -6446,14 +2146,10 @@ public class Packet_ClientPositionAndOrientationSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -6469,8 +2165,7 @@ public class Packet_ClientPositionAndOrientationSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ClientPositionAndOrientation instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.PlayerId);
         // Key for field: 2, Varint
@@ -6495,8 +2190,7 @@ public class Packet_ClientPositionAndOrientationSerializer
 }
 
 public class Packet_ClientMessageSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientMessage DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientMessage instance = new Packet_ClientMessage();
@@ -6525,8 +2219,7 @@ public class Packet_ClientMessageSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.Message = ProtocolParser.ReadString(stream);
                     continue;
@@ -6537,14 +2230,10 @@ public class Packet_ClientMessageSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -6562,8 +2251,7 @@ public class Packet_ClientMessageSerializer
     public static void Serialize(Stream stream, Packet_ClientMessage instance)
     {
         if (instance.Message != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Message));
         }
@@ -6574,8 +2262,7 @@ public class Packet_ClientMessageSerializer
 }
 
 public class Packet_ClientInventoryActionSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientInventoryAction DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientInventoryAction instance = new Packet_ClientInventoryAction();
@@ -6586,7 +2273,7 @@ public class Packet_ClientInventoryActionSerializer
     /// <summary>Read the VarInt length prefix and the given number of bytes from the stream and deserialze it into the instance.</summary>
     public static Packet_ClientInventoryAction DeserializeLengthDelimited(Stream stream, Packet_ClientInventoryAction instance)
     {
-        instance.Action = Packet_InventoryActionTypeEnum.Click;
+        instance.Action = PacketInventoryActionType.Click;
         long limit = ProtocolParser.ReadUInt32(stream);
         limit += stream.Position;
         while (true)
@@ -6605,10 +2292,9 @@ public class Packet_ClientInventoryActionSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
-                    instance.Action = ProtocolParser.ReadUInt64(stream);
+                    instance.Action = (PacketInventoryActionType)ProtocolParser.ReadUInt64(stream);
                     continue;
                 // Field 2 LengthDelimited
                 case 18:
@@ -6627,14 +2313,10 @@ public class Packet_ClientInventoryActionSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -6651,15 +2333,13 @@ public class Packet_ClientInventoryActionSerializer
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ClientInventoryAction instance)
     {
-        if (instance.Action != Packet_InventoryActionTypeEnum.Click)
-        {
-            // Key for field: 1, Varint
+        if (instance.Action != PacketInventoryActionType.Click)
+        {            // Key for field: 1, Varint
             stream.WriteByte(8);
-            ProtocolParser.WriteUInt64(stream, instance.Action);
+            ProtocolParser.WriteUInt64(stream, (int)instance.Action);
         }
         if (instance.A != null)
-        {
-            // Key for field: 2, LengthDelimited
+        {            // Key for field: 2, LengthDelimited
             stream.WriteByte(18);
             MemoryStream ms2 = new MemoryStream();
 
@@ -6673,11 +2353,9 @@ public class Packet_ClientInventoryActionSerializer
 
             stream.Write(ms2.GetBuffer(), 0, ms2Length);
 
-
         }
         if (instance.B != null)
-        {
-            // Key for field: 3, LengthDelimited
+        {            // Key for field: 3, LengthDelimited
             stream.WriteByte(26);
             MemoryStream ms3 = new MemoryStream();
 
@@ -6691,14 +2369,12 @@ public class Packet_ClientInventoryActionSerializer
 
             stream.Write(ms3.GetBuffer(), 0, ms3Length);
 
-
         }
     }
 }
 
 public class Packet_InventoryPositionSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_InventoryPosition DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_InventoryPosition instance = new Packet_InventoryPosition();
@@ -6709,7 +2385,7 @@ public class Packet_InventoryPositionSerializer
     /// <summary>Read the VarInt length prefix and the given number of bytes from the stream and deserialze it into the instance.</summary>
     public static Packet_InventoryPosition DeserializeLengthDelimited(Stream stream, Packet_InventoryPosition instance)
     {
-        instance.Type = Packet_InventoryPositionTypeEnum.MainArea;
+        instance.Type = PacketInventoryPositionType.MainArea;
         long limit = ProtocolParser.ReadUInt32(stream);
         limit += stream.Position;
         while (true)
@@ -6728,10 +2404,9 @@ public class Packet_InventoryPositionSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
-                    instance.Type = ProtocolParser.ReadUInt64(stream);
+                    instance.Type = (PacketInventoryPositionType)ProtocolParser.ReadUInt64(stream);
                     continue;
                 // Field 2 Varint
                 case 16:
@@ -6768,14 +2443,10 @@ public class Packet_InventoryPositionSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -6792,11 +2463,10 @@ public class Packet_InventoryPositionSerializer
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_InventoryPosition instance)
     {
-        if (instance.Type != Packet_InventoryPositionTypeEnum.MainArea)
-        {
-            // Key for field: 1, Varint
+        if (instance.Type != PacketInventoryPositionType.MainArea)
+        {            // Key for field: 1, Varint
             stream.WriteByte(8);
-            ProtocolParser.WriteUInt64(stream, instance.Type);
+            ProtocolParser.WriteUInt64(stream, (int)instance.Type);
         }
         // Key for field: 2, Varint
         stream.WriteByte(16);
@@ -6826,8 +2496,7 @@ public class Packet_InventoryPositionSerializer
 }
 
 public class Packet_PositionAndOrientationSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_PositionAndOrientation DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_PositionAndOrientation instance = new Packet_PositionAndOrientation();
@@ -6856,8 +2525,7 @@ public class Packet_PositionAndOrientationSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.X = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -6884,14 +2552,10 @@ public class Packet_PositionAndOrientationSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -6907,8 +2571,7 @@ public class Packet_PositionAndOrientationSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_PositionAndOrientation instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.X);
         // Key for field: 2, Varint
@@ -6930,8 +2593,7 @@ public class Packet_PositionAndOrientationSerializer
 }
 
 public class Packet_ClientReloadSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientReload DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientReload instance = new Packet_ClientReload();
@@ -6958,14 +2620,11 @@ public class Packet_ClientReloadSerializer
             if (keyByte == -1)
                 //throw new System.IO.EndOfStreamException();
                 return null;
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
+
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -6981,13 +2640,11 @@ public class Packet_ClientReloadSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ClientReload instance)
-    {
-    }
+    { }
 }
 
 public class Packet_ClientLeaveSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientLeave DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientLeave instance = new Packet_ClientLeave();
@@ -6998,7 +2655,7 @@ public class Packet_ClientLeaveSerializer
     /// <summary>Read the VarInt length prefix and the given number of bytes from the stream and deserialze it into the instance.</summary>
     public static Packet_ClientLeave DeserializeLengthDelimited(Stream stream, Packet_ClientLeave instance)
     {
-        instance.Reason = Packet_LeaveReasonEnum.Leave;
+        instance.Reason = PacketLeaveReason.Leave;
         long limit = ProtocolParser.ReadUInt32(stream);
         limit += stream.Position;
         while (true)
@@ -7017,22 +2674,17 @@ public class Packet_ClientLeaveSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
-                    instance.Reason = ProtocolParser.ReadUInt64(stream);
+                    instance.Reason = (PacketLeaveReason)ProtocolParser.ReadUInt64(stream);
                     continue;
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -7049,18 +2701,16 @@ public class Packet_ClientLeaveSerializer
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ClientLeave instance)
     {
-        if (instance.Reason != Packet_LeaveReasonEnum.Leave)
-        {
-            // Key for field: 1, Varint
+        if (instance.Reason != PacketLeaveReason.Leave)
+        {            // Key for field: 1, Varint
             stream.WriteByte(8);
-            ProtocolParser.WriteUInt64(stream, instance.Reason);
+            ProtocolParser.WriteUInt64(stream, (int)instance.Reason);
         }
     }
 }
 
 public class Packet_ClientHealthSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientHealth DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientHealth instance = new Packet_ClientHealth();
@@ -7089,22 +2739,17 @@ public class Packet_ClientHealthSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.CurrentHealth = ProtocolParser.ReadUInt64(stream);
                     continue;
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -7120,16 +2765,14 @@ public class Packet_ClientHealthSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ClientHealth instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.CurrentHealth);
     }
 }
 
 public class Packet_ClientOxygenSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientOxygen DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientOxygen instance = new Packet_ClientOxygen();
@@ -7158,22 +2801,17 @@ public class Packet_ClientOxygenSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.CurrentOxygen = ProtocolParser.ReadUInt64(stream);
                     continue;
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -7189,16 +2827,14 @@ public class Packet_ClientOxygenSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ClientOxygen instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.CurrentOxygen);
     }
 }
 
 public class Packet_ClientDialogClickSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientDialogClick DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientDialogClick instance = new Packet_ClientDialogClick();
@@ -7233,8 +2869,7 @@ public class Packet_ClientDialogClickSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.WidgetId = ProtocolParser.ReadString(stream);
                     continue;
@@ -7246,14 +2881,10 @@ public class Packet_ClientDialogClickSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -7271,8 +2902,7 @@ public class Packet_ClientDialogClickSerializer
     public static void Serialize(Stream stream, Packet_ClientDialogClick instance)
     {
         if (instance.WidgetId != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.WidgetId));
         }
@@ -7290,8 +2920,7 @@ public class Packet_ClientDialogClickSerializer
 }
 
 public class Packet_ClientPingReplySerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientPingReply DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientPingReply instance = new Packet_ClientPingReply();
@@ -7318,14 +2947,11 @@ public class Packet_ClientPingReplySerializer
             if (keyByte == -1)
                 //throw new System.IO.EndOfStreamException();
                 return null;
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
+
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -7341,13 +2967,11 @@ public class Packet_ClientPingReplySerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ClientPingReply instance)
-    {
-    }
+    { }
 }
 
 public class Packet_ClientCraftSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientCraft DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientCraft instance = new Packet_ClientCraft();
@@ -7376,8 +3000,7 @@ public class Packet_ClientCraftSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.X = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -7396,14 +3019,10 @@ public class Packet_ClientCraftSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -7419,8 +3038,7 @@ public class Packet_ClientCraftSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ClientCraft instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.X);
         // Key for field: 2, Varint
@@ -7436,8 +3054,7 @@ public class Packet_ClientCraftSerializer
 }
 
 public class Packet_ClientShotSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientShot DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientShot instance = new Packet_ClientShot();
@@ -7466,8 +3083,7 @@ public class Packet_ClientShotSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.FromX = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -7510,14 +3126,10 @@ public class Packet_ClientShotSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -7533,8 +3145,7 @@ public class Packet_ClientShotSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ClientShot instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.FromX);
         // Key for field: 2, Varint
@@ -7568,8 +3179,7 @@ public class Packet_ClientShotSerializer
 }
 
 public class Packet_ClientSpecialKeySerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientSpecialKey DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientSpecialKey instance = new Packet_ClientSpecialKey();
@@ -7580,7 +3190,7 @@ public class Packet_ClientSpecialKeySerializer
     /// <summary>Read the VarInt length prefix and the given number of bytes from the stream and deserialze it into the instance.</summary>
     public static Packet_ClientSpecialKey DeserializeLengthDelimited(Stream stream, Packet_ClientSpecialKey instance)
     {
-        instance.Key_ = Packet_SpecialKeyEnum.Respawn;
+        instance.Key_ = PacketSpecialKey.Respawn;
         long limit = ProtocolParser.ReadUInt32(stream);
         limit += stream.Position;
         while (true)
@@ -7599,22 +3209,17 @@ public class Packet_ClientSpecialKeySerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
-                    instance.Key_ = ProtocolParser.ReadUInt64(stream);
+                    instance.Key_ = (PacketSpecialKey)ProtocolParser.ReadUInt64(stream);
                     continue;
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -7631,18 +3236,16 @@ public class Packet_ClientSpecialKeySerializer
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ClientSpecialKey instance)
     {
-        if (instance.Key_ != Packet_SpecialKeyEnum.Respawn)
-        {
-            // Key for field: 1, Varint
+        if (instance.Key_ != PacketSpecialKey.Respawn)
+        {            // Key for field: 1, Varint
             stream.WriteByte(8);
-            ProtocolParser.WriteUInt64(stream, instance.Key_);
+            ProtocolParser.WriteUInt64(stream, (int)instance.Key_);
         }
     }
 }
 
 public class Packet_ClientActiveMaterialSlotSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientActiveMaterialSlot DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientActiveMaterialSlot instance = new Packet_ClientActiveMaterialSlot();
@@ -7671,22 +3274,17 @@ public class Packet_ClientActiveMaterialSlotSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.ActiveMaterialSlot = ProtocolParser.ReadUInt64(stream);
                     continue;
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -7702,16 +3300,14 @@ public class Packet_ClientActiveMaterialSlotSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ClientActiveMaterialSlot instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.ActiveMaterialSlot);
     }
 }
 
 public class Packet_ClientDeathSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientDeath DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientDeath instance = new Packet_ClientDeath();
@@ -7722,7 +3318,7 @@ public class Packet_ClientDeathSerializer
     /// <summary>Read the VarInt length prefix and the given number of bytes from the stream and deserialze it into the instance.</summary>
     public static Packet_ClientDeath DeserializeLengthDelimited(Stream stream, Packet_ClientDeath instance)
     {
-        instance.Reason = Packet_DeathReasonEnum.FallDamage;
+        instance.Reason = DeathReason.FallDamage;
         long limit = ProtocolParser.ReadUInt32(stream);
         limit += stream.Position;
         while (true)
@@ -7741,10 +3337,9 @@ public class Packet_ClientDeathSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
-                    instance.Reason = ProtocolParser.ReadUInt64(stream);
+                    instance.Reason = (DeathReason)ProtocolParser.ReadUInt64(stream);
                     continue;
                 // Field 2 Varint
                 case 16:
@@ -7753,14 +3348,10 @@ public class Packet_ClientDeathSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -7777,11 +3368,10 @@ public class Packet_ClientDeathSerializer
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ClientDeath instance)
     {
-        if (instance.Reason != Packet_DeathReasonEnum.FallDamage)
-        {
-            // Key for field: 1, Varint
+        if (instance.Reason != DeathReason.FallDamage)
+        {            // Key for field: 1, Varint
             stream.WriteByte(8);
-            ProtocolParser.WriteUInt64(stream, instance.Reason);
+            ProtocolParser.WriteUInt64(stream, (int)instance.Reason);
         }
         // Key for field: 2, Varint
         stream.WriteByte(16);
@@ -7790,8 +3380,7 @@ public class Packet_ClientDeathSerializer
 }
 
 public class Packet_ClientServerQuerySerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientServerQuery DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientServerQuery instance = new Packet_ClientServerQuery();
@@ -7818,14 +3407,11 @@ public class Packet_ClientServerQuerySerializer
             if (keyByte == -1)
                 //throw new System.IO.EndOfStreamException();
                 return null;
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
+
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -7841,13 +3427,11 @@ public class Packet_ClientServerQuerySerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ClientServerQuery instance)
-    {
-    }
+    { }
 }
 
 public class Packet_ClientGameResolutionSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientGameResolution DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientGameResolution instance = new Packet_ClientGameResolution();
@@ -7876,8 +3460,7 @@ public class Packet_ClientGameResolutionSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.Width = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -7888,14 +3471,10 @@ public class Packet_ClientGameResolutionSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -7911,8 +3490,7 @@ public class Packet_ClientGameResolutionSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ClientGameResolution instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.Width);
         // Key for field: 2, Varint
@@ -7922,8 +3500,7 @@ public class Packet_ClientGameResolutionSerializer
 }
 
 public class Packet_ClientSerializer
-{
-    /// <summary>Helper: put the buffer into a MemoryStream before deserializing</summary>
+{    /// <summary>Helper: put the buffer into a MemoryStream before deserializing</summary>
     public static Packet_Client DeserializeBuffer(byte[] buffer, int length, Packet_Client instance)
     {
         MemoryStream ms = new(buffer, 0, length);
@@ -7934,7 +3511,7 @@ public class Packet_ClientSerializer
     /// <summary>Takes the remaining content of the stream and deserialze it into the instance.</summary>
     public static Packet_Client Deserialize(Stream stream, Packet_Client instance)
     {
-        instance.Id = Packet_ClientIdEnum.PlayerIdentification;
+        instance.Id = PacketType.PlayerIdentification;
         while (true)
         {
             int keyByte = stream.ReadByte();
@@ -7942,10 +3519,9 @@ public class Packet_ClientSerializer
                 break;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
-                    instance.Id = ProtocolParser.ReadUInt64(stream);
+                    instance.Id = (PacketType)ProtocolParser.ReadUInt64(stream);
                     continue;
                 // Field 2 LengthDelimited
                 case 18:
@@ -8048,20 +3624,16 @@ public class Packet_ClientSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
                     return null;
                 case 31:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.FillArea == null)
                         instance.FillArea = Packet_ClientFillAreaSerializer.DeserializeLengthDelimitedNew(stream);
@@ -8069,7 +3641,7 @@ public class Packet_ClientSerializer
                         Packet_ClientFillAreaSerializer.DeserializeLengthDelimited(stream, instance.FillArea);
                     continue;
                 case 16:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.Reload == null)
                         instance.Reload = Packet_ClientReloadSerializer.DeserializeLengthDelimitedNew(stream);
@@ -8077,7 +3649,7 @@ public class Packet_ClientSerializer
                         Packet_ClientReloadSerializer.DeserializeLengthDelimited(stream, instance.Reload);
                     continue;
                 case 17:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.Oxygen == null)
                         instance.Oxygen = Packet_ClientOxygenSerializer.DeserializeLengthDelimitedNew(stream);
@@ -8085,7 +3657,7 @@ public class Packet_ClientSerializer
                         Packet_ClientOxygenSerializer.DeserializeLengthDelimited(stream, instance.Oxygen);
                     continue;
                 case 18:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.Death == null)
                         instance.Death = Packet_ClientDeathSerializer.DeserializeLengthDelimitedNew(stream);
@@ -8093,7 +3665,7 @@ public class Packet_ClientSerializer
                         Packet_ClientDeathSerializer.DeserializeLengthDelimited(stream, instance.Death);
                     continue;
                 case 19:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.Query == null)
                         instance.Query = Packet_ClientServerQuerySerializer.DeserializeLengthDelimitedNew(stream);
@@ -8101,7 +3673,7 @@ public class Packet_ClientSerializer
                         Packet_ClientServerQuerySerializer.DeserializeLengthDelimited(stream, instance.Query);
                     continue;
                 case 20:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.GameResolution == null)
                         instance.GameResolution = Packet_ClientGameResolutionSerializer.DeserializeLengthDelimitedNew(stream);
@@ -8109,7 +3681,7 @@ public class Packet_ClientSerializer
                         Packet_ClientGameResolutionSerializer.DeserializeLengthDelimited(stream, instance.GameResolution);
                     continue;
                 case 21:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.EntityInteraction == null)
                         instance.EntityInteraction = Packet_ClientEntityInteractionSerializer.DeserializeLengthDelimitedNew(stream);
@@ -8128,15 +3700,13 @@ public class Packet_ClientSerializer
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_Client instance)
     {
-        if (instance.Id != Packet_ClientIdEnum.PlayerIdentification)
-        {
-            // Key for field: 1, Varint
+        if (instance.Id != PacketType.PlayerIdentification)
+        {            // Key for field: 1, Varint
             stream.WriteByte(8);
-            ProtocolParser.WriteUInt64(stream, instance.Id);
+            ProtocolParser.WriteUInt64(stream, (int)instance.Id);
         }
         if (instance.Identification != null)
-        {
-            // Key for field: 2, LengthDelimited
+        {            // Key for field: 2, LengthDelimited
             stream.WriteByte(18);
             MemoryStream ms2 = new MemoryStream();
 
@@ -8149,12 +3719,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms2Length);
 
             stream.Write(ms2.GetBuffer(), 0, ms2Length);
-
-
         }
         if (instance.SetBlock != null)
-        {
-            // Key for field: 3, LengthDelimited
+        {            // Key for field: 3, LengthDelimited
             stream.WriteByte(26);
             MemoryStream ms3 = new MemoryStream();
 
@@ -8167,12 +3734,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms3Length);
 
             stream.Write(ms3.GetBuffer(), 0, ms3Length);
-
-
         }
         if (instance.FillArea != null)
-        {
-            // Key for field: 31, LengthDelimited
+        {            // Key for field: 31, LengthDelimited
             stream.WriteByte(250);
             stream.WriteByte(1);
             MemoryStream ms31 = new MemoryStream();
@@ -8186,12 +3750,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms31Length);
 
             stream.Write(ms31.GetBuffer(), 0, ms31Length);
-
-
         }
         if (instance.PositionAndOrientation != null)
-        {
-            // Key for field: 4, LengthDelimited
+        {            // Key for field: 4, LengthDelimited
             stream.WriteByte(34);
             MemoryStream ms4 = new MemoryStream();
 
@@ -8204,12 +3765,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms4Length);
 
             stream.Write(ms4.GetBuffer(), 0, ms4Length);
-
-
         }
         if (instance.Message != null)
-        {
-            // Key for field: 5, LengthDelimited
+        {            // Key for field: 5, LengthDelimited
             stream.WriteByte(42);
             MemoryStream ms5 = new MemoryStream();
 
@@ -8222,12 +3780,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms5Length);
 
             stream.Write(ms5.GetBuffer(), 0, ms5Length);
-
-
         }
         if (instance.Craft != null)
-        {
-            // Key for field: 6, LengthDelimited
+        {            // Key for field: 6, LengthDelimited
             stream.WriteByte(50);
             MemoryStream ms6 = new MemoryStream();
 
@@ -8240,12 +3795,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms6Length);
 
             stream.Write(ms6.GetBuffer(), 0, ms6Length);
-
-
         }
         if (instance.RequestBlob != null)
-        {
-            // Key for field: 7, LengthDelimited
+        {            // Key for field: 7, LengthDelimited
             stream.WriteByte(58);
             MemoryStream ms7 = new MemoryStream();
 
@@ -8258,12 +3810,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms7Length);
 
             stream.Write(ms7.GetBuffer(), 0, ms7Length);
-
-
         }
         if (instance.InventoryAction != null)
-        {
-            // Key for field: 8, LengthDelimited
+        {            // Key for field: 8, LengthDelimited
             stream.WriteByte(66);
             MemoryStream ms8 = new MemoryStream();
 
@@ -8276,12 +3825,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms8Length);
 
             stream.Write(ms8.GetBuffer(), 0, ms8Length);
-
-
         }
         if (instance.Health != null)
-        {
-            // Key for field: 9, LengthDelimited
+        {            // Key for field: 9, LengthDelimited
             stream.WriteByte(74);
             MemoryStream ms9 = new MemoryStream();
 
@@ -8294,12 +3840,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms9Length);
 
             stream.Write(ms9.GetBuffer(), 0, ms9Length);
-
-
         }
         if (instance.PingReply != null)
-        {
-            // Key for field: 10, LengthDelimited
+        {            // Key for field: 10, LengthDelimited
             stream.WriteByte(82);
             MemoryStream ms10 = new MemoryStream();
 
@@ -8312,12 +3855,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms10Length);
 
             stream.Write(ms10.GetBuffer(), 0, ms10Length);
-
-
         }
         if (instance.DialogClick_ != null)
-        {
-            // Key for field: 11, LengthDelimited
+        {            // Key for field: 11, LengthDelimited
             stream.WriteByte(90);
             MemoryStream ms11 = new MemoryStream();
 
@@ -8330,12 +3870,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms11Length);
 
             stream.Write(ms11.GetBuffer(), 0, ms11Length);
-
-
         }
         if (instance.Shot != null)
-        {
-            // Key for field: 12, LengthDelimited
+        {            // Key for field: 12, LengthDelimited
             stream.WriteByte(98);
             MemoryStream ms12 = new MemoryStream();
 
@@ -8348,12 +3885,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms12Length);
 
             stream.Write(ms12.GetBuffer(), 0, ms12Length);
-
-
         }
         if (instance.SpecialKey_ != null)
-        {
-            // Key for field: 13, LengthDelimited
+        {            // Key for field: 13, LengthDelimited
             stream.WriteByte(106);
             MemoryStream ms13 = new MemoryStream();
 
@@ -8366,12 +3900,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms13Length);
 
             stream.Write(ms13.GetBuffer(), 0, ms13Length);
-
-
         }
         if (instance.ActiveMaterialSlot != null)
-        {
-            // Key for field: 14, LengthDelimited
+        {            // Key for field: 14, LengthDelimited
             stream.WriteByte(114);
             MemoryStream ms14 = new MemoryStream();
 
@@ -8384,12 +3915,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms14Length);
 
             stream.Write(ms14.GetBuffer(), 0, ms14Length);
-
-
         }
         if (instance.Leave != null)
-        {
-            // Key for field: 15, LengthDelimited
+        {            // Key for field: 15, LengthDelimited
             stream.WriteByte(122);
             MemoryStream ms15 = new MemoryStream();
 
@@ -8402,12 +3930,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms15Length);
 
             stream.Write(ms15.GetBuffer(), 0, ms15Length);
-
-
         }
         if (instance.Reload != null)
-        {
-            // Key for field: 16, LengthDelimited
+        {            // Key for field: 16, LengthDelimited
             stream.WriteByte(130);
             stream.WriteByte(1);
             MemoryStream ms16 = new MemoryStream();
@@ -8421,12 +3946,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms16Length);
 
             stream.Write(ms16.GetBuffer(), 0, ms16Length);
-
-
         }
         if (instance.Oxygen != null)
-        {
-            // Key for field: 17, LengthDelimited
+        {            // Key for field: 17, LengthDelimited
             stream.WriteByte(138);
             stream.WriteByte(1);
             MemoryStream ms17 = new MemoryStream();
@@ -8440,12 +3962,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms17Length);
 
             stream.Write(ms17.GetBuffer(), 0, ms17Length);
-
-
         }
         if (instance.Death != null)
-        {
-            // Key for field: 18, LengthDelimited
+        {            // Key for field: 18, LengthDelimited
             stream.WriteByte(146);
             stream.WriteByte(1);
             MemoryStream ms18 = new MemoryStream();
@@ -8459,12 +3978,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms18Length);
 
             stream.Write(ms18.GetBuffer(), 0, ms18Length);
-
-
         }
         if (instance.Query != null)
-        {
-            // Key for field: 19, LengthDelimited
+        {            // Key for field: 19, LengthDelimited
             stream.WriteByte(154);
             stream.WriteByte(1);
             MemoryStream ms19 = new MemoryStream();
@@ -8478,12 +3994,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms19Length);
 
             stream.Write(ms19.GetBuffer(), 0, ms19Length);
-
-
         }
         if (instance.GameResolution != null)
-        {
-            // Key for field: 20, LengthDelimited
+        {            // Key for field: 20, LengthDelimited
             stream.WriteByte(162);
             stream.WriteByte(1);
             MemoryStream ms20 = new MemoryStream();
@@ -8497,12 +4010,9 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms20Length);
 
             stream.Write(ms20.GetBuffer(), 0, ms20Length);
-
-
         }
         if (instance.EntityInteraction != null)
-        {
-            // Key for field: 21, LengthDelimited
+        {            // Key for field: 21, LengthDelimited
             stream.WriteByte(170);
             stream.WriteByte(1);
             MemoryStream ms21 = new MemoryStream();
@@ -8516,15 +4026,12 @@ public class Packet_ClientSerializer
             ProtocolParser.WriteUInt32_(stream, ms21Length);
 
             stream.Write(ms21.GetBuffer(), 0, ms21Length);
-
-
         }
     }
 }
 
 public class Packet_ClientEntityInteractionSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ClientEntityInteraction DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ClientEntityInteraction instance = new Packet_ClientEntityInteraction();
@@ -8535,7 +4042,7 @@ public class Packet_ClientEntityInteractionSerializer
     /// <summary>Read the VarInt length prefix and the given number of bytes from the stream and deserialze it into the instance.</summary>
     public static Packet_ClientEntityInteraction DeserializeLengthDelimited(Stream stream, Packet_ClientEntityInteraction instance)
     {
-        instance.InteractionType = Packet_EntityInteractionTypeEnum.Use;
+        instance.InteractionType = PacketEntityInteractionType.Use;
         long limit = ProtocolParser.ReadUInt32(stream);
         limit += stream.Position;
         while (true)
@@ -8554,26 +4061,21 @@ public class Packet_ClientEntityInteractionSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.EntityId = ProtocolParser.ReadUInt64(stream);
                     continue;
                 // Field 2 Varint
                 case 16:
-                    instance.InteractionType = ProtocolParser.ReadUInt64(stream);
+                    instance.InteractionType = (PacketEntityInteractionType)ProtocolParser.ReadUInt64(stream);
                     continue;
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -8589,22 +4091,19 @@ public class Packet_ClientEntityInteractionSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ClientEntityInteraction instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.EntityId);
-        if (instance.InteractionType != Packet_EntityInteractionTypeEnum.Use)
-        {
-            // Key for field: 2, Varint
+        if (instance.InteractionType != PacketEntityInteractionType.Use)
+        {            // Key for field: 2, Varint
             stream.WriteByte(16);
-            ProtocolParser.WriteUInt64(stream, instance.InteractionType);
+            ProtocolParser.WriteUInt64(stream, (int)instance.InteractionType);
         }
     }
 }
 
 public class Packet_SoundSetSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_SoundSet DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_SoundSet instance = new Packet_SoundSet();
@@ -8675,8 +4174,7 @@ public class Packet_SoundSetSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     // repeated
                     instance.WalkAdd(ProtocolParser.ReadString(stream));
@@ -8714,14 +4212,10 @@ public class Packet_SoundSetSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -8812,8 +4306,7 @@ public class Packet_SoundSetSerializer
 }
 
 public class Packet_BlockTypeSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_BlockType DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_BlockType instance = new Packet_BlockType();
@@ -8824,7 +4317,7 @@ public class Packet_BlockTypeSerializer
     /// <summary>Read the VarInt length prefix and the given number of bytes from the stream and deserialze it into the instance.</summary>
     public static Packet_BlockType DeserializeLengthDelimited(Stream stream, Packet_BlockType instance)
     {
-        instance.DrawType = Packet_DrawTypeEnum.Empty;
+        instance.DrawType = DrawType.Empty;
         instance.WalkableType = Packet_WalkableTypeEnum.Empty;
         instance.PistolType = Packet_PistolTypeEnum.Normal;
         long limit = ProtocolParser.ReadUInt32(stream);
@@ -8845,8 +4338,7 @@ public class Packet_BlockTypeSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.TextureIdTop = ProtocolParser.ReadString(stream);
                     continue;
@@ -8876,7 +4368,7 @@ public class Packet_BlockTypeSerializer
                     continue;
                 // Field 8 Varint
                 case 64:
-                    instance.DrawType = ProtocolParser.ReadUInt64(stream);
+                    instance.DrawType = (DrawType)ProtocolParser.ReadUInt64(stream);
                     continue;
                 // Field 9 Varint
                 case 72:
@@ -8912,165 +4404,161 @@ public class Packet_BlockTypeSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
                     return null;
                 case 16:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.Strength = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 17:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     instance.Name = ProtocolParser.ReadString(stream);
                     continue;
                 case 18:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.IsBuildable = ProtocolParser.ReadBool(stream);
                     continue;
                 case 19:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.IsUsable = ProtocolParser.ReadBool(stream);
                     continue;
                 case 20:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.IsTool = ProtocolParser.ReadBool(stream);
                     continue;
                 case 21:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     instance.Handimage = ProtocolParser.ReadString(stream);
                     continue;
                 case 22:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.IsPistol = ProtocolParser.ReadBool(stream);
                     continue;
                 case 23:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.AimRadiusFloat = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 24:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.RecoilFloat = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 25:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.DelayFloat = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 26:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.BulletsPerShotFloat = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 27:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.WalkSpeedWhenUsedFloat = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 28:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.IronSightsEnabled = ProtocolParser.ReadBool(stream);
                     continue;
                 case 29:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.IronSightsMoveSpeedFloat = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 30:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     instance.IronSightsImage = ProtocolParser.ReadString(stream);
                     continue;
                 case 31:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.IronSightsAimRadiusFloat = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 32:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.IronSightsFovFloat = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 33:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.AmmoMagazine = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 34:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.AmmoTotal = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 35:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.ReloadDelayFloat = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 36:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.ExplosionRangeFloat = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 37:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.ExplosionTimeFloat = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 38:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.ProjectileSpeedFloat = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 39:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.ProjectileBounce = ProtocolParser.ReadBool(stream);
                     continue;
                 case 40:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.DamageBodyFloat = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 41:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.DamageHeadFloat = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 42:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.PistolType = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 43:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.DamageToPlayer = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 44:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.WhenPlacedGetsConvertedTo = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 45:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.PickDistanceWhenUsedFloat = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -9087,56 +4575,47 @@ public class Packet_BlockTypeSerializer
     public static void Serialize(Stream stream, Packet_BlockType instance)
     {
         if (instance.TextureIdTop != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.TextureIdTop));
         }
         if (instance.TextureIdBottom != null)
-        {
-            // Key for field: 2, LengthDelimited
+        {            // Key for field: 2, LengthDelimited
             stream.WriteByte(18);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.TextureIdBottom));
         }
         if (instance.TextureIdFront != null)
-        {
-            // Key for field: 3, LengthDelimited
+        {            // Key for field: 3, LengthDelimited
             stream.WriteByte(26);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.TextureIdFront));
         }
         if (instance.TextureIdBack != null)
-        {
-            // Key for field: 4, LengthDelimited
+        {            // Key for field: 4, LengthDelimited
             stream.WriteByte(34);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.TextureIdBack));
         }
         if (instance.TextureIdLeft != null)
-        {
-            // Key for field: 5, LengthDelimited
+        {            // Key for field: 5, LengthDelimited
             stream.WriteByte(42);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.TextureIdLeft));
         }
         if (instance.TextureIdRight != null)
-        {
-            // Key for field: 6, LengthDelimited
+        {            // Key for field: 6, LengthDelimited
             stream.WriteByte(50);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.TextureIdRight));
         }
         if (instance.TextureIdForInventory != null)
-        {
-            // Key for field: 7, LengthDelimited
+        {            // Key for field: 7, LengthDelimited
             stream.WriteByte(58);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.TextureIdForInventory));
         }
-        if (instance.DrawType != Packet_DrawTypeEnum.Empty)
-        {
-            // Key for field: 8, Varint
+        if (instance.DrawType != DrawType.Empty)
+        {            // Key for field: 8, Varint
             stream.WriteByte(64);
-            ProtocolParser.WriteUInt64(stream, instance.DrawType);
+            ProtocolParser.WriteUInt64(stream, (int)instance.DrawType);
         }
         if (instance.WalkableType != Packet_WalkableTypeEnum.Empty)
-        {
-            // Key for field: 9, Varint
+        {            // Key for field: 9, Varint
             stream.WriteByte(72);
             ProtocolParser.WriteUInt64(stream, instance.WalkableType);
         }
@@ -9150,8 +4629,7 @@ public class Packet_BlockTypeSerializer
         stream.WriteByte(96);
         ProtocolParser.WriteBool(stream, instance.IsSlipperyWalk);
         if (instance.Sounds != null)
-        {
-            // Key for field: 13, LengthDelimited
+        {            // Key for field: 13, LengthDelimited
             stream.WriteByte(106);
             MemoryStream ms13 = new MemoryStream();
 
@@ -9165,7 +4643,6 @@ public class Packet_BlockTypeSerializer
 
             stream.Write(ms13.GetBuffer(), 0, ms13Length);
 
-
         }
         // Key for field: 14, Varint
         stream.WriteByte(112);
@@ -9178,8 +4655,7 @@ public class Packet_BlockTypeSerializer
         stream.WriteByte(1);
         ProtocolParser.WriteUInt64(stream, instance.Strength);
         if (instance.Name != null)
-        {
-            // Key for field: 17, LengthDelimited
+        {            // Key for field: 17, LengthDelimited
             stream.WriteByte(138);
             stream.WriteByte(1);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Name));
@@ -9197,8 +4673,7 @@ public class Packet_BlockTypeSerializer
         stream.WriteByte(1);
         ProtocolParser.WriteBool(stream, instance.IsTool);
         if (instance.Handimage != null)
-        {
-            // Key for field: 21, LengthDelimited
+        {            // Key for field: 21, LengthDelimited
             stream.WriteByte(170);
             stream.WriteByte(1);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Handimage));
@@ -9236,8 +4711,7 @@ public class Packet_BlockTypeSerializer
         stream.WriteByte(1);
         ProtocolParser.WriteUInt64(stream, instance.IronSightsMoveSpeedFloat);
         if (instance.IronSightsImage != null)
-        {
-            // Key for field: 30, LengthDelimited
+        {            // Key for field: 30, LengthDelimited
             stream.WriteByte(242);
             stream.WriteByte(1);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.IronSightsImage));
@@ -9287,8 +4761,7 @@ public class Packet_BlockTypeSerializer
         stream.WriteByte(2);
         ProtocolParser.WriteUInt64(stream, instance.DamageHeadFloat);
         if (instance.PistolType != Packet_PistolTypeEnum.Normal)
-        {
-            // Key for field: 42, Varint
+        {            // Key for field: 42, Varint
             stream.WriteByte(208);
             stream.WriteByte(2);
             ProtocolParser.WriteUInt64(stream, instance.PistolType);
@@ -9309,8 +4782,7 @@ public class Packet_BlockTypeSerializer
 }
 
 public class Packet_ServerIdentificationSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerIdentification DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerIdentification instance = new Packet_ServerIdentification();
@@ -9339,8 +4811,7 @@ public class Packet_ServerIdentificationSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.MdProtocolVersion = ProtocolParser.ReadString(stream);
                     continue;
@@ -9397,14 +4868,10 @@ public class Packet_ServerIdentificationSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -9422,8 +4889,7 @@ public class Packet_ServerIdentificationSerializer
     public static void Serialize(Stream stream, Packet_ServerIdentification instance)
     {
         if (instance.MdProtocolVersion != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.MdProtocolVersion));
         }
@@ -9431,14 +4897,12 @@ public class Packet_ServerIdentificationSerializer
         stream.WriteByte(16);
         ProtocolParser.WriteUInt64(stream, instance.AssignedClientId);
         if (instance.ServerName != null)
-        {
-            // Key for field: 3, LengthDelimited
+        {            // Key for field: 3, LengthDelimited
             stream.WriteByte(26);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.ServerName));
         }
         if (instance.ServerMotd != null)
-        {
-            // Key for field: 4, LengthDelimited
+        {            // Key for field: 4, LengthDelimited
             stream.WriteByte(34);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.ServerMotd));
         }
@@ -9461,8 +4925,7 @@ public class Packet_ServerIdentificationSerializer
         stream.WriteByte(104);
         ProtocolParser.WriteUInt64(stream, instance.RenderHint_);
         if (instance.RequiredBlobMd5 != null)
-        {
-            // Key for field: 14, LengthDelimited
+        {            // Key for field: 14, LengthDelimited
             stream.WriteByte(114);
             MemoryStream ms14 = new MemoryStream();
 
@@ -9476,11 +4939,9 @@ public class Packet_ServerIdentificationSerializer
 
             stream.Write(ms14.GetBuffer(), 0, ms14Length);
 
-
         }
         if (instance.RequiredBlobName != null)
-        {
-            // Key for field: 15, LengthDelimited
+        {            // Key for field: 15, LengthDelimited
             stream.WriteByte(122);
             MemoryStream ms15 = new MemoryStream();
 
@@ -9494,14 +4955,12 @@ public class Packet_ServerIdentificationSerializer
 
             stream.Write(ms15.GetBuffer(), 0, ms15Length);
 
-
         }
     }
 }
 
 public class Packet_StringListSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_StringList DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_StringList instance = new Packet_StringList();
@@ -9536,8 +4995,7 @@ public class Packet_StringListSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     // repeated
                     instance.ItemsAdd(ProtocolParser.ReadString(stream));
@@ -9545,14 +5003,10 @@ public class Packet_StringListSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -9583,8 +5037,7 @@ public class Packet_StringListSerializer
 }
 
 public class Packet_ServerPlayerSpawnPositionSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerPlayerSpawnPosition DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerPlayerSpawnPosition instance = new Packet_ServerPlayerSpawnPosition();
@@ -9613,8 +5066,7 @@ public class Packet_ServerPlayerSpawnPositionSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.X = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -9629,14 +5081,10 @@ public class Packet_ServerPlayerSpawnPositionSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -9652,8 +5100,7 @@ public class Packet_ServerPlayerSpawnPositionSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerPlayerSpawnPosition instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.X);
         // Key for field: 2, Varint
@@ -9666,8 +5113,7 @@ public class Packet_ServerPlayerSpawnPositionSerializer
 }
 
 public class Packet_ServerLevelInitializeSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerLevelInitialize DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerLevelInitialize instance = new Packet_ServerLevelInitialize();
@@ -9694,14 +5140,11 @@ public class Packet_ServerLevelInitializeSerializer
             if (keyByte == -1)
                 //throw new System.IO.EndOfStreamException();
                 return null;
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
+
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -9717,13 +5160,11 @@ public class Packet_ServerLevelInitializeSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerLevelInitialize instance)
-    {
-    }
+    { }
 }
 
 public class Packet_ServerBlobInitializeSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerBlobInitialize DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerBlobInitialize instance = new Packet_ServerBlobInitialize();
@@ -9752,8 +5193,7 @@ public class Packet_ServerBlobInitializeSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 2 LengthDelimited
+            {                // Field 2 LengthDelimited
                 case 18:
                     instance.Name = ProtocolParser.ReadString(stream);
                     continue;
@@ -9764,14 +5204,10 @@ public class Packet_ServerBlobInitializeSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -9789,14 +5225,12 @@ public class Packet_ServerBlobInitializeSerializer
     public static void Serialize(Stream stream, Packet_ServerBlobInitialize instance)
     {
         if (instance.Name != null)
-        {
-            // Key for field: 2, LengthDelimited
+        {            // Key for field: 2, LengthDelimited
             stream.WriteByte(18);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Name));
         }
         if (instance.Md5 != null)
-        {
-            // Key for field: 3, LengthDelimited
+        {            // Key for field: 3, LengthDelimited
             stream.WriteByte(26);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Md5));
         }
@@ -9804,8 +5238,7 @@ public class Packet_ServerBlobInitializeSerializer
 }
 
 public class Packet_ServerBlobPartSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerBlobPart DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerBlobPart instance = new Packet_ServerBlobPart();
@@ -9834,8 +5267,7 @@ public class Packet_ServerBlobPartSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.Data = ProtocolParser.ReadBytes(stream);
                     continue;
@@ -9846,14 +5278,10 @@ public class Packet_ServerBlobPartSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -9871,8 +5299,7 @@ public class Packet_ServerBlobPartSerializer
     public static void Serialize(Stream stream, Packet_ServerBlobPart instance)
     {
         if (instance.Data != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, instance.Data);
         }
@@ -9883,8 +5310,7 @@ public class Packet_ServerBlobPartSerializer
 }
 
 public class Packet_ServerBlobFinalizeSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerBlobFinalize DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerBlobFinalize instance = new Packet_ServerBlobFinalize();
@@ -9911,14 +5337,11 @@ public class Packet_ServerBlobFinalizeSerializer
             if (keyByte == -1)
                 //throw new System.IO.EndOfStreamException();
                 return null;
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
+
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -9934,13 +5357,11 @@ public class Packet_ServerBlobFinalizeSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerBlobFinalize instance)
-    {
-    }
+    { }
 }
 
 public class Packet_ServerBlockTypesSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerBlockTypes DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerBlockTypes instance = new Packet_ServerBlockTypes();
@@ -9967,14 +5388,11 @@ public class Packet_ServerBlockTypesSerializer
             if (keyByte == -1)
                 //throw new System.IO.EndOfStreamException();
                 return null;
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
+
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -9990,13 +5408,11 @@ public class Packet_ServerBlockTypesSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerBlockTypes instance)
-    {
-    }
+    { }
 }
 
 public class Packet_ServerBlockTypeSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerBlockType DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerBlockType instance = new Packet_ServerBlockType();
@@ -10025,8 +5441,7 @@ public class Packet_ServerBlockTypeSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.Id = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -10040,14 +5455,10 @@ public class Packet_ServerBlockTypeSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -10063,13 +5474,11 @@ public class Packet_ServerBlockTypeSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerBlockType instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.Id);
         if (instance.Blocktype != null)
-        {
-            // Key for field: 2, LengthDelimited
+        {            // Key for field: 2, LengthDelimited
             stream.WriteByte(18);
             MemoryStream ms2 = new MemoryStream();
 
@@ -10087,8 +5496,7 @@ public class Packet_ServerBlockTypeSerializer
 }
 
 public class Packet_ServerSunLevelsSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerSunLevels DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerSunLevels instance = new Packet_ServerSunLevels();
@@ -10123,8 +5531,7 @@ public class Packet_ServerSunLevelsSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     // repeated
                     instance.SunlevelsAdd(ProtocolParser.ReadUInt64(stream));
@@ -10132,14 +5539,10 @@ public class Packet_ServerSunLevelsSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -10170,8 +5573,7 @@ public class Packet_ServerSunLevelsSerializer
 }
 
 public class Packet_ServerLightLevelsSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerLightLevels DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerLightLevels instance = new Packet_ServerLightLevels();
@@ -10206,8 +5608,7 @@ public class Packet_ServerLightLevelsSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     // repeated
                     instance.LightlevelsAdd(ProtocolParser.ReadUInt64(stream));
@@ -10215,14 +5616,10 @@ public class Packet_ServerLightLevelsSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -10253,8 +5650,7 @@ public class Packet_ServerLightLevelsSerializer
 }
 
 public class Packet_ServerCraftingRecipesSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerCraftingRecipes DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerCraftingRecipes instance = new Packet_ServerCraftingRecipes();
@@ -10289,8 +5685,7 @@ public class Packet_ServerCraftingRecipesSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     // repeated
                     instance.CraftingRecipesAdd(Packet_CraftingRecipeSerializer.DeserializeLengthDelimitedNew(stream));
@@ -10298,14 +5693,10 @@ public class Packet_ServerCraftingRecipesSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -10340,16 +5731,13 @@ public class Packet_ServerCraftingRecipesSerializer
                 ProtocolParser.WriteUInt32_(stream, ms1Length);
 
                 stream.Write(ms1.GetBuffer(), 0, ms1Length);
-
-
             }
         }
     }
 }
 
 public class Packet_IngredientSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_Ingredient DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_Ingredient instance = new Packet_Ingredient();
@@ -10378,8 +5766,7 @@ public class Packet_IngredientSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.Type = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -10390,14 +5777,10 @@ public class Packet_IngredientSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -10413,8 +5796,7 @@ public class Packet_IngredientSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_Ingredient instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.Type);
         // Key for field: 2, Varint
@@ -10424,8 +5806,7 @@ public class Packet_IngredientSerializer
 }
 
 public class Packet_CraftingRecipeSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_CraftingRecipe DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_CraftingRecipe instance = new Packet_CraftingRecipe();
@@ -10460,8 +5841,7 @@ public class Packet_CraftingRecipeSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     // repeated
                     instance.IngredientsAdd(Packet_IngredientSerializer.DeserializeLengthDelimitedNew(stream));
@@ -10476,14 +5856,10 @@ public class Packet_CraftingRecipeSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -10519,12 +5895,10 @@ public class Packet_CraftingRecipeSerializer
 
                 stream.Write(ms1.GetBuffer(), 0, ms1Length);
 
-
             }
         }
         if (instance.Output != null)
-        {
-            // Key for field: 2, LengthDelimited
+        {            // Key for field: 2, LengthDelimited
             stream.WriteByte(18);
             MemoryStream ms2 = new MemoryStream();
 
@@ -10538,14 +5912,12 @@ public class Packet_CraftingRecipeSerializer
 
             stream.Write(ms2.GetBuffer(), 0, ms2Length);
 
-
         }
     }
 }
 
 public class Packet_ServerLevelProgressSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerLevelProgress DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerLevelProgress instance = new Packet_ServerLevelProgress();
@@ -10574,8 +5946,7 @@ public class Packet_ServerLevelProgressSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 2 Varint
+            {                // Field 2 Varint
                 case 16:
                     instance.PercentComplete = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -10590,14 +5961,10 @@ public class Packet_ServerLevelProgressSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -10613,13 +5980,11 @@ public class Packet_ServerLevelProgressSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerLevelProgress instance)
-    {
-        // Key for field: 2, Varint
+    {        // Key for field: 2, Varint
         stream.WriteByte(16);
         ProtocolParser.WriteUInt64(stream, instance.PercentComplete);
         if (instance.Status != null)
-        {
-            // Key for field: 3, LengthDelimited
+        {            // Key for field: 3, LengthDelimited
             stream.WriteByte(26);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Status));
         }
@@ -10630,8 +5995,7 @@ public class Packet_ServerLevelProgressSerializer
 }
 
 public class Packet_ServerLevelFinalizeSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerLevelFinalize DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerLevelFinalize instance = new Packet_ServerLevelFinalize();
@@ -10658,14 +6022,11 @@ public class Packet_ServerLevelFinalizeSerializer
             if (keyByte == -1)
                 //throw new System.IO.EndOfStreamException();
                 return null;
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
+
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -10681,13 +6042,11 @@ public class Packet_ServerLevelFinalizeSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerLevelFinalize instance)
-    {
-    }
+    { }
 }
 
 public class Packet_ServerSetBlockSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerSetBlock DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerSetBlock instance = new Packet_ServerSetBlock();
@@ -10716,8 +6075,7 @@ public class Packet_ServerSetBlockSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.X = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -10736,14 +6094,10 @@ public class Packet_ServerSetBlockSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -10759,8 +6113,7 @@ public class Packet_ServerSetBlockSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerSetBlock instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.X);
         // Key for field: 2, Varint
@@ -10776,8 +6129,7 @@ public class Packet_ServerSetBlockSerializer
 }
 
 public class Packet_ServerFillAreaSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerFillArea DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerFillArea instance = new Packet_ServerFillArea();
@@ -10806,8 +6158,7 @@ public class Packet_ServerFillAreaSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.X1 = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -10842,14 +6193,10 @@ public class Packet_ServerFillAreaSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -10865,8 +6212,7 @@ public class Packet_ServerFillAreaSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerFillArea instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.X1);
         // Key for field: 2, Varint
@@ -10894,8 +6240,7 @@ public class Packet_ServerFillAreaSerializer
 }
 
 public class Packet_ServerFillAreaLimitSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerFillAreaLimit DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerFillAreaLimit instance = new Packet_ServerFillAreaLimit();
@@ -10924,22 +6269,17 @@ public class Packet_ServerFillAreaLimitSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.Limit = ProtocolParser.ReadUInt64(stream);
                     continue;
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -10955,16 +6295,14 @@ public class Packet_ServerFillAreaLimitSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerFillAreaLimit instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.Limit);
     }
 }
 
 public class Packet_ServerFreemoveSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerFreemove DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerFreemove instance = new Packet_ServerFreemove();
@@ -10993,22 +6331,17 @@ public class Packet_ServerFreemoveSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.IsEnabled = ProtocolParser.ReadUInt64(stream);
                     continue;
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -11024,16 +6357,14 @@ public class Packet_ServerFreemoveSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerFreemove instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.IsEnabled);
     }
 }
 
 public class Packet_ServerMessageSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerMessage DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerMessage instance = new Packet_ServerMessage();
@@ -11062,22 +6393,17 @@ public class Packet_ServerMessageSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 2 LengthDelimited
+            {                // Field 2 LengthDelimited
                 case 18:
                     instance.Message = ProtocolParser.ReadString(stream);
                     continue;
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -11095,8 +6421,7 @@ public class Packet_ServerMessageSerializer
     public static void Serialize(Stream stream, Packet_ServerMessage instance)
     {
         if (instance.Message != null)
-        {
-            // Key for field: 2, LengthDelimited
+        {            // Key for field: 2, LengthDelimited
             stream.WriteByte(18);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Message));
         }
@@ -11104,8 +6429,7 @@ public class Packet_ServerMessageSerializer
 }
 
 public class Packet_ServerDisconnectPlayerSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerDisconnectPlayer DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerDisconnectPlayer instance = new Packet_ServerDisconnectPlayer();
@@ -11134,22 +6458,17 @@ public class Packet_ServerDisconnectPlayerSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.DisconnectReason = ProtocolParser.ReadString(stream);
                     continue;
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -11167,8 +6486,7 @@ public class Packet_ServerDisconnectPlayerSerializer
     public static void Serialize(Stream stream, Packet_ServerDisconnectPlayer instance)
     {
         if (instance.DisconnectReason != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.DisconnectReason));
         }
@@ -11176,8 +6494,7 @@ public class Packet_ServerDisconnectPlayerSerializer
 }
 
 public class Packet_ServerSoundSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerSound DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerSound instance = new Packet_ServerSound();
@@ -11206,8 +6523,7 @@ public class Packet_ServerSoundSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.Name = ProtocolParser.ReadString(stream);
                     continue;
@@ -11226,14 +6542,10 @@ public class Packet_ServerSoundSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -11251,8 +6563,7 @@ public class Packet_ServerSoundSerializer
     public static void Serialize(Stream stream, Packet_ServerSound instance)
     {
         if (instance.Name != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Name));
         }
@@ -11269,8 +6580,7 @@ public class Packet_ServerSoundSerializer
 }
 
 public class Packet_ServerFollowSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerFollow DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerFollow instance = new Packet_ServerFollow();
@@ -11299,8 +6609,7 @@ public class Packet_ServerFollowSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.Client = ProtocolParser.ReadString(stream);
                     continue;
@@ -11311,14 +6620,10 @@ public class Packet_ServerFollowSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -11336,8 +6641,7 @@ public class Packet_ServerFollowSerializer
     public static void Serialize(Stream stream, Packet_ServerFollow instance)
     {
         if (instance.Client != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Client));
         }
@@ -11348,8 +6652,7 @@ public class Packet_ServerFollowSerializer
 }
 
 public class Packet_ServerBulletSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerBullet DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerBullet instance = new Packet_ServerBullet();
@@ -11378,8 +6681,7 @@ public class Packet_ServerBulletSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.FromXFloat = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -11410,14 +6712,10 @@ public class Packet_ServerBulletSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -11433,8 +6731,7 @@ public class Packet_ServerBulletSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerBullet instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.FromXFloat);
         // Key for field: 2, Varint
@@ -11459,8 +6756,7 @@ public class Packet_ServerBulletSerializer
 }
 
 public class Packet_ServerProjectileSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerProjectile DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerProjectile instance = new Packet_ServerProjectile();
@@ -11489,8 +6785,7 @@ public class Packet_ServerProjectileSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.FromXFloat = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -11529,14 +6824,10 @@ public class Packet_ServerProjectileSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -11552,8 +6843,7 @@ public class Packet_ServerProjectileSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerProjectile instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.FromXFloat);
         // Key for field: 2, Varint
@@ -11584,8 +6874,7 @@ public class Packet_ServerProjectileSerializer
 }
 
 public class Packet_ServerExplosionSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerExplosion DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerExplosion instance = new Packet_ServerExplosion();
@@ -11614,8 +6903,7 @@ public class Packet_ServerExplosionSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.XFloat = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -11642,14 +6930,10 @@ public class Packet_ServerExplosionSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -11665,8 +6949,7 @@ public class Packet_ServerExplosionSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerExplosion instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.XFloat);
         // Key for field: 2, Varint
@@ -11688,8 +6971,7 @@ public class Packet_ServerExplosionSerializer
 }
 
 public class Packet_ServerQueryAnswerSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerQueryAnswer DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerQueryAnswer instance = new Packet_ServerQueryAnswer();
@@ -11718,8 +7000,7 @@ public class Packet_ServerQueryAnswerSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.Name = ProtocolParser.ReadString(stream);
                     continue;
@@ -11778,14 +7059,10 @@ public class Packet_ServerQueryAnswerSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -11803,14 +7080,12 @@ public class Packet_ServerQueryAnswerSerializer
     public static void Serialize(Stream stream, Packet_ServerQueryAnswer instance)
     {
         if (instance.Name != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Name));
         }
         if (instance.MOTD != null)
-        {
-            // Key for field: 2, LengthDelimited
+        {            // Key for field: 2, LengthDelimited
             stream.WriteByte(18);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.MOTD));
         }
@@ -11821,8 +7096,7 @@ public class Packet_ServerQueryAnswerSerializer
         stream.WriteByte(32);
         ProtocolParser.WriteUInt64(stream, instance.MaxPlayers);
         if (instance.PlayerList != null)
-        {
-            // Key for field: 5, LengthDelimited
+        {            // Key for field: 5, LengthDelimited
             stream.WriteByte(42);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.PlayerList));
         }
@@ -11830,8 +7104,7 @@ public class Packet_ServerQueryAnswerSerializer
         stream.WriteByte(48);
         ProtocolParser.WriteUInt64(stream, instance.Port);
         if (instance.GameMode != null)
-        {
-            // Key for field: 7, LengthDelimited
+        {            // Key for field: 7, LengthDelimited
             stream.WriteByte(58);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.GameMode));
         }
@@ -11839,14 +7112,12 @@ public class Packet_ServerQueryAnswerSerializer
         stream.WriteByte(64);
         ProtocolParser.WriteBool(stream, instance.Password);
         if (instance.PublicHash != null)
-        {
-            // Key for field: 9, LengthDelimited
+        {            // Key for field: 9, LengthDelimited
             stream.WriteByte(74);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.PublicHash));
         }
         if (instance.ServerVersion != null)
-        {
-            // Key for field: 10, LengthDelimited
+        {            // Key for field: 10, LengthDelimited
             stream.WriteByte(82);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.ServerVersion));
         }
@@ -11860,8 +7131,7 @@ public class Packet_ServerQueryAnswerSerializer
         stream.WriteByte(104);
         ProtocolParser.WriteUInt64(stream, instance.MapSizeZ);
         if (instance.ServerThumbnail != null)
-        {
-            // Key for field: 14, LengthDelimited
+        {            // Key for field: 14, LengthDelimited
             stream.WriteByte(114);
             ProtocolParser.WriteBytes(stream, instance.ServerThumbnail);
         }
@@ -11869,8 +7139,7 @@ public class Packet_ServerQueryAnswerSerializer
 }
 
 public class Packet_ServerRedirectSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerRedirect DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerRedirect instance = new Packet_ServerRedirect();
@@ -11899,8 +7168,7 @@ public class Packet_ServerRedirectSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.IP = ProtocolParser.ReadString(stream);
                     continue;
@@ -11911,14 +7179,10 @@ public class Packet_ServerRedirectSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -11936,8 +7200,7 @@ public class Packet_ServerRedirectSerializer
     public static void Serialize(Stream stream, Packet_ServerRedirect instance)
     {
         if (instance.IP != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.IP));
         }
@@ -11948,8 +7211,7 @@ public class Packet_ServerRedirectSerializer
 }
 
 public class Packet_ServerSerializer
-{
-    /// <summary>Helper: put the buffer into a MemoryStream before deserializing</summary>
+{    /// <summary>Helper: put the buffer into a MemoryStream before deserializing</summary>
     public static Packet_Server DeserializeBuffer(byte[] buffer, int length, Packet_Server instance)
     {
         MemoryStream ms = new MemoryStream(buffer, 0, length);
@@ -11968,8 +7230,7 @@ public class Packet_ServerSerializer
                 break;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     if (instance.Identification == null)
                         instance.Identification = Packet_ServerIdentificationSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12056,25 +7317,21 @@ public class Packet_ServerSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
                     return null;
                 case 90:
-                    if (key.GetWireType() != Wire.Varint)
+                    if (key.WireType != Wire.Varint)
                         break;
                     instance.Id = ProtocolParser.ReadUInt64(stream);
                     continue;
                 case 51:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.FillArea == null)
                         instance.FillArea = Packet_ServerFillAreaSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12082,7 +7339,7 @@ public class Packet_ServerSerializer
                         Packet_ServerFillAreaSerializer.DeserializeLengthDelimited(stream, instance.FillArea);
                     continue;
                 case 52:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.FillAreaLimit == null)
                         instance.FillAreaLimit = Packet_ServerFillAreaLimitSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12090,7 +7347,7 @@ public class Packet_ServerSerializer
                         Packet_ServerFillAreaLimitSerializer.DeserializeLengthDelimited(stream, instance.FillAreaLimit);
                     continue;
                 case 53:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.Freemove == null)
                         instance.Freemove = Packet_ServerFreemoveSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12098,7 +7355,7 @@ public class Packet_ServerSerializer
                         Packet_ServerFreemoveSerializer.DeserializeLengthDelimited(stream, instance.Freemove);
                     continue;
                 case 16:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.BlobFinalize == null)
                         instance.BlobFinalize = Packet_ServerBlobFinalizeSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12106,7 +7363,7 @@ public class Packet_ServerSerializer
                         Packet_ServerBlobFinalizeSerializer.DeserializeLengthDelimited(stream, instance.BlobFinalize);
                     continue;
                 case 17:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.HeightmapChunk == null)
                         instance.HeightmapChunk = Packet_ServerHeightmapChunkSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12114,7 +7371,7 @@ public class Packet_ServerSerializer
                         Packet_ServerHeightmapChunkSerializer.DeserializeLengthDelimited(stream, instance.HeightmapChunk);
                     continue;
                 case 18:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.Ping == null)
                         instance.Ping = Packet_ServerPingSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12122,7 +7379,7 @@ public class Packet_ServerSerializer
                         Packet_ServerPingSerializer.DeserializeLengthDelimited(stream, instance.Ping);
                     continue;
                 case 181:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.PlayerPing == null)
                         instance.PlayerPing = Packet_ServerPlayerPingSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12130,7 +7387,7 @@ public class Packet_ServerSerializer
                         Packet_ServerPlayerPingSerializer.DeserializeLengthDelimited(stream, instance.PlayerPing);
                     continue;
                 case 19:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.Sound == null)
                         instance.Sound = Packet_ServerSoundSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12138,7 +7395,7 @@ public class Packet_ServerSerializer
                         Packet_ServerSoundSerializer.DeserializeLengthDelimited(stream, instance.Sound);
                     continue;
                 case 20:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.PlayerStats == null)
                         instance.PlayerStats = Packet_ServerPlayerStatsSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12146,7 +7403,7 @@ public class Packet_ServerSerializer
                         Packet_ServerPlayerStatsSerializer.DeserializeLengthDelimited(stream, instance.PlayerStats);
                     continue;
                 case 21:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.Monster == null)
                         instance.Monster = Packet_ServerMonstersSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12154,7 +7411,7 @@ public class Packet_ServerSerializer
                         Packet_ServerMonstersSerializer.DeserializeLengthDelimited(stream, instance.Monster);
                     continue;
                 case 22:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.PlayerSpawnPosition == null)
                         instance.PlayerSpawnPosition = Packet_ServerPlayerSpawnPositionSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12162,7 +7419,7 @@ public class Packet_ServerSerializer
                         Packet_ServerPlayerSpawnPositionSerializer.DeserializeLengthDelimited(stream, instance.PlayerSpawnPosition);
                     continue;
                 case 23:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.BlockTypes == null)
                         instance.BlockTypes = Packet_ServerBlockTypesSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12170,7 +7427,7 @@ public class Packet_ServerSerializer
                         Packet_ServerBlockTypesSerializer.DeserializeLengthDelimited(stream, instance.BlockTypes);
                     continue;
                 case 24:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.SunLevels == null)
                         instance.SunLevels = Packet_ServerSunLevelsSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12178,7 +7435,7 @@ public class Packet_ServerSerializer
                         Packet_ServerSunLevelsSerializer.DeserializeLengthDelimited(stream, instance.SunLevels);
                     continue;
                 case 25:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.LightLevels == null)
                         instance.LightLevels = Packet_ServerLightLevelsSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12186,7 +7443,7 @@ public class Packet_ServerSerializer
                         Packet_ServerLightLevelsSerializer.DeserializeLengthDelimited(stream, instance.LightLevels);
                     continue;
                 case 26:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.CraftingRecipes == null)
                         instance.CraftingRecipes = Packet_ServerCraftingRecipesSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12194,7 +7451,7 @@ public class Packet_ServerSerializer
                         Packet_ServerCraftingRecipesSerializer.DeserializeLengthDelimited(stream, instance.CraftingRecipes);
                     continue;
                 case 27:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.Dialog == null)
                         instance.Dialog = Packet_ServerDialogSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12202,7 +7459,7 @@ public class Packet_ServerSerializer
                         Packet_ServerDialogSerializer.DeserializeLengthDelimited(stream, instance.Dialog);
                     continue;
                 case 28:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.Follow == null)
                         instance.Follow = Packet_ServerFollowSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12210,7 +7467,7 @@ public class Packet_ServerSerializer
                         Packet_ServerFollowSerializer.DeserializeLengthDelimited(stream, instance.Follow);
                     continue;
                 case 29:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.Bullet == null)
                         instance.Bullet = Packet_ServerBulletSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12218,7 +7475,7 @@ public class Packet_ServerSerializer
                         Packet_ServerBulletSerializer.DeserializeLengthDelimited(stream, instance.Bullet);
                     continue;
                 case 30:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.Ammo == null)
                         instance.Ammo = Packet_ServerAmmoSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12226,7 +7483,7 @@ public class Packet_ServerSerializer
                         Packet_ServerAmmoSerializer.DeserializeLengthDelimited(stream, instance.Ammo);
                     continue;
                 case 31:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.BlockType == null)
                         instance.BlockType = Packet_ServerBlockTypeSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12234,7 +7491,7 @@ public class Packet_ServerSerializer
                         Packet_ServerBlockTypeSerializer.DeserializeLengthDelimited(stream, instance.BlockType);
                     continue;
                 case 32:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.ChunkPart == null)
                         instance.ChunkPart = Packet_ServerChunkPartSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12242,7 +7499,7 @@ public class Packet_ServerSerializer
                         Packet_ServerChunkPartSerializer.DeserializeLengthDelimited(stream, instance.ChunkPart);
                     continue;
                 case 33:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.Explosion == null)
                         instance.Explosion = Packet_ServerExplosionSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12250,7 +7507,7 @@ public class Packet_ServerSerializer
                         Packet_ServerExplosionSerializer.DeserializeLengthDelimited(stream, instance.Explosion);
                     continue;
                 case 34:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.Projectile == null)
                         instance.Projectile = Packet_ServerProjectileSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12258,7 +7515,7 @@ public class Packet_ServerSerializer
                         Packet_ServerProjectileSerializer.DeserializeLengthDelimited(stream, instance.Projectile);
                     continue;
                 case 35:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.Translation == null)
                         instance.Translation = Packet_ServerTranslatedStringSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12266,7 +7523,7 @@ public class Packet_ServerSerializer
                         Packet_ServerTranslatedStringSerializer.DeserializeLengthDelimited(stream, instance.Translation);
                     continue;
                 case 36:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.QueryAnswer == null)
                         instance.QueryAnswer = Packet_ServerQueryAnswerSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12274,7 +7531,7 @@ public class Packet_ServerSerializer
                         Packet_ServerQueryAnswerSerializer.DeserializeLengthDelimited(stream, instance.QueryAnswer);
                     continue;
                 case 37:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.Redirect == null)
                         instance.Redirect = Packet_ServerRedirectSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12282,7 +7539,7 @@ public class Packet_ServerSerializer
                         Packet_ServerRedirectSerializer.DeserializeLengthDelimited(stream, instance.Redirect);
                     continue;
                 case 39:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.EntitySpawn == null)
                         instance.EntitySpawn = Packet_ServerEntitySpawnSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12290,7 +7547,7 @@ public class Packet_ServerSerializer
                         Packet_ServerEntitySpawnSerializer.DeserializeLengthDelimited(stream, instance.EntitySpawn);
                     continue;
                 case 40:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.EntityPosition == null)
                         instance.EntityPosition = Packet_ServerEntityPositionAndOrientationSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12298,7 +7555,7 @@ public class Packet_ServerSerializer
                         Packet_ServerEntityPositionAndOrientationSerializer.DeserializeLengthDelimited(stream, instance.EntityPosition);
                     continue;
                 case 41:
-                    if (key.GetWireType() != Wire.LengthDelimited)
+                    if (key.WireType != Wire.LengthDelimited)
                         break;
                     if (instance.EntityDespawn == null)
                         instance.EntityDespawn = Packet_ServerEntityDespawnSerializer.DeserializeLengthDelimitedNew(stream);
@@ -12318,15 +7575,13 @@ public class Packet_ServerSerializer
     public static void Serialize(Stream stream, Packet_Server instance)
     {
         if (instance.Id != Packet_ServerIdEnum.ServerIdentification)
-        {
-            // Key for field: 90, Varint
+        {            // Key for field: 90, Varint
             stream.WriteByte(208);
             stream.WriteByte(5);
             ProtocolParser.WriteUInt64(stream, instance.Id);
         }
         if (instance.Identification != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             MemoryStream ms1 = new MemoryStream();
 
@@ -12340,11 +7595,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms1.GetBuffer(), 0, ms1Length);
 
-
         }
         if (instance.LevelInitialize != null)
-        {
-            // Key for field: 2, LengthDelimited
+        {            // Key for field: 2, LengthDelimited
             stream.WriteByte(18);
             MemoryStream ms2 = new MemoryStream();
 
@@ -12358,11 +7611,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms2.GetBuffer(), 0, ms2Length);
 
-
         }
         if (instance.LevelDataChunk != null)
-        {
-            // Key for field: 3, LengthDelimited
+        {            // Key for field: 3, LengthDelimited
             stream.WriteByte(26);
             MemoryStream ms3 = new MemoryStream();
 
@@ -12376,11 +7627,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms3.GetBuffer(), 0, ms3Length);
 
-
         }
         if (instance.LevelFinalize != null)
-        {
-            // Key for field: 4, LengthDelimited
+        {            // Key for field: 4, LengthDelimited
             stream.WriteByte(34);
             MemoryStream ms4 = new MemoryStream();
 
@@ -12394,11 +7643,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms4.GetBuffer(), 0, ms4Length);
 
-
         }
         if (instance.SetBlock != null)
-        {
-            // Key for field: 5, LengthDelimited
+        {            // Key for field: 5, LengthDelimited
             stream.WriteByte(42);
             MemoryStream ms5 = new MemoryStream();
 
@@ -12412,11 +7659,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms5.GetBuffer(), 0, ms5Length);
 
-
         }
         if (instance.FillArea != null)
-        {
-            // Key for field: 51, LengthDelimited
+        {            // Key for field: 51, LengthDelimited
             stream.WriteByte(154);
             stream.WriteByte(3);
             MemoryStream ms51 = new MemoryStream();
@@ -12431,11 +7676,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms51.GetBuffer(), 0, ms51Length);
 
-
         }
         if (instance.FillAreaLimit != null)
-        {
-            // Key for field: 52, LengthDelimited
+        {            // Key for field: 52, LengthDelimited
             stream.WriteByte(162);
             stream.WriteByte(3);
             MemoryStream ms52 = new MemoryStream();
@@ -12450,11 +7693,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms52.GetBuffer(), 0, ms52Length);
 
-
         }
         if (instance.Freemove != null)
-        {
-            // Key for field: 53, LengthDelimited
+        {            // Key for field: 53, LengthDelimited
             stream.WriteByte(170);
             stream.WriteByte(3);
             MemoryStream ms53 = new MemoryStream();
@@ -12469,11 +7710,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms53.GetBuffer(), 0, ms53Length);
 
-
         }
         if (instance.Message != null)
-        {
-            // Key for field: 9, LengthDelimited
+        {            // Key for field: 9, LengthDelimited
             stream.WriteByte(74);
             MemoryStream ms9 = new MemoryStream();
 
@@ -12487,11 +7726,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms9.GetBuffer(), 0, ms9Length);
 
-
         }
         if (instance.DisconnectPlayer != null)
-        {
-            // Key for field: 10, LengthDelimited
+        {            // Key for field: 10, LengthDelimited
             stream.WriteByte(82);
             MemoryStream ms10 = new MemoryStream();
 
@@ -12505,11 +7742,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms10.GetBuffer(), 0, ms10Length);
 
-
         }
         if (instance.Chunk_ != null)
-        {
-            // Key for field: 11, LengthDelimited
+        {            // Key for field: 11, LengthDelimited
             stream.WriteByte(90);
             MemoryStream ms11 = new MemoryStream();
 
@@ -12523,11 +7758,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms11.GetBuffer(), 0, ms11Length);
 
-
         }
         if (instance.Inventory != null)
-        {
-            // Key for field: 12, LengthDelimited
+        {            // Key for field: 12, LengthDelimited
             stream.WriteByte(98);
             MemoryStream ms12 = new MemoryStream();
 
@@ -12541,11 +7774,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms12.GetBuffer(), 0, ms12Length);
 
-
         }
         if (instance.Season != null)
-        {
-            // Key for field: 13, LengthDelimited
+        {            // Key for field: 13, LengthDelimited
             stream.WriteByte(106);
             MemoryStream ms13 = new MemoryStream();
 
@@ -12559,11 +7790,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms13.GetBuffer(), 0, ms13Length);
 
-
         }
         if (instance.BlobInitialize != null)
-        {
-            // Key for field: 14, LengthDelimited
+        {            // Key for field: 14, LengthDelimited
             stream.WriteByte(114);
             MemoryStream ms14 = new MemoryStream();
 
@@ -12577,11 +7806,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms14.GetBuffer(), 0, ms14Length);
 
-
         }
         if (instance.BlobPart != null)
-        {
-            // Key for field: 15, LengthDelimited
+        {            // Key for field: 15, LengthDelimited
             stream.WriteByte(122);
             MemoryStream ms15 = new MemoryStream();
 
@@ -12595,11 +7822,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms15.GetBuffer(), 0, ms15Length);
 
-
         }
         if (instance.BlobFinalize != null)
-        {
-            // Key for field: 16, LengthDelimited
+        {            // Key for field: 16, LengthDelimited
             stream.WriteByte(130);
             stream.WriteByte(1);
             MemoryStream ms16 = new MemoryStream();
@@ -12614,11 +7839,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms16.GetBuffer(), 0, ms16Length);
 
-
         }
         if (instance.HeightmapChunk != null)
-        {
-            // Key for field: 17, LengthDelimited
+        {            // Key for field: 17, LengthDelimited
             stream.WriteByte(138);
             stream.WriteByte(1);
             MemoryStream ms17 = new MemoryStream();
@@ -12633,11 +7856,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms17.GetBuffer(), 0, ms17Length);
 
-
         }
         if (instance.Ping != null)
-        {
-            // Key for field: 18, LengthDelimited
+        {            // Key for field: 18, LengthDelimited
             stream.WriteByte(146);
             stream.WriteByte(1);
             MemoryStream ms18 = new MemoryStream();
@@ -12652,11 +7873,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms18.GetBuffer(), 0, ms18Length);
 
-
         }
         if (instance.PlayerPing != null)
-        {
-            // Key for field: 181, LengthDelimited
+        {            // Key for field: 181, LengthDelimited
             stream.WriteByte(170);
             stream.WriteByte(11);
             MemoryStream ms181 = new MemoryStream();
@@ -12671,11 +7890,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms181.GetBuffer(), 0, ms181Length);
 
-
         }
         if (instance.Sound != null)
-        {
-            // Key for field: 19, LengthDelimited
+        {            // Key for field: 19, LengthDelimited
             stream.WriteByte(154);
             stream.WriteByte(1);
             MemoryStream ms19 = new MemoryStream();
@@ -12690,11 +7907,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms19.GetBuffer(), 0, ms19Length);
 
-
         }
         if (instance.PlayerStats != null)
-        {
-            // Key for field: 20, LengthDelimited
+        {            // Key for field: 20, LengthDelimited
             stream.WriteByte(162);
             stream.WriteByte(1);
             MemoryStream ms20 = new MemoryStream();
@@ -12709,11 +7924,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms20.GetBuffer(), 0, ms20Length);
 
-
         }
         if (instance.Monster != null)
-        {
-            // Key for field: 21, LengthDelimited
+        {            // Key for field: 21, LengthDelimited
             stream.WriteByte(170);
             stream.WriteByte(1);
             MemoryStream ms21 = new MemoryStream();
@@ -12728,11 +7941,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms21.GetBuffer(), 0, ms21Length);
 
-
         }
         if (instance.PlayerSpawnPosition != null)
-        {
-            // Key for field: 22, LengthDelimited
+        {            // Key for field: 22, LengthDelimited
             stream.WriteByte(178);
             stream.WriteByte(1);
             MemoryStream ms22 = new MemoryStream();
@@ -12747,11 +7958,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms22.GetBuffer(), 0, ms22Length);
 
-
         }
         if (instance.BlockTypes != null)
-        {
-            // Key for field: 23, LengthDelimited
+        {            // Key for field: 23, LengthDelimited
             stream.WriteByte(186);
             stream.WriteByte(1);
             MemoryStream ms23 = new MemoryStream();
@@ -12766,11 +7975,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms23.GetBuffer(), 0, ms23Length);
 
-
         }
         if (instance.SunLevels != null)
-        {
-            // Key for field: 24, LengthDelimited
+        {            // Key for field: 24, LengthDelimited
             stream.WriteByte(194);
             stream.WriteByte(1);
             MemoryStream ms24 = new MemoryStream();
@@ -12785,11 +7992,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms24.GetBuffer(), 0, ms24Length);
 
-
         }
         if (instance.LightLevels != null)
-        {
-            // Key for field: 25, LengthDelimited
+        {            // Key for field: 25, LengthDelimited
             stream.WriteByte(202);
             stream.WriteByte(1);
             MemoryStream ms25 = new MemoryStream();
@@ -12804,11 +8009,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms25.GetBuffer(), 0, ms25Length);
 
-
         }
         if (instance.CraftingRecipes != null)
-        {
-            // Key for field: 26, LengthDelimited
+        {            // Key for field: 26, LengthDelimited
             stream.WriteByte(210);
             stream.WriteByte(1);
             MemoryStream ms26 = new MemoryStream();
@@ -12823,11 +8026,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms26.GetBuffer(), 0, ms26Length);
 
-
         }
         if (instance.Dialog != null)
-        {
-            // Key for field: 27, LengthDelimited
+        {            // Key for field: 27, LengthDelimited
             stream.WriteByte(218);
             stream.WriteByte(1);
             MemoryStream ms27 = new MemoryStream();
@@ -12842,11 +8043,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms27.GetBuffer(), 0, ms27Length);
 
-
         }
         if (instance.Follow != null)
-        {
-            // Key for field: 28, LengthDelimited
+        {            // Key for field: 28, LengthDelimited
             stream.WriteByte(226);
             stream.WriteByte(1);
             MemoryStream ms28 = new MemoryStream();
@@ -12861,11 +8060,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms28.GetBuffer(), 0, ms28Length);
 
-
         }
         if (instance.Bullet != null)
-        {
-            // Key for field: 29, LengthDelimited
+        {            // Key for field: 29, LengthDelimited
             stream.WriteByte(234);
             stream.WriteByte(1);
             MemoryStream ms29 = new MemoryStream();
@@ -12880,11 +8077,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms29.GetBuffer(), 0, ms29Length);
 
-
         }
         if (instance.Ammo != null)
-        {
-            // Key for field: 30, LengthDelimited
+        {            // Key for field: 30, LengthDelimited
             stream.WriteByte(242);
             stream.WriteByte(1);
             MemoryStream ms30 = new MemoryStream();
@@ -12899,11 +8094,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms30.GetBuffer(), 0, ms30Length);
 
-
         }
         if (instance.BlockType != null)
-        {
-            // Key for field: 31, LengthDelimited
+        {            // Key for field: 31, LengthDelimited
             stream.WriteByte(250);
             stream.WriteByte(1);
             MemoryStream ms31 = new MemoryStream();
@@ -12918,11 +8111,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms31.GetBuffer(), 0, ms31Length);
 
-
         }
         if (instance.ChunkPart != null)
-        {
-            // Key for field: 32, LengthDelimited
+        {            // Key for field: 32, LengthDelimited
             stream.WriteByte(130);
             stream.WriteByte(2);
             MemoryStream ms32 = new MemoryStream();
@@ -12937,11 +8128,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms32.GetBuffer(), 0, ms32Length);
 
-
         }
         if (instance.Explosion != null)
-        {
-            // Key for field: 33, LengthDelimited
+        {            // Key for field: 33, LengthDelimited
             stream.WriteByte(138);
             stream.WriteByte(2);
             MemoryStream ms33 = new MemoryStream();
@@ -12956,11 +8145,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms33.GetBuffer(), 0, ms33Length);
 
-
         }
         if (instance.Projectile != null)
-        {
-            // Key for field: 34, LengthDelimited
+        {            // Key for field: 34, LengthDelimited
             stream.WriteByte(146);
             stream.WriteByte(2);
             MemoryStream ms34 = new MemoryStream();
@@ -12975,11 +8162,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms34.GetBuffer(), 0, ms34Length);
 
-
         }
         if (instance.Translation != null)
-        {
-            // Key for field: 35, LengthDelimited
+        {            // Key for field: 35, LengthDelimited
             stream.WriteByte(154);
             stream.WriteByte(2);
             MemoryStream ms35 = new MemoryStream();
@@ -12994,11 +8179,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms35.GetBuffer(), 0, ms35Length);
 
-
         }
         if (instance.QueryAnswer != null)
-        {
-            // Key for field: 36, LengthDelimited
+        {            // Key for field: 36, LengthDelimited
             stream.WriteByte(162);
             stream.WriteByte(2);
             MemoryStream ms36 = new MemoryStream();
@@ -13013,11 +8196,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms36.GetBuffer(), 0, ms36Length);
 
-
         }
         if (instance.Redirect != null)
-        {
-            // Key for field: 37, LengthDelimited
+        {            // Key for field: 37, LengthDelimited
             stream.WriteByte(170);
             stream.WriteByte(2);
             MemoryStream ms37 = new MemoryStream();
@@ -13032,11 +8213,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms37.GetBuffer(), 0, ms37Length);
 
-
         }
         if (instance.EntitySpawn != null)
-        {
-            // Key for field: 39, LengthDelimited
+        {            // Key for field: 39, LengthDelimited
             stream.WriteByte(186);
             stream.WriteByte(2);
             MemoryStream ms39 = new MemoryStream();
@@ -13051,11 +8230,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms39.GetBuffer(), 0, ms39Length);
 
-
         }
         if (instance.EntityPosition != null)
-        {
-            // Key for field: 40, LengthDelimited
+        {            // Key for field: 40, LengthDelimited
             stream.WriteByte(194);
             stream.WriteByte(2);
             MemoryStream ms40 = new MemoryStream();
@@ -13070,11 +8247,9 @@ public class Packet_ServerSerializer
 
             stream.Write(ms40.GetBuffer(), 0, ms40Length);
 
-
         }
         if (instance.EntityDespawn != null)
-        {
-            // Key for field: 41, LengthDelimited
+        {            // Key for field: 41, LengthDelimited
             stream.WriteByte(202);
             stream.WriteByte(2);
             MemoryStream ms41 = new MemoryStream();
@@ -13089,7 +8264,6 @@ public class Packet_ServerSerializer
 
             stream.Write(ms41.GetBuffer(), 0, ms41Length);
 
-
         }
     }
 
@@ -13103,8 +8277,7 @@ public class Packet_ServerSerializer
 }
 
 public class Packet_ServerEntitySpawnSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerEntitySpawn DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerEntitySpawn instance = new Packet_ServerEntitySpawn();
@@ -13133,8 +8306,7 @@ public class Packet_ServerEntitySpawnSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.Id = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -13148,14 +8320,10 @@ public class Packet_ServerEntitySpawnSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -13171,13 +8339,11 @@ public class Packet_ServerEntitySpawnSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerEntitySpawn instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.Id);
         if (instance.Entity_ != null)
-        {
-            // Key for field: 2, LengthDelimited
+        {            // Key for field: 2, LengthDelimited
             stream.WriteByte(18);
             MemoryStream ms2 = new MemoryStream();
 
@@ -13191,14 +8357,12 @@ public class Packet_ServerEntitySpawnSerializer
 
             stream.Write(ms2.GetBuffer(), 0, ms2Length);
 
-
         }
     }
 }
 
 public class Packet_ServerEntityPositionAndOrientationSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerEntityPositionAndOrientation DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerEntityPositionAndOrientation instance = new Packet_ServerEntityPositionAndOrientation();
@@ -13227,8 +8391,7 @@ public class Packet_ServerEntityPositionAndOrientationSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.Id = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -13242,14 +8405,10 @@ public class Packet_ServerEntityPositionAndOrientationSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -13265,13 +8424,11 @@ public class Packet_ServerEntityPositionAndOrientationSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerEntityPositionAndOrientation instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.Id);
         if (instance.PositionAndOrientation != null)
-        {
-            // Key for field: 2, LengthDelimited
+        {            // Key for field: 2, LengthDelimited
             stream.WriteByte(18);
             MemoryStream ms2 = new MemoryStream();
 
@@ -13285,14 +8442,12 @@ public class Packet_ServerEntityPositionAndOrientationSerializer
 
             stream.Write(ms2.GetBuffer(), 0, ms2Length);
 
-
         }
     }
 }
 
 public class Packet_ServerEntityDespawnSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerEntityDespawn DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerEntityDespawn instance = new Packet_ServerEntityDespawn();
@@ -13321,22 +8476,17 @@ public class Packet_ServerEntityDespawnSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.Id = ProtocolParser.ReadUInt64(stream);
                     continue;
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -13352,16 +8502,14 @@ public class Packet_ServerEntityDespawnSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerEntityDespawn instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.Id);
     }
 }
 
 public class Packet_ServerEntitySerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerEntity DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerEntity instance = new Packet_ServerEntity();
@@ -13390,8 +8538,7 @@ public class Packet_ServerEntitySerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     if (instance.Position == null)
                         instance.Position = Packet_PositionAndOrientationSerializer.DeserializeLengthDelimitedNew(stream);
@@ -13454,14 +8601,10 @@ public class Packet_ServerEntitySerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -13479,8 +8622,7 @@ public class Packet_ServerEntitySerializer
     public static void Serialize(Stream stream, Packet_ServerEntity instance)
     {
         if (instance.Position != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             MemoryStream ms1 = new MemoryStream();
 
@@ -13494,11 +8636,9 @@ public class Packet_ServerEntitySerializer
 
             stream.Write(ms1.GetBuffer(), 0, ms1Length);
 
-
         }
         if (instance.DrawModel != null)
-        {
-            // Key for field: 2, LengthDelimited
+        {            // Key for field: 2, LengthDelimited
             stream.WriteByte(18);
             MemoryStream ms2 = new MemoryStream();
 
@@ -13512,11 +8652,9 @@ public class Packet_ServerEntitySerializer
 
             stream.Write(ms2.GetBuffer(), 0, ms2Length);
 
-
         }
         if (instance.DrawName_ != null)
-        {
-            // Key for field: 3, LengthDelimited
+        {            // Key for field: 3, LengthDelimited
             stream.WriteByte(26);
             MemoryStream ms3 = new MemoryStream();
 
@@ -13530,11 +8668,9 @@ public class Packet_ServerEntitySerializer
 
             stream.Write(ms3.GetBuffer(), 0, ms3Length);
 
-
         }
         if (instance.DrawText != null)
-        {
-            // Key for field: 4, LengthDelimited
+        {            // Key for field: 4, LengthDelimited
             stream.WriteByte(34);
             MemoryStream ms4 = new MemoryStream();
 
@@ -13548,11 +8684,9 @@ public class Packet_ServerEntitySerializer
 
             stream.Write(ms4.GetBuffer(), 0, ms4Length);
 
-
         }
         if (instance.DrawBlock != null)
-        {
-            // Key for field: 5, LengthDelimited
+        {            // Key for field: 5, LengthDelimited
             stream.WriteByte(42);
             MemoryStream ms5 = new MemoryStream();
 
@@ -13566,11 +8700,9 @@ public class Packet_ServerEntitySerializer
 
             stream.Write(ms5.GetBuffer(), 0, ms5Length);
 
-
         }
         if (instance.Push != null)
-        {
-            // Key for field: 6, LengthDelimited
+        {            // Key for field: 6, LengthDelimited
             stream.WriteByte(50);
             MemoryStream ms6 = new MemoryStream();
 
@@ -13584,14 +8716,12 @@ public class Packet_ServerEntitySerializer
 
             stream.Write(ms6.GetBuffer(), 0, ms6Length);
 
-
         }
         // Key for field: 7, Varint
         stream.WriteByte(56);
         ProtocolParser.WriteBool(stream, instance.Usable);
         if (instance.PlayerStats != null)
-        {
-            // Key for field: 8, LengthDelimited
+        {            // Key for field: 8, LengthDelimited
             stream.WriteByte(66);
             MemoryStream ms8 = new MemoryStream();
 
@@ -13605,11 +8735,9 @@ public class Packet_ServerEntitySerializer
 
             stream.Write(ms8.GetBuffer(), 0, ms8Length);
 
-
         }
         if (instance.DrawArea != null)
-        {
-            // Key for field: 9, LengthDelimited
+        {            // Key for field: 9, LengthDelimited
             stream.WriteByte(74);
             MemoryStream ms9 = new MemoryStream();
 
@@ -13627,8 +8755,7 @@ public class Packet_ServerEntitySerializer
 }
 
 public class Packet_ServerEntityDrawAreaSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerEntityDrawArea DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerEntityDrawArea instance = new Packet_ServerEntityDrawArea();
@@ -13657,8 +8784,7 @@ public class Packet_ServerEntityDrawAreaSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.X = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -13689,14 +8815,10 @@ public class Packet_ServerEntityDrawAreaSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -13712,8 +8834,7 @@ public class Packet_ServerEntityDrawAreaSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerEntityDrawArea instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.X);
         // Key for field: 2, Varint
@@ -13738,8 +8859,7 @@ public class Packet_ServerEntityDrawAreaSerializer
 }
 
 public class Packet_ServerEntityAnimatedModelSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerEntityAnimatedModel DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerEntityAnimatedModel instance = new Packet_ServerEntityAnimatedModel();
@@ -13768,8 +8888,7 @@ public class Packet_ServerEntityAnimatedModelSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.Model_ = ProtocolParser.ReadString(stream);
                     continue;
@@ -13792,14 +8911,10 @@ public class Packet_ServerEntityAnimatedModelSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -13817,14 +8932,12 @@ public class Packet_ServerEntityAnimatedModelSerializer
     public static void Serialize(Stream stream, Packet_ServerEntityAnimatedModel instance)
     {
         if (instance.Model_ != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Model_));
         }
         if (instance.Texture_ != null)
-        {
-            // Key for field: 2, LengthDelimited
+        {            // Key for field: 2, LengthDelimited
             stream.WriteByte(18);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Texture_));
         }
@@ -13841,8 +8954,7 @@ public class Packet_ServerEntityAnimatedModelSerializer
 }
 
 public class Packet_ServerEntityDrawNameSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerEntityDrawName DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerEntityDrawName instance = new Packet_ServerEntityDrawName();
@@ -13871,8 +8983,7 @@ public class Packet_ServerEntityDrawNameSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.Name = ProtocolParser.ReadString(stream);
                     continue;
@@ -13891,14 +9002,10 @@ public class Packet_ServerEntityDrawNameSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -13916,8 +9023,7 @@ public class Packet_ServerEntityDrawNameSerializer
     public static void Serialize(Stream stream, Packet_ServerEntityDrawName instance)
     {
         if (instance.Name != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Name));
         }
@@ -13928,8 +9034,7 @@ public class Packet_ServerEntityDrawNameSerializer
         stream.WriteByte(24);
         ProtocolParser.WriteBool(stream, instance.ClientAutoComplete);
         if (instance.Color != null)
-        {
-            // Key for field: 4, LengthDelimited
+        {            // Key for field: 4, LengthDelimited
             stream.WriteByte(34);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Color));
         }
@@ -13937,8 +9042,7 @@ public class Packet_ServerEntityDrawNameSerializer
 }
 
 public class Packet_ServerEntityDrawTextSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerEntityDrawText DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerEntityDrawText instance = new Packet_ServerEntityDrawText();
@@ -13967,8 +9071,7 @@ public class Packet_ServerEntityDrawTextSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.Text = ProtocolParser.ReadString(stream);
                     continue;
@@ -13999,14 +9102,10 @@ public class Packet_ServerEntityDrawTextSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -14024,8 +9123,7 @@ public class Packet_ServerEntityDrawTextSerializer
     public static void Serialize(Stream stream, Packet_ServerEntityDrawText instance)
     {
         if (instance.Text != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Text));
         }
@@ -14051,8 +9149,7 @@ public class Packet_ServerEntityDrawTextSerializer
 }
 
 public class Packet_ServerEntityDrawBlockSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerEntityDrawBlock DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerEntityDrawBlock instance = new Packet_ServerEntityDrawBlock();
@@ -14081,22 +9178,17 @@ public class Packet_ServerEntityDrawBlockSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.BlockType = ProtocolParser.ReadUInt64(stream);
                     continue;
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -14112,16 +9204,14 @@ public class Packet_ServerEntityDrawBlockSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerEntityDrawBlock instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.BlockType);
     }
 }
 
 public class Packet_ServerEntityPushSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerEntityPush DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerEntityPush instance = new Packet_ServerEntityPush();
@@ -14150,22 +9240,17 @@ public class Packet_ServerEntityPushSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.RangeFloat = ProtocolParser.ReadUInt64(stream);
                     continue;
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -14181,16 +9266,14 @@ public class Packet_ServerEntityPushSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerEntityPush instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.RangeFloat);
     }
 }
 
 public class Packet_IntIntSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_IntInt DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_IntInt instance = new Packet_IntInt();
@@ -14219,8 +9302,7 @@ public class Packet_IntIntSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.Key_ = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -14231,14 +9313,10 @@ public class Packet_IntIntSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -14254,8 +9332,7 @@ public class Packet_IntIntSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_IntInt instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.Key_);
         // Key for field: 2, Varint
@@ -14265,8 +9342,7 @@ public class Packet_IntIntSerializer
 }
 
 public class Packet_ServerAmmoSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerAmmo DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerAmmo instance = new Packet_ServerAmmo();
@@ -14301,8 +9377,7 @@ public class Packet_ServerAmmoSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     // repeated
                     instance.TotalAmmoAdd(Packet_IntIntSerializer.DeserializeLengthDelimitedNew(stream));
@@ -14310,14 +9385,10 @@ public class Packet_ServerAmmoSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -14353,15 +9424,13 @@ public class Packet_ServerAmmoSerializer
 
                 stream.Write(ms1.GetBuffer(), 0, ms1Length);
 
-
             }
         }
     }
 }
 
 public class Packet_ServerChunkPartSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerChunkPart DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerChunkPart instance = new Packet_ServerChunkPart();
@@ -14390,22 +9459,17 @@ public class Packet_ServerChunkPartSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.CompressedChunkPart = ProtocolParser.ReadBytes(stream);
                     continue;
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -14423,8 +9487,7 @@ public class Packet_ServerChunkPartSerializer
     public static void Serialize(Stream stream, Packet_ServerChunkPart instance)
     {
         if (instance.CompressedChunkPart != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, instance.CompressedChunkPart);
         }
@@ -14432,8 +9495,7 @@ public class Packet_ServerChunkPartSerializer
 }
 
 public class Packet_ServerChunkSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerChunk DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerChunk instance = new Packet_ServerChunk();
@@ -14462,8 +9524,7 @@ public class Packet_ServerChunkSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.X = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -14490,14 +9551,10 @@ public class Packet_ServerChunkSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -14513,8 +9570,7 @@ public class Packet_ServerChunkSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerChunk instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.X);
         // Key for field: 2, Varint
@@ -14536,8 +9592,7 @@ public class Packet_ServerChunkSerializer
 }
 
 public class Packet_ServerHeightmapChunkSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerHeightmapChunk DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerHeightmapChunk instance = new Packet_ServerHeightmapChunk();
@@ -14566,8 +9621,7 @@ public class Packet_ServerHeightmapChunkSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.X = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -14590,14 +9644,10 @@ public class Packet_ServerHeightmapChunkSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -14613,8 +9663,7 @@ public class Packet_ServerHeightmapChunkSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerHeightmapChunk instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.X);
         // Key for field: 2, Varint
@@ -14627,8 +9676,7 @@ public class Packet_ServerHeightmapChunkSerializer
         stream.WriteByte(32);
         ProtocolParser.WriteUInt64(stream, instance.SizeY);
         if (instance.CompressedHeightmap != null)
-        {
-            // Key for field: 5, LengthDelimited
+        {            // Key for field: 5, LengthDelimited
             stream.WriteByte(42);
             ProtocolParser.WriteBytes(stream, instance.CompressedHeightmap);
         }
@@ -14636,8 +9684,7 @@ public class Packet_ServerHeightmapChunkSerializer
 }
 
 public class Packet_ServerInventorySerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerInventory DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerInventory instance = new Packet_ServerInventory();
@@ -14666,8 +9713,7 @@ public class Packet_ServerInventorySerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 4 LengthDelimited
+            {                // Field 4 LengthDelimited
                 case 34:
                     if (instance.Inventory == null)
                         instance.Inventory = Packet_InventorySerializer.DeserializeLengthDelimitedNew(stream);
@@ -14677,14 +9723,10 @@ public class Packet_ServerInventorySerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -14702,8 +9744,7 @@ public class Packet_ServerInventorySerializer
     public static void Serialize(Stream stream, Packet_ServerInventory instance)
     {
         if (instance.Inventory != null)
-        {
-            // Key for field: 4, LengthDelimited
+        {            // Key for field: 4, LengthDelimited
             stream.WriteByte(34);
             MemoryStream ms4 = new MemoryStream();
 
@@ -14717,14 +9758,12 @@ public class Packet_ServerInventorySerializer
 
             stream.Write(ms4.GetBuffer(), 0, ms4Length);
 
-
         }
     }
 }
 
 public class Packet_ServerPlayerStatsSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerPlayerStats DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerPlayerStats instance = new Packet_ServerPlayerStats();
@@ -14753,8 +9792,7 @@ public class Packet_ServerPlayerStatsSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.CurrentHealth = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -14773,14 +9811,10 @@ public class Packet_ServerPlayerStatsSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -14796,8 +9830,7 @@ public class Packet_ServerPlayerStatsSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerPlayerStats instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.CurrentHealth);
         // Key for field: 2, Varint
@@ -14813,8 +9846,7 @@ public class Packet_ServerPlayerStatsSerializer
 }
 
 public class Packet_ServerMonstersSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerMonsters DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerMonsters instance = new Packet_ServerMonsters();
@@ -14849,8 +9881,7 @@ public class Packet_ServerMonstersSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     // repeated
                     instance.MonstersAdd(Packet_ServerMonsterSerializer.DeserializeLengthDelimitedNew(stream));
@@ -14858,14 +9889,10 @@ public class Packet_ServerMonstersSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -14901,15 +9928,13 @@ public class Packet_ServerMonstersSerializer
 
                 stream.Write(ms1.GetBuffer(), 0, ms1Length);
 
-
             }
         }
     }
 }
 
 public class Packet_ServerMonsterSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerMonster DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerMonster instance = new Packet_ServerMonster();
@@ -14938,8 +9963,7 @@ public class Packet_ServerMonsterSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.Id = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -14960,15 +9984,10 @@ public class Packet_ServerMonsterSerializer
                     continue;
                 default: break;
             }
-
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -14984,16 +10003,14 @@ public class Packet_ServerMonsterSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerMonster instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.Id);
         // Key for field: 2, Varint
         stream.WriteByte(16);
         ProtocolParser.WriteUInt64(stream, instance.MonsterType);
         if (instance.PositionAndOrientation != null)
-        {
-            // Key for field: 3, LengthDelimited
+        {            // Key for field: 3, LengthDelimited
             stream.WriteByte(26);
             MemoryStream ms3 = new MemoryStream();
 
@@ -15007,7 +10024,6 @@ public class Packet_ServerMonsterSerializer
 
             stream.Write(ms3.GetBuffer(), 0, ms3Length);
 
-
         }
         // Key for field: 4, Varint
         stream.WriteByte(32);
@@ -15016,8 +10032,7 @@ public class Packet_ServerMonsterSerializer
 }
 
 public class Packet_ServerSeasonSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerSeason DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerSeason instance = new Packet_ServerSeason();
@@ -15046,8 +10061,7 @@ public class Packet_ServerSeasonSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 2 Varint
+            {                // Field 2 Varint
                 case 16:
                     instance.Hour = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -15062,14 +10076,10 @@ public class Packet_ServerSeasonSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -15085,8 +10095,7 @@ public class Packet_ServerSeasonSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerSeason instance)
-    {
-        // Key for field: 2, Varint
+    {        // Key for field: 2, Varint
         stream.WriteByte(16);
         ProtocolParser.WriteUInt64(stream, instance.Hour);
         // Key for field: 3, Varint
@@ -15099,8 +10108,7 @@ public class Packet_ServerSeasonSerializer
 }
 
 public class Packet_ServerDialogSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerDialog DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerDialog instance = new Packet_ServerDialog();
@@ -15129,8 +10137,7 @@ public class Packet_ServerDialogSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.DialogId = ProtocolParser.ReadString(stream);
                     continue;
@@ -15144,14 +10151,10 @@ public class Packet_ServerDialogSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -15169,14 +10172,12 @@ public class Packet_ServerDialogSerializer
     public static void Serialize(Stream stream, Packet_ServerDialog instance)
     {
         if (instance.DialogId != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.DialogId));
         }
         if (instance.Dialog != null)
-        {
-            // Key for field: 2, LengthDelimited
+        {            // Key for field: 2, LengthDelimited
             stream.WriteByte(18);
             MemoryStream ms2 = new MemoryStream();
 
@@ -15190,14 +10191,12 @@ public class Packet_ServerDialogSerializer
 
             stream.Write(ms2.GetBuffer(), 0, ms2Length);
 
-
         }
     }
 }
 
 public class Packet_ServerPingSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerPing DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerPing instance = new Packet_ServerPing();
@@ -15224,14 +10223,11 @@ public class Packet_ServerPingSerializer
             if (keyByte == -1)
                 //throw new System.IO.EndOfStreamException();
                 return null;
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
+
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -15247,13 +10243,11 @@ public class Packet_ServerPingSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerPing instance)
-    {
-    }
+    { }
 }
 
 public class Packet_ServerPlayerPingSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerPlayerPing DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerPlayerPing instance = new Packet_ServerPlayerPing();
@@ -15282,8 +10276,7 @@ public class Packet_ServerPlayerPingSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.ClientId = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -15294,14 +10287,10 @@ public class Packet_ServerPlayerPingSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -15317,8 +10306,7 @@ public class Packet_ServerPlayerPingSerializer
 
     /// <summary>Serialize the instance into the stream</summary>
     public static void Serialize(Stream stream, Packet_ServerPlayerPing instance)
-    {
-        // Key for field: 1, Varint
+    {        // Key for field: 1, Varint
         stream.WriteByte(8);
         ProtocolParser.WriteUInt64(stream, instance.ClientId);
         // Key for field: 2, Varint
@@ -15328,8 +10316,7 @@ public class Packet_ServerPlayerPingSerializer
 }
 
 public class Packet_ServerTranslatedStringSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_ServerTranslatedString DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_ServerTranslatedString instance = new Packet_ServerTranslatedString();
@@ -15358,8 +10345,7 @@ public class Packet_ServerTranslatedStringSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.Lang = ProtocolParser.ReadString(stream);
                     continue;
@@ -15374,14 +10360,10 @@ public class Packet_ServerTranslatedStringSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -15415,8 +10397,7 @@ public class Packet_ServerTranslatedStringSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.Lang = ProtocolParser.ReadString(stream);
                     continue;
@@ -15431,14 +10412,10 @@ public class Packet_ServerTranslatedStringSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -15456,20 +10433,17 @@ public class Packet_ServerTranslatedStringSerializer
     public static void Serialize(Stream stream, Packet_ServerTranslatedString instance)
     {
         if (instance.Lang != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Lang));
         }
         if (instance.Id != null)
-        {
-            // Key for field: 2, LengthDelimited
+        {            // Key for field: 2, LengthDelimited
             stream.WriteByte(18);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Id));
         }
         if (instance.Translation != null)
-        {
-            // Key for field: 3, LengthDelimited
+        {            // Key for field: 3, LengthDelimited
             stream.WriteByte(26);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Translation));
         }
@@ -15477,8 +10451,7 @@ public class Packet_ServerTranslatedStringSerializer
 }
 
 public class Packet_InventorySerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_Inventory DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_Inventory instance = new Packet_Inventory();
@@ -15519,8 +10492,7 @@ public class Packet_InventorySerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 3 LengthDelimited
+            {                // Field 3 LengthDelimited
                 case 26:
                     if (instance.MainArmor == null)
                         instance.MainArmor = Packet_ItemSerializer.DeserializeLengthDelimitedNew(stream);
@@ -15568,14 +10540,10 @@ public class Packet_InventorySerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -15593,8 +10561,7 @@ public class Packet_InventorySerializer
     public static void Serialize(Stream stream, Packet_Inventory instance)
     {
         if (instance.MainArmor != null)
-        {
-            // Key for field: 3, LengthDelimited
+        {            // Key for field: 3, LengthDelimited
             stream.WriteByte(26);
             MemoryStream ms3 = new MemoryStream();
 
@@ -15608,11 +10575,9 @@ public class Packet_InventorySerializer
 
             stream.Write(ms3.GetBuffer(), 0, ms3Length);
 
-
         }
         if (instance.Boots != null)
-        {
-            // Key for field: 4, LengthDelimited
+        {            // Key for field: 4, LengthDelimited
             stream.WriteByte(34);
             MemoryStream ms4 = new MemoryStream();
 
@@ -15626,11 +10591,9 @@ public class Packet_InventorySerializer
 
             stream.Write(ms4.GetBuffer(), 0, ms4Length);
 
-
         }
         if (instance.Helmet != null)
-        {
-            // Key for field: 5, LengthDelimited
+        {            // Key for field: 5, LengthDelimited
             stream.WriteByte(42);
             MemoryStream ms5 = new MemoryStream();
 
@@ -15644,11 +10607,9 @@ public class Packet_InventorySerializer
 
             stream.Write(ms5.GetBuffer(), 0, ms5Length);
 
-
         }
         if (instance.Gauntlet != null)
-        {
-            // Key for field: 6, LengthDelimited
+        {            // Key for field: 6, LengthDelimited
             stream.WriteByte(50);
             MemoryStream ms6 = new MemoryStream();
 
@@ -15661,7 +10622,6 @@ public class Packet_InventorySerializer
             ProtocolParser.WriteUInt32_(stream, ms6Length);
 
             stream.Write(ms6.GetBuffer(), 0, ms6Length);
-
 
         }
         if (instance.Items != null)
@@ -15683,12 +10643,10 @@ public class Packet_InventorySerializer
 
                 stream.Write(ms7.GetBuffer(), 0, ms7Length);
 
-
             }
         }
         if (instance.DragDropItem != null)
-        {
-            // Key for field: 8, LengthDelimited
+        {            // Key for field: 8, LengthDelimited
             stream.WriteByte(66);
             MemoryStream ms8 = new MemoryStream();
 
@@ -15701,7 +10659,6 @@ public class Packet_InventorySerializer
             ProtocolParser.WriteUInt32_(stream, ms8Length);
 
             stream.Write(ms8.GetBuffer(), 0, ms8Length);
-
 
         }
         if (instance.RightHand != null)
@@ -15723,15 +10680,13 @@ public class Packet_InventorySerializer
 
                 stream.Write(ms9.GetBuffer(), 0, ms9Length);
 
-
             }
         }
     }
 }
 
 public class Packet_ItemSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_Item DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_Item instance = new Packet_Item();
@@ -15761,8 +10716,7 @@ public class Packet_ItemSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 Varint
+            {                // Field 1 Varint
                 case 8:
                     instance.ItemClass = ProtocolParser.ReadUInt64(stream);
                     continue;
@@ -15780,15 +10734,10 @@ public class Packet_ItemSerializer
                     continue;
                 default: break;
             }
-
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -15806,14 +10755,12 @@ public class Packet_ItemSerializer
     public static void Serialize(Stream stream, Packet_Item instance)
     {
         if (instance.ItemClass != Packet_ItemClassEnum.Block)
-        {
-            // Key for field: 1, Varint
+        {            // Key for field: 1, Varint
             stream.WriteByte(8);
             ProtocolParser.WriteUInt64(stream, instance.ItemClass);
         }
         if (instance.ItemId != null)
-        {
-            // Key for field: 2, LengthDelimited
+        {            // Key for field: 2, LengthDelimited
             stream.WriteByte(18);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.ItemId));
         }
@@ -15827,8 +10774,7 @@ public class Packet_ItemSerializer
 }
 
 public class Packet_PositionItemSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_PositionItem DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_PositionItem instance = new Packet_PositionItem();
@@ -15857,8 +10803,7 @@ public class Packet_PositionItemSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.Key_ = ProtocolParser.ReadString(stream);
                     continue;
@@ -15880,14 +10825,10 @@ public class Packet_PositionItemSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -15905,14 +10846,12 @@ public class Packet_PositionItemSerializer
     public static void Serialize(Stream stream, Packet_PositionItem instance)
     {
         if (instance.Key_ != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Key_));
         }
         if (instance.Value_ != null)
-        {
-            // Key for field: 2, LengthDelimited
+        {            // Key for field: 2, LengthDelimited
             stream.WriteByte(18);
             MemoryStream ms2 = new MemoryStream();
 
@@ -15926,7 +10865,6 @@ public class Packet_PositionItemSerializer
 
             stream.Write(ms2.GetBuffer(), 0, ms2Length);
 
-
         }
         // Key for field: 3, Varint
         stream.WriteByte(24);
@@ -15938,8 +10876,7 @@ public class Packet_PositionItemSerializer
 }
 
 public class Packet_DialogSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_Dialog DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_Dialog instance = new Packet_Dialog();
@@ -15974,8 +10911,7 @@ public class Packet_DialogSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     // repeated
                     instance.WidgetsAdd(Packet_WidgetSerializer.DeserializeLengthDelimitedNew(stream));
@@ -15994,15 +10930,10 @@ public class Packet_DialogSerializer
                     continue;
                 default: break;
             }
-
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -16038,7 +10969,6 @@ public class Packet_DialogSerializer
 
                 stream.Write(ms1.GetBuffer(), 0, ms1Length);
 
-
             }
         }
         // Key for field: 2, Varint
@@ -16054,8 +10984,7 @@ public class Packet_DialogSerializer
 }
 
 public class Packet_WidgetSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_Widget DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_Widget instance = new Packet_Widget();
@@ -16085,8 +11014,7 @@ public class Packet_WidgetSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.Id = ProtocolParser.ReadString(stream);
                     continue;
@@ -16140,14 +11068,10 @@ public class Packet_WidgetSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -16165,8 +11089,7 @@ public class Packet_WidgetSerializer
     public static void Serialize(Stream stream, Packet_Widget instance)
     {
         if (instance.Id != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Id));
         }
@@ -16186,8 +11109,7 @@ public class Packet_WidgetSerializer
         stream.WriteByte(48);
         ProtocolParser.WriteUInt64(stream, instance.Height_);
         if (instance.Text != null)
-        {
-            // Key for field: 7, LengthDelimited
+        {            // Key for field: 7, LengthDelimited
             stream.WriteByte(58);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Text));
         }
@@ -16195,8 +11117,7 @@ public class Packet_WidgetSerializer
         stream.WriteByte(64);
         ProtocolParser.WriteUInt64(stream, instance.ClickKey);
         if (instance.Image != null)
-        {
-            // Key for field: 9, LengthDelimited
+        {            // Key for field: 9, LengthDelimited
             stream.WriteByte(74);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.Image));
         }
@@ -16204,8 +11125,7 @@ public class Packet_WidgetSerializer
         stream.WriteByte(80);
         ProtocolParser.WriteUInt64(stream, instance.Color);
         if (instance.Font != null)
-        {
-            // Key for field: 11, LengthDelimited
+        {            // Key for field: 11, LengthDelimited
             stream.WriteByte(90);
             MemoryStream ms11 = new MemoryStream();
 
@@ -16219,11 +11139,9 @@ public class Packet_WidgetSerializer
 
             stream.Write(ms11.GetBuffer(), 0, ms11Length);
 
-
         }
         if (instance.Type != Packet_WidgetTypeEnum.Image)
-        {
-            // Key for field: 12, Varint
+        {            // Key for field: 12, Varint
             stream.WriteByte(96);
             ProtocolParser.WriteUInt64(stream, instance.Type);
         }
@@ -16231,8 +11149,7 @@ public class Packet_WidgetSerializer
 }
 
 public class Packet_DialogFontSerializer
-{
-    /// <summary>Helper: create a new instance to deserializing into</summary>
+{    /// <summary>Helper: create a new instance to deserializing into</summary>
     public static Packet_DialogFont DeserializeLengthDelimitedNew(Stream stream)
     {
         Packet_DialogFont instance = new Packet_DialogFont();
@@ -16262,8 +11179,7 @@ public class Packet_DialogFontSerializer
                 return null;
             // Optimized reading of known fields with field ID < 16
             switch (keyByte)
-            {
-                // Field 1 LengthDelimited
+            {                // Field 1 LengthDelimited
                 case 10:
                     instance.FamilyName = ProtocolParser.ReadString(stream);
                     continue;
@@ -16278,14 +11194,10 @@ public class Packet_DialogFontSerializer
                 default: break;
             }
 
-#if CITO
-             Key key = ProtocolParser.ReadKey_(keyByte.LowByte, stream);
-#else
             Key key = ProtocolParser.ReadKey_((byte)keyByte, stream);
-#endif
 
             // Reading field ID > 16 and unknown field ID/wire type combinations
-            switch (key.GetField())
+            switch (key.Field)
             {
                 case 0:
                     //throw new InvalidDataException("Invalid field id: 0, something went wrong in the stream");
@@ -16303,8 +11215,7 @@ public class Packet_DialogFontSerializer
     public static void Serialize(Stream stream, Packet_DialogFont instance)
     {
         if (instance.FamilyName != null)
-        {
-            // Key for field: 1, LengthDelimited
+        {            // Key for field: 1, LengthDelimited
             stream.WriteByte(10);
             ProtocolParser.WriteBytes(stream, Encoding.UTF8.GetBytes(instance.FamilyName));
         }
@@ -16312,8 +11223,7 @@ public class Packet_DialogFontSerializer
         stream.WriteByte(16);
         ProtocolParser.WriteUInt64(stream, instance.SizeFloat);
         if (instance.FontStyle != Packet_DialogFontStyleEnum.Regular)
-        {
-            // Key for field: 3, Varint
+        {            // Key for field: 3, Varint
             stream.WriteByte(24);
             ProtocolParser.WriteUInt64(stream, instance.FontStyle);
         }

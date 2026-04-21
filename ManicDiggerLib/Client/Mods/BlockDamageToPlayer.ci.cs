@@ -1,4 +1,6 @@
-﻿/// <summary>
+﻿using ManicDigger;
+
+/// <summary>
 /// Handles environmental damage to the player from blocks (e.g. lava, fire) and drowning mechanics.
 /// </summary>
 public class ModBlockDamageToPlayer : ModBase
@@ -43,7 +45,7 @@ public class ModBlockDamageToPlayer : ModBase
 
         int times = blockDamageTimer.Update(dt);
         for (int i = 0; i < times; i++)
-            game.ApplyDamageToPlayer(damage, Packet_DeathReasonEnum.BlockDamage, hurtingBlock);
+            game.ApplyDamageToPlayer(damage, DeathReason.BlockDamage, hurtingBlock);
     }
 
     /// <summary>Drains oxygen while underwater and applies drowning damage when oxygen is depleted.</summary>
@@ -59,7 +61,7 @@ public class ModBlockDamageToPlayer : ModBase
             {
                 game.PlayerStats.CurrentOxygen = 0;
                 int dmg = Math.Max(1, game.PlayerStats.MaxHealth / 10);
-                game.ApplyDamageToPlayer(dmg, Packet_DeathReasonEnum.Drowning, 0);
+                game.ApplyDamageToPlayer(dmg, DeathReason.Drowning, 0);
             }
         }
         else

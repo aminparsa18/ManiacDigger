@@ -1,4 +1,6 @@
-﻿public partial class Game
+﻿using ManicDigger;
+
+public partial class Game
 {
     // -------------------------------------------------------------------------
     // Block geometry
@@ -23,9 +25,9 @@
         int block = VoxelMap.GetBlock(x, y, z);
         if (blocktypes[block].Rail != 0)
             return RailHeight;
-        if (blocktypes[block].DrawType == Packet_DrawTypeEnum.HalfHeight)
+        if (blocktypes[block].DrawType == DrawType.HalfHeight)
             return one / 2;
-        if (blocktypes[block].DrawType == Packet_DrawTypeEnum.Flat)
+        if (blocktypes[block].DrawType == DrawType.Flat)
             return one / 20;
 
         return 1;

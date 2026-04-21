@@ -427,7 +427,7 @@ public partial class Game
                 }
                 else
                 {
-                    SendSetBlock(posX, posY, posZ, Packet_BlockSetModeEnum.Use, 0, ActiveMaterial);
+                    SendSetBlock(posX, posY, posZ, PacketBlockSetMode.Use, 0, ActiveMaterial);
                 }
             }
         }

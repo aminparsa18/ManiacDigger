@@ -17,7 +17,7 @@ public class ServerSystemSign : ServerSystem
     {
         if (server.modManager.GetBlockName(tool) != "Sign") return;
         if (server.d_Map.GetChunk(x, y, z) == null) return;
-        if (!server.CheckBuildPrivileges(player, x, y, z, Packet_BlockSetModeEnum.Create)) return;
+        if (!server.CheckBuildPrivileges(player, x, y, z, PacketBlockSetMode.Create)) return;
 
         var e = new ServerEntity
         {
@@ -68,7 +68,7 @@ public class ServerSystemSign : ServerSystem
     {
         ServerEntity e = server.GetEntity(chunkx, chunky, chunkz, id);
         if (e.sign == null) return;
-        if (!server.CheckBuildPrivileges(player, (int)e.position.x, (int)e.position.z, (int)e.position.y, Packet_BlockSetModeEnum.Use)) return;
+        if (!server.CheckBuildPrivileges(player, (int)e.position.x, (int)e.position.z, (int)e.position.y, PacketBlockSetMode.Use)) return;
 
         var font = new DialogFont("Verdana", 11f, DialogFontStyle.Bold);
 

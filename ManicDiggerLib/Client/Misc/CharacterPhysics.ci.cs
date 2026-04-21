@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using ManicDigger;
+using OpenTK.Mathematics;
 
 /// <summary>
 /// Defines the per-frame fixed-timestep update contract for entity behaviour scripts.
@@ -428,7 +429,7 @@ public class ScriptCharacterPhysics : IEntityScript
             if (IsEmptyPoint(newposition.X, tmpPlayerPosition.Y + 0.5f, tmpPlayerPosition.Z, out _))
             {
                 game.reachedwall_1blockhigh = true;
-                if (game.blocktypes[tmpBlockingBlockType].DrawType == Packet_DrawTypeEnum.HalfHeight) { game.reachedHalfBlock = true; }
+                if (game.blocktypes[tmpBlockingBlockType].DrawType == DrawType.HalfHeight) { game.reachedHalfBlock = true; }
                 if (StandingOnHalfBlock(newposition.X, tmpPlayerPosition.Y, tmpPlayerPosition.Z)) { game.reachedHalfBlock = true; }
             }
         }
@@ -450,7 +451,7 @@ public class ScriptCharacterPhysics : IEntityScript
             if (IsEmptyPoint(tmpPlayerPosition.X, tmpPlayerPosition.Y + 0.5f, newposition.Z, out _))
             {
                 game.reachedwall_1blockhigh = true;
-                if (game.blocktypes[tmpBlockingBlockType].DrawType == Packet_DrawTypeEnum.HalfHeight) { game.reachedHalfBlock = true; }
+                if (game.blocktypes[tmpBlockingBlockType].DrawType == DrawType.HalfHeight) { game.reachedHalfBlock = true; }
                 if (StandingOnHalfBlock(tmpPlayerPosition.X, tmpPlayerPosition.Y, newposition.Z)) { game.reachedHalfBlock = true; }
             }
         }
@@ -469,7 +470,7 @@ public class ScriptCharacterPhysics : IEntityScript
     private bool StandingOnHalfBlock(float x, float y, float z)
     {
         int under = game.VoxelMap.GetBlock((int)x, (int)z, (int)y);
-        return game.blocktypes[under].DrawType == Packet_DrawTypeEnum.HalfHeight;
+        return game.blocktypes[under].DrawType == DrawType.HalfHeight;
     }
 
     /// <summary>

@@ -60,7 +60,7 @@ public class ModGuiEscapeMenu : ModBase
         }
         if (b == buttonMainExit)
         {
-            game.SendLeave(Packet_LeaveReasonEnum.Leave);
+            game.SendLeave(PacketLeaveReason.Leave);
             game.ExitToMainMenu_();
         }
     }

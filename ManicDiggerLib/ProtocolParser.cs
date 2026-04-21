@@ -41,13 +41,13 @@ public class ProtocolParser
         WriteUInt32_(stream, val.Length);
         stream.Write(val, 0, val.Length);
     }
-   
+
     public static Key ReadKey_(byte firstByte, Stream stream)
     {
         if (firstByte < 128)
-            return Key.Create(firstByte >> 3, firstByte & 0x07);
+            return new Key(firstByte >> 3, (Wire)(firstByte & 0x07));
         int fieldID = (ReadUInt32(stream) << 4) | ((firstByte >> 3) & 0x0F);
-        return Key.Create(fieldID, firstByte & 0x07);
+        return new Key(fieldID, (Wire)(firstByte & 0x07));
     }
 
     /// <summary>
@@ -55,7 +55,7 @@ public class ProtocolParser
     /// </summary>
     public static void SkipKey(Stream stream, Key key)
     {
-        switch (key.GetWireType())
+        switch (key.WireType)
         {
             case Wire.Fixed32:
                 stream.Seek(4, SeekOrigin.Current);
@@ -71,7 +71,7 @@ public class ProtocolParser
                 return;
             default:
 #if !CITO
-                throw new NotImplementedException("Unknown wire type: " + key.GetWireType());
+                throw new NotImplementedException("Unknown wire type: " + key.WireType);
 #else
                 return;
 #endif

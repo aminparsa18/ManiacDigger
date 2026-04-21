@@ -1,4 +1,6 @@
-﻿/// <summary>
+﻿using ManicDigger;
+
+/// <summary>
 /// Applies fall damage and manages the falling wind sound effect for the local player.
 /// </summary>
 public class ModFallDamageToPlayer : ModBase
@@ -59,7 +61,7 @@ public class ModFallDamageToPlayer : ModBase
         if ((now - lastFallDamageTimeMilliseconds) / 1000f < FallDamageCooldownSeconds) return;
 
         lastFallDamageTimeMilliseconds = now;
-        game.ApplyDamageToPlayer((int)(severity * game.PlayerStats.MaxHealth), Packet_DeathReasonEnum.FallDamage, 0);
+        game.ApplyDamageToPlayer((int)(severity * game.PlayerStats.MaxHealth), DeathReason.FallDamage, 0);
     }
 
     internal void SetFallSoundActive(Game game, bool active)

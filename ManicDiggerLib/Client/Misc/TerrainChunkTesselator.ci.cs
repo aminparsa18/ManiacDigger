@@ -16,6 +16,7 @@
 // This class is heavily inlined and unrolled for performance.
 // Special-shape (rare) blocks don't need as much performance.
 // </summary>
+using ManicDigger;
 using OpenTK.Mathematics;
 
 public class TerrainChunkTesselatorCi
@@ -571,8 +572,8 @@ public class TerrainChunkTesselatorCi
     public bool IsTransparentFully(int p)
     {
         Packet_BlockType b = game.blocktypes[p];
-        return (b.DrawType != Packet_DrawTypeEnum.Solid) && (b.DrawType != Packet_DrawTypeEnum.Plant)
-             && (b.DrawType != Packet_DrawTypeEnum.OpenDoorLeft) && (b.DrawType != Packet_DrawTypeEnum.OpenDoorRight) && (b.DrawType != Packet_DrawTypeEnum.ClosedDoor);
+        return (b.DrawType != DrawType.Solid) && (b.DrawType != DrawType.Plant)
+             && (b.DrawType != DrawType.OpenDoorLeft) && (b.DrawType != DrawType.OpenDoorRight) && (b.DrawType != DrawType.ClosedDoor);
     }
 
 #if !CITO
@@ -867,7 +868,7 @@ public class TerrainChunkTesselatorCi
             BuildBlockFace(x, y, z, tiletype, 0.05f, 0.5f, 0f, vScaleX, vScaleY, vScaleZ, currentChunk, TileSideEnum.Back);
             return;//done
         }
-        else if (game.blocktypes[tiletype].DrawType == Packet_DrawTypeEnum.Cactus)
+        else if (game.blocktypes[tiletype].DrawType == DrawType.Cactus)
         {
             //Cactus is thin
             float fScale = 0.875f;
@@ -899,8 +900,8 @@ public class TerrainChunkTesselatorCi
             //continue to draw top and bottom
             nToDraw = nToDraw & (TileSideFlagsEnum.Top | TileSideFlagsEnum.Bottom);
         }
-        else if (game.blocktypes[tiletype].DrawType == Packet_DrawTypeEnum.OpenDoorLeft ||
-                 game.blocktypes[tiletype].DrawType == Packet_DrawTypeEnum.OpenDoorRight)//TODO: is this one ever used?
+        else if (game.blocktypes[tiletype].DrawType == DrawType.OpenDoorLeft ||
+                 game.blocktypes[tiletype].DrawType == DrawType.OpenDoorRight)//TODO: is this one ever used?
         {
             bool blnDrawn = false;
             
@@ -928,8 +929,8 @@ public class TerrainChunkTesselatorCi
                 nToDraw = TileSideFlagsEnum.Front;//do not stuck in the wall
             }
         }
-        else if (game.blocktypes[tiletype].DrawType == Packet_DrawTypeEnum.Fence ||
-                 game.blocktypes[tiletype].DrawType == Packet_DrawTypeEnum.ClosedDoor) // fence tiles automatically when another fence is beside
+        else if (game.blocktypes[tiletype].DrawType == DrawType.Fence ||
+                 game.blocktypes[tiletype].DrawType == DrawType.ClosedDoor) // fence tiles automatically when another fence is beside
         {
             bool blnSideDrawn = false;
 
@@ -951,7 +952,7 @@ public class TerrainChunkTesselatorCi
 
             return;
         }
-        else if (game.blocktypes[tiletype].DrawType == Packet_DrawTypeEnum.Ladder) // try to fit ladder to best wall or existing ladder
+        else if (game.blocktypes[tiletype].DrawType == DrawType.Ladder) // try to fit ladder to best wall or existing ladder
         {
             //bring it away from the wall
             vOffsetX = 0.025f;
@@ -987,19 +988,19 @@ public class TerrainChunkTesselatorCi
                 default: nToDraw |= TileSideFlagsEnum.Left; break;
             }
         }
-        else if (game.blocktypes[tiletype].DrawType == Packet_DrawTypeEnum.HalfHeight)
+        else if (game.blocktypes[tiletype].DrawType == DrawType.HalfHeight)
         {
             vScaleX = 1;
             vScaleY = 1;
             vScaleZ = 0.5f;
         }
-        else if (game.blocktypes[tiletype].DrawType == Packet_DrawTypeEnum.Flat)
+        else if (game.blocktypes[tiletype].DrawType == DrawType.Flat)
         {
             vScaleX = 1;
             vScaleY = 1;
             vScaleZ = 0.05f;
         }
-        else if (game.blocktypes[tiletype].DrawType == Packet_DrawTypeEnum.Torch)
+        else if (game.blocktypes[tiletype].DrawType == DrawType.Torch)
         {
             int type = TorchTypeEnum.Normal;
             if (CanSupportTorch(currentChunk[Index3d(xx - 1, yy, zz, chunksize + 2, chunksize + 2)])) { type = TorchTypeEnum.Front; }
@@ -1077,7 +1078,7 @@ public class TerrainChunkTesselatorCi
     public bool IsTransparentForLight(int block)
     {
         Packet_BlockType b = game.blocktypes[block];
-        return b.DrawType != Packet_DrawTypeEnum.Solid && b.DrawType != Packet_DrawTypeEnum.ClosedDoor;
+        return b.DrawType != DrawType.Solid && b.DrawType != DrawType.ClosedDoor;
     }
     
     // <summary>
@@ -1103,7 +1104,7 @@ public class TerrainChunkTesselatorCi
     public bool CanSupportTorch(int blocktype)
     {
         return blocktype != 0
-            && game.blocktypes[blocktype].DrawType != Packet_DrawTypeEnum.Torch;
+            && game.blocktypes[blocktype].DrawType != DrawType.Torch;
     }
 
     public static void AddVertex(GeometryModel model, float x, float y, float z, float u, float v, int color)
@@ -1182,7 +1183,7 @@ public class TerrainChunkTesselatorCi
 
     public bool IsFlower(int tiletype)
     {
-        return game.blocktypes[tiletype].DrawType == Packet_DrawTypeEnum.Plant;
+        return game.blocktypes[tiletype].DrawType == DrawType.Plant;
     }
 
     public bool isvalid(int tt)
@@ -1507,13 +1508,13 @@ public class TerrainChunkTesselatorCi
             {
                 continue;
             }
-            istransparent[i] = (b.DrawType != Packet_DrawTypeEnum.Solid) && (b.DrawType != Packet_DrawTypeEnum.Fluid);
+            istransparent[i] = (b.DrawType != DrawType.Solid) && (b.DrawType != DrawType.Fluid);
 
-            if((b.DrawType == Packet_DrawTypeEnum.HalfHeight) || (b.DrawType == Packet_DrawTypeEnum.Flat) || (b.GetRail() != 0))
+            if((b.DrawType == DrawType.HalfHeight) || (b.DrawType == DrawType.Flat) || (b.GetRail() != 0))
             {
                 isLowered[i] = true;
             }
-            isFluid[i] = b.DrawType == Packet_DrawTypeEnum.Fluid;
+            isFluid[i] = b.DrawType == DrawType.Fluid;
         }
 
         if (x < 0 || y < 0 || z < 0) { retCount = 0; return []; }

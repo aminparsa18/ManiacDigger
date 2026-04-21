@@ -1,23 +1,25 @@
-﻿public class ClientPackets
+﻿using ManicDigger;
+
+public class ClientPackets
 {
     private static readonly Packet_ClientPingReply s_pingReplyInner = new();
     private static readonly Packet_Client s_pingReplyPacket = new()
     {
-        Id = Packet_ClientIdEnum.PingReply,
+        Id = PacketType.PingReply,
         PingReply = s_pingReplyInner
     };
 
     private static readonly Packet_ClientServerQuery s_serverQueryInner = new();
     private static readonly Packet_Client s_serverQueryPacket = new()
     {
-        Id = Packet_ClientIdEnum.ServerQuery,
+        Id = PacketType.ServerQuery,
         Query = s_serverQueryInner
     };
 
     private static readonly Packet_ClientPositionAndOrientation s_positionPayload = new();
     private static readonly Packet_Client s_positionPacket = new()
     {
-        Id = Packet_ClientIdEnum.PositionandOrientation,
+        Id = PacketType.PositionAndOrientation,
         PositionAndOrientation = s_positionPayload
     };
 
@@ -31,7 +33,7 @@
         }
         Packet_Client pp = new()
         {
-            Id = Packet_ClientIdEnum.PlayerIdentification,
+            Id = PacketType.PlayerIdentification,
             Identification = p
         };
         return pp;
@@ -48,7 +50,7 @@
         }
         Packet_Client pp = new()
         {
-            Id = Packet_ClientIdEnum.PlayerIdentification,
+            Id = PacketType.PlayerIdentification,
             Identification = p
         };
         return pp;
@@ -58,7 +60,7 @@
     {
         Packet_Client packet = new()
         {
-            Id = Packet_ClientIdEnum.Oxygen,
+            Id = PacketType.Oxygen,
             Oxygen = new Packet_ClientOxygen
             {
                 CurrentOxygen = currentOxygen
@@ -71,7 +73,7 @@
     {
         Packet_Client p = new()
         {
-            Id = Packet_ClientIdEnum.Reload,
+            Id = PacketType.Reload,
             Reload = new Packet_ClientReload()
         };
         return p;
@@ -86,7 +88,7 @@
         };
         Packet_Client pp = new()
         {
-            Id = Packet_ClientIdEnum.Message,
+            Id = PacketType.Message,
             Message = p
         };
         return pp;
@@ -94,7 +96,7 @@
 
     public static Packet_Client PingReply() => s_pingReplyPacket;
 
-    public static Packet_Client SetBlock(int x, int y, int z, int mode, int type, int materialslot)
+    public static Packet_Client SetBlock(int x, int y, int z, PacketBlockSetMode mode, int type, int materialslot)
     {
         Packet_ClientSetBlock p = new();
         {
@@ -107,7 +109,7 @@
         }
         Packet_Client pp = new()
         {
-            Id = Packet_ClientIdEnum.SetBlock,
+            Id = PacketType.SetBlock,
             SetBlock = p
         };
         return pp;
@@ -117,10 +119,10 @@
     {
         Packet_Client p = new();
         {
-            p.Id = Packet_ClientIdEnum.SpecialKey;
+            p.Id = PacketType.SpecialKey;
             p.SpecialKey_ = new Packet_ClientSpecialKey
             {
-                Key_ = Packet_SpecialKeyEnum.Respawn
+                Key_ = PacketSpecialKey.Respawn
             };
         }
         return p;
@@ -141,7 +143,7 @@
         }
         Packet_Client pp = new()
         {
-            Id = Packet_ClientIdEnum.FillArea,
+            Id = PacketType.FillArea,
             FillArea = p
         };
         return pp;
@@ -152,11 +154,11 @@
         Packet_ClientInventoryAction p = new()
         {
             A = pos,
-            Action = Packet_InventoryActionTypeEnum.Click
+            Action = PacketInventoryActionType.Click
         };
         Packet_Client pp = new()
         {
-            Id = Packet_ClientIdEnum.InventoryAction,
+            Id = PacketType.InventoryAction,
             InventoryAction = p
         };
         return pp;
@@ -168,11 +170,11 @@
         {
             A = from,
             B = to,
-            Action = Packet_InventoryActionTypeEnum.WearItem
+            Action = PacketInventoryActionType.WearItem
         };
         Packet_Client pp = new()
         {
-            Id = Packet_ClientIdEnum.InventoryAction,
+            Id = PacketType.InventoryAction,
             InventoryAction = p
         };
         return pp;
@@ -183,21 +185,21 @@
         Packet_ClientInventoryAction p = new()
         {
             A = from,
-            Action = Packet_InventoryActionTypeEnum.MoveToInventory
+            Action = PacketInventoryActionType.MoveToInventory
         };
         Packet_Client pp = new()
         {
-            Id = Packet_ClientIdEnum.InventoryAction,
+            Id = PacketType.InventoryAction,
             InventoryAction = p
         };
         return pp;
     }
 
-    public static Packet_Client Death(int reason, int sourcePlayer)
+    public static Packet_Client Death(DeathReason reason, int sourcePlayer)
     {
         Packet_Client p = new()
         {
-            Id = Packet_ClientIdEnum.Death,
+            Id = PacketType.Death,
             Death = new Packet_ClientDeath()
         };
         {
@@ -211,7 +213,7 @@
     {
         Packet_Client p = new();
         {
-            p.Id = Packet_ClientIdEnum.Health;
+            p.Id = PacketType.Health;
             p.Health = new Packet_ClientHealth
             {
                 CurrentHealth = currentHealth
@@ -230,17 +232,17 @@
         }
         Packet_Client pp = new()
         {
-            Id = Packet_ClientIdEnum.RequestBlob,
+            Id = PacketType.RequestBlob,
             RequestBlob = p
         };
         return pp;
     }
 
-    public static Packet_Client Leave(int reason)
+    public static Packet_Client Leave(PacketLeaveReason reason)
     {
         Packet_Client p = new()
         {
-            Id = Packet_ClientIdEnum.Leave,
+            Id = PacketType.Leave,
             Leave = new Packet_ClientLeave
             {
                 Reason = reason
@@ -260,7 +262,7 @@
         };
         Packet_Client p = new()
         {
-            Id = Packet_ClientIdEnum.Craft,
+            Id = PacketType.Craft,
             Craft = cmd
         };
         return p;
@@ -270,7 +272,7 @@
     {
         Packet_Client p = new()
         {
-            Id = Packet_ClientIdEnum.DialogClick,
+            Id = PacketType.DialogClick,
             DialogClick_ = new Packet_ClientDialogClick
             {
                 WidgetId = widgetId
@@ -289,7 +291,7 @@
         };
         Packet_Client pp = new()
         {
-            Id = Packet_ClientIdEnum.GameResolution,
+            Id = PacketType.GameResolution,
             GameResolution = p
         };
         return pp;
@@ -299,10 +301,10 @@
     {
         Packet_Client p = new()
         {
-            Id = Packet_ClientIdEnum.SpecialKey,
+            Id = PacketType.SpecialKey,
             SpecialKey_ = new Packet_ClientSpecialKey
             {
-                Key_ = Packet_SpecialKeyEnum.TabPlayerList
+                Key_ = PacketSpecialKey.TabPlayerList
             }
         };
         return p;
@@ -312,10 +314,10 @@
     {
         Packet_Client p = new();
         {
-            p.Id = Packet_ClientIdEnum.SpecialKey;
+            p.Id = PacketType.SpecialKey;
             p.SpecialKey_ = new Packet_ClientSpecialKey
             {
-                Key_ = Packet_SpecialKeyEnum.SelectTeam
+                Key_ = PacketSpecialKey.SelectTeam
             };
         }
         return p;
@@ -325,10 +327,10 @@
     {
         Packet_Client p = new();
         {
-            p.Id = Packet_ClientIdEnum.SpecialKey;
+            p.Id = PacketType.SpecialKey;
             p.SpecialKey_ = new Packet_ClientSpecialKey
             {
-                Key_ = Packet_SpecialKeyEnum.SetSpawn
+                Key_ = PacketSpecialKey.SetSpawn
             };
         }
         return p;
@@ -338,7 +340,7 @@
     {
         Packet_Client p = new();
         {
-            p.Id = Packet_ClientIdEnum.ActiveMaterialSlot;
+            p.Id = PacketType.ActiveMaterialSlot;
             p.ActiveMaterialSlot = new Packet_ClientActiveMaterialSlot
             {
                 ActiveMaterialSlot = ActiveMaterial
@@ -355,7 +357,7 @@
         };
         Packet_Client packet = new()
         {
-            Id = Packet_ClientIdEnum.MonsterHit,
+            Id = PacketType.MonsterHit,
             Health = p
         };
         return packet;
@@ -386,11 +388,11 @@
     {
         Packet_Client p = new()
         {
-            Id = Packet_ClientIdEnum.EntityInteraction,
+            Id = PacketType.EntityInteraction,
             EntityInteraction = new Packet_ClientEntityInteraction
             {
                 EntityId = entityId,
-                InteractionType = Packet_EntityInteractionTypeEnum.Use
+                InteractionType = PacketEntityInteractionType.Use
             }
         };
         return p;
@@ -400,11 +402,11 @@
     {
         Packet_Client p = new()
         {
-            Id = Packet_ClientIdEnum.EntityInteraction,
+            Id = PacketType.EntityInteraction,
             EntityInteraction = new Packet_ClientEntityInteraction
             {
                 EntityId = entityId,
-                InteractionType = Packet_EntityInteractionTypeEnum.Hit
+                InteractionType = PacketEntityInteractionType.Hit
             }
         };
         return p;

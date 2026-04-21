@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using ManicDigger;
+using OpenTK.Mathematics;
 
 /// <summary>
 /// Removes entities when their lifetime expires, triggering grenade explosions where applicable.
@@ -73,6 +74,6 @@ public class ModExpire : ModBase
         float dist = Vector3.Distance(new Vector3(game.player.position.x, game.player.position.y, game.player.position.z), new Vector3(posX, posY, posZ));
         float dmg = (1f - dist / explosionRange) * game.DecodeFixedPoint(blockType.DamageBodyFloat);
         if (dmg > 0)
-            game.ApplyDamageToPlayer((int)dmg, Packet_DeathReasonEnum.Explosion, grenade.sourcePlayer);
+            game.ApplyDamageToPlayer((int)dmg, DeathReason.Explosion, grenade.sourcePlayer);
     }
 }

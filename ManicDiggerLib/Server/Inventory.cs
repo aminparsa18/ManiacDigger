@@ -289,7 +289,7 @@ public class InventoryServer : IInventoryController
 
     public void InventoryClick(Packet_InventoryPosition pos)
     {
-        if (pos.Type == Packet_InventoryPositionTypeEnum.MainArea)
+        if (pos.Type == PacketInventoryPositionType.MainArea)
         {
             Point? selected = null;
             foreach (var k in d_Inventory.Items)
@@ -347,7 +347,7 @@ public class InventoryServer : IInventoryController
                 SendInventory();
             }
         }
-        else if (pos.Type == Packet_InventoryPositionTypeEnum.Ground)
+        else if (pos.Type == PacketInventoryPositionType.Ground)
         {
             /*
             if (d_Inventory.DragDropItem != null)
@@ -358,7 +358,7 @@ public class InventoryServer : IInventoryController
             }
             */
         }
-        else if (pos.Type == Packet_InventoryPositionTypeEnum.MaterialSelector)
+        else if (pos.Type == PacketInventoryPositionType.MaterialSelector)
         {
             if (d_Inventory.DragDropItem == null && d_Inventory.RightHand[pos.MaterialId] != null)
             {
@@ -384,7 +384,7 @@ public class InventoryServer : IInventoryController
             }
             SendInventory();
         }
-        else if (pos.Type == Packet_InventoryPositionTypeEnum.WearPlace)
+        else if (pos.Type == PacketInventoryPositionType.WearPlace)
         {
             //just swap.
             Item wear = d_InventoryUtil.ItemAtWearPlace(pos.WearPlace, pos.ActiveMaterial);
@@ -409,8 +409,8 @@ public class InventoryServer : IInventoryController
     {
         //todo
         ProtoPoint originPoint = new(from.AreaX, from.AreaY);
-        if (from.Type == Packet_InventoryPositionTypeEnum.MainArea
-            && to.Type == Packet_InventoryPositionTypeEnum.MaterialSelector
+        if (from.Type == PacketInventoryPositionType.MainArea
+            && to.Type == PacketInventoryPositionType.MaterialSelector
             && d_Inventory.RightHand[to.MaterialId] == null
             && d_Inventory.Items.ContainsKey(originPoint)
             && d_Items.CanWear(WearPlace.RightHand, d_Inventory.Items[originPoint]))
@@ -423,7 +423,7 @@ public class InventoryServer : IInventoryController
     public void MoveToInventory(Packet_InventoryPosition from)
     {
         //todo
-        if (from.Type == Packet_InventoryPositionTypeEnum.MaterialSelector)
+        if (from.Type == PacketInventoryPositionType.MaterialSelector)
         {
             //duplicate code with GrabItem().
             Item item = d_Inventory.RightHand[from.MaterialId];

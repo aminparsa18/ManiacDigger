@@ -566,7 +566,7 @@ public class ModNetworkProcess : ModBase
                 }
             case Packet_ServerIdEnum.ServerRedirect:
                 game.ChatLog("[GAME] Received server redirect");
-                game.SendLeave(Packet_LeaveReasonEnum.Leave);
+                game.SendLeave(PacketLeaveReason.Leave);
                 game.ExitAndSwitchServer(packet.Redirect);
                 break;
         }

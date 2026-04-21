@@ -1163,7 +1163,7 @@ public partial class Server : ICurrentTime, IDropItem
         Packet_ClientSerializer.DeserializeBuffer(data, data.Length, packet);
         if (c.queryClient)
         {
-            if (!(packet.Id == Packet_ClientIdEnum.ServerQuery || packet.Id == Packet_ClientIdEnum.PlayerIdentification))
+            if (!(packet.Id == PacketType.ServerQuery || packet.Id == PacketType.PlayerIdentification))
             {
                 //Reject all packets other than ServerQuery or PlayerIdentification
                 Console.WriteLine("Rejected packet from not authenticated client");
@@ -1180,12 +1180,12 @@ public partial class Server : ICurrentTime, IDropItem
         int realPlayers = 0;
         switch (packet.Id)
         {
-            case Packet_ClientIdEnum.PingReply:
+            case PacketType.PingReply:
                 clients[clientid].Ping.Receive(platform);
                 clients[clientid].LastPing = (float)clients[clientid].Ping.RoundtripMilliseconds / 1000;
                 this.NotifyPing(clientid, clients[clientid].Ping.RoundtripMilliseconds);
                 break;
-            case Packet_ClientIdEnum.PlayerIdentification:
+            case PacketType.PlayerIdentification:
                 {
                     foreach (var cl in clients)
                     {
@@ -1311,7 +1311,7 @@ public partial class Server : ICurrentTime, IDropItem
                     PlayerEntitySetDirty(clientid);
                 }
                 break;
-            case Packet_ClientIdEnum.RequestBlob:
+            case PacketType.RequestBlob:
                 {
                     // Set player's spawn position
                     Vector3i position = GetPlayerSpawnPositionMul32(clientid);
@@ -1350,12 +1350,12 @@ public partial class Server : ICurrentTime, IDropItem
                     NotifySeason(clientid);
                 }
                 break;
-            case Packet_ClientIdEnum.SetBlock:
+            case PacketType.SetBlock:
                 {
                     int x = packet.SetBlock.X;
                     int y = packet.SetBlock.Y;
                     int z = packet.SetBlock.Z;
-                    if (packet.SetBlock.Mode == Packet_BlockSetModeEnum.Use)	//Check if player only uses block
+                    if (packet.SetBlock.Mode == PacketBlockSetMode.Use)	//Check if player only uses block
                     {
                         if (!CheckUsePrivileges(clientid, x, y, z))
                         {
@@ -1375,12 +1375,12 @@ public partial class Server : ICurrentTime, IDropItem
                             SendSetBlock(clientid, x, y, z, d_Map.GetBlock(x, y, z)); //revert
                         }
                         //Only log when building/destroying blocks. Prevents VandalFinder entries
-                        if (packet.SetBlock.Mode != Packet_BlockSetModeEnum.UseWithTool)
+                        if (packet.SetBlock.Mode != PacketBlockSetMode.UseWithTool)
                             BuildLog(string.Format("{0} {1} {2} {3} {4} {5}", x, y, z, c.playername, c.socket.RemoteEndPoint().AddressToString(), d_Map.GetBlock(x, y, z)));
                     }
                 }
                 break;
-            case Packet_ClientIdEnum.FillArea:
+            case PacketType.FillArea:
                 {
                     if (!clients[clientid].privileges.Contains(ServerClientMisc.Privilege.build))
                     {
@@ -1414,7 +1414,7 @@ public partial class Server : ICurrentTime, IDropItem
                         d_Map.GetBlock(a.X, a.Y, a.Z)));
                 }
                 break;
-            case Packet_ClientIdEnum.PositionandOrientation:
+            case PacketType.PositionAndOrientation:
                 {
                     var p = packet.PositionAndOrientation;
                     clients[clientid].PositionMul32GlX = p.X;
@@ -1425,7 +1425,7 @@ public partial class Server : ICurrentTime, IDropItem
                     clients[clientid].stance = (byte)p.Stance;
                 }
                 break;
-            case Packet_ClientIdEnum.Message:
+            case PacketType.Message:
                 {
                     packet.Message.Message = packet.Message.Message.Trim();
                     // empty message
@@ -1496,13 +1496,13 @@ public partial class Server : ICurrentTime, IDropItem
                     }
                 }
                 break;
-            case Packet_ClientIdEnum.Craft:
+            case PacketType.Craft:
                 DoCommandCraft(true, packet.Craft);
                 break;
-            case Packet_ClientIdEnum.InventoryAction:
+            case PacketType.InventoryAction:
                 DoCommandInventory(clientid, packet.InventoryAction);
                 break;
-            case Packet_ClientIdEnum.Health:
+            case PacketType.Health:
                 {
                     //todo server side
                     var stats = GetPlayerStats(clients[clientid].playername);
@@ -1515,7 +1515,7 @@ public partial class Server : ICurrentTime, IDropItem
                     clients[clientid].IsPlayerStatsDirty = true;
                 }
                 break;
-            case Packet_ClientIdEnum.Death:
+            case PacketType.Death:
                 {
                     //Console.WriteLine("Death Packet Received. Client: {0}, Reason: {1}, Source: {2}", clientid, packet.Death.Reason, packet.Death.SourcePlayer);
                     for (int i = 0; i < modEventHandlers.onplayerdeath.Count; i++)
@@ -1533,7 +1533,7 @@ public partial class Server : ICurrentTime, IDropItem
                     }
                 }
                 break;
-            case Packet_ClientIdEnum.Oxygen:
+            case PacketType.Oxygen:
                 {
                     //todo server side
                     var stats = GetPlayerStats(clients[clientid].playername);
@@ -1541,10 +1541,10 @@ public partial class Server : ICurrentTime, IDropItem
                     clients[clientid].IsPlayerStatsDirty = true;
                 }
                 break;
-            case Packet_ClientIdEnum.MonsterHit:
+            case PacketType.MonsterHit:
                 HitMonsters(clientid, packet.Health.CurrentHealth);
                 break;
-            case Packet_ClientIdEnum.DialogClick:
+            case PacketType.DialogClick:
                 for (int i = 0; i < modEventHandlers.ondialogclick.Count; i++)
                 {
                     try
@@ -1576,7 +1576,7 @@ public partial class Server : ICurrentTime, IDropItem
                     }
                 }
                 break;
-            case Packet_ClientIdEnum.Shot:
+            case PacketType.Shot:
                 int shootSoundIndex = pistolcycle++ % BlockTypes[packet.Shot.WeaponBlock].Sounds.ShootEnd.Length;	//Cycle all given ShootEnd sounds
                 PlaySoundAtExceptPlayer((int)DeserializeFloat(packet.Shot.FromX), (int)DeserializeFloat(packet.Shot.FromZ), (int)DeserializeFloat(packet.Shot.FromY), BlockTypes[packet.Shot.WeaponBlock].Sounds.ShootEnd[shootSoundIndex] + ".ogg", clientid);
                 if (BlockTypes[packet.Shot.WeaponBlock].ProjectileSpeed == 0)
@@ -1705,7 +1705,7 @@ public partial class Server : ICurrentTime, IDropItem
                     }
                 }
                 break;
-            case Packet_ClientIdEnum.SpecialKey:
+            case PacketType.SpecialKey:
                 for (int i = 0; i < modEventHandlers.onspecialkey.Count; i++)
                 {
                     try
@@ -1720,7 +1720,7 @@ public partial class Server : ICurrentTime, IDropItem
                     }
                 }
                 break;
-            case Packet_ClientIdEnum.ActiveMaterialSlot:
+            case PacketType.ActiveMaterialSlot:
                 clients[clientid].ActiveMaterialSlot = packet.ActiveMaterialSlot.ActiveMaterialSlot;
                 for (int i = 0; i < modEventHandlers.changedactivematerialslot.Count; i++)
                 {
@@ -1736,14 +1736,14 @@ public partial class Server : ICurrentTime, IDropItem
                     }
                 }
                 break;
-            case Packet_ClientIdEnum.Leave:
+            case PacketType.Leave:
                 //0: Leave - 1: Crash
                 Console.WriteLine("Disconnect reason: {0}", packet.Leave.Reason);
                 KillPlayer(clientid);
                 break;
-            case Packet_ClientIdEnum.Reload:
+            case PacketType.Reload:
                 break;
-            case Packet_ClientIdEnum.ServerQuery:
+            case PacketType.ServerQuery:
                 //Flood/DDoS-abuse protection
                 if ((DateTime.UtcNow - lastQuery) < TimeSpan.FromMilliseconds(200))
                 {
@@ -1792,22 +1792,22 @@ public partial class Server : ICurrentTime, IDropItem
                 SendPacket(clientid, ServerPackets.DisconnectPlayer("Query success."));
                 KillPlayer(clientid);
                 break;
-            case Packet_ClientIdEnum.GameResolution:
+            case PacketType.GameResolution:
                 //Update client information
                 clients[clientid].WindowSize = new int[] { packet.GameResolution.Width, packet.GameResolution.Height };
                 //Console.WriteLine("client:{0} --> {1}x{2}", clientid, clients[clientid].WindowSize[0], clients[clientid].WindowSize[1]);
                 break;
-            case Packet_ClientIdEnum.EntityInteraction:
+            case PacketType.EntityInteraction:
                 switch (packet.EntityInteraction.InteractionType)
                 {
-                    case Packet_EntityInteractionTypeEnum.Use:
+                    case PacketEntityInteractionType.Use:
                         for (int i = 0; i < modEventHandlers.onuseentity.Count; i++)
                         {
                             ServerEntityId id = c.spawnedEntities[packet.EntityInteraction.EntityId - 64];
                             modEventHandlers.onuseentity[i](clientid, id.chunkx, id.chunky, id.chunkz, id.id);
                         }
                         break;
-                    case Packet_EntityInteractionTypeEnum.Hit:
+                    case PacketEntityInteractionType.Hit:
                         for (int i = 0; i < modEventHandlers.onhitentity.Count; i++)
                         {
                             ServerEntityId id = c.spawnedEntities[packet.EntityInteraction.EntityId - 64];
@@ -1825,7 +1825,7 @@ public partial class Server : ICurrentTime, IDropItem
         }
     }
 
-    public bool CheckBuildPrivileges(int player, int x, int y, int z, int mode)
+    public bool CheckBuildPrivileges(int player, int x, int y, int z, PacketBlockSetMode mode)
     {
         Server server = this;
         if (!server.PlayerHasPrivilege(player, ServerClientMisc.Privilege.build))
@@ -1860,7 +1860,7 @@ public partial class Server : ICurrentTime, IDropItem
             return false;
         }
         bool retval = true;
-        if (mode == Packet_BlockSetModeEnum.Create)
+        if (mode == PacketBlockSetMode.Create)
         {
             for (int i = 0; i < modEventHandlers.checkonbuild.Count; i++)
             {
@@ -1879,7 +1879,7 @@ public partial class Server : ICurrentTime, IDropItem
                 }
             }
         }
-        else if (mode == Packet_BlockSetModeEnum.Destroy)
+        else if (mode == PacketBlockSetMode.Destroy)
         {
             for (int i = 0; i < modEventHandlers.checkondelete.Count; i++)
             {
@@ -2274,13 +2274,13 @@ public partial class Server : ICurrentTime, IDropItem
 
         switch (cmd.Action)
         {
-            case Packet_InventoryActionTypeEnum.Click:
+            case PacketInventoryActionType.Click:
                 s.InventoryClick(cmd.A);
                 break;
-            case Packet_InventoryActionTypeEnum.MoveToInventory:
+            case PacketInventoryActionType.MoveToInventory:
                 s.MoveToInventory(cmd.A);
                 break;
-            case Packet_InventoryActionTypeEnum.WearItem:
+            case PacketInventoryActionType.WearItem:
                 s.WearItem(cmd.A, cmd.B);
                 break;
             default:
@@ -2358,12 +2358,12 @@ public partial class Server : ICurrentTime, IDropItem
                     };
                     if (GetBlock(x, y, z) != 0)
                     {
-                        cmd.Mode = Packet_BlockSetModeEnum.Destroy;
+                        cmd.Mode = PacketBlockSetMode.Destroy;
                         DoCommandBuild(player_id, true, cmd);
                     }
                     if (blockType != d_Data.BlockIdFillArea())
                     {
-                        cmd.Mode = Packet_BlockSetModeEnum.Create;
+                        cmd.Mode = PacketBlockSetMode.Create;
                         DoCommandBuild(player_id, true, cmd);
                     }
                 }
@@ -2499,7 +2499,7 @@ public partial class Server : ICurrentTime, IDropItem
     {
         Vector3 v = new(cmd.X, cmd.Y, cmd.Z);
         Inventory inventory = GetPlayerInventory(clients[player_id].playername).Inventory;
-        if (cmd.Mode == Packet_BlockSetModeEnum.Use)
+        if (cmd.Mode == PacketBlockSetMode.Use)
         {
             for (int i = 0; i < modEventHandlers.onuse.Count; i++)
             {
@@ -2516,7 +2516,7 @@ public partial class Server : ICurrentTime, IDropItem
             }
             return true;
         }
-        if (cmd.Mode == Packet_BlockSetModeEnum.UseWithTool)
+        if (cmd.Mode == PacketBlockSetMode.UseWithTool)
         {
             for (int i = 0; i < modEventHandlers.onusewithtool.Count; i++)
             {
@@ -2533,17 +2533,17 @@ public partial class Server : ICurrentTime, IDropItem
             }
             return true;
         }
-        if (cmd.Mode == Packet_BlockSetModeEnum.Create
+        if (cmd.Mode == PacketBlockSetMode.Create
             && d_Data.Rail()[cmd.BlockType] != 0)
         {
             return DoCommandBuildRail(player_id, execute, cmd);
         }
-        if (cmd.Mode == Packet_BlockSetModeEnum.Destroy
+        if (cmd.Mode == PacketBlockSetMode.Destroy
             && d_Data.Rail()[d_Map.GetBlock(cmd.X, cmd.Y, cmd.Z)] != 0)
         {
             return DoCommandRemoveRail(player_id, execute, cmd);
         }
-        if (cmd.Mode == Packet_BlockSetModeEnum.Create)
+        if (cmd.Mode == PacketBlockSetMode.Create)
         {
             int oldblock = d_Map.GetBlock(cmd.X, cmd.Y, cmd.Z);
             if (!(oldblock == 0 || BlockTypes[oldblock].IsFluid()))
@@ -4018,7 +4018,7 @@ public class BlockTypeConverter
             DamageHeadFloat = Server.SerializeFloat(block.DamageHead),
             DamageToPlayer = block.DamageToPlayer,
             DelayFloat = Server.SerializeFloat(block.Delay),
-            DrawType = (int)block.DrawType,
+            DrawType = block.DrawType,
             ExplosionRangeFloat = Server.SerializeFloat(block.ExplosionRange),
             ExplosionTimeFloat = Server.SerializeFloat(block.ExplosionTime),
             Handimage = block.handimage,

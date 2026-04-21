@@ -1,17 +1,19 @@
-﻿public partial class Game
+﻿using ManicDigger;
+
+public partial class Game
 {
     // -------------------------------------------------------------------------
     // Block type queries
     // -------------------------------------------------------------------------
 
     public static bool IsEmptyForPhysics(Packet_BlockType block) =>
-        block.DrawType == Packet_DrawTypeEnum.Ladder
+        block.DrawType == DrawType.Ladder
         || (block.WalkableType != Packet_WalkableTypeEnum.Solid
             && block.WalkableType != Packet_WalkableTypeEnum.Fluid);
 
     public static bool IsTransparentForLight(Packet_BlockType b) =>
-        b.DrawType != Packet_DrawTypeEnum.Solid
-        && b.DrawType != Packet_DrawTypeEnum.ClosedDoor;
+        b.DrawType != DrawType.Solid
+        && b.DrawType != DrawType.ClosedDoor;
 
     internal bool IsWater(int blockType)
     {
@@ -49,7 +51,7 @@
 
     internal bool IsTileEmptyForPhysicsClose(int x, int y, int z) =>
         IsTileEmptyForPhysics(x, y, z)
-        || (VoxelMap.IsValidPos(x, y, z) && blocktypes[VoxelMap.GetBlock(x, y, z)].DrawType == Packet_DrawTypeEnum.HalfHeight)
+        || (VoxelMap.IsValidPos(x, y, z) && blocktypes[VoxelMap.GetBlock(x, y, z)].DrawType == DrawType.HalfHeight)
         || (VoxelMap.IsValidPos(x, y, z) && IsEmptyForPhysics(blocktypes[VoxelMap.GetBlock(x, y, z)]));
 
     // -------------------------------------------------------------------------
@@ -151,7 +153,7 @@
     // Speculative block placement
     // -------------------------------------------------------------------------
 
-    internal void SendSetBlockAndUpdateSpeculative(int material, int x, int y, int z, int mode)
+    internal void SendSetBlockAndUpdateSpeculative(int material, int x, int y, int z, PacketBlockSetMode mode)
     {
         SendSetBlock(x, y, z, mode, material, ActiveMaterial);
 
@@ -159,7 +161,7 @@
         if (item == null || item.ItemClass != Packet_ItemClassEnum.Block)
             return;
 
-        int blockid = mode == Packet_BlockSetModeEnum.Destroy ? SpecialBlockId.Empty : material;
+        int blockid = mode == PacketBlockSetMode.Destroy ? SpecialBlockId.Empty : material;
         AddSpeculative(new Speculative
         {
             x = x,

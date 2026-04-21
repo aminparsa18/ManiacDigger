@@ -1,6 +1,8 @@
 ﻿// lightweight single-player / embedded server.
 // Runs on a background thread via ModServerSimple.OnReadOnlyBackgroundThread.
 
+using ManicDigger;
+
 public class ServerSimple
 {
     // -------------------------------------------------------------------------
@@ -130,35 +132,35 @@ public class ServerSimple
 
     private void ProcessPacket(int clientId, Packet_Client packet)
     {
-        switch (packet.GetId())
+        switch (packet.Id)
         {
-            case Packet_ClientIdEnum.PlayerIdentification:
+            case PacketType.PlayerIdentification:
                 if (packet.Identification == null) return;
                 SendPacket(clientId, ServerPackets.Identification(
                     0, MapSizeX, MapSizeY, MapSizeZ, platform.GetGameVersion()));
                 clients[clientId].Name = packet.Identification.Username;
                 break;
 
-            case Packet_ClientIdEnum.RequestBlob:
+            case PacketType.RequestBlob:
                 OnRequestBlob(clientId);
                 break;
 
-            case Packet_ClientIdEnum.Message:
+            case PacketType.Message:
                 SendPacketToAll(ServerPackets.Message(
                     $"{clients[clientId].Name}: &f{packet.Message.Message}"));
                 break;
 
-            case Packet_ClientIdEnum.SetBlock:
+            case PacketType.SetBlock:
                 OnSetBlock(packet);
                 break;
 
-            case Packet_ClientIdEnum.PositionandOrientation:
+            case PacketType.PositionAndOrientation:
                 clients[clientId].glX = _one * packet.PositionAndOrientation.X / 32;
                 clients[clientId].glY = _one * packet.PositionAndOrientation.Y / 32;
                 clients[clientId].glZ = _one * packet.PositionAndOrientation.Z / 32;
                 break;
 
-            case Packet_ClientIdEnum.InventoryAction:
+            case PacketType.InventoryAction:
                 // Inventory actions handled by mods — nothing here yet.
                 break;
         }
@@ -216,9 +218,9 @@ public class ServerSimple
         int x = packet.SetBlock.X;
         int y = packet.SetBlock.Y;
         int z = packet.SetBlock.Z;
-        int mode = packet.SetBlock.Mode;
+        PacketBlockSetMode mode = packet.SetBlock.Mode;
 
-        if (mode == Packet_BlockSetModeEnum.Destroy)
+        if (mode == PacketBlockSetMode.Destroy)
             SendPacketToAll(ServerPackets.SetBlock(x, y, z, 0));
     }
 
@@ -513,7 +515,7 @@ public class BlockTypeSimple
         block.TextureIdForInventory = texture;
     }
 
-    public void SetDrawType(int p) => block.DrawType = p;
+    public void SetDrawType(DrawType p) => block.DrawType = p;
     public void SetWalkableType(int p) => block.WalkableType = p;
     public void SetName(string name) => block.Name = name;
     public void SetTextureTop(string p) => block.TextureIdTop = p;
@@ -532,11 +534,11 @@ public class ModSimpleDefault : ModSimple
     {
         _m = manager;
 
-        Add("Empty", Packet_DrawTypeEnum.Empty, Packet_WalkableTypeEnum.Empty);
+        Add("Empty", DrawType.Empty, Packet_WalkableTypeEnum.Empty);
         AddTextured("Stone", "Stone");
         AddTextured("Dirt", "Dirt");
 
-        BlockTypeSimple grass = Add("Grass", Packet_DrawTypeEnum.Solid, Packet_WalkableTypeEnum.Solid);
+        BlockTypeSimple grass = Add("Grass", DrawType.Solid, Packet_WalkableTypeEnum.Solid);
         grass.SetTextureTop("Grass");
         grass.SetTextureFront("GrassSide"); grass.SetTextureBack("GrassSide");
         grass.SetTextureLeft("GrassSide"); grass.SetTextureRight("GrassSide");
@@ -562,7 +564,7 @@ public class ModSimpleDefault : ModSimple
         manager.CreateBlockType("Rail0");
     }
 
-    private BlockTypeSimple Add(string name, int drawType, int walkableType)
+    private BlockTypeSimple Add(string name, DrawType drawType, int walkableType)
     {
         BlockTypeSimple b = _m.CreateBlockType(name);
         b.SetDrawType(drawType);
@@ -572,7 +574,7 @@ public class ModSimpleDefault : ModSimple
 
     private void AddTextured(string name, string texture)
     {
-        BlockTypeSimple b = Add(name, Packet_DrawTypeEnum.Solid, Packet_WalkableTypeEnum.Solid);
+        BlockTypeSimple b = Add(name, DrawType.Solid, Packet_WalkableTypeEnum.Solid);
         b.SetAllTextures(texture);
     }
 

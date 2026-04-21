@@ -445,7 +445,7 @@ public class ModPicking : ModBase
             SpawnGrenadeEntity(game, pick, item, toX, toY, toZ, projectileSpeed, cookWait, ref shot);
         }
 
-        game.SendPacketClient(new Packet_Client { Id = Packet_ClientIdEnum.Shot, Shot = shot });
+        game.SendPacketClient(new Packet_Client { Id = PacketType.Shot, Shot = shot });
 
         if (game.blocktypes[item.BlockId].Sounds.ShootEndCount > 0)
         {
@@ -608,13 +608,13 @@ public class ModPicking : ModBase
         int x = blockposX;
         int y = blockposY;
         int z = blockposZ;
-        int mode = right ? Packet_BlockSetModeEnum.Create : Packet_BlockSetModeEnum.Destroy;
+        PacketBlockSetMode mode = right ? PacketBlockSetMode.Create : PacketBlockSetMode.Destroy;
 
         if (game.IsAnyPlayerInPos(x, y, z) || activeMaterial == 151 /* Compass */) { return; }
 
         Vector3i v = new(x, y, z);
 
-        if (mode == Packet_BlockSetModeEnum.Create)
+        if (mode == PacketBlockSetMode.Create)
         {
             if (game.blocktypes[activeMaterial].IsTool)
             {
@@ -734,7 +734,7 @@ public class ModPicking : ModBase
 
     /// <summary>Sends a <c>UseWithTool</c> block-set packet for the block at the given position.</summary>
     internal static void OnPickUseWithTool(Game game, int posX, int posY, int posZ)
-        => game.SendSetBlock(posX, posY, posZ, Packet_BlockSetModeEnum.UseWithTool,
+        => game.SendSetBlock(posX, posY, posZ, PacketBlockSetMode.UseWithTool,
                              game.d_Inventory.RightHand[game.ActiveMaterial].BlockId,
                              game.ActiveMaterial);
 
@@ -938,7 +938,7 @@ public class ModPicking : ModBase
     {
         Packet_InventoryPosition pos = new()
         {
-            Type = Packet_InventoryPositionTypeEnum.MaterialSelector,
+            Type = PacketInventoryPositionType.MaterialSelector,
             MaterialId = materialId
         };
         return pos;
@@ -948,7 +948,7 @@ public class ModPicking : ModBase
     {
         Packet_InventoryPosition pos = new()
         {
-            Type = Packet_InventoryPositionTypeEnum.MainArea,
+            Type = PacketInventoryPositionType.MainArea,
             AreaX = x,
             AreaY = y
         };

@@ -58,8 +58,8 @@ public class ServerMonitor
 
         switch (packet.Id)
         {
-            case Packet_ClientIdEnum.SetBlock:
-            case Packet_ClientIdEnum.FillArea:
+            case PacketType.SetBlock:
+            case PacketType.FillArea:
                 if (monitorClients[clientId].SetBlockPunished())
                 {
                     // TODO: revert block at client
@@ -72,7 +72,7 @@ public class ServerMonitor
                 }
                 // punish client
                 return this.ActionSetBlock(clientId);
-            case Packet_ClientIdEnum.Message:
+            case PacketType.Message:
                 if (monitorClients[clientId].MessagePunished())
                 {
                     server.SendMessage(clientId, server.language.ServerMonitorChatNotSent(), Server.MessageType.Error);

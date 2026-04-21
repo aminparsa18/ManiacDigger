@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using ManicDigger;
+using OpenTK.Mathematics;
 using System.Text;
 
 public class LoginData
@@ -1160,7 +1161,7 @@ public class GameData
         {
             mWhenPlayerPlacesGetsConvertedTo[id] = id;
         }
-        IsFlower()[id] = b.DrawType == Packet_DrawTypeEnum.Plant;
+        IsFlower()[id] = b.DrawType == DrawType.Plant;
         Rail()[id] = b.Rail;
         WalkSpeed()[id] = DeserializeFloat(b.WalkSpeedFloat);
         IsSlipperyWalk()[id] = b.IsSlipperyWalk;
@@ -1217,6 +1218,6 @@ public class OnCrashHandlerLeave : OnCrashHandler
     private Game g;
     public override void OnCrash()
     {
-        g.SendLeave(Packet_LeaveReasonEnum.Crash);
+        g.SendLeave(PacketLeaveReason.Crash);
     }
 }

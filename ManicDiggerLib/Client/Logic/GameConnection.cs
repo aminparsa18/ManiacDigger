@@ -41,7 +41,7 @@
         SendPacketClient(ClientPackets.PingReply());
     }
 
-    internal void SendSetBlock(int x, int y, int z, int mode, int type, int materialslot)
+    internal void SendSetBlock(int x, int y, int z, PacketBlockSetMode mode, int type, int materialslot)
     {
         SendPacketClient(ClientPackets.SetBlock(x, y, z, mode, type, materialslot));
     }
@@ -61,7 +61,7 @@
         SendPacketClient(ClientPackets.GameResolution(Width(), Height()));
     }
 
-    internal void SendLeave(int reason)
+    internal void SendLeave(PacketLeaveReason reason)
     {
         SendPacketClient(ClientPackets.Leave(reason));
     }

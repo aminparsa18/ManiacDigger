@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+using ManicDigger;
 using OpenTK.Mathematics;
 
 /// <summary>
@@ -622,8 +623,8 @@ public class ModDrawTerrain : ModBase
     public bool IsTransparentForLight(int blockId)
     {
         Packet_BlockType b = _game.blocktypes[blockId];
-        return b.DrawType != Packet_DrawTypeEnum.Solid
-            && b.DrawType != Packet_DrawTypeEnum.ClosedDoor;
+        return b.DrawType != DrawType.Solid
+            && b.DrawType != DrawType.ClosedDoor;
     }
 
     /// <summary>

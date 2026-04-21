@@ -46,7 +46,7 @@ public class ServerSystemPermissionSign : ServerSystem
     {
         if (server.modManager.GetBlockName(tool) != "PermissionSign") return;
         if (server.d_Map.GetChunk(x, y, z) == null) return;
-        if (!server.CheckBuildPrivileges(player, x, y, z, Packet_BlockSetModeEnum.Create)) return;
+        if (!server.CheckBuildPrivileges(player, x, y, z, PacketBlockSetMode.Create)) return;
         if (!CheckAreaPrivilege(player)) return;
 
         var e = new ServerEntity

@@ -1,4 +1,5 @@
-﻿using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
+﻿using ManicDigger;
+using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 public partial class Game
 {
@@ -151,7 +152,7 @@ public partial class Game
     // Damage
     // -------------------------------------------------------------------------
 
-    internal void ApplyDamageToPlayer(int damage, int damageSource, int sourceId)
+    internal void ApplyDamageToPlayer(int damage, DeathReason damageSource, int sourceId)
     {
         PlayerStats.CurrentHealth -= damage;
         if (PlayerStats.CurrentHealth <= 0)

@@ -138,7 +138,7 @@ public class ModGuiInventory : ModBase
             game.ActiveMaterial = materialSlot.Value;
             controller.InventoryClick(new Packet_InventoryPosition
             {
-                Type = Packet_InventoryPositionTypeEnum.MaterialSelector,
+                Type = PacketInventoryPositionType.MaterialSelector,
                 MaterialId = game.ActiveMaterial
             });
             args.SetHandled(true);
@@ -151,7 +151,7 @@ public class ModGuiInventory : ModBase
         {
             Packet_InventoryPosition mainClick = new()
             {
-                Type = Packet_InventoryPositionTypeEnum.MainArea,
+                Type = PacketInventoryPositionType.MainArea,
                 AreaX = cell.Value.X,
                 AreaY = cell.Value.Y + ScrollLine
             };
@@ -166,7 +166,7 @@ public class ModGuiInventory : ModBase
                 controller.InventoryClick(mainClick);
                 controller.InventoryClick(new Packet_InventoryPosition
                 {
-                    Type = Packet_InventoryPositionTypeEnum.WearPlace,
+                    Type = PacketInventoryPositionType.WearPlace,
                     WearPlace = (int)WearPlace.RightHand,
                     ActiveMaterial = game.ActiveMaterial
                 });
@@ -186,7 +186,7 @@ public class ModGuiInventory : ModBase
         {
             controller.InventoryClick(new Packet_InventoryPosition
             {
-                Type = Packet_InventoryPositionTypeEnum.WearPlace,
+                Type = PacketInventoryPositionType.WearPlace,
                 WearPlace = wearPlace.Value,
                 ActiveMaterial = game.ActiveMaterial
             });

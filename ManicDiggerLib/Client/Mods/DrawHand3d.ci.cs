@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using ManicDigger;
+using OpenTK.Mathematics;
 
 /// <summary>
 /// Client-side mod that renders the player's held item (or empty hand) as a 3-D model
@@ -234,7 +235,7 @@ public class ModDrawHand3d : ModBase
         Packet_Item item = game.d_Inventory.RightHand[game.ActiveMaterial];
         return item != null
             && item.ItemClass == Packet_ItemClassEnum.Block
-            && game.blocktypes[item.BlockId].DrawType == Packet_DrawTypeEnum.Torch;
+            && game.blocktypes[item.BlockId].DrawType == DrawType.Torch;
     }
 
     /// <summary>
