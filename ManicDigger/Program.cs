@@ -8,7 +8,7 @@ public class Program
     public static void Main(string[] args)
     {
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
-       File.WriteAllText("crash.txt", e.ExceptionObject.ToString());
+        File.WriteAllText("crash.txt", e.ExceptionObject.ToString());
 
         CrashReporter.DefaultFileName = "ManicDiggerClientCrash.txt";
         CrashReporter.EnableGlobalExceptionHandling(isConsole: false);

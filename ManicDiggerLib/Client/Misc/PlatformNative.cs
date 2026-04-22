@@ -16,7 +16,6 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
-using Monitor = System.Threading.Monitor;
 using Vector3 = OpenTK.Mathematics.Vector3;
 using Vector4 = OpenTK.Mathematics.Vector4;
 
@@ -172,17 +171,15 @@ public class GamePlatformNative : IGamePlatform
             totalRead += bytesRead;
     }
 
-    private readonly ICompression compression = new CompressionGzip();
-    public byte[] GzipCompress(byte[] data, int dataLength, out int retLength)
+    public byte[] GzipCompress(byte[] data, int dataLength)
     {
-        byte[] data_ = new byte[dataLength];
-        for (int i = 0; i < dataLength; i++)
-        {
-            data_[i] = data[i];
-        }
-        byte[] compressed = compression.Compress(data_);
-        retLength = compressed.Length;
-        return compressed;
+        using var output = new MemoryStream();
+        using (var gz = new GZipStream(output, CompressionMode.Compress, leaveOpen: true))
+            gz.Write(data, 0, dataLength);
+        // GZipStream must be disposed (flushed) before reading — leaveOpen keeps
+        // output accessible after gz is done writing the GZip footer.
+        byte[] result = output.ToArray();
+        return result;
     }
 
     public bool ENABLE_CHATLOG = true;

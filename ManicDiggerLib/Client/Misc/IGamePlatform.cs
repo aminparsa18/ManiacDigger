@@ -78,7 +78,7 @@ public interface IPlatformMisc
     bool MultithreadingAvailable();
     void QueueUserWorkItem(Action action);
     List<Asset> LoadAssetsAsyc(out float progress);
-    byte[] GzipCompress(byte[] data, int dataLength, out int retLength);
+    byte[] GzipCompress(byte[] data, int dataLength);
     bool IsDebuggerAttached();
     bool IsSmallScreen();
     void OpenLinkInBrowser(string url);

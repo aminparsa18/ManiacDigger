@@ -5,9 +5,8 @@ public class ModDraw2dMisc : ModBase
     public override void OnNewFrameDraw2d(Game game, float deltaTime)
     {
         if (game.guistate == GuiState.Normal)
-        {
             DrawAim(game);
-        }
+
         if (game.guistate != GuiState.MapLoading)
         {
             DrawEnemyHealthBlock(game);
@@ -15,46 +14,31 @@ public class ModDraw2dMisc : ModBase
             DrawLocalPosition(game);
             DrawBlockInfo(game);
         }
+
         DrawMouseCursor(game);
         DrawDisconnected(game);
     }
 
-    public void DrawBlockInfo(Game game)
+    // ── Block / entity health display ─────────────────────────────────────────
+
+    public static void DrawBlockInfo(Game game)
     {
-        if (!game.drawblockinfo)
-        {
-            return;
-        }
+        if (!game.drawblockinfo) return;
+
         int x = game.SelectedBlockPositionX;
         int y = game.SelectedBlockPositionZ;
         int z = game.SelectedBlockPositionY;
-        //string info = "None";
-        if (!game.VoxelMap.IsValidPos(x, y, z))
-        {
-            return;
-        }
+
+        if (!game.VoxelMap.IsValidPos(x, y, z)) return;
+
         int blocktype = game.VoxelMap.GetBlock(x, y, z);
-        if (!game.IsValid(blocktype))
-        {
-            return;
-        }
+        if (!game.IsValid(blocktype)) return;
+
         game.currentAttackedBlock = new Vector3i(x, y, z);
         DrawEnemyHealthBlock(game);
     }
 
-    internal static void DrawMouseCursor(Game game)
-    {
-        if (!game.GetFreeMouse())
-        {
-            return;
-        }
-        if (!game.platform.MouseCursorIsVisible())
-        {
-            game.Draw2dBitmapFile("mousecursor.png", game.mouseCurrentX, game.mouseCurrentY, 32, 32);
-        }
-    }
-
-    internal void DrawEnemyHealthBlock(Game game)
+    internal static void DrawEnemyHealthBlock(Game game)
     {
         if (game.currentAttackedBlock != null)
         {
@@ -64,137 +48,164 @@ public class ModDraw2dMisc : ModBase
             int blocktype = game.VoxelMap.GetBlock(x, y, z);
             float health = game.GetCurrentBlockHealth(x, y, z);
             float progress = health / game.BlockRegistry.Strength[blocktype];
+
+            // Cache the translated name — used in up to two calls below.
+            string name = game.language.Get("Block_" + game.blocktypes[blocktype].Name);
+
             if (game.IsUsableBlock(blocktype))
-            {
-                DrawEnemyHealthUseInfo(game, game.language.Get(string.Concat("Block_", game.blocktypes[blocktype].Name)), progress, true);
-            }
-            DrawEnemyHealthCommon(game, game.language.Get(string.Concat("Block_", game.blocktypes[blocktype].Name)), progress);
+                DrawEnemyHealthUseInfo(game, name, progress, useInfo: true);
+
+            DrawEnemyHealthBackground(game, name);
         }
+
         if (game.currentlyAttackedEntity != -1)
         {
             Entity e = game.entities[game.currentlyAttackedEntity];
-            if (e == null)
-            {
-                return;
-            }
-            float health;
-            if (e.playerStats != null)
-            {
-                health = game.one * e.playerStats.CurrentHealth / e.playerStats.MaxHealth;
-            }
-            else
-            {
-                health = 1;
-            }
-            string name = "Unknown";
-            if (e.drawName != null)
-            {
-                name = e.drawName.Name;
-            }
+            if (e == null) return;
+
+            float health = e.playerStats != null
+                ? (float)e.playerStats.CurrentHealth / e.playerStats.MaxHealth
+                : 1f;
+
+            string name = e.drawName?.Name ?? "Unknown";
+            string translatedName = game.language.Get(name);
+
             if (e.usable)
-            {
-                DrawEnemyHealthUseInfo(game, game.language.Get(name), health, true);
-            }
-            DrawEnemyHealthCommon(game, game.language.Get(name), health);
+                DrawEnemyHealthUseInfo(game, translatedName, health, useInfo: true);
+
+            DrawEnemyHealthBackground(game, translatedName);
         }
     }
 
-    internal void DrawEnemyHealthCommon(Game game, string name, float progress)
-    {
-        DrawEnemyHealthUseInfo(game, name, 1, false);
-    }
+    /// <summary>
+    /// Draws the full-width background bar and name label (no progress, no use hint).
+    /// Replaces the old <c>DrawEnemyHealthCommon</c> which accepted a <c>progress</c>
+    /// parameter it silently ignored.
+    /// </summary>
+    internal static void DrawEnemyHealthBackground(Game game, string name)
+        => DrawEnemyHealthUseInfo(game, name, progress: 1f, useInfo: false);
 
     internal static void DrawEnemyHealthUseInfo(Game game, string name, float progress, bool useInfo)
     {
-        int y = useInfo ? 55 : 35;
-        game.Draw2dTexture(game.WhiteTexture(), game.Xcenter(300), 40, 300, y, null, 0, ColorUtils.ColorFromArgb(255, 0, 0, 0), false);
-        game.Draw2dTexture(game.WhiteTexture(), game.Xcenter(300), 40, 300 * progress, y, null, 0, ColorUtils.ColorFromArgb(255, 255, 0, 0), false);
-        Font font = new("Arial", 14);
-        game.platform.TextSize(name, 14, out int w, out int h);
-        game.Draw2dText(name, font, game.Xcenter(w), 40, null, false);
+        int barHeight = useInfo ? 55 : 35;
+        int whiteTexId = game.WhiteTexture(); // cache — was called twice
+
+        game.Draw2dTexture(whiteTexId, game.Xcenter(300), 40, 300, barHeight, null, 0,
+            ColorUtils.ColorFromArgb(255, 0, 0, 0), false);
+        game.Draw2dTexture(whiteTexId, game.Xcenter(300), 40, 300 * progress, barHeight, null, 0,
+            ColorUtils.ColorFromArgb(255, 255, 0, 0), false);
+
+        game.platform.TextSize(name, 14, out int w, out _);
+        game.Draw2dText1(name, game.Xcenter(w), 40, 14, null, false);
+
         if (useInfo)
         {
-            name = string.Format(game.language.PressToUse(), "E");
-            game.platform.TextSize(name, 10, out w, out h);
-            Font font2 = new("Arial", 10);
-            game.Draw2dText(name, font2, game.Xcenter(w), 70, null, false);
+            string hint = string.Format(game.language.PressToUse(), "E");
+            game.platform.TextSize(hint, 10, out w, out _);
+            game.Draw2dText1(hint, game.Xcenter(w), 70, 10, null, false);
         }
     }
 
+    // ── Crosshair ─────────────────────────────────────────────────────────────
+
     internal static void DrawAim(Game game)
     {
-        if (game.cameratype == CameraType.Overhead)
-        {
-            return;
-        }
-        int aimwidth = 32;
-        int aimheight = 32;
+        if (game.cameratype == CameraType.Overhead) return;
+
+        const int AimSize = 32;
         game.platform.BindTexture2d(0);
+
         if (game.CurrentAimRadius() > 1)
         {
             float fov_ = game.CurrentFov();
-            game.Circle3i(game.Width() / 2, game.Height() / 2, game.CurrentAimRadius() * game.fov / fov_);
+            game.Circle3i(game.Width() / 2, game.Height() / 2,
+                game.CurrentAimRadius() * game.fov / fov_);
         }
-        game.Draw2dBitmapFile("target.png", game.Width() / 2 - aimwidth / 2, game.Height() / 2 - aimheight / 2, aimwidth, aimheight);
+
+        game.Draw2dBitmapFile("target.png",
+            game.Width() / 2 - AimSize / 2,
+            game.Height() / 2 - AimSize / 2,
+            AimSize, AimSize);
     }
+
+    // ── Mouse cursor ──────────────────────────────────────────────────────────
+
+    internal static void DrawMouseCursor(Game game)
+    {
+        if (!game.GetFreeMouse()) return;
+        if (!game.platform.MouseCursorIsVisible())
+            game.Draw2dBitmapFile("mousecursor.png", game.mouseCurrentX, game.mouseCurrentY, 32, 32);
+    }
+
+    // ── Ammo counter ──────────────────────────────────────────────────────────
 
     internal static void DrawAmmo(Game game)
     {
         Packet_Item item = game.d_Inventory.RightHand[game.ActiveMaterial];
-        if (item != null && item.ItemClass == Packet_ItemClassEnum.Block)
+        if (item == null || item.ItemClass != Packet_ItemClassEnum.Block) return;
+        if (!game.blocktypes[item.BlockId].IsPistol) return;
+
+        int loaded = game.LoadedAmmo[item.BlockId];
+        int total = game.TotalAmmo[item.BlockId];
+        string s = $"{loaded}/{total - loaded}";
+        int color = loaded == 0
+            ? ColorUtils.ColorFromArgb(255, 255, 0, 0)
+            : ColorUtils.ColorFromArgb(255, 255, 255, 255);
+
+        game.Draw2dText1(s, game.Width() - game.TextSizeWidth(s, 18) - 50,
+            game.Height() - game.TextSizeHeight(s, 18) - 50, 18, color, false);
+
+        if (loaded == 0)
         {
-            if (game.blocktypes[item.BlockId].IsPistol)
-            {
-                int loaded = game.LoadedAmmo[item.BlockId];
-                int total = game.TotalAmmo[item.BlockId];
-                string s = string.Format("{0}/{1}", loaded.ToString(), (total - loaded).ToString());
-                Font font = new("Arial", 18);
-                game.Draw2dText(s, font, game.Width() - game.TextSizeWidth(s, 18) - 50,
-                    game.Height() - game.TextSizeHeight(s, 18) - 50, loaded == 0 ? ColorUtils.ColorFromArgb(255, 255, 0, 0)
-                    : ColorUtils.ColorFromArgb(255, 255, 255, 255), false);
-                if (loaded == 0)
-                {
-                    font = new("Arial", 14);
-                    string pressR = "Press R to reload";
-                    game.Draw2dText(pressR, font, game.Width() - game.TextSizeWidth(pressR, 14) - 50,
-                        game.Height() - game.TextSizeHeight(s, 14) - 80, ColorUtils.ColorFromArgb(255, 255, 0, 0), false);
-                }
-            }
+            const string PressR = "Press R to reload"; // TODO: move to game.language
+            game.Draw2dText1(PressR,
+                game.Width() - game.TextSizeWidth(PressR, 14) - 50,
+                game.Height() - game.TextSizeHeight(s, 14) - 80,
+                14, ColorUtils.ColorFromArgb(255, 255, 0, 0), false);
         }
     }
+
+    // ── Debug position overlay ────────────────────────────────────────────────
 
     private static void DrawLocalPosition(Game game)
     {
-        float one = 1;
-        if (game.ENABLE_DRAWPOSITION)
-        {
-            float heading = one * Game.HeadingByte(game.player.position.rotx, game.player.position.roty, game.player.position.rotz);
-            float pitch = one * Game.PitchByte(game.player.position.rotx, game.player.position.roty, game.player.position.rotz);
-            string postext = string.Format("X: {0}", MathF.Floor(game.player.position.x).ToString());
-            postext = string.Concat(postext, ",\tY: ");
-            postext = string.Concat(postext, MathF.Floor(game.player.position.z).ToString());
-            postext = string.Concat(postext, ",\tZ: ");
-            postext = string.Concat(postext, MathF.Floor(game.player.position.y).ToString());
-            postext = string.Concat(postext, "\nHeading: ");
-            postext = string.Concat(postext, MathF.Floor(heading).ToString());
-            postext = string.Concat(postext, "\nPitch: ");
-            postext = string.Concat(postext, MathF.Floor(pitch).ToString());
-            Font font = new("Arial", Game.ChatFontSize);
-            game.Draw2dText(postext, font, 100, 460, null, false);
-        }
+        if (!game.ENABLE_DRAWPOSITION) return;
+
+        float heading = Game.HeadingByte(
+            game.player.position.rotx, game.player.position.roty, game.player.position.rotz);
+        float pitch = Game.PitchByte(
+            game.player.position.rotx, game.player.position.roty, game.player.position.rotz);
+
+        // Single interpolated string replaces seven string.Concat calls.
+        string postext =
+            $"X: {MathF.Floor(game.player.position.x)},\t" +
+            $"Y: {MathF.Floor(game.player.position.z)},\t" +
+            $"Z: {MathF.Floor(game.player.position.y)}\n" +
+            $"Heading: {MathF.Floor(heading)}\n" +
+            $"Pitch: {MathF.Floor(pitch)}";
+
+        game.Draw2dText1(postext, 100, 460, Game.ChatFontSize, null, false);
     }
+
+    // ── Disconnected overlay ──────────────────────────────────────────────────
 
     private static void DrawDisconnected(Game game)
     {
-        float one = 1;
-        float lagSeconds = one * (game.platform.TimeMillisecondsFromStart - game.LastReceivedMilliseconds) / 1000;
-        if (lagSeconds >= Game.DISCONNECTED_ICON_AFTER_SECONDS && lagSeconds < 60 * 60 * 24
-            && game.invalidVersionDrawMessage == null && !(game.issingleplayer && (!game.platform.SinglePlayerServerLoaded())))
-        {
-            game.Draw2dBitmapFile("disconnected.png", game.Width() - 100, 50, 50, 50);
-            Font font = new("Arial", 12);
-            game.Draw2dText(((int)lagSeconds).ToString(), font, game.Width() - 100, 50 + 50 + 10, null, false);
-            game.Draw2dText("Press F6 to reconnect", font, game.Width() / 2 - 200 / 2, 50, null, false);
-        }
+        float lagSeconds =
+            (game.platform.TimeMillisecondsFromStart - game.LastReceivedMilliseconds) / 1000f;
+
+        if (lagSeconds < Game.DISCONNECTED_ICON_AFTER_SECONDS) return;
+        if (lagSeconds >= 60 * 60 * 24) return;
+        if (game.invalidVersionDrawMessage != null) return;
+        if (game.issingleplayer && !game.platform.SinglePlayerServerLoaded()) return;
+
+        game.Draw2dBitmapFile("disconnected.png", game.Width() - 100, 50, 50, 50);
+
+        game.Draw2dText1(((int)lagSeconds).ToString(),
+            game.Width() - 100, 50 + 50 + 10, 12, null, false);
+
+        const string Reconnect = "Press F6 to reconnect";
+        game.Draw2dText1(Reconnect,
+            game.Width() / 2 - 200 / 2, 50, 12, null, false);
     }
 }

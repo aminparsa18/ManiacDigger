@@ -16,14 +16,6 @@ public class ScreenGame : ScreenBase
     private string singleplayerSavePath;
 
     /// <summary>
-    /// In-process server used when the platform does not supply its own
-    /// singleplayer server. <see langword="null"/> in multiplayer or when the
-    /// platform handles singleplayer itself.
-    /// </summary>
-    private ServerSimple serverSimple;
-    private ModServerSimple serverSimpleMod;
-
-    /// <summary>
     /// Initialises the game with the given connection parameters and starts the
     /// network session. Must be called before the screen becomes active.
     /// </summary>
@@ -59,24 +51,8 @@ public class ScreenGame : ScreenBase
         {
             DummyNetwork network = platform.SinglePlayerServerGetNetwork();
 
-            if (platform.SinglePlayerServerAvailable())
-            {
-                // Platform provides its own singleplayer server (e.g. mobile).
-                platform.SinglePlayerServerStart(singleplayerSavePath);
-            }
-            else
-            {
-                // No platform server — spin up an in-process server and wire it
-                // to the game via the dummy network.
-                DummyNetServer server = new(network);
-                server.Start();
-
-                serverSimple = new ServerSimple();
-                serverSimple.Start(server, singleplayerSavePath, platform);
-
-                serverSimpleMod = new ModServerSimple { server = serverSimple };
-                game.AddMod(serverSimpleMod);
-            }
+            // Platform provides its own singleplayer server (e.g. mobile).
+            platform.SinglePlayerServerStart(singleplayerSavePath);
 
             // Prime the server inbox so the handshake starts immediately.
             network.ServerInbox.Enqueue([]);
