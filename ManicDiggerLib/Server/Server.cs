@@ -86,7 +86,7 @@ public partial class Server : ICurrentTime, IDropItem
     private readonly IGamePlatform gameplatform;
     public GameExit exit;
     public ServerMapStorage d_Map;
-    public GameData d_Data;
+    public BlockTypeRegistry d_Data;
     public CraftingTableTool d_CraftingTableTool;
     public IGetFileStream d_GetFile;
     public IChunkDb d_ChunkDb;
@@ -351,7 +351,7 @@ public partial class Server : ICurrentTime, IDropItem
         d_GetFile = getfile;
 
         //Initialize game components
-        var data = new GameData();
+        var data = new BlockTypeRegistry();
         data.Start();
         d_Data = data;
         d_CraftingTableTool = new CraftingTableTool() { d_Map = map, d_Data = data };
@@ -1047,9 +1047,9 @@ public partial class Server : ICurrentTime, IDropItem
         Inventory inv = ManicDigger.Inventory.Create();
         int x = 0;
         int y = 0;
-        for (int i = 0; i < d_Data.StartInventoryAmount().Length; i++)
+        for (int i = 0; i < d_Data.StartInventoryAmount.Length; i++)
         {
-            int amount = d_Data.StartInventoryAmount()[i];
+            int amount = d_Data.StartInventoryAmount[i];
             if (config.IsCreative)
             {
                 if (amount > 0 || BlockTypes[i].IsBuildable)
@@ -2167,7 +2167,7 @@ public partial class Server : ICurrentTime, IDropItem
     private bool ENABLE_FINITEINVENTORY { get { return !config.IsCreative; } }
     private bool DoCommandCraft(bool execute, Packet_ClientCraft cmd)
     {
-        if (d_Map.GetBlock(cmd.X, cmd.Y, cmd.Z) != d_Data.BlockIdCraftingTable())
+        if (d_Map.GetBlock(cmd.X, cmd.Y, cmd.Z) != d_Data.BlockIdCraftingTable)
         {
             return false;
         }
@@ -2187,7 +2187,7 @@ public partial class Server : ICurrentTime, IDropItem
                 //check if ingredients available
                 foreach (Ingredient ingredient in craftingrecipes[i].ingredients)
                 {
-                    if (ontableFindAllCount(ontable, ontableCount, ingredient.Type) < ingredient.Amount)
+                    if (OntableFindAllCount(ontable, ontableCount, ingredient.Type) < ingredient.Amount)
                     {
                         goto nextrecipe;
                     }
@@ -2198,7 +2198,7 @@ public partial class Server : ICurrentTime, IDropItem
                     for (int ii = 0; ii < ingredient.Amount; ii++)
                     {
                         //replace on table
-                        ReplaceOne(ontable, ontableCount, ingredient.Type, d_Data.BlockIdEmpty());
+                        ReplaceOne(ontable, ontableCount, ingredient.Type, d_Data.BlockIdEmpty);
                     }
                 }
                 //add output
@@ -2212,7 +2212,7 @@ public partial class Server : ICurrentTime, IDropItem
         }
         foreach (var v in outputtoadd)
         {
-            ReplaceOne(ontable, ontableCount, d_Data.BlockIdEmpty(), v);
+            ReplaceOne(ontable, ontableCount, d_Data.BlockIdEmpty, v);
         }
         int zz = 0;
         if (execute)
@@ -2227,7 +2227,7 @@ public partial class Server : ICurrentTime, IDropItem
         return true;
     }
 
-    private static int ontableFindAllCount(int[] ontable, int ontableCount, int p)
+    private static int OntableFindAllCount(int[] ontable, int ontableCount, int p)
     {
         int count = 0;
         for (int i = 0; i < ontableCount; i++)
@@ -2251,6 +2251,7 @@ public partial class Server : ICurrentTime, IDropItem
             }
         }
     }
+
     public IGameDataItems d_DataItems;
     public InventoryUtil GetInventoryUtil(Inventory inventory)
     {
@@ -2333,7 +2334,7 @@ public partial class Server : ICurrentTime, IDropItem
         int endz = Math.Max(a.Z, b.Z);
 
         int blockType = fill.BlockType;
-        blockType = d_Data.WhenPlayerPlacesGetsConvertedTo()[blockType];
+        blockType = d_Data.WhenPlayerPlacesGetsConvertedTo[blockType];
 
         Inventory inventory = GetPlayerInventory(clients[player_id].playername).Inventory;
         var item = inventory.RightHand[fill.MaterialSlot];
@@ -2361,7 +2362,7 @@ public partial class Server : ICurrentTime, IDropItem
                         cmd.Mode = PacketBlockSetMode.Destroy;
                         DoCommandBuild(player_id, true, cmd);
                     }
-                    if (blockType != d_Data.BlockIdFillArea())
+                    if (blockType != d_Data.BlockIdFillArea)
                     {
                         cmd.Mode = PacketBlockSetMode.Create;
                         DoCommandBuild(player_id, true, cmd);
@@ -2534,12 +2535,12 @@ public partial class Server : ICurrentTime, IDropItem
             return true;
         }
         if (cmd.Mode == PacketBlockSetMode.Create
-            && d_Data.Rail()[cmd.BlockType] != 0)
+            && d_Data.Rail[cmd.BlockType] != 0)
         {
             return DoCommandBuildRail(player_id, execute, cmd);
         }
         if (cmd.Mode == PacketBlockSetMode.Destroy
-            && d_Data.Rail()[d_Map.GetBlock(cmd.X, cmd.Y, cmd.Z)] != 0)
+            && d_Data.Rail[d_Map.GetBlock(cmd.X, cmd.Y, cmd.Z)] != 0)
         {
             return DoCommandRemoveRail(player_id, execute, cmd);
         }
@@ -2563,7 +2564,7 @@ public partial class Server : ICurrentTime, IDropItem
                     {
                         inventory.RightHand[cmd.MaterialSlot] = null;
                     }
-                    if (d_Data.Rail()[item.BlockId] != 0)
+                    if (d_Data.Rail[item.BlockId] != 0)
                     {
                     }
                     SetBlockAndNotify(cmd.X, cmd.Y, cmd.Z, item.BlockId);
@@ -2593,7 +2594,7 @@ public partial class Server : ICurrentTime, IDropItem
                 ItemClass = ItemClass.Block
             };
             int blockid = d_Map.GetBlock(cmd.X, cmd.Y, cmd.Z);
-            item.BlockId = d_Data.WhenPlayerPlacesGetsConvertedTo()[blockid];
+            item.BlockId = d_Data.WhenPlayerPlacesGetsConvertedTo[blockid];
             if (!config.IsCreative)
             {
                 GetInventoryUtil(inventory).GrabItem(item, cmd.MaterialSlot);
@@ -2633,14 +2634,14 @@ public partial class Server : ICurrentTime, IDropItem
         if (d_Data.IsRailTile(oldblock))
         {
             oldrailcount = DirectionUtils.RailDirectionFlagsCount(
-                oldblock - d_Data.BlockIdRailstart());
+                oldblock - d_Data.BlockIdRailStart);
         }
         int newrailcount = DirectionUtils.RailDirectionFlagsCount(
-            cmd.BlockType - d_Data.BlockIdRailstart());
+            cmd.BlockType - d_Data.BlockIdRailStart);
         int blockstoput = newrailcount - oldrailcount;
 
         Item item = inventory.RightHand[cmd.MaterialSlot];
-        if (!(item.ItemClass == ItemClass.Block && d_Data.Rail()[item.BlockId] != 0))
+        if (!(item.ItemClass == ItemClass.Block && d_Data.Rail[item.BlockId] != 0))
         {
             return false;
         }
@@ -2674,7 +2675,7 @@ public partial class Server : ICurrentTime, IDropItem
         Inventory inventory = GetPlayerInventory(clients[player_id].playername).Inventory;
         //add to inventory
         int blockid = d_Map.GetBlock(cmd.X, cmd.Y, cmd.Z);
-        int blocktype = d_Data.WhenPlayerPlacesGetsConvertedTo()[blockid];
+        int blocktype = d_Data.WhenPlayerPlacesGetsConvertedTo[blockid];
         if ((!IsValid(blocktype))
             || blocktype == SpecialBlockId.Empty)
         {
@@ -2684,13 +2685,13 @@ public partial class Server : ICurrentTime, IDropItem
         if (d_Data.IsRailTile(blocktype))
         {
             blockstopick = DirectionUtils.RailDirectionFlagsCount(
-                blocktype - d_Data.BlockIdRailstart());
+                blocktype - d_Data.BlockIdRailStart);
         }
 
         var item = new Item
         {
             ItemClass = ItemClass.Block,
-            BlockId = d_Data.WhenPlayerPlacesGetsConvertedTo()[blocktype],
+            BlockId = d_Data.WhenPlayerPlacesGetsConvertedTo[blocktype],
             BlockCount = blockstopick
         };
         if (!config.IsCreative)
@@ -3350,7 +3351,7 @@ public partial class Server : ICurrentTime, IDropItem
     {
         BlockTypes[id] = block;
         block.Name = name;
-        d_Data.UseBlockType(platform, id, BlockTypeConverter.GetBlockType(block));
+        d_Data.RegisterBlockType(platform, id, BlockTypeConverter.GetBlockType(block));
     }
 
     public void SetBlockType(string name, BlockType block)

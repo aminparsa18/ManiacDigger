@@ -15,9 +15,6 @@ public class BlockOctreeSearcher
     /// <summary>The line currently being tested, set at the start of <see cref="LineIntersection"/>.</summary>
     private Line3D currentLine;
 
-    /// <summary>The most recent intersection hit point, populated by <see cref="BoxHit"/>.</summary>
-    private Vector3 currentHit;
-
     /// <summary>
     /// Reusable result buffer for <see cref="LineIntersection"/> to avoid
     /// per-call heap allocation.
@@ -27,7 +24,6 @@ public class BlockOctreeSearcher
     public BlockOctreeSearcher()
     {
         hits = new List<BlockPosSide>();
-        currentHit = Vector3.Zero;
     }
 
     /// <summary>
@@ -102,7 +98,7 @@ public class BlockOctreeSearcher
     /// <returns><c>true</c> if the line intersects <paramref name="box"/>.</returns>
     public bool BoxHit(Box3 box)
     {
-        return Intersection.CheckLineBox(box, currentLine, out currentHit);
+        return Intersection.CheckLineBox(box, currentLine, out _);
     }
 
     /// <summary>
@@ -120,7 +116,6 @@ public class BlockOctreeSearcher
     {
         hits.Clear();
         currentLine = line;
-        currentHit = Vector3.Zero;
 
         List<Box3> candidates = Search(PredicateBox3DHit.Create(this));
 

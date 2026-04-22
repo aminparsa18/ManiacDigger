@@ -1,5 +1,4 @@
-﻿
-/// <summary>
+﻿/// <summary>
 /// Provides a factory method for generating UV-sphere <see cref="GeometryModel"/>,
 /// parameterised by radius, height, segment and ring counts.
 /// </summary>

@@ -74,7 +74,7 @@ public partial class Game
     public int MaterialSlots_(int i)
     {
         Packet_Item item = d_Inventory.RightHand[i];
-        int m = d_Data.BlockIdDirt();
+        int m = d_Data.BlockIdDirt;
         if (item != null && item.ItemClass == Packet_ItemClassEnum.Block)
         {
             m = d_Inventory.RightHand[i].BlockId;

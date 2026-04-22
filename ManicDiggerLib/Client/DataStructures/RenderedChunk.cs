@@ -16,19 +16,4 @@ public class RenderedChunk
     /// rather than simply nulled when this chunk is unloaded.
     /// </summary>
     internal bool LightRented;
-
-    /// <summary>
-    /// Returns <see cref="Light"/> to <see cref="System.Buffers.ArrayPool{T}.Shared"/>
-    /// if it was rented, then nulls the reference. Safe to call when Light is null.
-    /// </summary>
-    internal void ReleaseLight()
-    {
-        if (Light == null) return;
-        if (LightRented)
-        {
-            System.Buffers.ArrayPool<byte>.Shared.Return(Light);
-            LightRented = false;
-        }
-        Light = null;
-    }
 }

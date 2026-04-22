@@ -162,7 +162,7 @@ public class ScriptCharacterPhysics : IEntityScript
         // Trampoline block: force a super-jump when landing on it.
         {
             int blockunderplayer = game.BlockUnderPlayer();
-            if (blockunderplayer != -1 && blockunderplayer == game.d_Data.BlockIdTrampoline()
+            if (blockunderplayer != -1 && blockunderplayer == game.d_Data.BlockIdTrampoline
                 && (!isplayeronground) && !game.controls.shiftkeydown)
             {
                 game.controls.wantsjump = true;
@@ -173,7 +173,7 @@ public class ScriptCharacterPhysics : IEntityScript
         // Ice and water share the same slippery acceleration profile.
         {
             int blockunderplayer = game.BlockUnderPlayer();
-            if ((blockunderplayer != -1 && game.d_Data.IsSlipperyWalk()[blockunderplayer]) || game.SwimmingBody())
+            if ((blockunderplayer != -1 && game.d_Data.IsSlipperyWalk[blockunderplayer]) || game.SwimmingBody())
             {
                 acceleration.acceleration1 = 0.99f;
                 acceleration.acceleration2 = 0.2f;

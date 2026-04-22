@@ -43,7 +43,7 @@ public class ModManager1 : IModManager
             throw new Exception(blockType);
         }
         server.BlockTypes[id].IsBuildable = true;
-        server.d_Data.UseBlockType(server.platform, id, BlockTypeConverter.GetBlockType(server.BlockTypes[id]));
+        server.d_Data.RegisterBlockType(server.platform, id, BlockTypeConverter.GetBlockType(server.BlockTypes[id]));
     }
 
     public void RegisterOnBlockBuild(ModDelegates.BlockBuild f)
@@ -219,7 +219,7 @@ public class ModManager1 : IModManager
         {
             ItemClass = ItemClass.Block,
             BlockCount = amount,
-            BlockId = server.d_Data.WhenPlayerPlacesGetsConvertedTo()[block]
+            BlockId = server.d_Data.WhenPlayerPlacesGetsConvertedTo[block]
         };
         server.GetInventoryUtil(inventory).GrabItem(item, 0);
     }
@@ -386,7 +386,7 @@ public class ModManager1 : IModManager
 
     public void AddToStartInventory(string blocktype, int amount)
     {
-        server.d_Data.StartInventoryAmount()[GetBlockId(blocktype)] = amount;
+        server.d_Data.StartInventoryAmount[GetBlockId(blocktype)] = amount;
     }
 
     public long GetCurrentTick()

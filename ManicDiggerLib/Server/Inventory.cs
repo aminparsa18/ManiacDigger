@@ -468,7 +468,7 @@ public class InventoryServer : IInventoryController
 }
 public class GameDataItemsBlocks : IGameDataItems
 {
-    public GameData? d_Data;
+    public BlockTypeRegistry? d_Data;
 
     public int ItemSizeX(Item item)
     {
@@ -487,8 +487,8 @@ public class GameDataItemsBlocks : IGameDataItems
         if (itemA.ItemClass == ItemClass.Block
             && itemB.ItemClass == ItemClass.Block)
         {
-            int railcountA = DirectionUtils.RailDirectionFlagsCount(d_Data.Rail()[itemA.BlockId]);
-            int railcountB = DirectionUtils.RailDirectionFlagsCount(d_Data.Rail()[itemB.BlockId]);
+            int railcountA = DirectionUtils.RailDirectionFlagsCount(d_Data.Rail[itemA.BlockId]);
+            int railcountB = DirectionUtils.RailDirectionFlagsCount(d_Data.Rail[itemB.BlockId]);
             if ((itemA.BlockId != itemB.BlockId) && (!(railcountA > 0 && railcountB > 0)))
             {
                 return null;

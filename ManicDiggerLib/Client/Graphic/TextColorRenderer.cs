@@ -1,4 +1,5 @@
 ﻿using System.Text;
+
 /// <summary>Renders multi-colored text into a single power-of-two <see cref="Bitmap"/>.</summary>
 public class TextColorRenderer
 {
@@ -16,14 +17,14 @@ public class TextColorRenderer
     /// </returns>
     internal Bitmap CreateTextTexture(TextStyle t)
     {
-        TextPart[] parts = DecodeColors(t.Text, t.Color, out int partsCount);
+        TextPart[] parts = DecodeColors(t.Text, t.Color);
 
         float totalWidth = 0;
         float totalHeight = 0;
-        int[] sizesX = new int[partsCount];
-        int[] sizesY = new int[partsCount];
+        int[] sizesX = new int[parts.Length];
+        int[] sizesY = new int[parts.Length];
 
-        for (int i = 0; i < partsCount; i++)
+        for (int i = 0; i < parts.Length; i++)
         {
             platform.TextSize(parts[i].text, t.FontSize, out int outWidth, out int outHeight);
             sizesX[i] = outWidth;
@@ -37,7 +38,7 @@ public class TextColorRenderer
         PixelBuffer atlas = PixelBuffer.Create(size2X, size2Y);
 
         float currentWidth = 0;
-        for (int i = 0; i < partsCount; i++)
+        for (int i = 0; i < parts.Length; i++)
         {
             int sizeX = sizesX[i];
             int sizeY = sizesY[i];
@@ -76,7 +77,7 @@ public class TextColorRenderer
     /// Splits <paramref name="s"/> into colored segments by parsing inline color codes of the
     /// form <c>&amp;X</c> where X is a hex digit (0–9, a–f). Unrecognised sequences are kept as-is.
     /// </summary>
-    public static TextPart[] DecodeColors(string s, int defaultcolor, out int retLength)
+    public static TextPart[] DecodeColors(string s, int defaultcolor)
     {
         List<TextPart> parts = [];
         int currentcolor = defaultcolor;
@@ -107,8 +108,7 @@ public class TextColorRenderer
             parts.Add(new TextPart { text = currenttext.ToString(), color = currentcolor });
         }
 
-        retLength = parts.Count;
-        return parts.ToArray();
+        return [.. parts];
     }
 
     /// <summary>

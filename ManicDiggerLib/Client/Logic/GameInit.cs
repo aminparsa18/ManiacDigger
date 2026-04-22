@@ -1,5 +1,4 @@
-﻿using ManicDigger.Mods;
-using OpenTK.Mathematics;
+﻿using OpenTK.Mathematics;
 using System.Collections.Concurrent;
 
 /// <summary>
@@ -298,7 +297,7 @@ public partial class Game
     internal SunMoonRenderer d_SunMoonRenderer;
     internal InventoryUtilClient d_InventoryUtil;
     internal ModDrawParticleEffectBlockBreak particleEffectBlockBreak;
-    internal GameData d_Data;
+    internal BlockTypeRegistry d_Data;
     internal GameDataMonsters d_DataMonsters;
     internal Packet_Inventory d_Inventory;
 

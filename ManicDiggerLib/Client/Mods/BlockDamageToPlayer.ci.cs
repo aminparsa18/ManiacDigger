@@ -37,12 +37,11 @@ public class ModBlockDamageToPlayer : ModBase
         int block1 = GetBlockAt(game, pX, pY, pZ);
         int block2 = GetBlockAt(game, pX, pY - 1, pZ);
 
-        int damage = game.d_Data.DamageToPlayer()[block1] + game.d_Data.DamageToPlayer()[block2];
+        int damage = game.d_Data.DamageToPlayer[block1] + game.d_Data.DamageToPlayer[block2];
         if (damage <= 0) return;
 
         // Prefer eye-level block as damage source; fall back to feet block
-        int hurtingBlock = (block1 != 0 && game.d_Data.DamageToPlayer()[block1] > 0) ? block1 : block2;
-
+        int hurtingBlock = (block1 != 0 && game.d_Data.DamageToPlayer[block1] > 0) ? block1 : block2;
         int times = blockDamageTimer.Update(dt);
         for (int i = 0; i < times; i++)
             game.ApplyDamageToPlayer(damage, DeathReason.BlockDamage, hurtingBlock);

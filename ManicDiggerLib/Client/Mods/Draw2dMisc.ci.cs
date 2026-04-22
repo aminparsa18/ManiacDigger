@@ -63,7 +63,7 @@ public class ModDraw2dMisc : ModBase
             int z = game.currentAttackedBlock.Value.Z;
             int blocktype = game.VoxelMap.GetBlock(x, y, z);
             float health = game.GetCurrentBlockHealth(x, y, z);
-            float progress = health / game.d_Data.Strength()[blocktype];
+            float progress = health / game.d_Data.Strength[blocktype];
             if (game.IsUsableBlock(blocktype))
             {
                 DrawEnemyHealthUseInfo(game, game.language.Get(string.Concat("Block_", game.blocktypes[blocktype].Name)), progress, true);

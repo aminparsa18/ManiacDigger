@@ -30,9 +30,9 @@ public partial class Game
     internal bool IsValid(int blocktype) => blocktypes[blocktype].Name != null;
 
     internal bool IsFillBlock(int blocktype) =>
-        blocktype == d_Data.BlockIdFillArea()
-        || blocktype == d_Data.BlockIdFillStart()
-        || blocktype == d_Data.BlockIdCuboid();
+        blocktype == d_Data.BlockIdFillArea
+        || blocktype == d_Data.BlockIdFillStart
+        || blocktype == d_Data.BlockIdCuboid;
 
     internal bool IsUsableBlock(int blocktype) =>
         d_Data.IsRailTile(blocktype) || blocktypes[blocktype].IsUsable;
@@ -45,7 +45,7 @@ public partial class Game
 
         int block = VoxelMap.GetBlockValid(x, y, z);
         return block == SpecialBlockId.Empty
-            || block == d_Data.BlockIdFillArea()
+            || block == d_Data.BlockIdFillArea
             || IsWater(block);
     }
 
@@ -146,7 +146,7 @@ public partial class Game
         if (blockHealth.TryGetValue((x, y, z), out float health))
             return health;
 
-        return d_Data.Strength()[VoxelMap.GetBlock(x, y, z)];
+        return d_Data.Strength[VoxelMap.GetBlock(x, y, z)];
     }
 
     // -------------------------------------------------------------------------
@@ -257,7 +257,7 @@ public partial class Game
     internal void MapLoaded()
     {
         RedrawAllBlocks();
-        materialSlots = d_Data.DefaultMaterialSlots();
+        materialSlots = d_Data.DefaultMaterialSlots;
         GuiStateBackToGame();
 
         playerPositionSpawnX = player.position.x;

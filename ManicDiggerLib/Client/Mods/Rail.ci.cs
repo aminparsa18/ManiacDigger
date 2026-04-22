@@ -265,7 +265,7 @@ public class ModRail : ModBase
             return;
         }
 
-        int railUnder = game.d_Data.Rail()[game.VoxelMap.GetBlock(currentrailblockX, currentrailblockY, currentrailblockZ)];
+        int railUnder = game.d_Data.Rail[game.VoxelMap.GetBlock(currentrailblockX, currentrailblockY, currentrailblockZ)];
 
         railriding = true;
         originalmodelheight = game.GetCharacterEyesHeight();
@@ -436,7 +436,7 @@ public class ModRail : ModBase
             return 0;
         }
 
-        int railFlags = game.d_Data.Rail()[
+        int railFlags = game.d_Data.Rail[
             game.VoxelMap.GetBlock(enter.BlockPositionX, enter.BlockPositionY, enter.BlockPositionZ)];
 
         VehicleDirection12[] candidates = new VehicleDirection12[3];

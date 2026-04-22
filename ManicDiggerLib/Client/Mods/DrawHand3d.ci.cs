@@ -200,9 +200,9 @@ public class ModDrawHand3d : ModBase
             // Empty hand — use the designated empty-hand block texture.
             if (side == TileSide.Top)
             {
-                return game.TextureId[game.d_Data.BlockIdEmptyHand()][(int)TileSide.Top];
+                return game.TextureId[game.d_Data.BlockIdEmptyHand][(int)TileSide.Top];
             }
-            return game.TextureId[game.d_Data.BlockIdEmptyHand()][(int)TileSide.Front];
+            return game.TextureId[game.d_Data.BlockIdEmptyHand][(int)TileSide.Front];
         }
 
         if (item.ItemClass == Packet_ItemClassEnum.Block)
@@ -246,7 +246,7 @@ public class ModDrawHand3d : ModBase
         Packet_Item item = game.d_Inventory.RightHand[game.ActiveMaterial];
         return item != null
             && item.ItemClass == Packet_ItemClassEnum.Block
-            && item.BlockId == game.d_Data.BlockIdCompass();
+            && item.BlockId == game.d_Data.BlockIdCompass;
     }
 
     /// <summary>
@@ -668,7 +668,7 @@ public class BlockRendererTorch
     /// <param name="y">Block-grid Y origin of the torch.</param>
     /// <param name="z">Block-grid Z (vertical) origin of the torch.</param>
     /// <param name="type">Mount type that determines the tilt direction.</param>
-    public void AddTorch(GameData d_Data, Game d_TerrainRenderer, GeometryModel m,
+    public void AddTorch(BlockTypeRegistry d_Data, Game d_TerrainRenderer, GeometryModel m,
                          int x, int y, int z, TorchType type)
     {
         // --- Compute top-cap corners ---
