@@ -15,7 +15,14 @@ public class ModGuiMapLoading : ModBase
         ColorUtils.ColorFromArgb(255, 0,   255, 0),  // green
     ];
 
-    public override void OnNewFrameDraw2d(Game game, float deltaTime)
+    private readonly IGameClient game;
+
+    public ModGuiMapLoading(IGameClient game)
+    {
+        this.game = game;
+    }
+
+    public override void OnNewFrameDraw2d(float deltaTime)
     {
         if (game.GuiState != GuiState.MapLoading) return;
 
@@ -24,29 +31,29 @@ public class ModGuiMapLoading : ModBase
         int height = platform.GetCanvasHeight();
         int centerY = height / 2;
 
-        DrawBackground(game, width, height);
+        DrawBackground(width, height);
 
         if (game.InvalidVersionDrawMessage != null)
         {
-            DrawCentered(game, game.InvalidVersionDrawMessage, centerY - 50);
-            DrawCentered(game, "Click to connect", centerY + 50);
+            DrawCentered(game.InvalidVersionDrawMessage, centerY - 50);
+            DrawCentered("Click to connect", centerY + 50);
             return;
         }
 
-        string status = GetConnectionStatus(game, platform);
+        string status = GetConnectionStatus(platform);
 
-        DrawCentered(game, game.ServerInfo.ServerName, centerY - 150);
+        DrawCentered(game.ServerInfo.ServerName, centerY - 150);
 
         if (game.ServerInfo.ServerMotd != null)
-            DrawCentered(game, game.ServerInfo.ServerMotd, centerY - 100);
+            DrawCentered(game.ServerInfo.ServerMotd, centerY - 100);
 
-        DrawCentered(game, status, centerY - 50);
+        DrawCentered(status, centerY - 50);
 
         if (game.maploadingprogress.ProgressPercent > 0)
-            DrawProgress(game, centerY);
+            DrawProgress(centerY);
     }
 
-    private static string GetConnectionStatus(Game game, IGamePlatform platform)
+    private string GetConnectionStatus(IGamePlatform platform)
     {
         if (game.maploadingprogress.ProgressStatus != null)
             return game.maploadingprogress.ProgressStatus;
@@ -55,13 +62,13 @@ public class ModGuiMapLoading : ModBase
         return game.Language.Connecting();
     }
 
-    private static void DrawProgress(Game game, int centerY)
+    private void DrawProgress(int centerY)
     {
         string progress = string.Format(game.Language.ConnectingProgressPercent(), game.maploadingprogress.ProgressPercent.ToString());
         string progress1 = string.Format(game.Language.ConnectingProgressKilobytes(), (game.maploadingprogress.ProgressBytes / 1024).ToString());
 
-        DrawCentered(game, progress, centerY - 20);
-        DrawCentered(game, progress1, centerY + 10);
+        DrawCentered(progress, centerY - 20);
+        DrawCentered(progress1, centerY + 10);
 
         float ratio = game.maploadingprogress.ProgressPercent / 100f;
         int barX = game.Xcenter(ProgressBarWidth);
@@ -72,13 +79,13 @@ public class ModGuiMapLoading : ModBase
         game.Draw2dTexture(game.WhiteTexture(), barX, barY, ratio * ProgressBarWidth, ProgressBarHeight, null, 0, color, false);
     }
 
-    private static void DrawCentered(Game game, string text, int y)
+    private void DrawCentered(string text, int y)
     {
         TextRenderer.TextSize(text, FontSize, out int textWidth, out _);
-        game.Draw2dText(text, game.fontMapLoading, game.Xcenter(textWidth), y, null, false);
+        game.Draw2dText(text, game.FontMapLoading, game.Xcenter(textWidth), y, null, false);
     }
 
-    private static void DrawBackground(Game game, int width, int height)
+    private void DrawBackground(int width, int height)
     {
         int countX = width / BackgroundTileSize + 1;
         int countY = height / BackgroundTileSize + 1;

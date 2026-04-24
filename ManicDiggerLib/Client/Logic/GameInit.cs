@@ -44,7 +44,7 @@ public partial class Game : IGameClient
     public int[][] TextureId { get; set; }
     public int[] TextureIdForInventory { get; set; }
 
-    internal int terrainTexture;
+    public int TerrainTexture { get; set; }
     public int[] TerrainTextures1d { get; set; }
 
     /// <summary>Maximum texture size detected at runtime.</summary>
@@ -60,7 +60,7 @@ public partial class Game : IGameClient
     internal bool handSetAttackDestroy;
 
     internal int whitetexture;
-    internal Dictionary<TextStyle, CachedTexture> cachedTextTextures = [];
+    public Dictionary<TextStyle, CachedTexture> CachedTextTextures { get; set; } = [];
     internal Dictionary<string, int> textures;
     internal List<string> AllowedFonts;
 
@@ -113,7 +113,7 @@ public partial class Game : IGameClient
 
     public byte LocalStance { get; set; }
     public bool Spawned {  get; set; }
-    internal bool IsShiftPressed;
+    public bool IsShiftPressed { get; set; }
     internal int playertexturedefault;
     public const string playertexturedefaultfilename = "mineplayer.png";
 
@@ -123,7 +123,7 @@ public partial class Game : IGameClient
     public int LastReceivedMilliseconds { get; set; }
 
     public int LocalPlayerId { get; set; }
-    internal int currentlyAttackedEntity;
+    public int CurrentlyAttackedEntity {  get; set; }
     internal int selectedmodelid;
     internal Vector3 playervelocity;
     internal float RadiusWhenMoving;
@@ -133,17 +133,17 @@ public partial class Game : IGameClient
     internal float PICK_DISTANCE;
     internal int grenadetime;
     internal int PlayerPushDistance;
-    internal bool AudioEnabled;
+    public bool AudioEnabled { get; set; }
     public bool AutoJumpEnabled { get; set; }
     public int[] TotalAmmo { get; set; }
     public int[] LoadedAmmo { get; set; }
     internal Dictionary<(int x, int y, int z), float> blockHealth = new();
     public VisibleDialog[] Dialogs { get; set; }
-    internal List<string> typinglog;
+    public List<string> TypingLog { get; set;}
 
     internal bool IronSights;
     internal Random rnd;
-    internal Vector3i? currentAttackedBlock;
+    public Vector3i? CurrentAttackedBlock {  get; set; }
     public int CurrentTimeMilliseconds { get; set; }
     public int TotalTimeMilliseconds { get; set; }
     public int ReceivedMapLength { get; set; }
@@ -157,7 +157,7 @@ public partial class Game : IGameClient
 
     internal bool shadowssimple;
     public bool ShouldRedrawAllBlocks { get; set; }
-    internal bool escapeMenuRestart;
+    public bool EscapeMenuRestart {  get; set; }
 
     // -------------------------------------------------------------------------
     // Fields — camera
@@ -174,7 +174,7 @@ public partial class Game : IGameClient
 
     internal CameraMatrixProvider CameraMatrix;
     internal float fov;
-    internal CameraType cameratype;
+    public CameraType CameraType { get; set; }
     internal bool ENABLE_TPP_VIEW;
     internal float znear;
     internal bool ENABLE_ZFAR;
@@ -220,13 +220,13 @@ public partial class Game : IGameClient
     internal bool mouserightdeclick;
     internal bool wasmouseright;
     public bool[] KeyboardState { get; set; }
-    internal bool[] keyboardStateRaw;
+    public bool[] KeyboardStateRaw { get; set; }
 
     internal bool mouseLeft;
     internal bool mouseMiddle;
     internal bool mouseRight;
 
-    internal int mouseCurrentX;
+    public int MouseCurrentX { get; set; }
     public int MouseCurrentY { get; set; }
     internal float mouseDeltaX;
     internal float mouseDeltaY;
@@ -238,10 +238,10 @@ public partial class Game : IGameClient
 
     public float TouchMoveDx { get; set; }
     public float TouchMoveDy { get; set; }
-    internal float touchOrientationDx;
-    internal float touchOrientationDy;
+    public float TouchOrientationDx { get; set; }
+    public float TouchOrientationDy {  get; set; }
 
-    internal bool drawblockinfo;
+    public bool DrawBlockInfo {  get; set; }
 
     // -------------------------------------------------------------------------
     // Fields — audio
@@ -295,20 +295,20 @@ public partial class Game : IGameClient
     public Packet_Inventory Inventory { get; set; }
 
     internal int[] materialSlots;
-    internal int Font;
+    public int Font { get; set; }
     internal GameExit d_Exit;
 
-    internal int typinglogpos;
+    public int TypingLogPos { get; set; }
     public TypingState GuiTyping { get; set; }
 
     public bool EnableDrawTestCharacter { get; set; }
-    internal bool ENABLE_DRAWPOSITION;
+    public bool EnableDrawPosition { get; set; }
     internal bool ENABLE_DRAW2D;
-    internal int ENABLE_LAG;
+    public int EnableLog {  get; set; }
     public bool AllowFreeMove { get; set; }
     internal MenuState menustate;
     public ServerInformation ServerInfo { get; set; }
-    internal GameOption options;
+    public GameOption options { get; set; }
     internal Dictionary<string, string> performanceinfo;
     public Packet_ServerPlayerStats PlayerStats { get; set; }
     internal string[] getAsset;
@@ -317,10 +317,10 @@ public partial class Game : IGameClient
     public List<Entity> Entities { get; set; }
 
     internal int ChatLinesMax;
-    internal List<Chatline> ChatLines;
+    public List<Chatline> ChatLines { get; set; }
 
-    internal MapLoadingProgressEventArgs maploadingprogress;
-    internal Font fontMapLoading;
+    public MapLoadingProgressEventArgs maploadingprogress {  get; set; }
+    public Font FontMapLoading { get; set; }
     public string InvalidVersionDrawMessage { get; set; }
     public Packet_Server InvalidVersionPacketIdentification { get; set;}
 
@@ -336,9 +336,9 @@ public partial class Game : IGameClient
 
     internal ConcurrentQueue<Action> commitActions;
 
-    internal int SelectedBlockPositionX;
-    internal int SelectedBlockPositionY;
-    internal int SelectedBlockPositionZ;
+    public int SelectedBlockPositionX { get; set; }
+    public int SelectedBlockPositionY { get; set; }
+    public int SelectedBlockPositionZ { get; set; }
     internal int SelectedEntityId;
 
     // -------------------------------------------------------------------------
@@ -400,7 +400,7 @@ public partial class Game : IGameClient
         handTexture = -1;
         whitetexture = -1;
         textures = [];
-        cachedTextTextures = [];
+        CachedTextTextures = [];
 
         AllowedFonts = ["Verdana"];
     }
@@ -409,7 +409,7 @@ public partial class Game : IGameClient
     {
         Player = new Entity { position = new EntityPosition_() };
         LocalPlayerId = -1;
-        currentlyAttackedEntity = -1;
+        CurrentlyAttackedEntity = -1;
         selectedmodelid = -1;
         playertexturedefault = -1;
 
@@ -438,7 +438,7 @@ public partial class Game : IGameClient
         LoadedAmmo = new int[GlobalVar.MAX_BLOCKTYPES];
         blockHealth = [];
         Dialogs = new VisibleDialog[512];
-        typinglog = [];
+        TypingLog = [];
     }
 
     private void InitCamera()
@@ -455,7 +455,7 @@ public partial class Game : IGameClient
 
         CameraMatrix = new CameraMatrixProvider();
         fov = MathF.PI / 3;
-        cameratype = CameraType.Fpp;
+        CameraType = CameraType.Fpp;
         ENABLE_TPP_VIEW = false;
         znear = 1f / 10;
         ENABLE_ZFAR = true;
@@ -491,15 +491,15 @@ public partial class Game : IGameClient
         for (int i = 0; i < KeysMax; i++)
             KeyboardState[i] = false;
 
-        keyboardStateRaw = new bool[KeysMax];
+        KeyboardStateRaw = new bool[KeysMax];
         for (int i = 0; i < KeysMax; i++)
-            keyboardStateRaw[i] = false;
+            KeyboardStateRaw[i] = false;
     }
 
     private void InitOptions()
     {
         ENABLE_DRAW2D = true;
-        ENABLE_LAG = 0;
+        EnableLog = 0;
         AllowFreeMove = true;
         menustate = new MenuState();
     }

@@ -115,7 +115,7 @@ public partial class Game
     // Weapon / aim
     // -------------------------------------------------------------------------
 
-    internal float CurrentFov()
+    public float CurrentFov()
     {
         if (IronSights)
         {
@@ -136,7 +136,7 @@ public partial class Game
         return DecodeFixedPoint(BlockTypes[item.BlockId].RecoilFloat);
     }
 
-    internal float CurrentAimRadius()
+    public float CurrentAimRadius()
     {
         Packet_Item item = Inventory.RightHand[ActiveMaterial];
         if (item == null || item.ItemClass != ItemClass.Block) return 0;

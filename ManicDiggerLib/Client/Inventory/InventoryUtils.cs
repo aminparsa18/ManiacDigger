@@ -12,7 +12,7 @@ public class InventoryUtils
     // -------------------------------------------------------------------------
 
     /// <summary>Reference to the core game instance (language, platform, block types).</summary>
-    private readonly Game _game;
+    private readonly IGameClient _game;
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -25,7 +25,7 @@ public class InventoryUtils
     /// <exception cref="ArgumentNullException">
     ///     Thrown if <paramref name="game"/> is <c>null</c>.
     /// </exception>
-    public InventoryUtils(Game game)
+    public InventoryUtils(IGameClient game)
     {
         _game = game ?? throw new ArgumentNullException(nameof(game));
     }

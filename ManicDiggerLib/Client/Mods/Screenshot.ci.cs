@@ -13,18 +13,27 @@ public class ModScreenshot : ModBase
     private bool takeScreenshot;
     private int screenshotFlashFramesLeft;
 
-    public override void OnNewFrameDraw2d(Game game, float deltaTime)
+    private readonly IGameClient game;
+    private readonly IGamePlatform platform;
+
+    public ModScreenshot(IGameClient game, IGamePlatform platform)
+    {
+        this.game = game;
+        this.platform = platform;
+    }
+
+    public override void OnNewFrameDraw2d(float deltaTime)
     {
         if (takeScreenshot)
         {
             takeScreenshot = false;
-            game.Platform.SaveScreenshot(); // Must be done after rendering, before SwapBuffers
+            platform.SaveScreenshot(); // Must be done after rendering, before SwapBuffers
             screenshotFlashFramesLeft = FlashFrames;
         }
 
         if (screenshotFlashFramesLeft > 0)
         {
-            DrawScreenshotFlash(game);
+            DrawScreenshotFlash();
             screenshotFlashFramesLeft--;
         }
     }
@@ -36,7 +45,7 @@ public class ModScreenshot : ModBase
         args.Handled = true;
     }
 
-    internal static void DrawScreenshotFlash(Game game)
+    internal void DrawScreenshotFlash()
     {
         game.Draw2dTexture(game.WhiteTexture(), 0, 0, game.Platform.GetCanvasWidth(), game.Platform.GetCanvasHeight(), null, 0, White, false);
         TextRenderer.TextSize(ScreenshotText, FlashFontSize, out int textWidth, out int textHeight);

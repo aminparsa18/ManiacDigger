@@ -816,7 +816,7 @@ public class TextureAtlasCi
     }
 }
 
-internal sealed class CachedTexture
+public sealed class CachedTexture
 {
     internal int textureId;
     internal float sizeX;

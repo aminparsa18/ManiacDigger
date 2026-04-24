@@ -9,22 +9,30 @@ public class ModDialog : ModBase
     private const string TypableChars = "abcdefghijklmnopqrstuvwxyz1234567890\t ";
 
     private readonly ClientPacketHandler packetHandler = new ClientPacketHandlerDialog();
+    private readonly IGameClient game;
+    private readonly IGamePlatform platform;
 
-    public override void OnNewFrameDraw2d(Game game, float deltaTime)
+    public ModDialog(IGameClient game, IGamePlatform platform)
     {
-        game.PacketHandlers[(int)Packet_ServerIdEnum.Dialog] = packetHandler;
-        DrawDialogs(game);
+        this.game = game;
+        this.platform = platform;
     }
 
-    internal static void DrawDialogs(Game game)
+    public override void OnNewFrameDraw2d(float deltaTime)
+    {
+        game.PacketHandlers[(int)Packet_ServerIdEnum.Dialog] = packetHandler;
+        DrawDialogs();
+    }
+
+    internal void DrawDialogs()
     {
         for (int i = 0; i < game.Dialogs.Length; i++)
         {
             VisibleDialog d = game.Dialogs[i];
             if (d == null) continue;
 
-            d.screen.screenx = game.Width() / 2 - d.value.Width / 2;
-            d.screen.screeny = game.Height() / 2 - d.value.Height_ / 2;
+            d.screen.screenx = platform.GetCanvasWidth() / 2 - d.value.Width / 2;
+            d.screen.screeny = platform.GetCanvasHeight() / 2 - d.value.Height_ / 2;
             d.screen.DrawWidgets();
         }
     }

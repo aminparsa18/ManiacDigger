@@ -107,7 +107,7 @@ public partial class Game
 
         // ── Gameplay mechanics ────────────────────────────────────────────────
         AddMod(new ModRail(this));
-        AddMod(new ModCompass());
+        AddMod(new ModCompass(this, Platform));
         AddMod(new ModGrenade(this));
         AddMod(new ModBullet(this));
         AddMod(new ModExpire(this));
@@ -117,7 +117,7 @@ public partial class Game
         AddMod(new ModReloadAmmo(this));
         AddMod(new ModSendActiveMaterial(this));
         AddMod(new ModGuiCrafting(this));
-        AddMod(new ModGuiInventory());
+        AddMod(new ModGuiInventory(this, Platform));
 
         // ── Audio ─────────────────────────────────────────────────────────────
         AddMod(new ModWalkSound(this));
@@ -156,17 +156,17 @@ public partial class Game
         AddMod(new ModDrawHand2d());
         AddMod(new ModDrawHand3d());
         AddMod(new ModDrawText());
-        AddMod(new ModDraw2dMisc());
+        AddMod(new ModDraw2dMisc(this, Platform));
         AddMod(new ModFpsHistoryGraph(this, Platform));
 
         // ── GUI (topmost — rendered last) ─────────────────────────────────────
-        AddMod(new ModDialog());
-        AddMod(new ModGuiTouchButtons());
-        AddMod(new ModGuiEscapeMenu());
-        AddMod(new ModGuiMapLoading());
-        AddMod(new ModGuiPlayerStats());
-        AddMod(new ModGuiChat());
-        AddMod(new ModScreenshot());
+        AddMod(new ModDialog(this, Platform));
+        AddMod(new ModGuiTouchButtons(this, Platform));
+        AddMod(new ModGuiEscapeMenu(this));
+        AddMod(new ModGuiMapLoading(this));
+        AddMod(new ModGuiPlayerStats(this, Platform));
+        AddMod(new ModGuiChat(this));
+        AddMod(new ModScreenshot(this, Platform));
     }
 
     private void InitRenderer()

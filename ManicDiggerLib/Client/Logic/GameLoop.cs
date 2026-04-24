@@ -53,12 +53,12 @@
             return;
         }
 
-        if (ENABLE_LAG == 2)
+        if (EnableLog == 2)
             Platform.ThreadSpinWait(20_000_000); // simulate ~20 ms frame lag
 
         SetAmbientLight(Terraincolor());
         Platform.GlClearColorBufferAndDepthBuffer();
-        Platform.BindTexture2d(terrainTexture);
+        Platform.BindTexture2d(TerrainTexture);
 
         for (int i = 0; i < clientmods.Count; i++)
             clientmods[i]?.OnBeforeNewFrameDraw3d(this, deltaTime);

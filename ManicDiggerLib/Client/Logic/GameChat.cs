@@ -1,8 +1,8 @@
 ﻿public partial class Game
 {
-    internal int ChatLinesCount;
-    internal string GuiTypingBuffer;
-    internal bool IsTyping;
+    public int ChatLinesCount { get; set; }
+    public string GuiTypingBuffer { get; set; }
+    public bool IsTyping { get; set; }
 
     // -------------------------------------------------------------------------
     // Chat line display
@@ -86,7 +86,7 @@
     // Chat / command execution
     // -------------------------------------------------------------------------
 
-    internal void ExecuteChat(string s_)
+    public void ExecuteChat(string s_)
     {
         if (string.IsNullOrEmpty(s_))
             return;
@@ -139,7 +139,7 @@
                 break;
 
             case "pos":
-                ENABLE_DRAWPOSITION = BoolCommandArgument(arguments);
+                EnableDrawPosition = BoolCommandArgument(arguments);
                 break;
 
             case "noclip":

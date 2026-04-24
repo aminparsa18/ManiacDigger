@@ -105,7 +105,7 @@ public class ModPicking : ModBase
                 left = false;
             }
         }
-        if (!left) { game.currentAttackedBlock = null; }
+        if (!left) { game.CurrentAttackedBlock = null; }
 
         Packet_Item item = game.Inventory.RightHand[game.ActiveMaterial];
         bool isPistol = item != null && game.BlockTypes[item.BlockId].IsPistol;
@@ -197,14 +197,14 @@ public class ModPicking : ModBase
 
         PickEntity(game, pick, pick2, pick2count);
 
-        if (game.cameratype == CameraType.Fpp || game.cameratype == CameraType.Tpp)
+        if (game.CameraType == CameraType.Fpp || game.CameraType == CameraType.Tpp)
         {
             int ntileX = (int)pick0.Current()[0];
             int ntileY = (int)pick0.Current()[1];
             int ntileZ = (int)pick0.Current()[2];
             if (game.IsUsableBlock(game.VoxelMap.GetBlock(ntileX, ntileZ, ntileY)))
             {
-                game.currentAttackedBlock = new Vector3i(ntileX, ntileZ, ntileY);
+                game.CurrentAttackedBlock = new Vector3i(ntileX, ntileZ, ntileY);
             }
         }
 
@@ -327,7 +327,7 @@ public class ModPicking : ModBase
         int posx = newtileX;
         int posy = newtileY;
         int posz = newtileZ;
-        game.currentAttackedBlock = new Vector3i(posx, posy, posz);
+        game.CurrentAttackedBlock = new Vector3i(posx, posy, posz);
         var key = (posx, posy, posz);
 
         if (!game.blockHealth.ContainsKey(key))
@@ -340,7 +340,7 @@ public class ModPicking : ModBase
         if (game.GetCurrentBlockHealth(posx, posy, posz) <= 0)
         {
             game.blockHealth.Remove(key);
-            game.currentAttackedBlock = null;
+            game.CurrentAttackedBlock = null;
             OnPick(game,
                 newtileX, posy, posz,
                 (int)tile.Current()[0], (int)tile.Current()[2], (int)tile.Current()[1],
@@ -586,7 +586,7 @@ public class ModPicking : ModBase
         float xFract = collisionPos[0] - MathF.Floor(collisionPos[0]);
         float zFract = collisionPos[2] - MathF.Floor(collisionPos[2]);
 
-        int activeMaterial = game.MaterialSlots_(game.ActiveMaterial);
+        int activeMaterial = game.MaterialSlots(game.ActiveMaterial);
         int railStart = game.BlockRegistry.BlockIdRailStart;
 
         if (activeMaterial == railStart + RailDirectionFlags.TwoHorizontalVertical
@@ -771,7 +771,7 @@ public class ModPicking : ModBase
         ArraySegment<BlockPosSide> pick2, int pick2count)
     {
         game.SelectedEntityId = -1;
-        game.currentlyAttackedEntity = -1;
+        game.CurrentlyAttackedEntity = -1;
 
         float eyeX = game.EyesPosX(), eyeY = game.EyesPosY(), eyeZ = game.EyesPosZ();
 
@@ -798,9 +798,9 @@ public class ModPicking : ModBase
             if (blockedByTerrain) { continue; }
 
             game.SelectedEntityId = i;
-            if (game.cameratype == CameraType.Fpp || game.cameratype == CameraType.Tpp)
+            if (game.CameraType == CameraType.Fpp || game.CameraType == CameraType.Tpp)
             {
-                game.currentlyAttackedEntity = i;
+                game.CurrentlyAttackedEntity = i;
             }
         }
     }
@@ -811,14 +811,14 @@ public class ModPicking : ModBase
     /// </summary>
     private static void UpdateEntityHit(Game game)
     {
-        if (game.currentlyAttackedEntity == -1 || !game.mouseLeft) { return; }
+        if (game.CurrentlyAttackedEntity == -1 || !game.mouseLeft) { return; }
 
         for (int i = 0; i < game.clientmods.Count; i++)
         {
             if (game.clientmods[i] == null) { continue; }
-            game.clientmods[i].OnHitEntity(game, new OnUseEntityArgs { entityId = game.currentlyAttackedEntity });
+            game.clientmods[i].OnHitEntity(game, new OnUseEntityArgs { entityId = game.CurrentlyAttackedEntity });
         }
-        game.SendPacketClient(ClientPackets.HitEntity(game.currentlyAttackedEntity));
+        game.SendPacketClient(ClientPackets.HitEntity(game.CurrentlyAttackedEntity));
     }
 
     /// <summary>Placeholder called when the player picks a block in free-mouse mode.</summary>
@@ -847,14 +847,14 @@ public class ModPicking : ModBase
     public void GetPickingLine(Game game, Line3D retPick, bool isPistolShoot)
     {
         int mouseX, mouseY;
-        if (game.cameratype == CameraType.Fpp || game.cameratype == CameraType.Tpp)
+        if (game.CameraType == CameraType.Fpp || game.CameraType == CameraType.Tpp)
         {
             mouseX = game.Width() / 2;
             mouseY = game.Height() / 2;
         }
         else
         {
-            mouseX = game.mouseCurrentX;
+            mouseX = game.MouseCurrentX;
             mouseY = game.MouseCurrentY;
         }
 
@@ -923,11 +923,11 @@ public class ModPicking : ModBase
             distance = game.DecodeFixedPoint(game.BlockTypes[inHand.Value].PickDistanceWhenUsedFloat);
         }
 
-        if (game.cameratype == CameraType.Tpp)
+        if (game.CameraType == CameraType.Tpp)
         {
             distance = game.tppcameradistance + game.PICK_DISTANCE;
         }
-        if (game.cameratype == CameraType.Overhead)
+        if (game.CameraType == CameraType.Overhead)
         {
             distance = game.Platform.IsFastSystem() ? 100 : game.OverHeadCameraDistance * 2;
         }

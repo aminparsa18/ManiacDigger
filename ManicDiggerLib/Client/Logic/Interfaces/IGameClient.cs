@@ -85,7 +85,9 @@ public interface IGameClient
     void Draw2dTextures(Draw2dData[] todraw, int todrawLength, int textureId);
 
     /// <inheritdoc cref="Game.Draw2dText"/>
-    void Draw2dText(string text, Font font, float x, float y, object extra, bool shadow);
+    void Draw2dText(string text, Font font, float x, float y, int? color, bool shadow);
+
+    void Draw2dText1(string text, int x, int y, int fontsize, int? color, bool enabledepthtest);
 
     /// <summary>Switches the GL projection to orthographic for 2-D rendering.</summary>
     void OrthoMode(int width, int height);
@@ -347,4 +349,78 @@ public interface IGameClient
     int ActiveMaterial { get; set; }
     bool IsPlayerOnGround { get; set; }
     int BlockUnderPlayer();
+    int MaterialSlots(int i);
+
+    void GLPushMatrix();
+    void GLPopMatrix();
+    void GLRotate(float angle, float x, float y, float z);
+    void GLTranslate(float x, float y, float z);
+    bool DrawBlockInfo { get; set; }
+    int SelectedBlockPositionX { get; set; }
+    int SelectedBlockPositionY { get; set; }
+    int SelectedBlockPositionZ { get; set; }
+
+    bool IsValid(int blocktype);
+    Vector3i? CurrentAttackedBlock { get; set; }
+    float GetCurrentBlockHealth(int x, int y, int z);
+    bool IsUsableBlock(int blocktype);
+    int CurrentlyAttackedEntity { get; set; }
+    int Xcenter(float width);
+    CameraType CameraType { get; set; }
+    float CurrentAimRadius();
+    float CurrentFov();
+    void Circle3i(float x, float y, float radius);
+    void Draw2dBitmapFile(string filename, float x, float y, float w, float h);
+    int MouseCurrentX { get; set; }
+    bool GetFreeMouse();
+    int TextSizeWidth(string s, int size);
+    int TextSizeHeight(string s, int size);
+    bool EnableDrawPosition { get; set; }
+    float Scale();
+    List<Chatline> ChatLines { get; set; }
+    int ChatLinesCount { get; set; }
+    string GuiTypingBuffer { get; set; }
+    bool IsTeamchat { get; set; }
+    bool IsTyping { get; set; }
+    bool IsShiftPressed { get; set; }
+    List<string> TypingLog { get; set; }
+    int TypingLogPos { get; set; }
+    void ExecuteChat(string s_);
+    void StartTyping();
+
+    bool[] KeyboardStateRaw { get; set; }
+    void SetBlock(int x, int y, int z, int tileType);
+    int TerrainTexture { get; set; }
+    GameOption options { get; set; }
+    void ToggleFog();
+
+    void ToggleVsync();
+
+    void InventoryClick(Packet_InventoryPosition pos);
+    void WearItem(Packet_InventoryPosition from, Packet_InventoryPosition to);
+    void MoveToInventory(Packet_InventoryPosition from);
+    MapLoadingProgressEventArgs maploadingprogress { get; set; }
+    Font FontMapLoading { get; set; }
+    void Draw2dTexturePart(int textureid, float srcwidth, float srcheight,
+        float dstx, float dsty, float dstwidth, float dstheight, int color, bool enabledepthtest);
+
+    void EscapeMenuStart();
+
+    /// <summary>Shows the escape menu in free-mouse mode.</summary>
+    public void ShowEscapeMenu();
+
+    /// <summary>Opens the inventory screen in free-mouse mode.</summary>
+    public void ShowInventory();
+
+    void CameraChange();
+    void StopTyping();
+
+    float TouchOrientationDx { get; set; }
+    float TouchOrientationDy { get; set; }
+    bool AudioEnabled { get; set; }
+    int EnableLog { get; set; }
+    int Font { get; set; }
+    Dictionary<TextStyle, CachedTexture> CachedTextTextures { get; set; }
+    bool EscapeMenuRestart { get; set; }
+    void UseVsync();
 }

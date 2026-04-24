@@ -2,9 +2,9 @@
 
 public class ModGuiChat : ModBase
 {
-    public ModGuiChat()
+    public ModGuiChat(IGameClient game)
     {
-        one = 1;
+        this.game = game;
         ChatFontSize = 11;
         currentFontSize = ChatFontSize;
         ChatScreenExpireTimeSeconds = 20;
@@ -13,18 +13,16 @@ public class ModGuiChat : ModBase
         chatlines2 = new Chatline[1024];
     }
 
-    internal Game game;
+    private readonly IGameClient game;
     internal float ChatFontSize;
     internal int ChatScreenExpireTimeSeconds;
     internal int ChatLinesMaxToDraw;
     internal int ChatPageScroll;
-    internal float one;
     private float currentFontSize = 11;
     private FontStyle currentFontStyle = FontStyle.Regular;
 
-    public override void OnNewFrameDraw2d(Game game_, float deltaTime)
+    public override void OnNewFrameDraw2d(float deltaTime)
     {
-        game = game_;
         if (game.GuiState == GuiState.MapLoading)
         {
             return;
@@ -91,7 +89,7 @@ public class ModGuiChat : ModBase
         for (int i = first; i < first + count; i++)
         {
             Chatline c = game.ChatLines[i];
-            if (all || ((one * (timeNow - c.timeMilliseconds) / 1000) < ChatScreenExpireTimeSeconds))
+            if (all || ((1f * (timeNow - c.timeMilliseconds) / 1000) < ChatScreenExpireTimeSeconds))
             {
                 chatlines2[chatlines2Count++] = c;
             }
@@ -180,8 +178,8 @@ public class ModGuiChat : ModBase
         {
             if (game.GuiTyping == TypingState.Typing)
             {
-                game.typinglog.Add(game.GuiTypingBuffer);
-                game.typinglogpos = game.typinglog.Count;
+                game.TypingLog.Add(game.GuiTypingBuffer);
+                game.TypingLogPos = game.TypingLog.Count;
                 game.ExecuteChat(game.GuiTypingBuffer);
 
                 game.GuiTypingBuffer = "";
@@ -213,7 +211,7 @@ public class ModGuiChat : ModBase
                 args.Handled=true;
                 return;
             }
-            if (game.keyboardStateRaw[game.GetKey(Keys.LeftControl)] || game.keyboardStateRaw[game.GetKey(Keys.RightControl)])
+            if (game.KeyboardStateRaw[game.GetKey(Keys.LeftControl)] || game.KeyboardStateRaw[game.GetKey(Keys.RightControl)])
             {
                 if (key == game.GetKey(Keys.V))
                 {
@@ -227,23 +225,23 @@ public class ModGuiChat : ModBase
             }
             if (key == game.GetKey(Keys.Up))
             {
-                game.typinglogpos--;
-                if (game.typinglogpos < 0) { game.typinglogpos = 0; }
-                if (game.typinglogpos >= 0 && game.typinglogpos < game.typinglog.Count)
+                game.TypingLogPos--;
+                if (game.TypingLogPos < 0) { game.TypingLogPos = 0; }
+                if (game.TypingLogPos >= 0 && game.TypingLogPos < game.TypingLog.Count)
                 {
-                    game.GuiTypingBuffer = game.typinglog[game.typinglogpos];
+                    game.GuiTypingBuffer = game.TypingLog[game.TypingLogPos];
                 }
                 args.Handled=true;
             }
             if (key == game.GetKey(Keys.Down))
             {
-                game.typinglogpos++;
-                if (game.typinglogpos > game.typinglog.Count) { game.typinglogpos = game.typinglog.Count; }
-                if (game.typinglogpos >= 0 && game.typinglogpos < game.typinglog.Count)
+                game.TypingLogPos++;
+                if (game.TypingLogPos > game.TypingLog.Count) { game.TypingLogPos = game.TypingLog.Count; }
+                if (game.TypingLogPos >= 0 && game.TypingLogPos < game.TypingLog.Count)
                 {
-                    game.GuiTypingBuffer = game.typinglog[game.typinglogpos];
+                    game.GuiTypingBuffer = game.TypingLog[game.TypingLogPos];
                 }
-                if (game.typinglogpos == game.typinglog.Count)
+                if (game.TypingLogPos == game.TypingLog.Count)
                 {
                     game.GuiTypingBuffer = "";
                 }

@@ -12,7 +12,7 @@ public partial class Game : IMeshDrawer, IGameClient
     {
         GuiState = GuiState.MapLoading;
         maploadingprogress = new MapLoadingProgressEventArgs();
-        fontMapLoading = new Font("Arial", 14, FontStyle.Regular);
+        FontMapLoading = new Font("Arial", 14, FontStyle.Regular);
         SetFreeMouse(true);
     }
 
@@ -119,7 +119,7 @@ public partial class Game : IMeshDrawer, IGameClient
     /// Returns the block ID in the given hotbar slot, or
     /// <see cref="BlockRegistry.BlockIdDirt"/> when the slot is empty.
     /// </summary>
-    public int MaterialSlots_(int i)
+    public int MaterialSlots(int i)
     {
         Packet_Item item = Inventory.RightHand[i];
         if (item != null && item.ItemClass == ItemClass.Block)
@@ -265,12 +265,12 @@ public partial class Game : IMeshDrawer, IGameClient
     // ── VSync / lag simulation ────────────────────────────────────────────────
 
     /// <summary>Applies the current VSync setting (disabled only when lag simulation is active).</summary>
-    internal void UseVsync() => Platform.SetVSync(ENABLE_LAG != 1);
+    public void UseVsync() => Platform.SetVSync(EnableLog != 1);
 
     /// <summary>Cycles through lag-simulation modes (0 = off, 1 = no vsync, 2 = spin-wait).</summary>
-    internal void ToggleVsync()
+    public void ToggleVsync()
     {
-        ENABLE_LAG = (ENABLE_LAG + 1) % 3;
+        EnableLog = (EnableLog + 1) % 3;
         UseVsync();
     }
 
@@ -296,7 +296,7 @@ public partial class Game : IMeshDrawer, IGameClient
     {
         GuiState = GuiState.EscapeMenu;
         menustate = new MenuState();
-        escapeMenuRestart = true;
+        EscapeMenuRestart = true;
         Platform.ExitMousePointerLock();
     }
 
@@ -319,14 +319,14 @@ public partial class Game : IMeshDrawer, IGameClient
     // ── Text measurement ──────────────────────────────────────────────────────
 
     /// <summary>Returns the rendered width of <paramref name="s"/> at the given point size.</summary>
-    internal int TextSizeWidth(string s, int size)
+    public int TextSizeWidth(string s, int size)
     {
         TextRenderer.TextSize(s, size, out int width, out _);
         return width;
     }
 
     /// <summary>Returns the rendered height of <paramref name="s"/> at the given point size.</summary>
-    internal int TextSizeHeight(string s, int size)
+    public int TextSizeHeight(string s, int size)
     {
         TextRenderer.TextSize(s, size, out _, out int height);
         return height;
@@ -458,7 +458,7 @@ public partial class Game : IMeshDrawer, IGameClient
         foreach (int id in textures.Values)
             Platform.GLDeleteTexture(id);
 
-        foreach (CachedTexture ct in cachedTextTextures.Values)
+        foreach (CachedTexture ct in CachedTextTextures.Values)
             Platform.GLDeleteTexture(ct.textureId);
     }
 
@@ -479,13 +479,6 @@ public partial class Game : IMeshDrawer, IGameClient
     void IGameClient.SendChat(string message)
     {
         SendChat(message);
-    }
-
-
-
-    public void Draw2dText(string text, Font font, float x, float y, object extra, bool shadow)
-    {
-        throw new NotImplementedException();
     }
 
     public bool IsValidPos(int x, int y, int z) => VoxelMap.IsValidPos(x, y, z);

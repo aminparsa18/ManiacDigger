@@ -179,7 +179,7 @@ public class ModDrawHand3d : ModBase
     }
 
     /// <summary>Returns the OpenGL texture ID of the terrain texture atlas.</summary>
-    public int TerrainTexture => game.terrainTexture;
+    public int TerrainTexture => game.TerrainTexture;
 
     /// <summary>Returns the number of textures packed per row/column in the terrain atlas.</summary>
     public static int TexturesPacked => Game.TexturesPacked;

@@ -39,7 +39,7 @@
 
         // Collect keys to remove — cannot mutate a Dictionary while iterating it.
         List<TextStyle> toRemove = null;
-        foreach (var (style, tex) in cachedTextTextures)
+        foreach (var (style, tex) in CachedTextTextures)
         {
             if ((now - tex.lastuseMilliseconds) / 1000f > 1f)
             {
@@ -51,8 +51,8 @@
         if (toRemove == null) return;
         foreach (TextStyle key in toRemove)
         {
-            Platform.GLDeleteTexture(cachedTextTextures[key].textureId);
-            cachedTextTextures.Remove(key);
+            Platform.GLDeleteTexture(CachedTextTextures[key].textureId);
+            CachedTextTextures.Remove(key);
         }
     }
 
@@ -62,7 +62,7 @@
     /// O(1) Dictionary lookup.
     /// </summary>
     private CachedTexture GetCachedTextTexture(TextStyle t)
-        => cachedTextTextures.TryGetValue(t, out CachedTexture ct) ? ct : null;
+        => CachedTextTextures.TryGetValue(t, out CachedTexture ct) ? ct : null;
 
     /// <summary>
     /// Renders <paramref name="t"/> to a <see cref="Bitmap"/> via
@@ -79,9 +79,6 @@
             textureId = Platform.LoadTextureFromBitmap(bmp),
         };
     }
-
-    /// <summary>Forwards the current font setting to the text renderer.</summary>
-    public void UpdateTextRendererFont() => TextRenderer.SetFont(Font);
 
     // ── Named texture cache ───────────────────────────────────────────────────
 
@@ -139,7 +136,7 @@
     /// </summary>
     internal void UseTerrainTextureAtlas2d(Bitmap atlas2d, int atlas2dWidth)
     {
-        terrainTexture = Platform.LoadTextureFromBitmap(atlas2d);
+        TerrainTexture = Platform.LoadTextureFromBitmap(atlas2d);
         TerrainTexturesPerAtlas = Atlas1dheight() / (atlas2dWidth / Atlas2DTiles);
 
         Bitmap[] atlases1d = PixelBuffer.Atlas2dInto1d(atlas2d, Atlas2DTiles, Atlas1dheight(), out int atlasesidCount);

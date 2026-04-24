@@ -52,7 +52,7 @@ public partial class Game
     }
 
     /// <summary>Returns <see langword="true"/> when the block at this ID has a name assigned.</summary>
-    internal bool IsValid(int blocktype) => BlockTypes[blocktype].Name != null;
+    public bool IsValid(int blocktype) => BlockTypes[blocktype].Name != null;
 
     /// <summary>
     /// Returns <see langword="true"/> when <paramref name="blocktype"/> is one of
@@ -67,7 +67,7 @@ public partial class Game
     /// Returns <see langword="true"/> when the block can be interacted with
     /// (rail tiles or blocks with the <c>IsUsable</c> flag).
     /// </summary>
-    internal bool IsUsableBlock(int blocktype) =>
+    public bool IsUsableBlock(int blocktype) =>
         BlockRegistry.IsRailTile(blocktype) || BlockTypes[blocktype].IsUsable;
 
     /// <summary>
@@ -108,7 +108,7 @@ public partial class Game
     /// Writes a block directly into the map, marks the owning chunk dirty,
     /// updates shadow heights, and records the position for the next chunk redraw.
     /// </summary>
-    internal void SetBlock(int x, int y, int z, int tileType)
+    public void SetBlock(int x, int y, int z, int tileType)
     {
         VoxelMap.SetBlockRaw(x, y, z, tileType);
         VoxelMap.SetChunkDirty(x / chunksize, y / chunksize, z / chunksize, true, true);
@@ -208,7 +208,7 @@ public partial class Game
     /// Returns the remaining health of the block at the given position,
     /// falling back to the block type's base strength when not yet damaged.
     /// </summary>
-    internal float GetCurrentBlockHealth(int x, int y, int z) =>
+    public float GetCurrentBlockHealth(int x, int y, int z) =>
         blockHealth.TryGetValue((x, y, z), out float health)
             ? health
             : BlockRegistry.Strength[VoxelMap.GetBlock(x, y, z)];
@@ -287,7 +287,7 @@ public partial class Game
     /// values that exceed <see cref="maxdrawdistance"/> (except 32, which is
     /// always available as the minimum step).
     /// </summary>
-    internal void ToggleFog()
+    public void ToggleFog()
     {
         int count = FogDrawDistances.Count(d => d <= maxdrawdistance || d == 32);
         for (int i = 0; i < count; i++)

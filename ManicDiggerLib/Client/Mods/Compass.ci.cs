@@ -13,26 +13,33 @@ public class ModCompass : ModBase
     private int needleId = -1;
     private float compassAngle;
     private float compassVelocity;
-
-    public override void OnNewFrameDraw2d(Game game, float dt)
+    private readonly IGameClient game;
+    private readonly IGamePlatform platform;
+    public ModCompass(IGameClient game, IGamePlatform platform)
     {
-        if (game.GuiState == GuiState.MapLoading) return;
-        DrawCompass(game);
+        this.game = game;
+        this.platform = platform;
     }
 
-    private static bool CompassInActiveMaterials(Game game)
+    public override void OnNewFrameDraw2d(float dt)
+    {
+        if (game.GuiState == GuiState.MapLoading) return;
+        DrawCompass();
+    }
+
+    private bool CompassInActiveMaterials()
     {
         for (int i = 0; i < 10; i++)
         {
-            if (game.MaterialSlots_(i) == game.BlockRegistry.BlockIdCompass)
+            if (game.MaterialSlots(i) == game.BlockRegistry.BlockIdCompass)
                 return true;
         }
         return false;
     }
 
-    public void DrawCompass(Game game)
+    public void DrawCompass()
     {
-        if (!CompassInActiveMaterials(game)) return;
+        if (!CompassInActiveMaterials()) return;
 
         if (compassId == -1)
         {
@@ -40,7 +47,7 @@ public class ModCompass : ModBase
             needleId = game.GetTexture("compassneedle.png");
         }
 
-        float posX = game.Width() - CompassPosX;
+        float posX = platform.GetCanvasWidth() - CompassPosX;
         float posY = CompassPosY;
         float playerOrientation = -(game.Player.position.roty / (2 * MathF.PI)) * 360f;
 

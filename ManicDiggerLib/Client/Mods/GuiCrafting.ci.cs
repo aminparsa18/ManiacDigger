@@ -67,7 +67,7 @@ public class ModGuiCrafting : ModBase
 
     // ── ModBase overrides ─────────────────────────────────────────────────────
 
-    public override void OnNewFrameDraw2d(Game game, float deltaTime)
+    public override void OnNewFrameDraw2d(float deltaTime)
     {
         // Lazy-initialise the tool once.
         d_CraftingTableTool ??= new CraftingTableTool
@@ -84,7 +84,7 @@ public class ModGuiCrafting : ModBase
         }
 
         if (game.GuiState == GuiState.CraftingRecipes)
-            DrawCraftingRecipes(game);
+            DrawCraftingRecipes();
     }
 
     public override void OnNewFrameFixed(float args)
@@ -123,7 +123,7 @@ public class ModGuiCrafting : ModBase
 
     // ── Drawing ───────────────────────────────────────────────────────────────
 
-    internal void DrawCraftingRecipes(Game game)
+    internal void DrawCraftingRecipes()
     {
         // ── Filter recipes for which the player has all materials ─────────────
         // Uses _blockTypeCounts (built once in CraftingRecipesStart) for O(1)
@@ -173,7 +173,7 @@ public class ModGuiCrafting : ModBase
             {
                 Packet_Ingredient ing = r.Ingredients[ii];
                 int colX = menuX + 20 + ii * 130;
-                game.Draw2dTexture(game.terrainTexture,
+                game.Draw2dTexture(game.TerrainTexture,
                     colX, rowY, 32, 32,
                     game.TextureIdForInventory[ing.Type], Game.TexturesPacked, white, false);
                 game.Draw2dText1($"{ing.Amount} {game.BlockTypes[ing.Type].Name}",
@@ -181,7 +181,7 @@ public class ModGuiCrafting : ModBase
             }
 
             int outX = menuX + 20 + OutputColumnOffset;
-            game.Draw2dTexture(game.terrainTexture,
+            game.Draw2dTexture(game.TerrainTexture,
                 outX, rowY, 32, 32,
                 game.TextureIdForInventory[r.Output.Type], Game.TexturesPacked, white, false);
             game.Draw2dText1($"{r.Output.Amount} {game.BlockTypes[r.Output.Type].Name}",

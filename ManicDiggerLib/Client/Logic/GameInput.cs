@@ -63,7 +63,7 @@ public partial class Game
         if (!e.GetEmulated() || e.GetForceUsage())
         {
             // Set position only for real MouseMove events.
-            mouseCurrentX = e.GetX();
+            MouseCurrentX = e.GetX();
             MouseCurrentY = e.GetY();
         }
         if (e.GetEmulated() || e.GetForceUsage())
@@ -86,10 +86,10 @@ public partial class Game
 
         if (KeyboardState[GetKey(Keys.LeftShift)])
         {
-            if (cameratype == CameraType.Overhead)
+            if (CameraType == CameraType.Overhead)
                 OverHeadCameraDistance = Math.Clamp(OverHeadCameraDistance - delta, TPP_CAMERA_DISTANCE_MIN, TPP_CAMERA_DISTANCE_MAX);
 
-            if (cameratype == CameraType.Tpp)
+            if (CameraType == CameraType.Tpp)
                 tppcameradistance = Math.Clamp(tppcameradistance - delta, TPP_CAMERA_DISTANCE_MIN, TPP_CAMERA_DISTANCE_MAX);
         }
 
@@ -131,13 +131,13 @@ public partial class Game
             if (!OverheadCamera)
             {
                 float touchScale = constRotationSpeed * (1f / 75);
-                Player.position.rotx += touchOrientationDy * touchScale;
-                Player.position.roty += touchOrientationDx * touchScale;
-                touchOrientationDx = 0;
-                touchOrientationDy = 0;
+                Player.position.rotx += TouchOrientationDy * touchScale;
+                Player.position.roty += TouchOrientationDx * touchScale;
+                TouchOrientationDx = 0;
+                TouchOrientationDy = 0;
             }
 
-            if (cameratype == CameraType.Overhead && (mouseMiddle || mouseRight))
+            if (CameraType == CameraType.Overhead && (mouseMiddle || mouseRight))
             {
                 OverheadCameraK.TurnLeft(mouseDeltaX / 70);
                 OverheadCameraK.TurnUp(mouseDeltaY / 3);
@@ -170,7 +170,7 @@ public partial class Game
     public void OnTouchStart(TouchEventArgs e)
     {
         InvalidVersionAllow();
-        mouseCurrentX = e.GetX();
+        MouseCurrentX = e.GetX();
         MouseCurrentY = e.GetY();
         MouseLeftClick = true;
 
@@ -194,7 +194,7 @@ public partial class Game
 
     public void OnTouchEnd(TouchEventArgs e)
     {
-        mouseCurrentX = 0;
+        MouseCurrentX = 0;
         MouseCurrentY = 0;
 
         for (int i = 0; i < clientmods.Count; i++)
@@ -213,7 +213,7 @@ public partial class Game
 
     internal void KeyUp(KeyEventArgs eKey)
     {
-        keyboardStateRaw[eKey.KeyChar] = false;
+        KeyboardStateRaw[eKey.KeyChar] = false;
 
         for (int i = 0; i < clientmods.Count; i++)
         {
@@ -239,7 +239,7 @@ public partial class Game
 
     internal void KeyDown(KeyEventArgs eKey)
     {
-        keyboardStateRaw[eKey.KeyChar] = true;
+        KeyboardStateRaw[eKey.KeyChar] = true;
 
         if (GuiState != GuiState.MapLoading)
         {
@@ -334,7 +334,7 @@ public partial class Game
             }
         }
         if (eKey == GetKey(Keys.I))
-            drawblockinfo = !drawblockinfo;
+            DrawBlockInfo = !DrawBlockInfo;
 
         int playerx = (int)Player.position.x;
         int playery = (int)Player.position.z;
@@ -346,13 +346,13 @@ public partial class Game
 
         if (eKey == GetKey(Keys.Equal))
         {
-            if (cameratype == CameraType.Overhead) OverHeadCameraDistance -= 1;
-            else if (cameratype == CameraType.Tpp) tppcameradistance -= 1;
+            if (CameraType == CameraType.Overhead) OverHeadCameraDistance -= 1;
+            else if (CameraType == CameraType.Tpp) tppcameradistance -= 1;
         }
         if (eKey == GetKey(Keys.Minus) || eKey == GetKey(Keys.KeyPadSubtract))
         {
-            if (cameratype == CameraType.Overhead) OverHeadCameraDistance += 1;
-            else if (cameratype == CameraType.Tpp) tppcameradistance += 1;
+            if (CameraType == CameraType.Overhead) OverHeadCameraDistance += 1;
+            else if (CameraType == CameraType.Tpp) tppcameradistance += 1;
         }
 
         OverHeadCameraDistance = Math.Clamp(OverHeadCameraDistance, TPP_CAMERA_DISTANCE_MIN, TPP_CAMERA_DISTANCE_MAX);
@@ -364,9 +364,9 @@ public partial class Game
         if (eKey == (int)Keys.F8)
         {
             ToggleVsync();
-            if (ENABLE_LAG == 0) AddChatLine(Language.FrameRateVsync());
-            if (ENABLE_LAG == 1) AddChatLine(Language.FrameRateUnlimited());
-            if (ENABLE_LAG == 2) AddChatLine(Language.FrameRateLagSimulation());
+            if (EnableLog == 0) AddChatLine(Language.FrameRateVsync());
+            if (EnableLog == 1) AddChatLine(Language.FrameRateUnlimited());
+            if (EnableLog == 2) AddChatLine(Language.FrameRateLagSimulation());
         }
 
         if (eKey == GetKey(Keys.Tab))
@@ -409,11 +409,11 @@ public partial class Game
 
     private void KeyDownUse()
     {
-        if (currentAttackedBlock != null)
+        if (CurrentAttackedBlock != null)
         {
-            int posX = currentAttackedBlock.Value.X;
-            int posY = currentAttackedBlock.Value.Y;
-            int posZ = currentAttackedBlock.Value.Z;
+            int posX = CurrentAttackedBlock.Value.X;
+            int posY = CurrentAttackedBlock.Value.Y;
+            int posZ = CurrentAttackedBlock.Value.Z;
             int blocktype = VoxelMap.GetBlock(posX, posY, posZ);
 
             if (IsUsableBlock(blocktype))
@@ -432,15 +432,15 @@ public partial class Game
             }
         }
 
-        if (currentlyAttackedEntity != -1 && Entities[currentlyAttackedEntity].usable)
+        if (CurrentlyAttackedEntity != -1 && Entities[CurrentlyAttackedEntity].usable)
         {
-            OnUseEntityArgs args = new() { entityId = currentlyAttackedEntity };
+            OnUseEntityArgs args = new() { entityId = CurrentlyAttackedEntity };
             for (int i = 0; i < clientmods.Count; i++)
             {
                 if (clientmods[i] == null) continue;
                 clientmods[i].OnUseEntity(this, args);
             }
-            SendPacketClient(ClientPackets.UseEntity(currentlyAttackedEntity));
+            SendPacketClient(ClientPackets.UseEntity(CurrentlyAttackedEntity));
         }
     }
 

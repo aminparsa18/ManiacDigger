@@ -3,28 +3,36 @@ using OpenTK.Mathematics;
 
 public class ModDraw2dMisc : ModBase
 {
-    public override void OnNewFrameDraw2d(Game game, float deltaTime)
+    private readonly IGameClient game;
+    private readonly IGamePlatform platform;
+    public ModDraw2dMisc(IGameClient game, IGamePlatform platform)
+    {
+        this.game = game;
+        this.platform = platform;
+    }
+
+    public override void OnNewFrameDraw2d(float deltaTime)
     {
         if (game.GuiState == GuiState.Normal)
-            DrawAim(game);
+            DrawAim();
 
         if (game.GuiState != GuiState.MapLoading)
         {
-            DrawEnemyHealthBlock(game);
-            DrawAmmo(game);
-            DrawLocalPosition(game);
-            DrawBlockInfo(game);
+            DrawEnemyHealthBlock();
+            DrawAmmo();
+            DrawLocalPosition();
+            DrawBlockInfo();
         }
 
-        DrawMouseCursor(game);
-        DrawDisconnected(game);
+        DrawMouseCursor();
+        DrawDisconnected();
     }
 
     // ── Block / entity health display ─────────────────────────────────────────
 
-    public static void DrawBlockInfo(Game game)
+    public void DrawBlockInfo()
     {
-        if (!game.drawblockinfo) return;
+        if (!game.DrawBlockInfo) return;
 
         int x = game.SelectedBlockPositionX;
         int y = game.SelectedBlockPositionZ;
@@ -35,17 +43,17 @@ public class ModDraw2dMisc : ModBase
         int blocktype = game.VoxelMap.GetBlock(x, y, z);
         if (!game.IsValid(blocktype)) return;
 
-        game.currentAttackedBlock = new Vector3i(x, y, z);
-        DrawEnemyHealthBlock(game);
+        game.CurrentAttackedBlock = new Vector3i(x, y, z);
+        DrawEnemyHealthBlock();
     }
 
-    internal static void DrawEnemyHealthBlock(Game game)
+    internal void DrawEnemyHealthBlock()
     {
-        if (game.currentAttackedBlock != null)
+        if (game.CurrentAttackedBlock != null)
         {
-            int x = game.currentAttackedBlock.Value.X;
-            int y = game.currentAttackedBlock.Value.Y;
-            int z = game.currentAttackedBlock.Value.Z;
+            int x = game.CurrentAttackedBlock.Value.X;
+            int y = game.CurrentAttackedBlock.Value.Y;
+            int z = game.CurrentAttackedBlock.Value.Z;
             int blocktype = game.VoxelMap.GetBlock(x, y, z);
             float health = game.GetCurrentBlockHealth(x, y, z);
             float progress = health / game.BlockRegistry.Strength[blocktype];
@@ -54,14 +62,14 @@ public class ModDraw2dMisc : ModBase
             string name = game.Language.Get("Block_" + game.BlockTypes[blocktype].Name);
 
             if (game.IsUsableBlock(blocktype))
-                DrawEnemyHealthUseInfo(game, name, progress, useInfo: true);
+                DrawEnemyHealthUseInfo(name, progress, true);
 
-            DrawEnemyHealthBackground(game, name);
+            DrawEnemyHealthBackground(name);
         }
 
-        if (game.currentlyAttackedEntity != -1)
+        if (game.CurrentlyAttackedEntity != -1)
         {
-            Entity e = game.Entities[game.currentlyAttackedEntity];
+            Entity e = game.Entities[game.CurrentlyAttackedEntity];
             if (e == null) return;
 
             float health = e.playerStats != null
@@ -72,9 +80,9 @@ public class ModDraw2dMisc : ModBase
             string translatedName = game.Language.Get(name);
 
             if (e.usable)
-                DrawEnemyHealthUseInfo(game, translatedName, health, useInfo: true);
+                DrawEnemyHealthUseInfo(translatedName, health, useInfo: true);
 
-            DrawEnemyHealthBackground(game, translatedName);
+            DrawEnemyHealthBackground(translatedName);
         }
     }
 
@@ -83,10 +91,10 @@ public class ModDraw2dMisc : ModBase
     /// Replaces the old <c>DrawEnemyHealthCommon</c> which accepted a <c>progress</c>
     /// parameter it silently ignored.
     /// </summary>
-    internal static void DrawEnemyHealthBackground(Game game, string name)
-        => DrawEnemyHealthUseInfo(game, name, progress: 1f, useInfo: false);
+    internal void DrawEnemyHealthBackground(string name)
+        => DrawEnemyHealthUseInfo(name, progress: 1f, useInfo: false);
 
-    internal static void DrawEnemyHealthUseInfo(Game game, string name, float progress, bool useInfo)
+    internal void DrawEnemyHealthUseInfo(string name, float progress, bool useInfo)
     {
         int barHeight = useInfo ? 55 : 35;
         int whiteTexId = game.WhiteTexture(); // cache — was called twice
@@ -109,38 +117,38 @@ public class ModDraw2dMisc : ModBase
 
     // ── Crosshair ─────────────────────────────────────────────────────────────
 
-    internal static void DrawAim(Game game)
+    internal void DrawAim()
     {
-        if (game.cameratype == CameraType.Overhead) return;
+        if (game.CameraType == CameraType.Overhead) return;
 
         const int AimSize = 32;
-        game.Platform.BindTexture2d(0);
+        platform.BindTexture2d(0);
 
         if (game.CurrentAimRadius() > 1)
         {
             float fov_ = game.CurrentFov();
-            game.Circle3i(game.Width() / 2, game.Height() / 2,
-                game.CurrentAimRadius() * game.fov / fov_);
+            game.Circle3i(platform.GetCanvasWidth() / 2, platform.GetCanvasHeight() / 2,
+                game.CurrentAimRadius() * game.CurrentFov() / fov_);
         }
 
         game.Draw2dBitmapFile("target.png",
-            game.Width() / 2 - AimSize / 2,
-            game.Height() / 2 - AimSize / 2,
+            platform.GetCanvasWidth() / 2 - AimSize / 2,
+            platform.GetCanvasHeight() / 2 - AimSize / 2,
             AimSize, AimSize);
     }
 
     // ── Mouse cursor ──────────────────────────────────────────────────────────
 
-    internal static void DrawMouseCursor(Game game)
+    internal void DrawMouseCursor()
     {
         if (!game.GetFreeMouse()) return;
-        if (!game.Platform.MouseCursorIsVisible())
-            game.Draw2dBitmapFile("mousecursor.png", game.mouseCurrentX, game.MouseCurrentY, 32, 32);
+        if (!platform.MouseCursorIsVisible())
+            game.Draw2dBitmapFile("mousecursor.png", game.MouseCurrentX, game.MouseCurrentY, 32, 32);
     }
 
     // ── Ammo counter ──────────────────────────────────────────────────────────
 
-    internal static void DrawAmmo(Game game)
+    internal void DrawAmmo()
     {
         Packet_Item item = game.Inventory.RightHand[game.ActiveMaterial];
         if (item == null || item.ItemClass != ItemClass.Block) return;
@@ -153,24 +161,24 @@ public class ModDraw2dMisc : ModBase
             ? ColorUtils.ColorFromArgb(255, 255, 0, 0)
             : ColorUtils.ColorFromArgb(255, 255, 255, 255);
 
-        game.Draw2dText1(s, game.Width() - game.TextSizeWidth(s, 18) - 50,
-            game.Height() - game.TextSizeHeight(s, 18) - 50, 18, color, false);
+        game.Draw2dText1(s, platform.GetCanvasWidth() - game.TextSizeWidth(s, 18) - 50,
+            platform.GetCanvasWidth() - game.TextSizeHeight(s, 18) - 50, 18, color, false);
 
         if (loaded == 0)
         {
             const string PressR = "Press R to reload"; // TODO: move to game.language
             game.Draw2dText1(PressR,
-                game.Width() - game.TextSizeWidth(PressR, 14) - 50,
-                game.Height() - game.TextSizeHeight(s, 14) - 80,
+                platform.GetCanvasWidth() - game.TextSizeWidth(PressR, 14) - 50,
+                platform.GetCanvasHeight() - game.TextSizeHeight(s, 14) - 80,
                 14, ColorUtils.ColorFromArgb(255, 255, 0, 0), false);
         }
     }
 
     // ── Debug position overlay ────────────────────────────────────────────────
 
-    private static void DrawLocalPosition(Game game)
+    private void DrawLocalPosition()
     {
-        if (!game.ENABLE_DRAWPOSITION) return;
+        if (!game.EnableDrawPosition) return;
 
         float heading = Game.HeadingByte(
             game.Player.position.rotx, game.Player.position.roty, game.Player.position.rotz);
@@ -190,7 +198,7 @@ public class ModDraw2dMisc : ModBase
 
     // ── Disconnected overlay ──────────────────────────────────────────────────
 
-    private static void DrawDisconnected(Game game)
+    private void DrawDisconnected()
     {
         float lagSeconds =
             (game.Platform.TimeMillisecondsFromStart - game.LastReceivedMilliseconds) / 1000f;
@@ -200,13 +208,13 @@ public class ModDraw2dMisc : ModBase
         if (game.InvalidVersionDrawMessage != null) return;
         if (game.IsSinglePlayer && !game.Platform.SinglePlayerServerLoaded()) return;
 
-        game.Draw2dBitmapFile("disconnected.png", game.Width() - 100, 50, 50, 50);
+        game.Draw2dBitmapFile("disconnected.png", platform.GetCanvasWidth() - 100, 50, 50, 50);
 
         game.Draw2dText1(((int)lagSeconds).ToString(),
-            game.Width() - 100, 50 + 50 + 10, 12, null, false);
+            platform.GetCanvasWidth() - 100, 50 + 50 + 10, 12, null, false);
 
         const string Reconnect = "Press F6 to reconnect";
         game.Draw2dText1(Reconnect,
-            game.Width() / 2 - 200 / 2, 50, 12, null, false);
+            platform.GetCanvasWidth() / 2 - 200 / 2, 50, 12, null, false);
     }
 }

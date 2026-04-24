@@ -3,9 +3,11 @@ using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 public class ModGuiEscapeMenu : ModBase
 {
-    public ModGuiEscapeMenu()
+    private readonly IGameClient game;
+
+    public ModGuiEscapeMenu(IGameClient game)
     {
-        one = 1;
+        this.game = game;
         fonts = new string[4];
         fonts[0] = "Nice";
         fonts[1] = "Simple";
@@ -20,7 +22,7 @@ public class ModGuiEscapeMenu : ModBase
         widgets = new Button[1024];
         keyselectid = -1;
     }
-    private readonly float one;
+
     private Button buttonMainReturnToGame;
     private Button buttonMainOptions;
     private Button buttonMainExit;
@@ -186,12 +188,12 @@ public class ModGuiEscapeMenu : ModBase
             game.TerrainChunkTesselator.EnableSmoothLight = options.Smoothshadows;
             if (options.Smoothshadows)
             {
-                options.BlockShadowSave = one * 7 / 10;
+                options.BlockShadowSave = 0.7f;
                 game.TerrainChunkTesselator.BlockShadow = options.BlockShadowSave;
             }
             else
             {
-                options.BlockShadowSave = one * 6 / 10;
+                options.BlockShadowSave = 0.6f;
                 game.TerrainChunkTesselator.BlockShadow = options.BlockShadowSave;
             }
             game.RedrawAllBlocks();
@@ -376,14 +378,13 @@ public class ModGuiEscapeMenu : ModBase
         widgetsCount = 0;
     }
 
-    internal Game game;
     private EscapeMenuState escapemenustate;
     private void EscapeMenuMouse1()
     {
         for (int i = 0; i < widgetsCount; i++)
         {
             Button w = widgets[i];
-            w.selected = RectContains(w.x, w.y, w.width, w.height, game.mouseCurrentX, game.MouseCurrentY);
+            w.selected = RectContains(w.x, w.y, w.width, w.height, game.MouseCurrentX, game.MouseCurrentY);
             if (w.selected && game.MouseLeftClick)
             {
                 HandleButtonClick(w);
@@ -456,9 +457,9 @@ public class ModGuiEscapeMenu : ModBase
 
     private string VsyncString()
     {
-        if (game.ENABLE_LAG == 0) { return "Vsync"; }
-        else if (game.ENABLE_LAG == 1) { return "Unlimited"; }
-        else if (game.ENABLE_LAG == 2) { return "Lag"; }
+        if (game.EnableLog == 0) { return "Vsync"; }
+        else if (game.EnableLog == 1) { return "Unlimited"; }
+        else if (game.EnableLog == 2) { return "Lag"; }
         else return null; //throw new Exception();
     }
 
@@ -542,14 +543,14 @@ public class ModGuiEscapeMenu : ModBase
             options.Font = 0;
         }
         game.Font = fontValues[options.Font];
-        game.UpdateTextRendererFont();
+        TextRenderer.SetFont(game.Font);
 
         // Release all cached text textures — they were rendered with the old font
         // and are now invalid. Previously set list entries to null (leaking GPU
         // handles). Now explicitly delete each texture before clearing the dictionary.
-        foreach (CachedTexture ct in game.cachedTextTextures.Values)
+        foreach (CachedTexture ct in game.CachedTextTextures.Values)
             game.Platform.GLDeleteTexture(ct.textureId);
-        game.cachedTextTextures.Clear();
+        game.CachedTextTextures.Clear();
     }
 
     private string KeyName(int key)
@@ -582,17 +583,16 @@ public class ModGuiEscapeMenu : ModBase
         }
     }
     private bool loaded;
-    public override void OnNewFrameDraw2d(Game game_, float deltaTime)
+    public override void OnNewFrameDraw2d(float deltaTime)
     {
-        game = game_;
         if (!loaded)
         {
             loaded = true;
             LoadOptions();
         }
-        if (game.escapeMenuRestart)
+        if (game.EscapeMenuRestart)
         {
-            game.escapeMenuRestart = false;
+            game.EscapeMenuRestart = false;
             SetEscapeMenuState(EscapeMenuState.Main);
         }
         if (game.GuiState != GuiState.EscapeMenu)
@@ -717,7 +717,7 @@ public class ModGuiEscapeMenu : ModBase
         GameOption options = o;
 
         game.Font = fontValues[options.Font];
-        game.UpdateTextRendererFont();
+        TextRenderer.SetFont(game.Font);
         //game.d_CurrentShadows.ShadowsFull = options.Shadows;
         game.Config3d.ViewDistance = options.DrawDistance;
         game.AudioEnabled = options.EnableSound;
@@ -729,7 +729,7 @@ public class ModGuiEscapeMenu : ModBase
         game.TerrainChunkTesselator.EnableSmoothLight = options.Smoothshadows;
         game.TerrainChunkTesselator.BlockShadow = options.BlockShadowSave;
         game.TerrainChunkTesselator.option_DarkenBlockSides = options.EnableBlockShadow;
-        game.ENABLE_LAG = options.Framerate;
+        game.EnableLog = options.Framerate;
         UseFullscreen();
         game.UseVsync();
         UseResolution();
@@ -751,7 +751,7 @@ public class ModGuiEscapeMenu : ModBase
         options.Resolution = preferences.GetInt("Resolution", 0);
         options.Fullscreen = preferences.GetBool("Fullscreen", false);
         options.Smoothshadows = preferences.GetBool("Smoothshadows", true);
-        options.BlockShadowSave = one * preferences.GetInt("BlockShadowSave", 70) / 100;
+        options.BlockShadowSave = 1f * preferences.GetInt("BlockShadowSave", 70) / 100;
         options.EnableBlockShadow = preferences.GetBool("EnableBlockShadow", true);
 
         for (int i = 0; i < 256; i++)
@@ -780,7 +780,7 @@ public class ModGuiEscapeMenu : ModBase
         {
             options.ClientLanguage = game.Language.OverrideLanguage;
         }
-        options.Framerate = game.ENABLE_LAG;
+        options.Framerate = game.EnableLog;
         options.Fullscreen = game.Platform.GetWindowState() == WindowState.Fullscreen;
         options.Smoothshadows = game.TerrainChunkTesselator.EnableSmoothLight;
         options.EnableBlockShadow = game.TerrainChunkTesselator.option_DarkenBlockSides;

@@ -3,7 +3,7 @@
 public partial class Game
 {
     public NetClient NetClient { get; set; }
-    internal bool IsTeamchat;
+    public bool IsTeamchat { get; set; }
     private int packetLen;
 
     // -------------------------------------------------------------------------
@@ -74,17 +74,17 @@ public partial class Game
     // Inventory actions → packets
     // -------------------------------------------------------------------------
 
-    internal void InventoryClick(Packet_InventoryPosition pos)
+    public void InventoryClick(Packet_InventoryPosition pos)
     {
         SendPacketClient(ClientPackets.InventoryClick(pos));
     }
 
-    internal void WearItem(Packet_InventoryPosition from, Packet_InventoryPosition to)
+    public void WearItem(Packet_InventoryPosition from, Packet_InventoryPosition to)
     {
         SendPacketClient(ClientPackets.WearItem(from, to));
     }
 
-    internal void MoveToInventory(Packet_InventoryPosition from)
+    public void MoveToInventory(Packet_InventoryPosition from)
     {
         SendPacketClient(ClientPackets.MoveToInventory(from));
     }

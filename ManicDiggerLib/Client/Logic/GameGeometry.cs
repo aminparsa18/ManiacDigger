@@ -268,7 +268,7 @@ public partial class Game
         OrthoMode(Width(), Height());
 
         for (int i = 0; i < clientmods.Count; i++)
-            clientmods[i]?.OnNewFrameDraw2d(this, dt);
+            clientmods[i]?.OnNewFrameDraw2d(dt);
 
         PerspectiveMode();
     }
@@ -333,7 +333,7 @@ public partial class Game
     /// <see cref="Font"/> object on every call (this method is called per-frame
     /// for every visible text element).
     /// </summary>
-    internal void Draw2dText1(string text, int x, int y, int fontsize, int? color, bool enabledepthtest)
+    public void Draw2dText1(string text, int x, int y, int fontsize, int? color, bool enabledepthtest)
     {
         if (!_fontCache.TryGetValue(fontsize, out Font font))
         {
@@ -365,11 +365,11 @@ public partial class Game
 
         // Cache lookup — retrieve once and reuse rather than calling
         // GetCachedTextTexture twice (check-null then retrieve).
-        if (!cachedTextTextures.TryGetValue(t, out CachedTexture cached))
+        if (!CachedTextTextures.TryGetValue(t, out CachedTexture cached))
         {
             cached = MakeTextTexture(t);
             if (cached == null) return;
-            cachedTextTextures[t] = cached;
+            CachedTextTextures[t] = cached;
         }
 
         cached.lastuseMilliseconds = Platform.TimeMillisecondsFromStart;

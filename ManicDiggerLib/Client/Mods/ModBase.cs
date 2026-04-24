@@ -24,7 +24,7 @@ public abstract class ModBase
     public virtual void OnNewFrameFixed(float args) { }
 
     /// <summary>Called during the 2D draw pass of each frame.</summary>
-    public virtual void OnNewFrameDraw2d(Game game, float deltaTime) { }
+    public virtual void OnNewFrameDraw2d(float deltaTime) { }
 
     /// <summary>Called before the 3D draw pass of each frame.</summary>
     public virtual void OnBeforeNewFrameDraw3d(Game game, float deltaTime) { }

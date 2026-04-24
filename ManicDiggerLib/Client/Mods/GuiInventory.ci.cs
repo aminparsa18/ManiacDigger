@@ -11,7 +11,8 @@ using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 public class ModGuiInventory : ModBase
 {
     /// <summary>Reference to the current game instance.</summary>
-    internal Game game;
+    private readonly IGameClient game;
+    private readonly IGamePlatform platform;
 
     /// <summary>Item data helpers (texture IDs, sizes, display info).</summary>
     internal InventoryUtils dataItems;
@@ -67,8 +68,10 @@ public class ModGuiInventory : ModBase
     private int _scrollingDownTimeMs;
 
     /// <summary>Initialises cell dimensions and wear-place layout data.</summary>
-    public ModGuiInventory()
-    {
+    public ModGuiInventory(IGameClient game, IGamePlatform platform)
+    {   
+        this.game = game;
+        this.platform = platform;
         // Wear-place slot origins (relative to inventory background image origin).
         _wearPlaceStart = new Point[WearPlaceCount];
         _wearPlaceStart[(int)WearPlace.RightHand] = new Point(34, 100);
@@ -89,10 +92,10 @@ public class ModGuiInventory : ModBase
     }
 
     /// <summary>Returns the screen X coordinate of the inventory background's left edge.</summary>
-    public int InventoryStartX() => game.Width() / 2 - 560 / 2;
+    public int InventoryStartX() => platform.GetCanvasWidth() / 2 - 560 / 2;
 
     /// <summary>Returns the screen Y coordinate of the inventory background's top edge.</summary>
-    public int InventoryStartY() => game.Height() / 2 - 600 / 2;
+    public int InventoryStartY() => platform.GetCanvasHeight() / 2 - 600 / 2;
 
     /// <summary>Returns the screen X coordinate of the top-left inventory cell.</summary>
     public int CellsStartX() => 33 + InventoryStartX();
@@ -105,8 +108,8 @@ public class ModGuiInventory : ModBase
 
     private int MaterialSelectorStartX() => (int)(MaterialSelectorBgStartX() + 17 * game.Scale());
     private int MaterialSelectorStartY() => (int)(MaterialSelectorBgStartY() + 17 * game.Scale());
-    private int MaterialSelectorBgStartX() => (int)(game.Width() / 2 - 512 / 2 * game.Scale());
-    private int MaterialSelectorBgStartY() => (int)(game.Height() - 90 * game.Scale());
+    private int MaterialSelectorBgStartX() => (int)(platform.GetCanvasWidth() / 2 - 512 / 2 * game.Scale());
+    private int MaterialSelectorBgStartY() => (int)(platform.GetCanvasHeight() - 90 * game.Scale());
 
     private int ScrollButtonSize() => CellDrawSize;
     private int ScrollUpButtonX() => CellsStartX() + _cellCountInPageX * CellDrawSize;
@@ -256,14 +259,12 @@ public class ModGuiInventory : ModBase
     }
 
     /// <inheritdoc/>
-    public override void OnNewFrameDraw2d(Game game_, float deltaTime)
+    public override void OnNewFrameDraw2d(float deltaTime)
     {
-        game = game_;
-
         if (dataItems == null)
         {
-            dataItems = new InventoryUtils(game_);
-            controller = ClientInventoryController.Create(game_);
+            dataItems = new InventoryUtils(game);
+            controller = ClientInventoryController.Create(game);
             inventoryUtil = game.InventoryUtil;
         }
 
@@ -275,7 +276,7 @@ public class ModGuiInventory : ModBase
 
         AdvanceAutoScroll();
 
-        Point mouse = new(game.mouseCurrentX, game.MouseCurrentY);
+        Point mouse = new(game.MouseCurrentX, game.MouseCurrentY);
 
         game.Draw2dBitmapFile("inventory.png", InventoryStartX(), InventoryStartY(), 1024, 1024);
 
@@ -296,7 +297,7 @@ public class ModGuiInventory : ModBase
     /// cell grid or its adjacent scroll buttons.
     /// </summary>
     public bool IsMouseOverCells()
-        => SelectedCellOrScrollbar(game.mouseCurrentX, game.MouseCurrentY);
+        => SelectedCellOrScrollbar(game.MouseCurrentX, game.MouseCurrentY);
 
     /// <summary>Scrolls the inventory grid up by one row, clamped to row 0.</summary>
     public void ScrollUp()
@@ -368,7 +369,7 @@ public class ModGuiInventory : ModBase
         {
             if (item.BlockId == 0) { return; }
 
-            game.Draw2dTexture(game.terrainTexture, screenposX, screenposY,
+            game.Draw2dTexture(game.TerrainTexture, screenposX, screenposY,
                 drawsizeX, drawsizeY,
                 dataItems.TextureIdForInventory()[item.BlockId],
                 Game.                TexturesPacked, ColorUtils.ColorFromArgb(255, 255, 255, 255), false);
@@ -402,8 +403,8 @@ public class ModGuiInventory : ModBase
         int w = tw + CellDrawSize * sizex;
         int h = th < CellDrawSize * sizey + 4 ? CellDrawSize * sizey + 4 : th;
 
-        screenposX = Math.Clamp(screenposX, w + 20, game.Width() - (w + 20));
-        screenposY = Math.Clamp(screenposY, h + 20, game.Height() - (h + 20));
+        screenposX = Math.Clamp(screenposX, w + 20, platform.GetCanvasWidth() - (w + 20));
+        screenposY = Math.Clamp(screenposY, h + 20, platform.GetCanvasHeight() - (h + 20));
 
         // Black border, grey fill.
         game.Draw2dTexture(game.WhiteTexture(), screenposX - w, screenposY - h, w, h, null, 0, ColorUtils.ColorFromArgb(255, 0, 0, 0), false);

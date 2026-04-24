@@ -43,9 +43,14 @@ public class ModGuiTouchButtons : GameScreen
     /// <summary>Screen Y position where the rotation touch began.</summary>
     private int _touchRotateStartY;
 
+    private readonly IGameClient game;
+    private readonly IGamePlatform platform;
+
     /// <summary>Initialises all four touch buttons and assigns them to widget slots 0–3.</summary>
-    public ModGuiTouchButtons()
+    public ModGuiTouchButtons(IGameClient game, IGamePlatform platform)
     {
+        this.game = game;
+        this.platform = platform;
         _touchButtonsEnabled = false;
         _touchIdMove = -1;
         _touchIdRotate = -1;
@@ -62,11 +67,9 @@ public class ModGuiTouchButtons : GameScreen
     }
 
     /// <inheritdoc/>
-    public override void OnNewFrameDraw2d(Game game_, float deltaTime)
+    public override void OnNewFrameDraw2d(float deltaTime)
     {
         if (!_touchButtonsEnabled) { return; }
-
-        game = game_;
 
         if (game.GuiState != GuiState.Normal) { return; }
 
@@ -81,10 +84,10 @@ public class ModGuiTouchButtons : GameScreen
 
         if (!game.Platform.IsMousePointerLocked())
         {
-            if (game.cameratype == CameraType.Fpp || game.cameratype == CameraType.Tpp)
+            if (game.CameraType == CameraType.Fpp || game.CameraType == CameraType.Tpp)
             {
-                game.Draw2dText1("Move", game.Width() * 5 / 100, game.Height() * 85 / 100, (int)(scale * 50), null, false);
-                game.Draw2dText1("Look", game.Width() * 80 / 100, game.Height() * 85 / 100, (int)(scale * 50), null, false);
+                game.Draw2dText1("Move", platform.GetCanvasWidth() * 5 / 100, platform.GetCanvasHeight() * 85 / 100, (int)(scale * 50), null, false);
+                game.Draw2dText1("Look", platform.GetCanvasWidth() * 80 / 100, platform.GetCanvasHeight() * 85 / 100, (int)(scale * 50), null, false);
             }
             DrawWidgets();
         }
@@ -122,7 +125,7 @@ public class ModGuiTouchButtons : GameScreen
         base.OnTouchStart(game_, e);
         if (e.GetHandled()) { return; }
 
-        bool isLeftSide = e.GetX() <= game.Width() / 2;
+        bool isLeftSide = e.GetX() <= platform.GetCanvasWidth() / 2;
 
         if (isLeftSide && _touchIdMove == -1)
         {
@@ -130,7 +133,7 @@ public class ModGuiTouchButtons : GameScreen
             _touchMoveStartX = e.GetX();
             _touchMoveStartY = e.GetY();
             game.TouchMoveDx = 0;
-            game.TouchMoveDy = e.GetY() < game.Height() * 50 / 100 ? 1 : 0;
+            game.TouchMoveDy = e.GetY() < platform.GetCanvasHeight() * 50 / 100 ? 1 : 0;
         }
 
         bool isSecondFinger = _touchIdMove != -1 && e.GetId() != _touchIdMove;
@@ -170,8 +173,8 @@ public class ModGuiTouchButtons : GameScreen
         if (e.GetId() == _touchIdRotate)
         {
             float sensitivity = game.Width() / 40f;
-            game.touchOrientationDx += (e.GetX() - _touchRotateStartX) / sensitivity;
-            game.touchOrientationDy += (e.GetY() - _touchRotateStartY) / sensitivity;
+            game.TouchOrientationDx += (e.GetX() - _touchRotateStartX) / sensitivity;
+            game.TouchOrientationDy += (e.GetY() - _touchRotateStartY) / sensitivity;
             _touchRotateStartX = e.GetX();
             _touchRotateStartY = e.GetY();
         }
@@ -193,8 +196,8 @@ public class ModGuiTouchButtons : GameScreen
         if (e.GetId() == _touchIdRotate)
         {
             _touchIdRotate = -1;
-            game.touchOrientationDx = 0;
-            game.touchOrientationDy = 0;
+            game.TouchOrientationDx = 0;
+            game.TouchOrientationDy = 0;
         }
     }
 

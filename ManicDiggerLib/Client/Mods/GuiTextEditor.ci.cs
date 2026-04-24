@@ -27,7 +27,7 @@ public class ModGuiTextEditor : GameScreen
             buffer[i] = new int[MaxColumns];
     }
 
-    public override void OnNewFrameDraw2d(Game game, float deltaTime)
+    public override void OnNewFrameDraw2d(float deltaTime)
     {
         if (!visible) return;
 

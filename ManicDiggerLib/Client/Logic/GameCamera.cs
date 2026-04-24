@@ -11,19 +11,19 @@ public partial class Game
         switch (type)
         {
             case CameraType.Fpp:
-                cameratype = CameraType.Fpp;
+                CameraType = CameraType.Fpp;
                 SetFreeMouse(false);
                 ENABLE_TPP_VIEW = false;
                 OverheadCamera = false;
                 break;
 
             case CameraType.Tpp:
-                cameratype = CameraType.Tpp;
+                CameraType = CameraType.Tpp;
                 ENABLE_TPP_VIEW = true;
                 break;
 
             default: // Overhead
-                cameratype = CameraType.Overhead;
+                CameraType = CameraType.Overhead;
                 OverheadCamera = true;
                 SetFreeMouse(true);
                 ENABLE_TPP_VIEW = true;
@@ -38,15 +38,15 @@ public partial class Game
         if (Follow != null)
             return;
 
-        switch (cameratype)
+        switch (CameraType)
         {
             case CameraType.Fpp:
-                cameratype = CameraType.Tpp;
+                CameraType = CameraType.Tpp;
                 ENABLE_TPP_VIEW = true;
                 break;
 
             case CameraType.Tpp:
-                cameratype = CameraType.Overhead;
+                CameraType = CameraType.Overhead;
                 OverheadCamera = true;
                 SetFreeMouse(true);
                 ENABLE_TPP_VIEW = true;
@@ -54,7 +54,7 @@ public partial class Game
                 break;
 
             case CameraType.Overhead:
-                cameratype = CameraType.Fpp;
+                CameraType = CameraType.Fpp;
                 SetFreeMouse(false);
                 ENABLE_TPP_VIEW = false;
                 OverheadCamera = false;
