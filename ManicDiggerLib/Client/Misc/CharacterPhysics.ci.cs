@@ -7,7 +7,7 @@ using OpenTK.Mathematics;
 public interface IEntityScript
 {
     /// <summary>Called once per fixed physics tick for the given <paramref name="entity"/>.</summary>
-    void OnNewFrameFixed(Game game, int entity, float dt);
+    void OnNewFrameFixed(int entity, float dt);
 }
 
 /// <summary>
@@ -18,8 +18,10 @@ public class ScriptCharacterPhysics : IEntityScript
 {
     // ── Constructor ───────────────────────────────────────────────────────────
 
-    public ScriptCharacterPhysics()
+    public ScriptCharacterPhysics(IGameClient game, IGamePlatform platform)
     {
+        this.game = game;
+        this.platform = platform;
         // Only non-default values need explicit initialisation.
         // (movedz, curspeed, jumpacceleration, isplayeronground, etc. are
         //  already zero/false by C# default for their types.)
@@ -33,7 +35,8 @@ public class ScriptCharacterPhysics : IEntityScript
     // ── Dependencies ──────────────────────────────────────────────────────────
 
     /// <summary>Reference to the active game instance, assigned at the start of each tick.</summary>
-    internal Game game;
+    private readonly IGameClient game;
+    private readonly IGamePlatform platform;
 
     // ── Per-frame physics state ───────────────────────────────────────────────
 
@@ -82,9 +85,8 @@ public class ScriptCharacterPhysics : IEntityScript
     /// Reads player input, resolves move speed, and delegates to <see cref="Update"/>.
     /// Does nothing while the map-loading screen is active.
     /// </summary>
-    public void OnNewFrameFixed(Game game_, int entity, float dt)
+    public void OnNewFrameFixed(int entity, float dt)
     {
-        game = game_;
         if (game.GuiState == GuiState.MapLoading) return;
 
         movespeednow = game.MoveSpeedNow();
@@ -375,8 +377,8 @@ public class ScriptCharacterPhysics : IEntityScript
     {
         bool high = modelheight >= 2;
 
-        oldposition.Y += game.constWallDistance;
-        newposition.Y += game.constWallDistance;
+        oldposition.Y += game.WallDistance;
+        newposition.Y += game.WallDistance;
 
         game.ReachedWall = false;
         game.ReachedWall1BlockHigh = false;
@@ -425,7 +427,7 @@ public class ScriptCharacterPhysics : IEntityScript
         // Ground detection: Y did not advance toward the desired lower position.
         isplayeronground = tmpPlayerPosition.Y == oldposition.Y && newposition.Y < oldposition.Y;
 
-        tmpPlayerPosition.Y -= game.constWallDistance;
+        tmpPlayerPosition.Y -= game.WallDistance;
         return tmpPlayerPosition;
     }
 
@@ -455,7 +457,7 @@ public class ScriptCharacterPhysics : IEntityScript
                         float maxY = minY + game.Getblockheight((int)(x + xx - 1), (int)(z + zz - 1), (int)(y + yy - 1));
                         float minZ = z + zz - 1, maxZ = minZ + 1;
 
-                        if (BoxPointDistance(minX, minY, minZ, maxX, maxY, maxZ, x, y, z) < game.constWallDistance)
+                        if (BoxPointDistance(minX, minY, minZ, maxX, maxY, maxZ, x, y, z) < game.WallDistance)
                         {
                             blockingBlocktype = game.VoxelMap.GetBlock((int)(x + xx - 1), (int)(z + zz - 1), (int)(y + yy - 1));
                             return false;

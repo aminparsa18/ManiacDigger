@@ -33,7 +33,21 @@ public partial class Game : IGameClient
     public const int KeyAltRight = 6;
 
     // -------------------------------------------------------------------------
-    // Fields — rendering / textures
+    // Platform & core subsystems
+    // -------------------------------------------------------------------------
+
+    public IGamePlatform Platform { get; set; }
+    public Language Language { get; set; }
+    public Config3d Config3d { get; set; }
+    public GameOption options { get; set; }
+    public ServerInformation ServerInfo { get; set; }
+    private Dictionary<string, string> performanceinfo;
+    private TaskScheduler taskScheduler;
+    public ConcurrentQueue<Action> commitActions { get; set; }
+    private GameExit d_Exit;
+
+    // -------------------------------------------------------------------------
+    // Rendering / textures
     // -------------------------------------------------------------------------
 
     public List<Asset> Assets { get; set; }
@@ -51,168 +65,204 @@ public partial class Game : IGameClient
     internal int maxTextureSize;
     internal int Atlas1dheight() => maxTextureSize;
 
-    internal static int TexturesPacked => GlobalVar.MAX_BLOCKTYPES_SQRT; // 16x16
-    internal static int Atlas2DTiles => GlobalVar.MAX_BLOCKTYPES_SQRT;   // 16x16
+    internal static int TexturesPacked => GlobalVar.MAX_BLOCKTYPES_SQRT;
+    internal static int Atlas2DTiles => GlobalVar.MAX_BLOCKTYPES_SQRT;
 
     public int handTexture { get; set; }
     public bool HandRedraw { get; set; }
-    public bool handSetAttackBuild { get; set; }    
-    public bool handSetAttackDestroy {  get; set; }
 
-    internal int whitetexture;
+    private int whitetexture;
     public Dictionary<TextStyle, CachedTexture> CachedTextTextures { get; set; } = [];
     internal Dictionary<string, int> textures;
     internal List<string> AllowedFonts;
 
     public int ActiveMaterial { get; set; }
+    public int Font { get; set; }
+    private int[] materialSlots;
+
+    public bool ENABLE_DRAW2D { get; set; }
+    public bool EnableDrawTestCharacter { get; set; }
+    public bool EnableDrawPosition { get; set; }
+    public int EnableLog { get; set; }
 
     // -------------------------------------------------------------------------
-    // Fields — world / map
+    // World / map
     // -------------------------------------------------------------------------
 
     public VoxelMap VoxelMap { get; set; }
     public ChunkedMap2d<int> Heightmap { get; set; }
-    public Config3d Config3d { get; set; }
 
     public int LastplacedblockX { get; set; }
     public int LastplacedblockY { get; set; }
     public int LastplacedblockZ { get; set; }
 
+    public int FillAreaLimit { get; set; }
+    public int ReceivedMapLength { get; set; }
+    public bool ShouldRedrawAllBlocks { get; set; }
+    public MapLoadingProgressEventArgs maploadingprogress { get; set; }
+    public Font FontMapLoading { get; set; }
+
     // -------------------------------------------------------------------------
-    // Fields — player
+    // Player — identity & position
     // -------------------------------------------------------------------------
 
     public Entity Player { get; set; }
+    public int LocalPlayerId { get; set; }
+
+    public float LocalPositionX { get => Player.position.x; set => Player.position.x = value; }
+    public float LocalPositionY { get => Player.position.y; set => Player.position.y = value; }
+    public float LocalPositionZ { get => Player.position.z; set => Player.position.z = value; }
+
+    public float LocalOrientationX { get => Player.position.rotx; set => Player.position.rotx = value; }
+    public float LocalOrientationY { get => Player.position.roty; set => Player.position.roty = value; }
+    public float LocalOrientationZ { get => Player.position.rotz; set => Player.position.rotz = value; }
 
     public float PlayerPositionSpawnX { get; set; }
     public float PlayerPositionSpawnY { get; set; }
     public float PlayerPositionSpawnZ { get; set; }
 
-    public bool IsPlayerOnGround { get; set; }
-
-    public float PushX { get; set; }
-    public float PushY { get; set; }
-    public float PushZ { get; set; }
+    public Vector3 PlayerDestination { get; set; }
+    public Vector3 playervelocity { get; set; }
 
     private float lastplayerpositionX;
     private float lastplayerpositionY;
     private float lastplayerpositionZ;
 
+    // -------------------------------------------------------------------------
+    // Player — state & stats
+    // -------------------------------------------------------------------------
+
+    public bool Spawned { get; set; }
+    public bool IsPlayerOnGround { get; set; }
+    public bool IsShiftPressed { get; set; }
+    public byte LocalStance { get; set; }
+    public GuiState GuiState { get; set; }
+    public AnimationHint LocalPlayerAnimationHint { get; set; }
+
+    public Packet_ServerPlayerStats PlayerStats { get; set; }
+    public Dictionary<(int x, int y, int z), float> blockHealth { get; set; } = new();
+
+    public int CurrentlyAttackedEntity { get; set; }
+    public Vector3i? CurrentAttackedBlock { get; set; }
+    public int SelectedEntityId { get; set; }
+    public int SelectedBlockPositionX { get; set; }
+    public int SelectedBlockPositionY { get; set; }
+    public int SelectedBlockPositionZ { get; set; }
+
+    public int[] TotalAmmo { get; set; }
+    public int[] LoadedAmmo { get; set; }
+    public bool AmmoStarted { get; set; }
+    public bool AudioEnabled { get; set; }
+    public bool AutoJumpEnabled { get; set; }
+    public bool IronSights { get; set; }
+    public bool DrawBlockInfo { get; set; }
+
+    public VisibleDialog[] Dialogs { get; set; }
+    public List<string> TypingLog { get; set; }
+    public int TypingLogPos { get; set; }
+    public TypingState GuiTyping { get; set; }
+
+    private int playertexturedefault;
+    public const string playertexturedefaultfilename = "mineplayer.png";
+
+    private int lastOxygenTickMilliseconds;
+    public int LastReceivedMilliseconds { get; set; }
+    public int ReloadBlock { get; set; }
+    public int ReloadStartMilliseconds { get; set; }
+    public int CurrentTimeMilliseconds { get; set; }
+    public int TotalTimeMilliseconds { get; set; }
+    public int LastPositionSentMilliseconds { get; set; }
+
+    // -------------------------------------------------------------------------
+    // Player — movement & physics
+    // -------------------------------------------------------------------------
+
+    public bool EnableMove { get; set; }
+    public bool stopPlayerMove { get; set; }
+    public float MoveSpeed { get; set; }
+    public float Basemovespeed { get; set; }
+    public float PICK_DISTANCE { get; set; }
+    public float MovedZ { get; set; }
     public bool ReachedWall { get; set; }
     public bool ReachedWall1BlockHigh { get; set; }
     public bool ReachedHalfBlock { get; set; }
-    public float MovedZ {  get; set; }
+    public bool AllowFreeMove { get; set; }
 
-    internal float constWallDistance;
+    public float PushX { get; set; }
+    public float PushY { get; set; }
+    public float PushZ { get; set; }
+
+    public float WallDistance { get; set; }
     internal float constRotationSpeed;
-    public AnimationHint LocalPlayerAnimationHint { get; set; }
-    public bool EnableMove { get; set; }
+    private float RadiusWhenMoving;
+    private float rotationspeed;
+    private int PlayerPushDistance;
 
-    internal bool stopPlayerMove;
-    public GuiState GuiState { get; set; }
-
-    public byte LocalStance { get; set; }
-    public bool Spawned {  get; set; }
-    public bool IsShiftPressed { get; set; }
-    internal int playertexturedefault;
-    public const string playertexturedefaultfilename = "mineplayer.png";
-
-    public int ReloadBlock {  get; set; }
-    public int ReloadStartMilliseconds {  get; set; }
-    internal int lastOxygenTickMilliseconds;
-    public int LastReceivedMilliseconds { get; set; }
-
-    public int LocalPlayerId { get; set; }
-    public int CurrentlyAttackedEntity {  get; set; }
-    internal int selectedmodelid;
-    public Vector3 playervelocity { get; set; }
-    internal float RadiusWhenMoving;
-    public float Basemovespeed { get; set; }
-    public float MoveSpeed { get; set; }
-    internal float rotationspeed;
-    public float PICK_DISTANCE { get; set; }
     public int grenadetime { get; set; }
-    internal int PlayerPushDistance;
-    public bool AudioEnabled { get; set; }
-    public bool AutoJumpEnabled { get; set; }
-    public int[] TotalAmmo { get; set; }
-    public int[] LoadedAmmo { get; set; }
-    public Dictionary<(int x, int y, int z), float> blockHealth { get; set; } = new();
-    public VisibleDialog[] Dialogs { get; set; }
-    public List<string> TypingLog { get; set;}
-
-    public bool IronSights { get; set; }
-    internal Random rnd;
-    public Vector3i? CurrentAttackedBlock {  get; set; }
-    public int CurrentTimeMilliseconds { get; set; }
-    public int TotalTimeMilliseconds { get; set; }
-    public int ReceivedMapLength { get; set; }
-    internal int maxdrawdistance;
-
-    public bool leftpressedpicking { get; set; }
-    public int pistolcycle { get; set; }
-    public int lastironsightschangeMilliseconds { get; set; }
     public int grenadecookingstartMilliseconds { get; set; }
-    public int LastPositionSentMilliseconds {  get; set; }
-
-    public bool shadowssimple { get; set; }
-    public bool ShouldRedrawAllBlocks { get; set; }
-    public bool EscapeMenuRestart {  get; set; }
+    public int pistolcycle { get; set; }
+    public bool leftpressedpicking { get; set; }
+    public int lastironsightschangeMilliseconds { get; set; }
+    public bool handSetAttackBuild { get; set; }    // already declared above — kept for region clarity
+    public bool handSetAttackDestroy { get; set; }  // already declared above — kept for region clarity
 
     // -------------------------------------------------------------------------
-    // Fields — camera
+    // Camera
     // -------------------------------------------------------------------------
 
     public Matrix4 Camera { get; set; }
     public Vector3 CameraEye { get; set; }
-
-    internal bool currentMatrixModeProjection;
     public Stack<Matrix4> mvMatrix { get; set; }
     public Stack<Matrix4> pMatrix { get; set; }
 
-    internal CameraMatrixProvider CameraMatrix;
-    internal float fov;
+    private CameraMatrixProvider CameraMatrix;
+    private float fov;
     public CameraType CameraType { get; set; }
-    public bool EnableTppView {  get; set; }
-    internal float znear;
-    internal bool ENABLE_ZFAR;
-    public float OverHeadCameraDistance { get; set; }
-    public Camera OverheadCameraK {  get; set; }
+    public bool EnableTppView { get; set; }
     public float TppCameraDistance { get; set; }
-    internal float TPP_CAMERA_DISTANCE_MIN;
-    internal float TPP_CAMERA_DISTANCE_MAX;
-    internal bool enableCameraControl;
-    internal Matrix4 identityMatrix;
-    internal Matrix4 Set3dProjectionTempMat4;
+    public float OverHeadCameraDistance { get; set; }
+    public Camera OverheadCameraK { get; set; }
+    public bool OverheadCamera { get; set; }
+    private bool enableCameraControl;
+    private float znear;
+    private bool ENABLE_ZFAR;
+    private float TPP_CAMERA_DISTANCE_MIN;
+    private float TPP_CAMERA_DISTANCE_MAX;
+    private bool currentMatrixModeProjection;
+    private Matrix4 identityMatrix;
+    private Matrix4 Set3dProjectionTempMat4;
+    private int selectedmodelid;
+    private int maxdrawdistance;
 
     // -------------------------------------------------------------------------
-    // Fields — lighting
+    // Lighting
     // -------------------------------------------------------------------------
 
-    /// <summary>Maps light level (0–15) to a GL color multiplier.</summary>
     public float[] LightLevels { get; set; }
     public int Sunlight { get; set; }
     public int[] NightLevels { get; set; }
-
     public Vector3 sunPosition { get; set; }
     public Vector3 moonPosition { get; set; }
-    public bool isNight {  get; set; }
+    public bool isNight { get; set; }
     public bool fancySkysphere { get; set; }
     public bool SkySphereNight { get; set; }
-    internal ModSkySphereStatic skysphere;
+    private ModSkySphereStatic skysphere;
+    public bool shadowssimple { get; set; }
 
     // -------------------------------------------------------------------------
-    // Fields — input
+    // Input
     // -------------------------------------------------------------------------
 
     public Controls Controls { get; set; }
     internal bool mouseSmoothing;
+
     public bool MouseLeftClick { get; set; }
-    public bool mouseleftdeclick {  get; set; }
-    internal bool wasmouseleft;
+    public bool mouseleftdeclick { get; set; }
+    private bool wasmouseleft;
     public bool mouserightclick { get; set; }
-    internal bool mouserightdeclick;
-    internal bool wasmouseright;
+    private bool mouserightdeclick;
+    private bool wasmouseright;
+
     public bool[] KeyboardState { get; set; }
     public bool[] KeyboardStateRaw { get; set; }
 
@@ -222,118 +272,111 @@ public partial class Game : IGameClient
 
     public int MouseCurrentX { get; set; }
     public int MouseCurrentY { get; set; }
-    internal float mouseDeltaX;
-    internal float mouseDeltaY;
+    private float mouseDeltaX;
+    private float mouseDeltaY;
     private float mouseSmoothingVelX;
     private float mouseSmoothingVelY;
     private float mouseSmoothingAccum;
     private bool mousePointerLockShouldBe;
-    public bool OverheadCamera { get; set; }
 
     public float TouchMoveDx { get; set; }
     public float TouchMoveDy { get; set; }
     public float TouchOrientationDx { get; set; }
-    public float TouchOrientationDy {  get; set; }
-
-    public bool DrawBlockInfo {  get; set; }
+    public float TouchOrientationDy { get; set; }
 
     // -------------------------------------------------------------------------
-    // Fields — audio
+    // Audio
     // -------------------------------------------------------------------------
 
     public AudioControl Audio { get; set; }
-    public bool soundnow {  get; set; }
+    public bool soundnow { get; set; }
 
     // -------------------------------------------------------------------------
-    // Fields — networking / server
+    // Networking / server
     // -------------------------------------------------------------------------
 
     public ClientPacketHandler[] PacketHandlers { get; set; }
+    public NetClient NetClient { get; set; }
     public string ServerGameVersion { get; set; }
+    public bool IsSinglePlayer { get; set; }
+    public string Follow { get; set; }
+    internal ConnectionData connectdata;
+    internal bool reconnect;
+    internal bool exitToMainMenu;
+    private bool startedconnecting;
 
-    public bool AmmoStarted { get; set; }
-    public Packet_BlockType[] NewBlockTypes { get; set; }
     public Packet_BlockType[] BlockTypes { get; set; }
+    public Packet_BlockType[] NewBlockTypes { get; set; }
 
     public string BlobDownloadName { get; set; }
     public string BlobDownloadMd5 { get; set; }
     public MemoryStream BlobDownload { get; set; }
 
-    internal ConnectionData connectdata;
-    public bool IsSinglePlayer {  get; set; }
-    internal bool reconnect;
-    internal bool exitToMainMenu;
+    public string InvalidVersionDrawMessage { get; set; }
+    public Packet_Server InvalidVersionPacketIdentification { get; set; }
 
     // -------------------------------------------------------------------------
-    // Fields — speculative block placement
+    // Speculative block placement
     // -------------------------------------------------------------------------
 
-    internal Speculative[] speculative;
-    internal int speculativeCount;
+    private Speculative[] speculative;
+    private int speculativeCount;
 
     // -------------------------------------------------------------------------
-    // Fields — subsystems
+    // Subsystems
     // -------------------------------------------------------------------------
 
-    public List<ModBase> ClientMods {  get; set; }
-
-    public IGamePlatform Platform { get; set; }
-    public Language Language { get; set; }
+    public List<Entity> Entities { get; set; }
+    public List<ModBase> ClientMods { get; set; }
     public FrustumCulling FrustumCulling { get; set; }
     public TerrainChunkTesselator TerrainChunkTesselator { get; set; }
     public MeshBatcher Batcher { get; set; }
     public SunMoonRenderer SunMoonRenderer { get; set; }
     public InventoryUtilClient InventoryUtil { get; set; }
-    internal ModDrawParticleEffectBlockBreak particleEffectBlockBreak;
     public BlockTypeRegistry BlockRegistry { get; set; }
     public Packet_Inventory Inventory { get; set; }
+    public BlockOctreeSearcher BlockOctreeSearcher { get; set; }
+    private ModDrawParticleEffectBlockBreak particleEffectBlockBreak;
 
-    internal int[] materialSlots;
-    public int Font { get; set; }
-    internal GameExit d_Exit;
+    // -------------------------------------------------------------------------
+    // UI / menus
+    // -------------------------------------------------------------------------
 
-    public int TypingLogPos { get; set; }
-    public TypingState GuiTyping { get; set; }
-
-    public bool EnableDrawTestCharacter { get; set; }
-    public bool EnableDrawPosition { get; set; }
-    public bool ENABLE_DRAW2D { get; set; }
-    public int EnableLog {  get; set; }
-    public bool AllowFreeMove { get; set; }
     public MenuState MenuState { get; set; }
-    public ServerInformation ServerInfo { get; set; }
-    public GameOption options { get; set; }
-    internal Dictionary<string, string> performanceinfo;
-    public Packet_ServerPlayerStats PlayerStats { get; set; }
-    internal string[] getAsset;
-    public int FillAreaLimit { get; set; }
+    public bool EscapeMenuRestart { get; set; }
 
-    public List<Entity> Entities { get; set; }
-
-    internal int ChatLinesMax;
+    private int ChatLinesMax;
     public List<Chatline> ChatLines { get; set; }
 
-    public MapLoadingProgressEventArgs maploadingprogress {  get; set; }
-    public Font FontMapLoading { get; set; }
-    public string InvalidVersionDrawMessage { get; set; }
-    public Packet_Server InvalidVersionPacketIdentification { get; set;}
-
-    public Vector3 PlayerDestination { get; set; }
-    public string Follow { get; set; }
-    private bool startedconnecting;
-
+    private float accumulator;
     private int lastWidth;
     private int lastHeight;
+    private Random rnd;
+    private string[] getAsset;
 
-    private float accumulator;
-    private TaskScheduler taskScheduler;
+    // -------------------------------------------------------------------------
+    // IGameClient — computed / forwarded members
+    // -------------------------------------------------------------------------
 
-    public ConcurrentQueue<Action> commitActions {  get; set; }
+    public bool EnableCameraControl { set => enableCameraControl = value; }
+    public Dictionary<string, string> PerformanceInfo => performanceinfo;
 
-    public int SelectedBlockPositionX { get; set; }
-    public int SelectedBlockPositionY { get; set; }
-    public int SelectedBlockPositionZ { get; set; }
-    public int SelectedEntityId { get; set; }
+    public float LocalEyeHeight =>
+        Entities[LocalPlayerId].drawModel.eyeHeight;
+
+    public int FreemoveLevel
+    {
+        get
+        {
+            if (!Controls.freemove) return FreemoveLevelEnum.None;
+            return Controls.noclip ? FreemoveLevelEnum.Noclip : FreemoveLevelEnum.Freemove;
+        }
+        set
+        {
+            Controls.freemove = value != FreemoveLevelEnum.None;
+            Controls.noclip = value == FreemoveLevelEnum.Noclip;
+        }
+    }
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -356,7 +399,7 @@ public partial class Game : IGameClient
     }
 
     // -------------------------------------------------------------------------
-    // Initialization helpers
+    // Initialisation helpers
     // -------------------------------------------------------------------------
 
     private void InitCore()
@@ -395,7 +438,6 @@ public partial class Game : IGameClient
         whitetexture = -1;
         textures = [];
         CachedTextTextures = [];
-
         AllowedFonts = ["Verdana"];
     }
 
@@ -413,7 +455,7 @@ public partial class Game : IGameClient
 
         playervelocity = new Vector3();
         MovedZ = 0;
-        constWallDistance = 0.3f;
+        WallDistance = 0.3f;
         constRotationSpeed = 180 / 20;
         RadiusWhenMoving = 3f / 10;
         Basemovespeed = 5;
@@ -444,7 +486,6 @@ public partial class Game : IGameClient
         pMatrix.Push(Matrix4.Identity);
 
         CameraEye = Vector3.Zero;
-
         CameraMatrix = new CameraMatrixProvider();
         fov = MathF.PI / 3;
         CameraType = CameraType.Fpp;
@@ -480,12 +521,7 @@ public partial class Game : IGameClient
 
         const int KeysMax = 360;
         KeyboardState = new bool[KeysMax];
-        for (int i = 0; i < KeysMax; i++)
-            KeyboardState[i] = false;
-
         KeyboardStateRaw = new bool[KeysMax];
-        for (int i = 0; i < KeysMax; i++)
-            KeyboardStateRaw[i] = false;
     }
 
     private void InitOptions()

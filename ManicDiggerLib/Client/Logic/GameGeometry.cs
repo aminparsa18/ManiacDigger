@@ -184,9 +184,7 @@ public partial class Game
     private void FillAtlasQuadModel(float sx, float sy, float sw, float sh,
         float dx, float dy, float dw, float dh, int color)
     {
-        if (_atlasQuadModel == null)
-        {
-            _atlasQuadModel = new GeometryModel
+        _atlasQuadModel ??= new GeometryModel
             {
                 Xyz = new float[4 * 3],
                 Uv = new float[4 * 2],
@@ -196,7 +194,6 @@ public partial class Game
                 IndicesCount = 6,
                 Mode = (int)DrawMode.Triangles,
             };
-        }
 
         // Xyz — screen-space corners (Z = 0)
         float[] xyz = _atlasQuadModel.Xyz;
@@ -261,7 +258,7 @@ public partial class Game
     }
 
     /// <summary>Runs the 2D draw pass for all registered mods.</summary>
-    internal void Draw2d(float dt)
+    private void Draw2d(float dt)
     {
         if (!ENABLE_DRAW2D) return;
 
@@ -279,7 +276,7 @@ public partial class Game
     /// Xyz, Uv and Rgba arrays are copied with <see cref="Span{T}.CopyTo"/> rather
     /// than manual element loops. Index values are offset by the running vertex base.
     /// </summary>
-    public static GeometryModel CombineModelData(GeometryModel[] modelDatas, int count)
+    private static GeometryModel CombineModelData(GeometryModel[] modelDatas, int count)
     {
         int totalIndices = 0;
         int totalVertices = 0;

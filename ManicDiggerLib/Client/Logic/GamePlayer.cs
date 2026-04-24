@@ -7,22 +7,22 @@ public partial class Game
     // Eyes position
     // -------------------------------------------------------------------------
 
-    public float EyesPosX() => Player.position.x;
-    public float EyesPosY() => Player.position.y + GetCharacterEyesHeight();
-    public float EyesPosZ() => Player.position.z;
+    public float EyesPosX => Player.position.x;
+    public float EyesPosY => Player.position.y + GetCharacterEyesHeight();
+    public float EyesPosZ => Player.position.z;
 
     public float GetCharacterEyesHeight() => Entities[LocalPlayerId].drawModel.eyeHeight;
     public void SetCharacterEyesHeight(float value) => Entities[LocalPlayerId].drawModel.eyeHeight = value;
 
-    public int PlayerEyesBlockX => (int)MathF.Floor(Player.position.x);
-    public int PlayerEyesBlockY => (int)MathF.Floor(Player.position.z);
-    public int PlayerEyesBlockZ => (int)MathF.Floor(Player.position.y + GetCharacterEyesHeight());
+    public int PlayerEyesBlockX => (int)MathF.Floor(EyesPosX);
+    public int PlayerEyesBlockY => (int)MathF.Floor(EyesPosZ);
+    public int PlayerEyesBlockZ => (int)MathF.Floor(EyesPosY);
 
     internal int GetPlayerEyesBlock()
     {
-        int bx = (int)MathF.Floor(Player.position.x);
-        int by = (int)MathF.Floor(Player.position.z);
-        int bz = (int)MathF.Floor(Player.position.y + GetCharacterEyesHeight());
+        int bx = (int)MathF.Floor(EyesPosX);
+        int by = (int)MathF.Floor(EyesPosZ);
+        int bz = (int)MathF.Floor(EyesPosY);
 
         if (!VoxelMap.IsValidPos(bx, by, bz))
             return Player.position.y < WaterLevel() ? -1 : 0;
@@ -41,7 +41,7 @@ public partial class Game
         return BlockRegistry.WalkableType[eyesBlock] == WalkableType.Fluid;
     }
 
-    internal bool SwimmingBody()
+    public bool SwimmingBody()
     {
         int block = VoxelMap.GetBlock((int)Player.position.x, (int)Player.position.z, (int)(Player.position.y + 1));
         if (block == -1) return true;
@@ -79,7 +79,7 @@ public partial class Game
     // Movement speed
     // -------------------------------------------------------------------------
 
-    internal float MoveSpeedNow()
+    public float MoveSpeedNow()
     {
         float speed = MoveSpeed;
 
@@ -197,7 +197,7 @@ public partial class Game
             if (ScriptCharacterPhysics.BoxPointDistance(
                 blockposX, blockposZ, blockposY,
                 blockposX + 1, blockposZ + 1, blockposY + 1,
-                playerposX, playerposY + i + constWallDistance, playerposZ) < constWallDistance)
+                playerposX, playerposY + i + WallDistance, playerposZ) < WallDistance)
                 return true;
         }
         return false;

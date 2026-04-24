@@ -13,14 +13,6 @@ public partial class Game
     // Shader uniforms
     // -------------------------------------------------------------------------
 
-    public void SetMatrixUniforms()
-    {
-        var p = pMatrix.Peek();
-        var mv = mvMatrix.Peek();
-        Platform.SetMatrixUniformProjection(ref p);
-        Platform.SetMatrixUniformModelView(ref mv);
-    }
-
     public void SetMatrixUniformProjection()
     {
         var p = pMatrix.Peek();
@@ -81,7 +73,7 @@ public partial class Game
         MultiplyActiveMatrix(translation);
     }
 
-    public void GLOrtho(float left, float right, float bottom, float top, float zNear, float zFar)
+    private void GLOrtho(float left, float right, float bottom, float top, float zNear, float zFar)
     {
         if (currentMatrixModeProjection)
         {

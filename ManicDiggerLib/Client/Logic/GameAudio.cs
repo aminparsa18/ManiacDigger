@@ -9,7 +9,7 @@
         if (!AudioEnabled)
             return;
 
-        PlayAudioAt(file, EyesPosX(), EyesPosY(), EyesPosZ());
+        PlayAudioAt(file, EyesPosX, EyesPosY, EyesPosZ);
     }
 
     public void PlayAudio(string name, float x, float y, float z)
@@ -62,9 +62,9 @@
                 s = new Sound { name = file_, loop = true };
                 Audio.Add(s);
             }
-            s.x = EyesPosX();
-            s.y = EyesPosY();
-            s.z = EyesPosZ();
+            s.x = EyesPosX;
+            s.y = EyesPosY;
+            s.z = EyesPosZ;
         }
         else
         {

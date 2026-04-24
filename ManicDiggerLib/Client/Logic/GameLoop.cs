@@ -92,7 +92,7 @@
             Entity e = Entities[i];
             if (e == null) continue;
             for (int k = 0; k < e.scriptsCount; k++)
-                e.scripts[k].OnNewFrameFixed(this, i, dt);
+                e.scripts[k].OnNewFrameFixed(i, dt);
         }
 
         RevertSpeculative(dt);
@@ -103,7 +103,7 @@
         float orientationX = MathF.Sin(Player.position.roty);
         float orientationZ = -MathF.Cos(Player.position.roty);
         Platform.AudioUpdateListener(
-            EyesPosX(), EyesPosY(), EyesPosZ(),
+            EyesPosX, EyesPosY, EyesPosZ,
             orientationX, 0, orientationZ);
 
         // Estimate velocity in world units/second from per-tick displacement.
@@ -140,7 +140,7 @@
             if (!startedconnecting)
             {
                 startedconnecting = true;
-                Connect__();
+                Connect();
             }
         }
     }

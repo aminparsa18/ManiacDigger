@@ -20,7 +20,7 @@ public class ClientPacketHandlerEntitySpawn : ClientPacketHandler
             game.Player = entity;
             if (!game.Spawned)
             {
-                entity.scripts[entity.scriptsCount++] = new ScriptCharacterPhysics();
+                entity.scripts[entity.scriptsCount++] = new ScriptCharacterPhysics(game, game.Platform);
                 game.MapLoaded();
                 game.Spawned = true;
             }

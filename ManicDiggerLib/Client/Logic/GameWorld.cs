@@ -155,7 +155,7 @@ public partial class Game
     /// Recalculates the heightmap entry for column (<paramref name="x"/>,
     /// <paramref name="y"/>) by scanning downward for the first opaque block.
     /// </summary>
-    internal void UpdateColumnHeight(int x, int y)
+    private void UpdateColumnHeight(int x, int y)
     {
         // TODO: optimize — full column scan on every block change is O(MapSizeZ).
         int height = VoxelMap.MapSizeZ - 1;
@@ -173,7 +173,7 @@ public partial class Game
     /// due to a block placement or removal at (<paramref name="x"/>,
     /// <paramref name="y"/>, <paramref name="z"/>).
     /// </summary>
-    internal void ShadowsOnSetBlock(int x, int y, int z)
+    private void ShadowsOnSetBlock(int x, int y, int z)
     {
         int oldheight = Heightmap.GetBlock(x, y);
         UpdateColumnHeight(x, y);
@@ -264,7 +264,7 @@ public partial class Game
     /// by the server within <see cref="SpeculativeTimeoutSeconds"/>.
     /// Called once per fixed tick.
     /// </summary>
-    internal void RevertSpeculative(float dt)
+    private void RevertSpeculative(float dt)
     {
         int now = Platform.TimeMillisecondsFromStart;
         for (int i = 0; i < speculativeCount; i++)

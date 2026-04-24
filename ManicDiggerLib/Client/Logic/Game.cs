@@ -3,7 +3,7 @@ using OpenTK.Mathematics;
 using System.Numerics;
 using Vector3 = OpenTK.Mathematics.Vector3;
 
-public partial class Game : IMeshDrawer, IGameClient
+public partial class Game : IMeshDrawer
 {
     // ── Map loading ───────────────────────────────────────────────────────────
 
@@ -143,32 +143,9 @@ public partial class Game : IMeshDrawer, IGameClient
     public int MapSizeY => VoxelMap.MapSizeY;
     public int MapSizeZ => VoxelMap.MapSizeZ;
     public int TerrainTexturesPerAtlas { get; set; }
-    public float LocalPositionX { get => Player.position.x; set => Player.position.x = value; }
-    public float LocalPositionY { get => Player.position.y; set => Player.position.y = value; }
-    public float LocalPositionZ { get => Player.position.z; set => Player.position.z = value; }
-    public float LocalOrientationX { get => Player.position.rotx; set => Player.position.rotx = value; }
-    public float LocalOrientationY { get => Player.position.roty; set => Player.position.roty = value; }
-    public float LocalOrientationZ { get => Player.position.rotz; set => Player.position.rotz = value; }
-    public int FreemoveLevel
-    {
-        get
-        {
-            if (!Controls.freemove) return FreemoveLevelEnum.None;
-            return Controls.noclip ? FreemoveLevelEnum.Noclip : FreemoveLevelEnum.Freemove;
-        }
-        set
-        {
-            Controls.freemove = value != FreemoveLevelEnum.None;
-            Controls.noclip = value == FreemoveLevelEnum.Noclip;
-        }
-    }
 
     public bool EnableDraw2d { get => ENABLE_DRAW2D; set => ENABLE_DRAW2D = value; }
-    public bool EnableCameraControl { set => enableCameraControl = value; }
 
-    public Dictionary<string, string> PerformanceInfo => performanceinfo;
-
-    public float LocalEyeHeight => Entities[LocalPlayerId].drawModel.eyeHeight;
 
     /// <summary>
     /// Returns the index of the dialog with key <paramref name="name"/>,
@@ -390,8 +367,6 @@ public partial class Game : IMeshDrawer, IGameClient
         }
         return nearest;
     }
-
-    public BlockOctreeSearcher BlockOctreeSearcher { get; set; }
 
     /// <summary>
     /// Performs a ray–block intersection for <paramref name="line"/>, returning

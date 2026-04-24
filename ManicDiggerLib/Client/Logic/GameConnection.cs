@@ -2,20 +2,18 @@
 
 public partial class Game
 {
-    public NetClient NetClient { get; set; }
     public bool IsTeamchat { get; set; }
-    private int packetLen;
 
     // -------------------------------------------------------------------------
     // Packet serialization / sending
     // -------------------------------------------------------------------------
 
-    public static byte[] Serialize(Packet_Client packet)
+    private static byte[] Serialize(Packet_Client packet)
     {
         return MemoryPackSerializer.Serialize(packet);
     }
 
-    public void SendPacket(byte[] packet)
+    private void SendPacket(byte[] packet)
     {
         NetClient.SendMessage(packet.AsMemory(0, packet.Length), MyNetDeliveryMethod.ReliableOrdered);
     }
@@ -29,7 +27,7 @@ public partial class Game
     // Game actions → packets
     // -------------------------------------------------------------------------
 
-    internal void SendChat(string s)
+    private void SendChat(string s)
     {
         SendPacketClient(ClientPackets.Chat(s, IsTeamchat ? 1 : 0));
     }
@@ -49,12 +47,12 @@ public partial class Game
         SendPacketClient(ClientPackets.FillArea(startx, starty, startz, endx, endy, endz, blockType, ActiveMaterial));
     }
 
-    internal void SendRequestBlob(string[] required, int requiredCount)
+    private void SendRequestBlob(string[] required, int requiredCount)
     {
         SendPacketClient(ClientPackets.RequestBlob(this, required, requiredCount));
     }
 
-    internal void SendGameResolution()
+    private void SendGameResolution()
     {
         SendPacketClient(ClientPackets.GameResolution(Width(), Height()));
     }
@@ -64,7 +62,7 @@ public partial class Game
         SendPacketClient(ClientPackets.Leave(reason));
     }
 
-    internal void Respawn()
+    private void Respawn()
     {
         SendPacketClient(ClientPackets.SpecialKeyRespawn());
         stopPlayerMove = true;
@@ -93,31 +91,31 @@ public partial class Game
     // Connection
     // -------------------------------------------------------------------------
 
-    internal void Connect__()
+    private void Connect()
     {
         if (string.IsNullOrEmpty(connectdata.ServerPassword))
             Connect(connectdata.Ip, connectdata.Port, connectdata.Username, connectdata.Auth);
         else
-            Connect_(connectdata.Ip, connectdata.Port, connectdata.Username, connectdata.Auth, connectdata.ServerPassword);
+            Connect(connectdata.Ip, connectdata.Port, connectdata.Username, connectdata.Auth, connectdata.ServerPassword);
 
         MapLoadingStart();
     }
 
-    internal void Connect(string serverAddress, int port, string username, string auth)
+    private void Connect(string serverAddress, int port, string username, string auth)
     {
         NetClient.Start();
         NetClient.Connect(serverAddress, port);
         SendPacketClient(ClientPackets.CreateLoginPacket(Platform, username, auth));
     }
 
-    internal void Connect_(string serverAddress, int port, string username, string auth, string serverPassword)
+    private void Connect(string serverAddress, int port, string username, string auth, string serverPassword)
     {
         NetClient.Start();
         NetClient.Connect(serverAddress, port);
         SendPacketClient(ClientPackets.CreateLoginPacket_(Platform, username, auth, serverPassword));
     }
 
-    internal void Reconnect()
+    private void Reconnect()
     {
         reconnect = true;
     }
