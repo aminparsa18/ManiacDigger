@@ -45,7 +45,7 @@ public partial class Game
 
         FrustumCulling = new() { CameraMatrix = CameraMatrix };
 
-        d_TerrainChunkTesselator = new TerrainChunkTesselatorCi(this, Platform);
+        d_TerrainChunkTesselator = new TerrainChunkTesselator(this, Platform);
 
         d_Batcher = new MeshBatcher(Platform, this);
 
@@ -190,7 +190,7 @@ public partial class Game
     public void AddMod(ModBase mod)
     {
         clientmods.Add(mod);
-        mod.Start(modmanager);
+        mod.Start(this, Platform);
     }
 }
 

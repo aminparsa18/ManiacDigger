@@ -284,9 +284,8 @@ public partial class Game
 
     public IGamePlatform Platform { get; set; }
     internal Language language;
-    internal ClientModManager modmanager;
     internal FrustumCulling FrustumCulling;
-    internal TerrainChunkTesselatorCi d_TerrainChunkTesselator;
+    internal TerrainChunkTesselator d_TerrainChunkTesselator;
     internal MeshBatcher d_Batcher;
     internal SunMoonRenderer d_SunMoonRenderer;
     internal InventoryUtilClient d_InventoryUtil;
@@ -327,7 +326,6 @@ public partial class Game
 
     internal Vector3 playerdestination;
     internal string Follow;
-    private GeometryModel circleModelData;
     private bool startedconnecting;
 
     private int lastWidth;
@@ -369,9 +367,8 @@ public partial class Game
 
     private void InitCore()
     {
-        performanceinfo = new();
+        performanceinfo = [];
         language = new Language();
-        modmanager = new ClientModManager(this);
         particleEffectBlockBreak = new ModDrawParticleEffectBlockBreak();
         ServerInfo = new ServerInformation();
         options = new GameOption();
@@ -439,7 +436,7 @@ public partial class Game
 
         TotalAmmo = new int[GlobalVar.MAX_BLOCKTYPES];
         LoadedAmmo = new int[GlobalVar.MAX_BLOCKTYPES];
-        blockHealth = new();
+        blockHealth = [];
         dialogs = new VisibleDialog[512];
         typinglog = [];
     }

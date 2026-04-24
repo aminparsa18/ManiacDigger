@@ -19,7 +19,7 @@
 using ManicDigger;
 using OpenTK.Mathematics;
 
-public class TerrainChunkTesselatorCi
+public class TerrainChunkTesselator
 {
     //internal float texrecTop;
     internal float _texrecLeft;
@@ -75,7 +75,7 @@ public class TerrainChunkTesselatorCi
     private readonly float[] ref_blockCornerHeight;
     private readonly int[] tmpnPos;
 
-    public TerrainChunkTesselatorCi(ITerrainData terrain, IGamePlatform platform)
+    public TerrainChunkTesselator(ITerrainData terrain, IGamePlatform platform)
     {
         _terrain = terrain;
         _platform = platform;
@@ -1263,7 +1263,7 @@ public class TerrainChunkTesselatorCi
 
     public void AddTorch(int x, int y, int z, int type, int tt)
     {
-        TerrainChunkTesselatorCi d_TerainRenderer = this;
+        TerrainChunkTesselator d_TerainRenderer = this;
 
         int curcolor = _colorWhite;
         float torchsizexy = 0.16f;
