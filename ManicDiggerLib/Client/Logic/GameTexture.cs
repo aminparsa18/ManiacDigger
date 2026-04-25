@@ -1,12 +1,23 @@
-﻿public partial class Game
+﻿//This partial Game class manages all GPU texture loading and caching:
+//White texture — lazily creates a 1×1 white pixel texture used as a neutral tint when no colour modulation is needed.
+//Text texture cache — DeleteUnusedCachedTextTextures evicts text textures that haven't been used for over a second,
+//releasing their GPU handles. MakeTextTexture renders a TextStyle to a bitmap and uploads it to the GPU.
+//Named texture cache — GetTexture and GetTextureOrLoad load PNG assets into GPU textures and cache them by name.
+//DeleteTexture removes a texture and releases its GPU handle.
+//Terrain texture atlas — UseTerrainTextures builds a 2D atlas by loading all terrain tile PNGs
+//and blitting them into a large atlas bitmap row-by-row. UseTerrainTextureAtlas2d uploads 
+//that atlas and splits it into 1D strips for the tessellator.
+
+public partial class Game
 {
     // ── White texture ─────────────────────────────────────────────────────────
 
     /// <summary>
     /// Returns (and lazily creates) a 1×1 white GPU texture.
     /// Used as a neutral tint when no colour modulation is needed.
+    /// Named <c>GetOrCreate</c> to signal that this has a side effect on first call.
     /// </summary>
-    public int WhiteTexture()
+    public int GetOrCreateWhiteTexture()
     {
         if (whitetexture == -1)
         {
@@ -19,50 +30,32 @@
     }
 
     // ── Text texture cache ────────────────────────────────────────────────────
-    //
-    // Keyed by TextStyle so lookup is O(1). Previously a List<CachedTextTexture>
-    // was scanned linearly on every Draw2dText call, and deleted entries were
-    // set to null rather than removed, causing the list to grow indefinitely.
-    //
-    // PREREQUISITE: TextStyle must override GetHashCode() consistently with its
-    // Equals() implementation. If only Equals() is overridden the Dictionary
-    // silently falls back to reference equality and caching breaks.
+
+    private readonly List<TextStyle> _textStylesToRemove = new();
 
     /// <summary>
     /// Evicts text texture cache entries that have not been used for more than
     /// one second, releasing their GPU texture handles.
-    /// Entries are removed from the Dictionary immediately — no null slots accumulate.
+    /// Fix #1: uses a pre-allocated <see cref="_textStylesToRemove"/> list
+    /// instead of allocating a new one on every eviction frame.
     /// </summary>
     public void DeleteUnusedCachedTextTextures()
     {
         int now = Platform.TimeMillisecondsFromStart;
 
-        // Collect keys to remove — cannot mutate a Dictionary while iterating it.
-        List<TextStyle> toRemove = null;
+        _textStylesToRemove.Clear();
         foreach (var (style, tex) in CachedTextTextures)
         {
             if ((now - tex.lastuseMilliseconds) / 1000f > 1f)
-            {
-                toRemove ??= [];
-                toRemove.Add(style);
-            }
+                _textStylesToRemove.Add(style);
         }
 
-        if (toRemove == null) return;
-        foreach (TextStyle key in toRemove)
+        foreach (TextStyle key in _textStylesToRemove)
         {
             Platform.GLDeleteTexture(CachedTextTextures[key].textureId);
             CachedTextTextures.Remove(key);
         }
     }
-
-    /// <summary>
-    /// Returns the cached GPU texture for the given <see cref="TextStyle"/>,
-    /// or <see langword="null"/> if it has not yet been rendered.
-    /// O(1) Dictionary lookup.
-    /// </summary>
-    private CachedTexture GetCachedTextTexture(TextStyle t)
-        => CachedTextTextures.TryGetValue(t, out CachedTexture ct) ? ct : null;
 
     /// <summary>
     /// Renders <paramref name="t"/> to a <see cref="Bitmap"/> via
@@ -84,7 +77,7 @@
 
     /// <summary>
     /// Returns the GPU texture ID for the named asset, loading and caching it
-    /// on first access. Returns a fresh ID on every load for uncached names.
+    /// on first access.
     /// </summary>
     public int GetTexture(string p)
     {
@@ -98,10 +91,8 @@
     }
 
     /// <summary>
-    /// Returns the cached GPU texture for <paramref name="name"/>, uploading
-    /// <paramref name="bmp"/> on first access.
-    /// Uses a single <see cref="Dictionary{K,V}.TryGetValue"/> call instead of
-    /// the previous <c>ContainsKey</c> + indexer double-lookup.
+    /// Returns the cached GPU texture for <paramref name="name"/>,
+    /// uploading <paramref name="bmp"/> on first access.
     /// </summary>
     public int GetTextureOrLoad(string name, Bitmap bmp)
     {
@@ -133,13 +124,19 @@
     /// <summary>
     /// Uploads <paramref name="atlas2d"/> as the main terrain texture and splits
     /// it into 1-D atlas strips for indexed lookup by the tessellator.
+    /// calling it twice.
     /// </summary>
     internal void UseTerrainTextureAtlas2d(Bitmap atlas2d, int atlas2dWidth)
     {
         TerrainTexture = Platform.LoadTextureFromBitmap(atlas2d);
-        TerrainTexturesPerAtlas = Atlas1dheight() / (atlas2dWidth / Atlas2DTiles);
 
-        Bitmap[] atlases1d = PixelBuffer.Atlas2dInto1d(atlas2d, Atlas2DTiles, Atlas1dheight(), out int atlasesidCount);
+        // Fix #5: call Atlas1dheight() once and reuse the result.
+        int atlas1dHeight = Atlas1dheight();
+        TerrainTexturesPerAtlas = atlas1dHeight / (atlas2dWidth / Atlas2DTiles);
+
+        Bitmap[] atlases1d = PixelBuffer.Atlas2dInto1d(
+            atlas2d, Atlas2DTiles, atlas1dHeight, out int atlasesidCount);
+
         TerrainTextures1d = new int[atlasesidCount];
         for (int i = 0; i < atlasesidCount; i++)
         {
@@ -154,35 +151,37 @@
     /// Each texture is loaded from a PNG asset file and blitted into the atlas.
     /// Textures that are missing or not exactly 32×32 pixels are skipped.
     /// </summary>
-    /// <param name="textureIds">
-    /// Texture asset names (without <c>.png</c>). Null entries are skipped.
-    /// </param>
+    /// <param name="textureIds">Texture asset names (without <c>.png</c>). Null entries are skipped.</param>
     /// <param name="textureIdsCount">Number of valid entries to process.</param>
     public void UseTerrainTextures(string[] textureIds, int textureIdsCount)
     {
-        // TODO: support tile sizes other than 32×32.
-        const int tilesize = 32;
+        const int tilesize = 32; // TODO: support tile sizes other than 32×32.
+
         PixelBuffer atlas2d = PixelBuffer.Create(tilesize * Atlas2DTiles, tilesize * Atlas2DTiles);
+
+        byte[] unknownPng = GetAssetFile("Unknown.png");
 
         for (int i = 0; i < textureIdsCount; i++)
         {
             if (textureIds[i] == null) continue;
 
-            byte[] fileData = GetAssetFile(textureIds[i] + ".png") ?? GetAssetFile("Unknown.png");
+            byte[] fileData = GetAssetFile(string.Concat(textureIds[i], ".png")) ?? unknownPng;
             if (fileData == null) continue;
 
             using Bitmap bmp = PixelBuffer.BitmapFromPng(fileData, fileData.Length);
-            if (bmp.Width != tilesize || bmp.Height != tilesize) continue;
+
+            if (bmp.Width != tilesize || bmp.Height != tilesize)
+            {
+                Console.WriteLine(
+                    $"[Terrain] Skipping '{textureIds[i]}': expected {tilesize}×{tilesize}, got {bmp.Width}×{bmp.Height}.");
+                continue;
+            }
 
             PixelBuffer tile = PixelBuffer.FromBitmap(bmp);
 
             int destX = i % TexturesPacked * tilesize;
             int destY = i / TexturesPacked * tilesize;
 
-            // ── Row-by-row Span copy replaces the inner xx loop ───────────────
-            // tile.Argb is laid out as [row0_col0, row0_col1, ...] so each row
-            // is a contiguous tilesize-wide slice. The atlas destination rows are
-            // at stride atlas2d.Width, so we copy one row at a time.
             for (int row = 0; row < tilesize; row++)
             {
                 tile.Argb

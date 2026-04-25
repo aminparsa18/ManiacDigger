@@ -52,31 +52,27 @@ public sealed class QueryClient
     {
         using CancellationTokenSource cts = new(timeout);
 
-        try
+        while (!cts.IsCancellationRequested)
         {
-            while (!cts.IsCancellationRequested)
+            NetIncomingMessage? msg = client.ReadMessage();
+
+            if (msg == null)
             {
-                NetIncomingMessage? msg = client.ReadMessage();
-
-                if (msg == null)
-                {
-                    await Task.Delay(10, cts.Token);
-                    continue;
-                }
-
-                Packet_Server packet = MemoryPackSerializer.Deserialize<Packet_Server>(msg.Payload.Span);
-                switch (packet.Id)
-                {
-                    case Packet_ServerIdEnum.QueryAnswer:
-                        return (QueryResult.FromPacket(packet.QueryAnswer), "");
-
-                    case Packet_ServerIdEnum.DisconnectPlayer:
-                        return (null, packet.DisconnectPlayer.DisconnectReason);
-                }
-                // All other packets are silently dropped — not relevant to a query.
+                await Task.Delay(10, cts.Token);
+                continue;
             }
+
+            Packet_Server packet = MemoryPackSerializer.Deserialize<Packet_Server>(msg.Payload.Span);
+            switch (packet.Id)
+            {
+                case Packet_ServerIdEnum.QueryAnswer:
+                    return (QueryResult.FromPacket(packet.QueryAnswer), "");
+
+                case Packet_ServerIdEnum.DisconnectPlayer:
+                    return (null, packet.DisconnectPlayer.DisconnectReason);
+            }
+            // All other packets are silently dropped — not relevant to a query.
         }
-        catch (OperationCanceledException) { }
 
         return (null, "Timeout while querying server.");
     }

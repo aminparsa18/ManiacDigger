@@ -1,4 +1,21 @@
-﻿/// <summary>
+﻿//This is a cinematic camera system — you mark waypoints while exploring, then tell it to play back a smooth camera
+//flight through all of them. It works like this:
+
+//Record waypoints — .cam p captures your current position and orientation into a fixed array of up to 256 points
+//Play — .cam start [seconds] calculates the total path length, derives a travel speed (distance ÷ time), 
+//then each frame advances a timer, figures out which segment you're on, and uses Catmull-Rom spline interpolation
+//to smoothly blend between the surrounding four waypoints — giving a natural curved path
+//rather than straight lines between points
+//Record to AVI — .cam rec [real seconds][video seconds] does the same but also grabs screenshots at 60fps
+//and writes them to an AVI file, with a speed ratio so you can record in slow-motion or fast-forward
+//Save/load paths — .cam save serialises waypoints to the clipboard as integers (positions in centimetres,
+//orientations in milliradians); .cam load parses them back
+
+//When playback ends or is stopped, the player's original position and camera control are restored.
+
+using System.Text;
+
+/// <summary>
 /// A client-side mod that records a sequence of camera waypoints and plays
 /// the camera smoothly through them using Catmull-Rom spline interpolation.
 /// Optionally captures each frame to an AVI video file during playback.
@@ -12,18 +29,35 @@ public class ModAutoCamera : ModBase
     private const int MaxCameraPoints = 256;
 
     /// <summary>
-    /// Active AVI writer. <see langword="null"/> when not recording.
+    /// Default recording speed multiplier when <c>.cam rec [seconds]</c> is used
+    /// without a video-duration argument. A value of 10 means one second of real
+    /// playback becomes 0.1 s of video (10× speed).
     /// </summary>
-    private IAviWriter _avi;
+    private const float DefaultRecSpeed = 10f;
 
-    /// <summary>Freemove level that was active before playback started, restored on stop.</summary>
-    private int _previousFreemove;
+    // ── Dependencies ──────────────────────────────────────────────────────────
 
-    /// <summary>Player position saved before playback, restored when playback stops.</summary>
-    private float _previousPositionX, _previousPositionY, _previousPositionZ;
+    private readonly IGameClient _game;
+    private readonly IGamePlatform _platform;
 
-    /// <summary>Player orientation saved before playback, restored when playback stops.</summary>
-    private float _previousOrientationX, _previousOrientationY, _previousOrientationZ;
+    // ── Waypoint storage ──────────────────────────────────────────────────────
+
+    /// <summary>Fixed-size pool of camera waypoints.</summary>
+    private readonly CameraPoint[] _cameraPoints = new CameraPoint[MaxCameraPoints];
+
+    /// <summary>Number of waypoints currently stored.</summary>
+    private int _cameraPointsCount;
+
+    // ── Playback state ────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Whether the camera is currently playing back.
+    /// Replaces the fragile <c>_playingTime == -1</c> sentinel.
+    /// </summary>
+    private bool _isPlaying;
+
+    /// <summary>Elapsed real-time seconds since playback began.</summary>
+    private float _playingTime;
 
     /// <summary>
     /// World-units per second at which the camera travels along the path.
@@ -32,10 +66,39 @@ public class ModAutoCamera : ModBase
     private float _playingSpeed;
 
     /// <summary>
+    /// Precomputed cumulative distances along the path, indexed by segment start.
+    /// Built once at <see cref="StartPlayback"/> so <see cref="OnNewFrame"/> never
+    /// recalculates segment lengths per frame.
+    /// </summary>
+    private float[] _segmentStartDists = Array.Empty<float>();
+
+    // ── Saved camera state ────────────────────────────────────────────────────
+
+    /// <summary>Player position saved before playback, restored when playback stops.</summary>
+    private float _previousPositionX, _previousPositionY, _previousPositionZ;
+
+    /// <summary>Player orientation saved before playback, restored when playback stops.</summary>
+    private float _previousOrientationX, _previousOrientationY, _previousOrientationZ;
+
+    /// <summary>Freemove level that was active before playback started, restored on stop.</summary>
+    private int _previousFreemove;
+
+    // ── AVI recording ─────────────────────────────────────────────────────────
+
+    /// <summary>Active AVI writer. <see langword="null"/> when not recording.</summary>
+    private IAviWriter? _avi;
+
+    /// <summary>
     /// Ratio of real-time seconds to recorded-video seconds.
     /// A value of 2 means one second of real playback becomes 0.5 s of video (2× speed).
     /// </summary>
     private float _recSpeed;
+
+    /// <summary>
+    /// Precomputed interval between AVI frames in real-time seconds.
+    /// Cached at <see cref="StartPlayback"/> to avoid recomputing each frame.
+    /// </summary>
+    private float _frameInterval;
 
     /// <summary>Accumulated real-time delta used to decide when to capture the next AVI frame.</summary>
     private float _writeAccum;
@@ -46,42 +109,25 @@ public class ModAutoCamera : ModBase
     /// </summary>
     private bool _firstFrameDone;
 
-    /// <summary>Reference to the client mod manager, set in <see cref="Start"/>.</summary>
-    private IGameClient? _game;
-    private IGamePlatform? _platform;
+    // ── Constructor ───────────────────────────────────────────────────────────
 
-    /// <summary>Fixed-size pool of camera waypoints.</summary>
-    private CameraPoint[] _cameraPoints;
-
-    /// <summary>Number of waypoints currently stored in <see cref="_cameraPoints"/>.</summary>
-    private int _cameraPointsCount;
-
-    /// <summary>
-    /// Elapsed real-time seconds since playback began.
-    /// A value of <c>-1</c> means the camera is not currently playing.
-    /// </summary>
-    private float _playingTime;
-
-    public ModAutoCamera(IGameClient modmanager, IGamePlatform platform)
+    public ModAutoCamera(IGameClient game, IGamePlatform platform)
     {
-        _game = modmanager;
+        _game = game;
         _platform = platform;
-        _cameraPoints = new CameraPoint[MaxCameraPoints];
-        _cameraPointsCount = 0;
-        _playingTime = -1;
     }
+
+    // ── ModBase overrides ─────────────────────────────────────────────────────
 
     /// <inheritdoc/>
     public override bool OnClientCommand(ClientCommandArgs args)
     {
         if (args.command != "cam")
-        {
             return false;
-        }
 
         string[] arguments = args.arguments.Split(" ");
 
-        if (args.arguments.Trim() == "")
+        if (string.IsNullOrWhiteSpace(args.arguments))
         {
             PrintHelp();
             return true;
@@ -100,12 +146,12 @@ public class ModAutoCamera : ModBase
                 break;
 
             case "stop":
-                _game?.AddChatLine("Camera stopped.");
+                _game.AddChatLine("Camera stopped.");
                 Stop();
                 break;
 
             case "clear":
-                _game?.AddChatLine("Camera points cleared.");
+                _game.AddChatLine("Camera points cleared.");
                 _cameraPointsCount = 0;
                 Stop();
                 break;
@@ -116,9 +162,7 @@ public class ModAutoCamera : ModBase
 
             case "load":
                 if (arguments.Length >= 2)
-                {
                     LoadPointsFromString(arguments[1]);
-                }
                 break;
         }
 
@@ -126,73 +170,66 @@ public class ModAutoCamera : ModBase
     }
 
     /// <inheritdoc/>
-    public override void OnNewFrame(float args)
+    public override void OnNewFrame(float dt)
     {
-        if (_playingTime == -1)
-        {
-            return;
-        }
+        if (!_isPlaying) return;
 
-        float dt = args;
         _playingTime += dt;
 
         UpdateAvi(dt);
 
         float playingDist = _playingTime * _playingSpeed;
 
-        // Walk the segments to find which one contains the current distance.
-        float distA = 0;
+        // ── Fix #4: use precomputed segment distances ─────────────────────────
         int foundPoint = -1;
         for (int i = 0; i < _cameraPointsCount - 1; i++)
         {
-            float segmentDist = Distance(_cameraPoints[i], _cameraPoints[i + 1]);
-            if (playingDist >= distA && playingDist < distA + segmentDist)
+            float segEnd = _segmentStartDists[i + 1];
+            if (playingDist >= _segmentStartDists[i] && playingDist < segEnd)
             {
                 foundPoint = i;
                 break;
             }
-            distA += segmentDist;
         }
 
         if (foundPoint == -1)
         {
-            // Past the end of the path — playback is complete.
             Stop();
             return;
         }
 
-        ApplyCatmullRomPosition(foundPoint, distA, playingDist);
+        ApplyCatmullRomPosition(foundPoint, _segmentStartDists[foundPoint], playingDist);
     }
+
+    // ── Command handlers ──────────────────────────────────────────────────────
 
     /// <summary>Displays the in-game help text for all <c>.cam</c> sub-commands.</summary>
     private void PrintHelp()
     {
-        _game?.AddChatLine("&6AutoCamera help.");
-        _game?.AddChatLine("&6.cam p&f - add a point to path");
-        _game?.AddChatLine("&6.cam start [real seconds]&f - play the path");
-        _game?.AddChatLine("&6.cam rec [real seconds] [video seconds]&f - play and record to .avi file");
-        _game?.AddChatLine("&6.cam stop&f - stop playing and recording");
-        _game?.AddChatLine("&6.cam clear&f - remove all points from path");
-        _game?.AddChatLine("&6.cam save&f - copy path points to clipboard");
-        _game?.AddChatLine("&6.cam load [points]&f - load path points");
+        _game.AddChatLine("&6AutoCamera help.");
+        _game.AddChatLine("&6.cam p&f - add a point to path");
+        _game.AddChatLine("&6.cam start [real seconds]&f - play the path");
+        _game.AddChatLine("&6.cam rec [real seconds] [video seconds]&f - play and record to .avi file");
+        _game.AddChatLine("&6.cam stop&f - stop playing and recording");
+        _game.AddChatLine("&6.cam clear&f - remove all points from path");
+        _game.AddChatLine("&6.cam save&f - copy path points to clipboard");
+        _game.AddChatLine("&6.cam load [points]&f - load path points");
     }
 
     /// <summary>
-    /// Captures the player's current position and orientation as a new waypoint
-    /// and appends it to <see cref="_cameraPoints"/>.
+    /// Captures the player's current position and orientation as a new waypoint.
     /// </summary>
     private void AddPoint()
     {
-        CameraPoint point = new()
+        _cameraPoints[_cameraPointsCount++] = new CameraPoint
         {
-            PositionGlX = _game!.LocalPositionX,
+            PositionGlX = _game.LocalPositionX,
             PositionGlY = _game.LocalPositionY,
             PositionGlZ = _game.LocalPositionZ,
             OrientationGlX = _game.LocalOrientationX,
             OrientationGlY = _game.LocalOrientationY,
-            OrientationGlZ = _game.LocalOrientationZ
+            OrientationGlZ = _game.LocalOrientationZ,
         };
-        _cameraPoints[_cameraPointsCount++] = point;
         _game.AddChatLine("Point defined.");
     }
 
@@ -200,17 +237,9 @@ public class ModAutoCamera : ModBase
     /// Validates preconditions and then begins camera playback, optionally opening
     /// an AVI file for recording.
     /// </summary>
-    /// <param name="arguments">
-    /// Tokenised command arguments.
-    /// <list type="bullet">
-    ///   <item><description><c>arguments[0]</c> — sub-command (<c>"start"</c>, <c>"play"</c>, or <c>"rec"</c>).</description></item>
-    ///   <item><description><c>arguments[1]</c> (optional) — total real-time duration in seconds.</description></item>
-    ///   <item><description><c>arguments[2]</c> (optional, <c>"rec"</c> only) — desired video duration in seconds.</description></item>
-    /// </list>
-    /// </param>
     private void StartPlayback(string[] arguments)
     {
-        if (!_game!.AllowFreeMove)
+        if (!_game.AllowFreeMove)
         {
             _game.AddChatLine("Free move not allowed.");
             return;
@@ -222,33 +251,58 @@ public class ModAutoCamera : ModBase
             return;
         }
 
-        _playingSpeed = 1;
-        float totalRecTime = -1;
+        _playingSpeed = 1f;
+        float totalRecTime = -1f;
 
         if (arguments[0] == "rec")
         {
             if (arguments.Length >= 3)
             {
-                totalRecTime = float.Parse(arguments[2]);
+                // ── Fix #5: TryParse instead of Parse ─────────────────────────
+                if (!float.TryParse(arguments[2], out totalRecTime))
+                {
+                    _game.AddChatLine("Invalid video duration. Usage: .cam rec [real seconds] [video seconds]");
+                    return;
+                }
             }
 
             _avi = new AviWriterCiCs();
             _avi.Open(
-                string.Format("{0}.avi", string.Format("{0:yyyy-MM-dd_HH-mm-ss}", DateTime.Now)),
+                $"{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.avi",
                 Framerate,
-                _platform!.GetCanvasWidth(),
+                _platform.GetCanvasWidth(),
                 _platform.GetCanvasHeight());
         }
 
         if (arguments.Length >= 2)
         {
-            float totalTime = float.Parse(arguments[1]);
+            // ── Fix #5: TryParse instead of Parse ─────────────────────────────
+            if (!float.TryParse(arguments[1], out float totalTime))
+            {
+                _game.AddChatLine("Invalid duration. Usage: .cam start [real seconds]");
+                _avi?.Close();
+                _avi = null;
+                return;
+            }
+
             _playingSpeed = TotalDistance() / totalTime;
-            _recSpeed = totalRecTime == -1 ? 10 : totalTime / totalRecTime;
+            _recSpeed = totalRecTime < 0f ? DefaultRecSpeed : totalTime / totalRecTime;
         }
 
-        _playingTime = 0;
+        // ── Fix #8: cache frame interval once ────────────────────────────────
+        _frameInterval = 1f / Framerate * _recSpeed;
+
+        // ── Fix #4: precompute cumulative segment distances ───────────────────
+        _segmentStartDists = new float[_cameraPointsCount];
+        _segmentStartDists[0] = 0f;
+        for (int i = 1; i < _cameraPointsCount; i++)
+            _segmentStartDists[i] = _segmentStartDists[i - 1]
+                                  + Distance(_cameraPoints[i - 1], _cameraPoints[i]);
+
+        _playingTime = 0f;
+        _writeAccum = 0f;
         _firstFrameDone = false;
+        _isPlaying = true;
 
         // Save current camera state so it can be restored when playback ends.
         _previousPositionX = _game.LocalPositionX;
@@ -260,7 +314,7 @@ public class ModAutoCamera : ModBase
 
         _game.EnableDraw2d = false;
         _previousFreemove = _game.FreemoveLevel;
-        _game.FreemoveLevel = (FreemoveLevelEnum.Noclip);
+        _game.FreemoveLevel = FreemoveLevelEnum.Noclip;
         _game.EnableCameraControl = false;
     }
 
@@ -269,57 +323,54 @@ public class ModAutoCamera : ModBase
     /// copies it to the system clipboard so the path can be shared or reloaded later.
     /// </summary>
     /// <remarks>
-    /// Format: <c>1,x0,y0,z0,rx0,ry0,rz0,x1,y1,z1,rx1,ry1,rz1,…</c>
+    /// Format: <c>1,x0,y0,z0,rx0,ry0,rz0,x1,…</c>
     /// Positions are stored as integer centimetres; orientations as integer milliradians.
     /// </remarks>
     private void SavePointsToClipboard()
     {
-        string s = "1,";
+        // ── Fix #1: StringBuilder instead of repeated string.Format ───────────
+        var sb = new StringBuilder("1,");
         for (int i = 0; i < _cameraPointsCount; i++)
         {
-            CameraPoint point = _cameraPoints[i];
-            s = string.Format("{0}{1},", s, ((int)(point.PositionGlX * 100)).ToString());
-            s = string.Format("{0}{1},", s, ((int)(point.PositionGlY * 100)).ToString());
-            s = string.Format("{0}{1},", s, ((int)(point.PositionGlZ * 100)).ToString());
-            s = string.Format("{0}{1},", s, ((int)(point.OrientationGlX * 1000)).ToString());
-            s = string.Format("{0}{1},", s, ((int)(point.OrientationGlY * 1000)).ToString());
-            s = string.Format("{0}{1}", s, ((int)(point.OrientationGlZ * 1000)).ToString());
+            CameraPoint p = _cameraPoints[i];
+            sb.Append((int)(p.PositionGlX * 100)).Append(',');
+            sb.Append((int)(p.PositionGlY * 100)).Append(',');
+            sb.Append((int)(p.PositionGlZ * 100)).Append(',');
+            sb.Append((int)(p.OrientationGlX * 1000)).Append(',');
+            sb.Append((int)(p.OrientationGlY * 1000)).Append(',');
+            sb.Append((int)(p.OrientationGlZ * 1000));
             if (i != _cameraPointsCount - 1)
-            {
-                s = string.Format("{0},", s);
-            }
+                sb.Append(',');
         }
-        Clipboard.SetText(s);
-        _game?.AddChatLine("Camera points copied to clipboard.");
+        Clipboard.SetText(sb.ToString());
+        _game.AddChatLine("Camera points copied to clipboard.");
     }
 
     /// <summary>
     /// Parses a comma-separated waypoint string (as produced by <see cref="SavePointsToClipboard"/>)
     /// and replaces the current set of waypoints with the decoded values.
     /// </summary>
-    /// <param name="data">
-    /// The encoded waypoint string. Expected format:
-    /// <c>1,x0,y0,z0,rx0,ry0,rz0,x1,…</c>
-    /// </param>
     private void LoadPointsFromString(string data)
     {
-        string[] points = data.Split(",");
-        int n = (points.Length - 1) / 6;
+        string[] parts = data.Split(',');
+        int n = (parts.Length - 1) / 6;
         _cameraPointsCount = 0;
+
         for (int i = 0; i < n; i++)
         {
-            CameraPoint point = new()
+            // ── Fix #2: explicit float division to avoid integer truncation ────
+            _cameraPoints[_cameraPointsCount++] = new CameraPoint
             {
-                PositionGlX = int.Parse(points[1 + i * 6 + 0]) / 100,
-                PositionGlY = int.Parse(points[1 + i * 6 + 1]) / 100,
-                PositionGlZ = int.Parse(points[1 + i * 6 + 2]) / 100,
-                OrientationGlX = int.Parse(points[1 + i * 6 + 3]) / 1000,
-                OrientationGlY = int.Parse(points[1 + i * 6 + 4]) / 1000,
-                OrientationGlZ = int.Parse(points[1 + i * 6 + 5]) / 1000
+                PositionGlX = int.Parse(parts[1 + i * 6 + 0]) / 100f,
+                PositionGlY = int.Parse(parts[1 + i * 6 + 1]) / 100f,
+                PositionGlZ = int.Parse(parts[1 + i * 6 + 2]) / 100f,
+                OrientationGlX = int.Parse(parts[1 + i * 6 + 3]) / 1000f,
+                OrientationGlY = int.Parse(parts[1 + i * 6 + 4]) / 1000f,
+                OrientationGlZ = int.Parse(parts[1 + i * 6 + 5]) / 1000f,
             };
-            _cameraPoints[_cameraPointsCount++] = point;
         }
-        _game?.AddChatLine(string.Format("Camera points loaded: {0}", n.ToString()));
+
+        _game.AddChatLine($"Camera points loaded: {n}");
     }
 
     /// <summary>
@@ -329,12 +380,12 @@ public class ModAutoCamera : ModBase
     /// </summary>
     private void Stop()
     {
-        _game!.EnableDraw2d = true;
-        _game.EnableCameraControl = (true);
+        _game.EnableDraw2d = true;
+        _game.EnableCameraControl = true;
 
-        if (_playingTime != -1)
+        if (_isPlaying)
         {
-            _game.FreemoveLevel = (_previousFreemove);
+            _game.FreemoveLevel = _previousFreemove;
             _game.LocalPositionX = _previousPositionX;
             _game.LocalPositionY = _previousPositionY;
             _game.LocalPositionZ = _previousPositionZ;
@@ -343,54 +394,45 @@ public class ModAutoCamera : ModBase
             _game.LocalOrientationZ = _previousOrientationZ;
         }
 
-        _playingTime = -1;
+        // ── Fix #3: bool flag instead of sentinel float ───────────────────────
+        _isPlaying = false;
         _avi?.Close();
         _avi = null;
     }
+
+    // ── Playback helpers ──────────────────────────────────────────────────────
 
     /// <summary>
     /// Evaluates the Catmull-Rom spline at the current playback distance and applies
     /// the resulting position and orientation to the local camera.
     /// </summary>
-    /// <param name="segmentIndex">Index of the first waypoint of the active segment.</param>
-    /// <param name="segmentStartDist">Cumulative path distance at the start of that segment.</param>
-    /// <param name="playingDist">Current cumulative distance along the entire path.</param>
     private void ApplyCatmullRomPosition(int segmentIndex, float segmentStartDist, float playingDist)
     {
         CameraPoint a = _cameraPoints[segmentIndex];
         CameraPoint b = _cameraPoints[segmentIndex + 1];
-        CameraPoint aMinus = segmentIndex - 1 >= 0 ? _cameraPoints[segmentIndex - 1] : a;
-        CameraPoint bPlus = segmentIndex + 2 < _cameraPointsCount ? _cameraPoints[segmentIndex + 2] : b;
+        CameraPoint aMinus = segmentIndex - 1 >= 0
+            ? _cameraPoints[segmentIndex - 1] : a;
+        CameraPoint bPlus = segmentIndex + 2 < _cameraPointsCount
+            ? _cameraPoints[segmentIndex + 2] : b;
 
         float t = (playingDist - segmentStartDist) / Distance(a, b);
 
-        float x = CatmullRom(t, aMinus.PositionGlX, a.PositionGlX, b.PositionGlX, bPlus.PositionGlX);
-        float y = CatmullRom(t, aMinus.PositionGlY, a.PositionGlY, b.PositionGlY, bPlus.PositionGlY);
-        float z = CatmullRom(t, aMinus.PositionGlZ, a.PositionGlZ, b.PositionGlZ, bPlus.PositionGlZ);
-        _game!.LocalPositionX = x;
-        _game.LocalPositionY = y;
-        _game.LocalPositionZ = z;
+        _game.LocalPositionX = CatmullRom(t, aMinus.PositionGlX, a.PositionGlX, b.PositionGlX, bPlus.PositionGlX);
+        _game.LocalPositionY = CatmullRom(t, aMinus.PositionGlY, a.PositionGlY, b.PositionGlY, bPlus.PositionGlY);
+        _game.LocalPositionZ = CatmullRom(t, aMinus.PositionGlZ, a.PositionGlZ, b.PositionGlZ, bPlus.PositionGlZ);
 
-        float orientX = CatmullRom(t, aMinus.OrientationGlX, a.OrientationGlX, b.OrientationGlX, bPlus.OrientationGlX);
-        float orientY = CatmullRom(t, aMinus.OrientationGlY, a.OrientationGlY, b.OrientationGlY, bPlus.OrientationGlY);
-        float orientZ = CatmullRom(t, aMinus.OrientationGlZ, a.OrientationGlZ, b.OrientationGlZ, bPlus.OrientationGlZ);
-        _game.LocalOrientationX = orientX;
-        _game.LocalOrientationY = orientY;
-        _game.LocalOrientationZ = orientZ;
+        _game.LocalOrientationX = CatmullRom(t, aMinus.OrientationGlX, a.OrientationGlX, b.OrientationGlX, bPlus.OrientationGlX);
+        _game.LocalOrientationY = CatmullRom(t, aMinus.OrientationGlY, a.OrientationGlY, b.OrientationGlY, bPlus.OrientationGlY);
+        _game.LocalOrientationZ = CatmullRom(t, aMinus.OrientationGlZ, a.OrientationGlZ, b.OrientationGlZ, bPlus.OrientationGlZ);
     }
 
     /// <summary>
     /// Conditionally captures a screenshot and appends it to the AVI file.
-    /// Called every frame during playback. The capture is rate-controlled by
-    /// <see cref="_recSpeed"/> so the video plays back at the intended duration.
+    /// Rate-controlled by <see cref="_frameInterval"/>.
     /// </summary>
-    /// <param name="dt">Real-time delta for the current frame in seconds.</param>
     private void UpdateAvi(float dt)
     {
-        if (_avi == null)
-        {
-            return;
-        }
+        if (_avi == null) return;
 
         if (!_firstFrameDone)
         {
@@ -401,38 +443,32 @@ public class ModAutoCamera : ModBase
         }
 
         _writeAccum += dt;
-        if (_writeAccum >= 1f / Framerate * _recSpeed)
-        {
-            _writeAccum -= 1f / Framerate * _recSpeed;
 
-            var bmp = _platform!.GrabScreenshot();
+        // ── Fix #8: use cached _frameInterval ─────────────────────────────────
+        if (_writeAccum >= _frameInterval)
+        {
+            _writeAccum -= _frameInterval;
+            var bmp = _platform.GrabScreenshot();
             _avi.AddFrame(bmp);
             bmp.Dispose();
         }
     }
 
     /// <summary>
-    /// Returns the total arc length of the camera path by summing the straight-line
+    /// Returns the total arc length of the camera path by summing straight-line
     /// distances between all consecutive waypoints.
     /// </summary>
-    /// <returns>Total path length in world units.</returns>
     private float TotalDistance()
     {
-        float total = 0;
+        float total = 0f;
         for (int i = 0; i < _cameraPointsCount - 1; i++)
-        {
             total += Distance(_cameraPoints[i], _cameraPoints[i + 1]);
-        }
         return total;
     }
 
     /// <summary>
-    /// Returns the Euclidean distance between two waypoints using only their
-    /// position components (orientation is not factored in).
+    /// Returns the Euclidean distance between two waypoints (position only).
     /// </summary>
-    /// <param name="a">First waypoint.</param>
-    /// <param name="b">Second waypoint.</param>
-    /// <returns>Distance in world units.</returns>
     private static float Distance(CameraPoint a, CameraPoint b)
     {
         float dx = a.PositionGlX - b.PositionGlX;
@@ -444,26 +480,14 @@ public class ModAutoCamera : ModBase
     /// <summary>
     /// Evaluates the Catmull-Rom spline for a single scalar coordinate.
     /// </summary>
-    /// <remarks>
-    /// The four control points are <paramref name="p0"/> (one before the segment start),
-    /// <paramref name="p1"/> (segment start), <paramref name="p2"/> (segment end), and
-    /// <paramref name="p3"/> (one after the segment end).
-    /// When the segment is at the beginning or end of the path the missing neighbour
-    /// is replaced by the nearest endpoint, giving a natural clamped result.
-    /// <para>
-    /// Implementation adapted from:
-    /// http://stackoverflow.com/questions/939874/is-there-a-java-library-with-3d-spline-functions/2623619#2623619
-    /// </para>
-    /// </remarks>
-    /// <param name="t">Interpolation parameter in the range [0, 1].</param>
+    /// <param name="t">Interpolation parameter in [0, 1].</param>
     /// <param name="p0">Control point before the segment start.</param>
     /// <param name="p1">Segment start value.</param>
     /// <param name="p2">Segment end value.</param>
     /// <param name="p3">Control point after the segment end.</param>
-    /// <returns>Interpolated scalar value at <paramref name="t"/>.</returns>
     public static float CatmullRom(float t, float p0, float p1, float p2, float p3)
     {
-        return 1f / 2 * (
+        return 0.5f * (
               (2 * p1)
             + (-p0 + p2) * t
             + (2 * p0 - 5 * p1 + 4 * p2 - p3) * (t * t)
@@ -472,26 +496,27 @@ public class ModAutoCamera : ModBase
 }
 
 /// <summary>
-/// Stores the position and orientation of a single camera waypoint on a recorded path.
-/// Positions are in OpenGL world-space coordinates; orientations are Euler angles in radians.
+/// Stores the position and orientation of a single camera waypoint.
+/// Stored as a struct so the <c>_cameraPoints[]</c> array is fully contiguous
+/// in memory — no per-waypoint heap allocation.
 /// </summary>
-public class CameraPoint
+public struct CameraPoint
 {
     /// <summary>World-space X coordinate of the camera.</summary>
-    public float PositionGlX { get; set; }
+    public float PositionGlX;
 
     /// <summary>World-space Y coordinate of the camera.</summary>
-    public float PositionGlY { get; set; }
+    public float PositionGlY;
 
     /// <summary>World-space Z coordinate of the camera.</summary>
-    public float PositionGlZ { get; set; }
+    public float PositionGlZ;
 
     /// <summary>Camera orientation around the X axis (pitch), in radians.</summary>
-    public float OrientationGlX { get; set; }
+    public float OrientationGlX;
 
     /// <summary>Camera orientation around the Y axis (yaw), in radians.</summary>
-    public float OrientationGlY { get; set; }
+    public float OrientationGlY;
 
     /// <summary>Camera orientation around the Z axis (roll), in radians.</summary>
-    public float OrientationGlZ { get; set; }
+    public float OrientationGlZ;
 }

@@ -1,27 +1,31 @@
-﻿public partial class Game
+﻿using OpenTK.Mathematics;
+
+public partial class Game
 {
     // ── Fixed-timestep constants ──────────────────────────────────────────────
 
-    /// <summary>
-    /// Number of fixed-logic ticks per second.
-    /// Appears in two places: the tick delta-time and the velocity calculation
-    /// that converts per-tick displacement to units/second.
-    /// </summary>
+    /// <summary>Number of fixed-logic ticks per second.</summary>
     private const int FixedTickRate = 75;
 
     /// <summary>Delta time (seconds) passed to each <see cref="FrameTick"/> call.</summary>
     private const float FixedTickDt = 1f / FixedTickRate;
 
-    // ── Entry point (called by platform / scheduler) ──────────────────────────
+    /// <summary>Value of <see cref="EnableLog"/> that simulates ~20 ms frame lag.</summary>
+    private const int EnableLogSimulateLag = 2;
+
+    // Recomputed only when the colour changes, not every frame.
+    private float _clearColorRf, _clearColorGf, _clearColorBf, _clearColorAf;
+    private int _lastClearColorR = -1, _lastClearColorG = -1,
+                  _lastClearColorB = -1, _lastClearColorA = -1;
+
+    // ── Entry point ───────────────────────────────────────────────────────────
 
     /// <summary>
     /// Top-level per-frame entry point. Delegates to the task scheduler which
     /// orchestrates background and main-thread mod hooks.
     /// </summary>
     public void OnRenderFrame(float deltaTime)
-    {
-        taskScheduler.Update(deltaTime);
-    }
+        => taskScheduler.Update(deltaTime);
 
     /// <summary>
     /// Main-thread render path. Drives the fixed-update accumulator, dispatches
@@ -37,7 +41,7 @@
         // Required in Mono for running the terrain background thread.
         Platform.ApplicationDoEvents();
 
-        // Fixed-timestep accumulator — capped at 1 s to prevent a spiral of death
+        // Fixed-timestep accumulator — capped at 1 s to prevent spiral-of-death
         // when the renderer stalls (e.g. window resize, focus loss).
         accumulator = Math.Min(accumulator + deltaTime, 1f);
         while (accumulator >= FixedTickDt)
@@ -49,12 +53,13 @@
         // During map loading only the 2D pass (progress bar, status text) runs.
         if (GuiState == GuiState.MapLoading)
         {
-            GotoDraw2d(deltaTime);
+            RunDraw2dAndEndFrame(deltaTime);
             return;
         }
 
-        if (EnableLog == 2)
-            Platform.ThreadSpinWait(20_000_000); // simulate ~20 ms frame lag
+        // Fix #4: named constant instead of magic number.
+        if (EnableLog == EnableLogSimulateLag)
+            Platform.ThreadSpinWait(20_000_000);
 
         SetAmbientLight(Terraincolor());
         Platform.GlClearColorBufferAndDepthBuffer();
@@ -72,7 +77,7 @@
         for (int i = 0; i < ClientMods.Count; i++)
             ClientMods[i]?.OnNewFrameDraw3d(deltaTime);
 
-        GotoDraw2d(deltaTime);
+        RunDraw2dAndEndFrame(deltaTime);
     }
 
     // ── Fixed update tick ─────────────────────────────────────────────────────
@@ -97,8 +102,7 @@
 
         RevertSpeculative(dt);
 
-        if (GuiState == GuiState.MapLoading)
-            return;
+        if (GuiState == GuiState.MapLoading) return;
 
         float orientationX = MathF.Sin(Player.position.roty);
         float orientationZ = -MathF.Cos(Player.position.roty);
@@ -106,10 +110,11 @@
             EyesPosX, EyesPosY, EyesPosZ,
             orientationX, 0, orientationZ);
 
-        // Estimate velocity in world units/second from per-tick displacement.
-        playervelocity = new OpenTK.Mathematics.Vector3((Player.position.x - lastplayerpositionX) * FixedTickRate,
-            (Player.position.y - lastplayerpositionY) * FixedTickRate,
-            (Player.position.z - lastplayerpositionZ) * FixedTickRate);
+        Vector3 vel;
+        vel.X = (Player.position.x - lastplayerpositionX) * FixedTickRate;
+        vel.Y = (Player.position.y - lastplayerpositionY) * FixedTickRate;
+        vel.Z = (Player.position.z - lastplayerpositionZ) * FixedTickRate;
+        playervelocity = vel;
 
         lastplayerpositionX = Player.position.x;
         lastplayerpositionY = Player.position.y;
@@ -122,7 +127,7 @@
     /// Runs the 2D overlay pass, fires the end-of-frame mod hook, resets click
     /// state, and initiates the server connection on the first eligible frame.
     /// </summary>
-    internal void GotoDraw2d(float dt)
+    internal void RunDraw2dAndEndFrame(float dt)
     {
         SetAmbientLight(ColorUtils.ColorFromArgb(255, 255, 255, 255));
         Draw2d(dt);
@@ -130,18 +135,29 @@
         for (int i = 0; i < ClientMods.Count; i++)
             ClientMods[i]?.OnNewFrame(dt);
 
-        MouseLeftClick = mouserightclick = false;
-        mouseleftdeclick = mouserightdeclick = false;
+        MouseLeftClick = false;
+        mouserightclick = false;
+        mouseleftdeclick = false;
+        mouserightdeclick = false;
+
+        TryInitialiseConnection();
+    }
+
+    /// <summary>
+    /// Initiates the server connection on the first eligible frame.
+    /// Extracted from <see cref="RunDraw2dAndEndFrame"/> — starting a network
+    /// connection has nothing to do with drawing.
+    /// </summary>
+    private void TryInitialiseConnection()
+    {
+        if (startedconnecting) return;
 
         if (!IsSinglePlayer
          || Platform.SinglePlayerServerLoaded()
          || !Platform.SinglePlayerServerAvailable())
         {
-            if (!startedconnecting)
-            {
-                startedconnecting = true;
-                Connect();
-            }
+            startedconnecting = true;
+            Connect();
         }
     }
 
@@ -149,7 +165,6 @@
 
     /// <summary>
     /// Detects canvas size changes and triggers a viewport + projection update.
-    /// Caches both dimensions in locals to avoid double platform calls on change.
     /// </summary>
     private void UpdateResize()
     {
@@ -174,23 +189,33 @@
     // ── Per-frame helpers ─────────────────────────────────────────────────────
 
     /// <summary>
-    /// Sets the GL clear colour. During map loading the screen is pure black;
-    /// otherwise uses the current sky/terrain fog colour.
+    /// Sets the GL clear colour.
     /// </summary>
     private void UpdateClearColor()
     {
         if (GuiState == GuiState.MapLoading)
         {
-            Platform.GlClearColorRgbaf(0, 0, 0, 1);
+            Platform.GlClearColorRgbaf(0f, 0f, 0f, 1f);
+            return;
         }
-        else
+
+        // Recompute only when any component has changed.
+        if (clearcolorR != _lastClearColorR
+         || clearcolorG != _lastClearColorG
+         || clearcolorB != _lastClearColorB
+         || clearcolorA != _lastClearColorA)
         {
-            Platform.GlClearColorRgbaf(
-                clearcolorR / 255f,
-                clearcolorG / 255f,
-                clearcolorB / 255f,
-                clearcolorA / 255f);
+            _clearColorRf = clearcolorR / 255f;
+            _clearColorGf = clearcolorG / 255f;
+            _clearColorBf = clearcolorB / 255f;
+            _clearColorAf = clearcolorA / 255f;
+            _lastClearColorR = clearcolorR;
+            _lastClearColorG = clearcolorG;
+            _lastClearColorB = clearcolorB;
+            _lastClearColorA = clearcolorA;
         }
+
+        Platform.GlClearColorRgbaf(_clearColorRf, _clearColorGf, _clearColorBf, _clearColorAf);
     }
 
     /// <summary>

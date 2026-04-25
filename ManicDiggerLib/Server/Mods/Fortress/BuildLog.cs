@@ -25,33 +25,25 @@ public class BuildLog : IMod
 
     private void OnLoad()
     {
-        try
+        byte[] b = m.GetGlobalData("BuildLog");
+        if (b != null)
         {
-            byte[] b = m.GetGlobalData("BuildLog");
-            if (b != null)
+            MemoryStream ms = new(b);
+            BinaryReader br = new(ms);
+            int count = br.ReadInt32();
+            for (int i = 0; i < count; i++)
             {
-                MemoryStream ms = new(b);
-                BinaryReader br = new(ms);
-                int count = br.ReadInt32();
-                for (int i = 0; i < count; i++)
-                {
-                    var l = new object[8];
-                    l[0] = new DateTime(br.ReadInt64());//timestamp
-                    l[1] = br.ReadInt16();//x
-                    l[2] = br.ReadInt16();//y
-                    l[3] = br.ReadInt16();//z
-                    l[4] = br.ReadInt16();//blocktype
-                    l[5] = br.ReadBoolean();//build
-                    l[6] = br.ReadString();//playername
-                    l[7] = br.ReadString();//ip
-                    lines.Add(l);
-                }
+                var l = new object[8];
+                l[0] = new DateTime(br.ReadInt64());//timestamp
+                l[1] = br.ReadInt16();//x
+                l[2] = br.ReadInt16();//y
+                l[3] = br.ReadInt16();//z
+                l[4] = br.ReadInt16();//blocktype
+                l[5] = br.ReadBoolean();//build
+                l[6] = br.ReadString();//playername
+                l[7] = br.ReadString();//ip
+                lines.Add(l);
             }
-        }
-        catch
-        {
-            //corrupted
-            OnSave();
         }
     }
 

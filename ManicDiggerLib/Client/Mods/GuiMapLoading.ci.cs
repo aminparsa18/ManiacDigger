@@ -76,8 +76,8 @@ public class ModGuiMapLoading : ModBase
         int barY = centerY + 70;
         int color = ColorUtils.InterpolateColor(ratio, ProgressBarColors, ProgressBarColors.Length);
 
-        game.Draw2dTexture(game.WhiteTexture(), barX, barY, ProgressBarWidth, ProgressBarHeight, null, 0, ColorUtils.ColorFromArgb(255, 0, 0, 0), false);
-        game.Draw2dTexture(game.WhiteTexture(), barX, barY, ratio * ProgressBarWidth, ProgressBarHeight, null, 0, color, false);
+        game.Draw2dTexture(game.GetOrCreateWhiteTexture(), barX, barY, ProgressBarWidth, ProgressBarHeight, null, 0, ColorUtils.ColorFromArgb(255, 0, 0, 0), false);
+        game.Draw2dTexture(game.GetOrCreateWhiteTexture(), barX, barY, ratio * ProgressBarWidth, ProgressBarHeight, null, 0, color, false);
     }
 
     private void DrawCentered(string text, int y)

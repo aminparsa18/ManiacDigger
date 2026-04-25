@@ -1,4 +1,9 @@
-﻿using static ManicDigger.AudioOpenAl;
+﻿//This manages all in-game audio. On each frame it checks if assets are fully loaded,
+//then walks a pool of up to 64 active sounds and handles each one through four stages:
+//load & play(if the audio data is ready), update its 3D world position, stop it if flagged, 
+//and either restart it (looping sounds) or clear it (one-shot sounds) when it finishes.
+
+using static ManicDigger.AudioOpenAl;
 
 /// <summary>
 /// Mod that manages audio loading, playback, positional updates, looping, and cleanup.

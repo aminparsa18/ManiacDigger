@@ -222,7 +222,7 @@ public class GameScreen : ModBase
                     }
                     else
                     {
-                        game.Draw2dTexture(game.WhiteTexture(), screenx + w.x, screeny + w.y, w.sizex, w.sizey, null, 0, w.color, false);
+                        game.Draw2dTexture(game.GetOrCreateWhiteTexture(), screenx + w.x, screeny + w.y, w.sizex, w.sizey, null, 0, w.color, false);
                     }
                     game.Draw2dText1(text, screenx + (int)w.x, screeny + (int)(w.y + w.sizey / 2), (int)w.fontSize, null, false);
                 }

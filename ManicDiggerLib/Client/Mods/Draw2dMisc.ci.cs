@@ -97,7 +97,7 @@ public class ModDraw2dMisc : ModBase
     internal void DrawEnemyHealthUseInfo(string name, float progress, bool useInfo)
     {
         int barHeight = useInfo ? 55 : 35;
-        int whiteTexId = game.WhiteTexture(); // cache — was called twice
+        int whiteTexId = game.GetOrCreateWhiteTexture(); // cache — was called twice
 
         game.Draw2dTexture(whiteTexId, game.Xcenter(300), 40, 300, barHeight, null, 0,
             ColorUtils.ColorFromArgb(255, 0, 0, 0), false);

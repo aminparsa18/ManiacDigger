@@ -1,4 +1,12 @@
-﻿using ManicDigger;
+﻿//This handles two types of environmental damage to the player:
+//Block damage — every second, checks the block at eye level and the block at foot level.
+//If either deals damage (like lava), it adds them together and calls ApplyDamageToPlayer.
+//A timer ensures it only ticks once per second rather than every frame.
+//Drowning — every second, if the player's eyes are underwater it decrements their oxygen.
+//When oxygen hits zero it deals damage equal to 10% of max health. When they surface, oxygen instantly refills.
+//The current oxygen level is also sent to the server if it's new enough to support that packet.
+
+using ManicDigger;
 
 /// <summary>
 /// Handles environmental damage to the player from blocks (e.g. lava, fire) and drowning mechanics.
@@ -7,7 +15,7 @@ public class ModBlockDamageToPlayer : ModBase
 {
     public const int BlockDamageToPlayerEvery = 1;
     private int lastOxygenTickMilliseconds;
-    private readonly TimerCi blockDamageTimer;
+    private readonly DamageTimer blockDamageTimer;
 
     private readonly IGameClient _client;
     private readonly IGamePlatform _platform;
@@ -16,7 +24,7 @@ public class ModBlockDamageToPlayer : ModBase
     {
         _client = client;
         _platform = platform;
-        blockDamageTimer = TimerCi.Create(BlockDamageToPlayerEvery, BlockDamageToPlayerEvery * 2);
+        blockDamageTimer = new DamageTimer(BlockDamageToPlayerEvery, BlockDamageToPlayerEvery * 2);
     }
 
     public override void OnNewFrameFixed(float args)
@@ -113,45 +121,39 @@ public class DialogScreen : GameScreen
     }
 }
 
-public class TimerCi
+public class DamageTimer
 {
-    public TimerCi()
-    {
-        interval = 1;
-        maxDeltaTime = -1;
-    }
-    internal float interval;
-    internal float maxDeltaTime;
+    public float Interval { get; }
+    public float? MaxDeltaTime { get; }
 
-    internal float accumulator;
-    public void Reset()
+    private float _accumulator;
+
+    public DamageTimer(float interval, float? maxDeltaTime = null)
     {
-        accumulator = 0;
+        if (interval <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(interval));
+        }
+
+        Interval = interval;
+        MaxDeltaTime = maxDeltaTime;
     }
+
+    public void Reset() => _accumulator = 0;
+
     public int Update(float dt)
     {
-        accumulator += dt;
-        float constDt = interval;
-        if (maxDeltaTime != -1 && accumulator > maxDeltaTime)
-        {
-            accumulator = maxDeltaTime;
-        }
-        int updates = 0;
-        while (accumulator >= constDt)
-        {
-            updates++;
-            accumulator -= constDt;
-        }
-        return updates;
-    }
+        if (dt < 0)
+            return 0; // or throw, depending on your engine philosophy
 
-    internal static TimerCi Create(int interval_, int maxDeltaTime_)
-    {
-        TimerCi timer = new()
-        {
-            interval = interval_,
-            maxDeltaTime = maxDeltaTime_
-        };
-        return timer;
+        _accumulator += dt;
+
+        if (MaxDeltaTime.HasValue && _accumulator > MaxDeltaTime.Value)
+            _accumulator = MaxDeltaTime.Value;
+
+        int updates = (int)(_accumulator / Interval);
+        _accumulator -= updates * Interval;
+
+        return updates;
     }
 }

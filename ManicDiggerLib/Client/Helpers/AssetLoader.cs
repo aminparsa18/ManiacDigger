@@ -43,25 +43,18 @@ public class AssetLoader
 
             foreach (string file in Directory.GetFiles(path, "*.*", SearchOption.AllDirectories))
             {
-                try
-                {
-                    FileInfo f = new(file);
-                    if (f.Name.Equals("thumbs.db", StringComparison.InvariantCultureIgnoreCase))
-                        continue;
+                FileInfo f = new(file);
+                if (f.Name.Equals("thumbs.db", StringComparison.InvariantCultureIgnoreCase))
+                    continue;
 
-                    byte[] data = File.ReadAllBytes(file);
-                    assets.Add(new Asset
-                    {
-                        data = data,
-                        dataLength = data.Length,
-                        name = f.Name.ToLowerInvariant(),
-                        md5 = ComputeMd5(data)
-                    });
-                }
-                catch
+                byte[] data = File.ReadAllBytes(file);
+                assets.Add(new Asset
                 {
-                    // Skip unreadable files.
-                }
+                    data = data,
+                    dataLength = data.Length,
+                    name = f.Name.ToLowerInvariant(),
+                    md5 = ComputeMd5(data)
+                });
             }
         }
 

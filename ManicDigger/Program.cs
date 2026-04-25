@@ -7,19 +7,9 @@ public class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
-        File.WriteAllText("crash.txt", e.ExceptionObject.ToString());
-
         CrashReporter.DefaultFileName = "ManicDiggerClientCrash.txt";
         CrashReporter.EnableGlobalExceptionHandling(isConsole: false);
-        try
-        {
-            _ = new Program(args);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-        }
+        _ = new Program(args);
     }
 
     public Program(string[] args)
@@ -87,37 +77,37 @@ public class Program
         Log.Debug("Single-player server thread started");
         //try
         //{
-            DummyNetServer netServer = new(dummyNetwork);
+        DummyNetServer netServer = new(dummyNetwork);
 
-            Server server = new()
+        Server server = new()
+        {
+            SaveFilenameOverride = savefilename,
+            exit = exit,
+            mainSockets = new NetServer[3]
+        };
+        server.mainSockets[0] = netServer;
+
+        while (true)
+        {
+            server.Process();
+            Thread.Sleep(1);
+            platform.singlePlayerServerLoaded = true;
+
+            if (exit?.GetExit() == true)
             {
-                SaveFilenameOverride = savefilename,
-                exit = exit,
-                mainSockets = new NetServer[3]
-            };
-            server.mainSockets[0] = netServer;
-
-            while (true)
-            {
-                server.Process();
-                Thread.Sleep(1);
-                platform.singlePlayerServerLoaded = true;
-
-                if (exit?.GetExit() == true)
-                {
-                    server.Stop();
-                    break;
-                }
-
-                if (platform.singlepLayerServerExit)
-                {
-                    server.Exit();
-                    platform.singlepLayerServerExit = false;
-                }
+                server.Stop();
+                break;
             }
 
-            exit.SetExit(false);
-            Log.Debug("Single-player server thread stopped cleanly");
+            if (platform.singlepLayerServerExit)
+            {
+                server.Exit();
+                platform.singlepLayerServerExit = false;
+            }
+        }
+
+        exit.SetExit(false);
+        Log.Debug("Single-player server thread stopped cleanly");
         //}
         //catch (Exception ex)
         //{

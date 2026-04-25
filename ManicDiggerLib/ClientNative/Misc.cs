@@ -112,39 +112,29 @@ public class CrashReporter
     public void Crash(Exception? exCrash)
     {
         // 1. Log to file via Serilog
-        try
+        m_logger.Fatal(exCrash, "Critical error — application is terminating");
+
+        // Walk inner exceptions so each gets its own structured entry
+        for (Exception? inner = exCrash?.InnerException; inner != null; inner = inner.InnerException)
+            m_logger.Fatal(inner, "Inner exception");
+
+        // 2. Run caller-supplied cleanup (with timeout)
+        RunOnCrashCallback();
+
+        // 3. Flush — critical for async sinks so nothing is lost before Exit()
+        (m_logger as IDisposable)?.Dispose();
+
+        // 4. Tell the user
+        string summary = BuildSummary(exCrash);
+        DisplayToUser(summary);
+
+        if (s_isConsole)
         {
-            m_logger.Fatal(exCrash, "Critical error — application is terminating");
-
-            // Walk inner exceptions so each gets its own structured entry
-            for (Exception? inner = exCrash?.InnerException; inner != null; inner = inner.InnerException)
-                m_logger.Fatal(inner, "Inner exception");
-
-            // 2. Run caller-supplied cleanup (with timeout)
-            RunOnCrashCallback();
-
-            // 3. Flush — critical for async sinks so nothing is lost before Exit()
-            (m_logger as IDisposable)?.Dispose();
+            Console.WriteLine("Press any key to shut down...");
+            Console.ReadLine();
         }
-        catch (Exception logEx)
-        {
-            // Logging itself failed — last resort: stderr
-            Console.Error.WriteLine("CrashReporter: failed to write log: " + logEx);
-        }
-        finally
-        {
-            // 4. Tell the user
-            string summary = BuildSummary(exCrash);
-            DisplayToUser(summary);
 
-            if (s_isConsole)
-            {
-                Console.WriteLine("Press any key to shut down...");
-                Console.ReadLine();
-            }
-
-            Environment.Exit(1);
-        }
+        Environment.Exit(1);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -177,23 +167,17 @@ public class CrashReporter
 
     private static void DisplayToUser(string message)
     {
-        try
+        if (s_isConsole)
         {
-            if (s_isConsole)
-            {
-                Console.Error.WriteLine(message);
-            }
-            else
-            {
-                // Nudge the cursor visible in case the game hid it
-                for (int i = 0; i < 3; i++) { Cursor.Show(); Thread.Sleep(50); Application.DoEvents(); }
-                MessageBox.Show(message, "Critical Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            Console.Error.WriteLine(message);
         }
-        catch
+        else
         {
-            // If the UI is broken we can't do much — the log file is the safety net
+            // Nudge the cursor visible in case the game hid it
+            for (int i = 0; i < 3; i++) { Cursor.Show(); Thread.Sleep(50); Application.DoEvents(); }
+            MessageBox.Show(message, "Critical Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+
     }
 }
 
@@ -204,17 +188,12 @@ public static class GameStorePath
     public static string GetStorePath()
     {
         string apppath = Path.GetDirectoryName(Application.ExecutablePath);
-        try
+        var di = new DirectoryInfo(apppath);
+        if (di.Name.Equals("AutoUpdaterTemp", StringComparison.InvariantCultureIgnoreCase))
         {
-            var di = new DirectoryInfo(apppath);
-            if (di.Name.Equals("AutoUpdaterTemp", StringComparison.InvariantCultureIgnoreCase))
-            {
-                apppath = di.Parent.FullName;
-            }
+            apppath = di.Parent.FullName;
         }
-        catch
-        {
-        }
+
         string mdfolder = "UserData";
         if (apppath.Contains(
             Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)) && !IsMono)

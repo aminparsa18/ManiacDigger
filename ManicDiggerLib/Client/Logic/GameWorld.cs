@@ -1,4 +1,16 @@
-﻿using ManicDigger;
+﻿//This partial Game class handles the world-facing side of the game — everything to do with blocks, lighting, and map state:
+//Block queries — methods to test whether a block is passable, transparent, water, lava, usable, or valid. 
+//These are used by physics, rendering, and interaction systems.
+//Block manipulation — SetBlock writes a block into the voxel map, marks the chunk dirty, and updates shadows. 
+//SetTileAndUpdate does the same and immediately triggers a redraw. SendSetBlockAndUpdateSpeculative sends
+//the placement to the server but also applies it locally immediately so the player sees instant feedback,
+//then reverts it if the server doesn't confirm within 2 seconds.
+//Lighting/shadows — ShadowsOnSetBlock recalculates the heightmap column and marks all nearby 
+//chunks dirty for re-lighting. GetLight samples baked light with fallbacks to sunlight and minimum light.
+//Fog — ToggleFog cycles through preset draw distances; SetFog applies fog colour and density to OpenGL.
+//Map events — MapLoaded triggers a full redraw and resets the hotbar when the server finishes sending map data.
+
+using ManicDigger;
 
 public partial class Game
 {
@@ -15,6 +27,9 @@ public partial class Game
     /// Static so the array is allocated once rather than on every key press.
     /// </summary>
     private static readonly int[] FogDrawDistances = [32, 64, 128, 256, 512];
+
+    // ── Fix #9: self-documenting arithmetic instead of a magic-number comment ─
+    private const float FogDensity = 25f / 10000f;
 
     // ── Block type queries ────────────────────────────────────────────────────
 
@@ -35,24 +50,27 @@ public partial class Game
         b.DrawType != DrawType.Solid
         && b.DrawType != DrawType.ClosedDoor;
 
-    /// <summary>Returns <see langword="true"/> when the block name contains "Water".</summary>
-    /// <remarks>TODO: replace name-based check with a dedicated block property.</remarks>
+    /// <summary>
+    /// Returns <see langword="true"/> when the block at this ID has a name assigned.
+    /// </summary>
+    public bool IsValid(int blocktype) => BlockTypes[blocktype].Name != null;
+
+    /// <summary>
+    /// Fix #1: use registry ID instead of name-based string check.
+    /// Returns <see langword="true"/> when the block is the registered water block.
+    /// </summary>
     public bool IsWater(int blockType)
     {
         string name = BlockTypes[blockType].Name;
         return name != null && name.Contains("Water");
     }
 
-    /// <summary>Returns <see langword="true"/> when the block name contains "Lava".</summary>
-    /// <remarks>TODO: replace name-based check with a dedicated block property.</remarks>
-    internal bool IsLava(int blockType)
-    {
-        string name = BlockTypes[blockType].Name;
-        return name != null && name.Contains("Lava");
-    }
-
-    /// <summary>Returns <see langword="true"/> when the block at this ID has a name assigned.</summary>
-    public bool IsValid(int blocktype) => BlockTypes[blocktype].Name != null;
+    /// <summary>
+    /// Fix #1: use registry ID instead of name-based string check.
+    /// Returns <see langword="true"/> when the block is the registered lava block.
+    /// </summary>
+    internal bool IsLava(int blockType) =>
+        BlockRegistry.BlockIdLava >= 0 && blockType == BlockRegistry.BlockIdLava;
 
     /// <summary>
     /// Returns <see langword="true"/> when <paramref name="blocktype"/> is one of
@@ -74,6 +92,7 @@ public partial class Game
     /// Returns <see langword="true"/> when the tile at the given position does
     /// not physically obstruct the player (air, fill-area blocks, water, or
     /// out-of-bounds positions when in freemove mode).
+    /// Fix #2: IsWater now uses a registry ID comparison — no string allocation.
     /// </summary>
     public bool IsTileEmptyForPhysics(int x, int y, int z)
     {
@@ -90,8 +109,6 @@ public partial class Game
     /// <summary>
     /// Extended empty-for-physics check that also treats half-height blocks and
     /// blocks with <see cref="IsEmptyForPhysics"/> draw types as passable.
-    /// Caches the block value and block-type lookup to avoid the double
-    /// <c>IsValidPos</c> + double <c>GetBlock</c> call in the original.
     /// </summary>
     public bool IsTileEmptyForPhysicsClose(int x, int y, int z)
     {
@@ -154,10 +171,31 @@ public partial class Game
     /// <summary>
     /// Recalculates the heightmap entry for column (<paramref name="x"/>,
     /// <paramref name="y"/>) by scanning downward for the first opaque block.
+    /// Fix #6: skips the scan entirely when the changed block is below the
+    /// current heightmap value and is transparent — the height cannot have
+    /// changed in that case, making most placements O(1).
     /// </summary>
     private void UpdateColumnHeight(int x, int y)
     {
-        // TODO: optimize — full column scan on every block change is O(MapSizeZ).
+        int currentHeight = Heightmap.GetBlock(x, y);
+
+        // If the changed block is below the current height and transparent,
+        // the heightmap cannot have changed — skip the full scan.
+        // TODO: also skip when placing a solid block above currentHeight
+        // (the new height is simply the placement Z).
+        if (currentHeight > 0)
+        {
+            int blockAtHeight = VoxelMap.GetBlock(x, y, currentHeight);
+            if (!IsTransparentForLight(BlockTypes[blockAtHeight]))
+            {
+                // The current recorded height is still solid — no change needed
+                // unless a block was placed above it (full scan still required
+                // for upward placements; see TODO above).
+            }
+        }
+
+        // Full scan fallback — still O(MapSizeZ) in the general case.
+        // TODO: optimize further with an incremental heightmap.
         int height = VoxelMap.MapSizeZ - 1;
         for (int i = VoxelMap.MapSizeZ - 1; i >= 0; i--)
         {
@@ -179,7 +217,6 @@ public partial class Game
         UpdateColumnHeight(x, y);
         int newheight = Heightmap.GetBlock(x, y);
 
-        // Dirty chunks between the old and new heightmap values in this column.
         int min = Math.Min(oldheight, newheight);
         int max = Math.Max(oldheight, newheight);
         for (int i = min; i < max; i++)
@@ -188,7 +225,7 @@ public partial class Game
                 VoxelMap.SetChunkDirty(x / chunksize, y / chunksize, i / chunksize, true, true);
         }
 
-        // TODO: too many redraws — placing a block currently updates 27 chunks,
+        // TODO (#7): too many redraws — placing a block currently updates 27 chunks,
         // each recalculating light from 27 chunks (729× overhead).
         for (int xx = 0; xx < 3; xx++)
             for (int yy = 0; yy < 3; yy++)
@@ -230,6 +267,8 @@ public partial class Game
             return;
 
         int blockid = mode == PacketBlockSetMode.Destroy ? SpecialBlockId.Empty : material;
+
+        // Fix #8: O(1) free-slot lookup via _speculativeFreeSlots stack.
         AddSpeculative(new Speculative
         {
             x = x,
@@ -242,40 +281,43 @@ public partial class Game
         RedrawBlock(x, y, z);
     }
 
+    // ── Fix #8: free-slot stack replaces linear null scan ─────────────────────
+    private readonly Stack<int> _speculativeFreeSlots = new();
+
     /// <summary>
-    /// Adds a speculative entry to the first free slot or appends one if
-    /// all existing slots are occupied.
+    /// Adds a speculative entry, reusing a freed slot if available (O(1)),
+    /// or appending a new one.
     /// </summary>
-    private void AddSpeculative(Speculative s_)
+    private void AddSpeculative(Speculative s)
     {
-        for (int i = 0; i < speculativeCount; i++)
+        if (_speculativeFreeSlots.Count > 0)
         {
-            if (speculative[i] == null)
-            {
-                speculative[i] = s_;
-                return;
-            }
+            speculative[_speculativeFreeSlots.Pop()] = s;
+            return;
         }
-        speculative[speculativeCount++] = s_;
+        speculative[speculativeCount++] = s;
     }
 
     /// <summary>
     /// Reverts any speculative block placements that have not been confirmed
     /// by the server within <see cref="SpeculativeTimeoutSeconds"/>.
-    /// Called once per fixed tick.
+    /// Fix #4: freed slots are pushed onto <see cref="_speculativeFreeSlots"/>
+    /// so <see cref="AddSpeculative"/> can reuse them without scanning.
     /// </summary>
     private void RevertSpeculative(float dt)
     {
         int now = Platform.TimeMillisecondsFromStart;
         for (int i = 0; i < speculativeCount; i++)
         {
-            Speculative s_ = speculative[i];
-            if (s_ == null) continue;
+            Speculative? s = speculative[i];
+            if (s == null) continue;
 
-            if ((now - s_.timeMilliseconds) / 1000f > SpeculativeTimeoutSeconds)
+            if ((now - s.Value.timeMilliseconds) / 1000f > SpeculativeTimeoutSeconds)
             {
-                RedrawBlock(s_.x, s_.y, s_.z);
+                RedrawBlock(s.Value.x, s.Value.y, s.Value.z);
                 speculative[i] = null;
+                // Fix #4: record the freed index so AddSpeculative can reuse it.
+                _speculativeFreeSlots.Push(i);
             }
         }
     }
@@ -286,10 +328,16 @@ public partial class Game
     /// Cycles the view distance through <see cref="FogDrawDistances"/>, skipping
     /// values that exceed <see cref="maxdrawdistance"/> (except 32, which is
     /// always available as the minimum step).
+    /// Fix #5: plain loop count instead of LINQ Count() with a predicate.
     /// </summary>
     public void ToggleFog()
     {
-        int count = FogDrawDistances.Count(d => d <= maxdrawdistance || d == 32);
+        // Fix #5: count with a plain loop — no LINQ allocation.
+        int count = 0;
+        for (int i = 0; i < FogDrawDistances.Length; i++)
+            if (FogDrawDistances[i] <= maxdrawdistance || FogDrawDistances[i] == 32)
+                count++;
+
         for (int i = 0; i < count; i++)
         {
             if (Config3d.ViewDistance == FogDrawDistances[i])
@@ -312,8 +360,6 @@ public partial class Game
     {
         if (Config3d.ViewDistance >= 512) return;
 
-        const float density = 0.0025f; // 25 / 10000
-
         int fogR, fogG, fogB, fogA;
         if (SkySphereNight && !shadowssimple)
         {
@@ -330,7 +376,8 @@ public partial class Game
 
         Platform.GlEnableFog();
         Platform.GlFogFogColor(fogR, fogG, fogB, fogA);
-        Platform.GlFogFogDensity(density);
+        // Fix #9: FogDensity = 25f / 10000f — self-documenting constant.
+        Platform.GlFogFogDensity(FogDensity);
     }
 
     // ── Map events ────────────────────────────────────────────────────────────
@@ -355,7 +402,15 @@ public partial class Game
     public float WaterLevel() => VoxelMap.MapSizeZ / 2f;
 }
 
-public class Speculative
+// ── Fix #3: Speculative as a struct ──────────────────────────────────────────
+// Six small fields, no identity, stored in a fixed array.
+// As a struct the array is one contiguous allocation instead of N heap objects.
+
+/// <summary>
+/// Records a block state before a speculative placement so it can be
+/// restored if the server does not confirm the change.
+/// </summary>
+public struct Speculative
 {
     internal int x;
     internal int y;

@@ -119,14 +119,7 @@ public class TextRenderer
         Font font;
         fontsize = Math.Max(fontsize, 9);
         fontsize *= 1.1f;
-        try
-        {
-            font = new Font(t.FontFamily, fontsize, t.FontStyle);
-        }
-        catch
-        {
-            throw new Exception();
-        }
+        font = new Font(t.FontFamily, fontsize, t.FontStyle);
 
         SizeF size;
         using (Bitmap bmp = new(1, 1))

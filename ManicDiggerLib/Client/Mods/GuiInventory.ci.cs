@@ -407,8 +407,8 @@ public class ModGuiInventory : ModBase
         screenposY = Math.Clamp(screenposY, h + 20, platform.GetCanvasHeight() - (h + 20));
 
         // Black border, grey fill.
-        game.Draw2dTexture(game.WhiteTexture(), screenposX - w, screenposY - h, w, h, null, 0, ColorUtils.ColorFromArgb(255, 0, 0, 0), false);
-        game.Draw2dTexture(game.WhiteTexture(), screenposX - w + 2, screenposY - h + 2, w - 4, h - 4, null, 0, ColorUtils.ColorFromArgb(255, 105, 105, 105), false);
+        game.Draw2dTexture(game.GetOrCreateWhiteTexture(), screenposX - w, screenposY - h, w, h, null, 0, ColorUtils.ColorFromArgb(255, 0, 0, 0), false);
+        game.Draw2dTexture(game.GetOrCreateWhiteTexture(), screenposX - w + 2, screenposY - h + 2, w - 4, h - 4, null, 0, ColorUtils.ColorFromArgb(255, 105, 105, 105), false);
 
         game.Draw2dText(dataItems.ItemInfo(item),
             new Font("Arial", 10),
@@ -460,7 +460,7 @@ public class ModGuiInventory : ModBase
                     ? ColorUtils.ColorFromArgb(100, 255, 0, 0)   // red — blocked
                     : ColorUtils.ColorFromArgb(100, 0, 255, 0);  // green — free
 
-                game.Draw2dTexture(game.WhiteTexture(),
+                game.Draw2dTexture(game.GetOrCreateWhiteTexture(),
                     cellInPage.Value.X * CellDrawSize + CellsStartX(),
                     cellInPage.Value.Y * CellDrawSize + CellsStartY(),
                     CellDrawSize * sizex, CellDrawSize * sizey,
@@ -479,7 +479,7 @@ public class ModGuiInventory : ModBase
                 ? ColorUtils.ColorFromArgb(100, 0, 255, 0)   // green — can equip
                 : ColorUtils.ColorFromArgb(100, 255, 0, 0);  // red — cannot equip
 
-            game.Draw2dTexture(game.WhiteTexture(),
+            game.Draw2dTexture(game.GetOrCreateWhiteTexture(),
                 origin.X, origin.Y,
                 CellDrawSize * cells.X, CellDrawSize * cells.Y,
                 null, 0, color, false);

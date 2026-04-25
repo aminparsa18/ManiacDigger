@@ -105,31 +105,19 @@ public sealed class TcpNetConnection : NetConnection
     /// </summary>
     internal async Task RunAsync()
     {
-        try
-        {
-            _tcp = new TcpClient { NoDelay = true };
-            await _tcp.ConnectAsync(_ip, _port, _ct);
-            _stream = _tcp.GetStream();
+        _tcp = new TcpClient { NoDelay = true };
+        await _tcp.ConnectAsync(_ip, _port, _ct);
+        _stream = _tcp.GetStream();
 
-            // Flush messages that were sent before the connection was ready.
-            while (_pendingSend.TryRead(out ReadOnlyMemory<byte> queued))
-                await WriteFramedAsync(queued);
+        // Flush messages that were sent before the connection was ready.
+        while (_pendingSend.TryRead(out ReadOnlyMemory<byte> queued))
+            await WriteFramedAsync(queued);
 
-            // Receive loop and drain of any further sends run concurrently.
-            await Task.WhenAll(ReceiveLoopAsync(), SendLoopAsync());
-        }
-        catch (OperationCanceledException)
-        {
-            // Clean shutdown — caller called Disconnect().
-        }
-        catch (Exception ex)
-        {
-        }
-        finally
-        {
-            _tcp?.Close();
-            _inbox.TryComplete();
-        }
+        // Receive loop and drain of any further sends run concurrently.
+        await Task.WhenAll(ReceiveLoopAsync(), SendLoopAsync());
+
+        _tcp?.Close();
+        _inbox.TryComplete();
     }
 
     private async Task ReceiveLoopAsync()

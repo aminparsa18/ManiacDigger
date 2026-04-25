@@ -33,7 +33,7 @@ public class ModGuiTextEditor : GameScreen
     {
         if (!visible) return;
 
-        game.Draw2dTexture(game.WhiteTexture(), StartX, StartY, MaxColumns * CharSize, MaxLines * CharSize, null, 0, BackgroundColor, false);
+        game.Draw2dTexture(game.GetOrCreateWhiteTexture(), StartX, StartY, MaxColumns * CharSize, MaxLines * CharSize, null, 0, BackgroundColor, false);
 
         for (int i = 0; i < MaxLines; i++)
             game.Draw2dText(LineToString(buffer[i]), Font, StartX, StartY + CharSize * i, null, false);

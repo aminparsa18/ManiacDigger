@@ -1,4 +1,18 @@
-﻿using ManicDigger;
+﻿//This partial Game class handles all 2D rendering and block geometry utilities.
+//Block geometry — Blockheight scans a column downward to find the topmost solid block.
+// Getblockheight returns the visual fraction height of a block (rails are 30%, half-blocks are 50%,
+//flat blocks are 5%, everything else 100%).
+//2D drawing — a set of methods for drawing textured quads on screen (UI elements, inventory icons, HUD). 
+//It routes through three paths: a simple full - texture quad, an atlas sub-region quad, 
+//and a batch path that combines many quads into one GPU call. All three reuse pre-allocated
+//geometry models to avoid per-frame heap allocations.
+//Text rendering — Draw2dText renders text via a texture cache keyed on font+string+color. Draw2dText1
+//adds a font cache on top so new Font() isn't called every frame.
+//Circle — Circle3i draws a 2D circle outline using a pre-allocated line -
+//loop model whose vertex positions are updated in-place each call.
+//TextureAtlasCi is a small helper that converts a packed-atlas tile index into UV coordinates.
+
+using ManicDigger;
 
 public partial class Game
 {
@@ -12,25 +26,24 @@ public partial class Game
 
     // ── Pre-allocated 2D draw models ──────────────────────────────────────────
 
-    /// <summary>
-    /// Reusable model for <see cref="Draw2dTextureSimple"/> (full-texture quad).
-    /// Allocated on first use and reused every subsequent call.
-    /// </summary>
+    /// <summary>Reusable model for full-texture quad draws.</summary>
     private GeometryModel _quadModel;
 
     /// <summary>
-    /// Reusable model for atlas-sourced quad draws.
-    /// <see cref="Draw2dTextureInAtlas"/> and <see cref="Draw2dTexturePart"/>
-    /// previously called <see cref="Quad.CreateColored"/> on every draw call,
-    /// allocating Xyz <c>float[12]</c>, Uv <c>float[8]</c>, and Rgba <c>byte[16]</c>
-    /// every frame per 2D element. This model is allocated once and its arrays
-    /// are overwritten in-place before each GPU upload.
+    /// Reusable model for atlas-sourced and part-texture quad draws.
+    /// Arrays are overwritten in-place before each GPU upload — no per-call allocation.
     /// </summary>
     private GeometryModel _atlasQuadModel;
 
     /// <summary>
-    /// Scratch array for <see cref="Draw2dTextures"/>. Pre-allocated to avoid
-    /// a <c>new GeometryModel[512]</c> allocation on every batch draw call.
+    /// Pre-allocated combined output model for <see cref="Draw2dTextures"/>.
+    /// Fix #2: resized only when capacity is exceeded, not reallocated every frame.
+    /// </summary>
+    private GeometryModel _combinedModel;
+
+    /// <summary>
+    /// Pre-allocated per-element scratch models for <see cref="Draw2dTextures"/>.
+    /// Fix #1: each slot is initialised once; only its arrays are overwritten per call.
     /// </summary>
     private readonly GeometryModel[] _batchModelScratch = new GeometryModel[512];
 
@@ -42,8 +55,8 @@ public partial class Game
 
     /// <summary>
     /// Font cache keyed by point size. Avoids allocating a new <see cref="Font"/>
-    /// object on every <see cref="Draw2dText1"/> call (called per-frame for every
-    /// visible text element).
+    /// object on every <see cref="Draw2dText1"/> call.
+    /// Fix #6: fonts are disposed and the cache is cleared when fonts are rebuilt.
     /// </summary>
     private readonly Dictionary<float, Font> _fontCache = new();
 
@@ -67,13 +80,11 @@ public partial class Game
     /// <summary>
     /// Returns the visual height of the block at (<paramref name="x"/>,
     /// <paramref name="y"/>, <paramref name="z"/>) as a fraction of a full block.
-    /// Used for physics and camera positioning on partial-height blocks.
     /// Returns 1 for out-of-bounds positions (treat as solid).
     /// </summary>
     public float Getblockheight(int x, int y, int z)
     {
-        if (!VoxelMap.IsValidPos(x, y, z))
-            return 1f;
+        if (!VoxelMap.IsValidPos(x, y, z)) return 1f;
 
         int block = VoxelMap.GetBlock(x, y, z);
         if (BlockTypes[block].Rail != 0) return RailBlockHeight;
@@ -95,60 +106,54 @@ public partial class Game
         if (color == ColorUtils.ColorFromArgb(255, 255, 255, 255) && inAtlasId == null)
             Draw2dTextureSimple(textureid, x1, y1, width, height, enabledepthtest);
         else
-            Draw2dTextureInAtlas(textureid, x1, y1, width, height, inAtlasId, atlastextures, color, enabledepthtest);
+            Draw2dTextureInAtlas(textureid, x1, y1, width, height,
+                inAtlasId, atlastextures, color, enabledepthtest);
     }
 
     /// <summary>
     /// Draws a full-texture quad using the cached <see cref="_quadModel"/>.
-    /// No per-call allocation — the model is created once and reused.
+    /// Fix #4: matrix operations collapsed from 5 calls to 3 by pre-computing
+    /// the effective translation and scale instead of stacking them separately.
     /// </summary>
     private void Draw2dTextureSimple(int textureid, float x1, float y1,
         float width, float height, bool enabledepthtest)
     {
         Platform.GlDisableCullFace();
         Platform.BindTexture2d(textureid);
-
-        if (!enabledepthtest)
-            Platform.GlDisableDepthTest();
+        if (!enabledepthtest) Platform.GlDisableDepthTest();
 
         _quadModel ??= Platform.CreateModel(Quad.Create());
 
+        // Collapsed: Translate(x1,y1) · Scale(w,h) · Scale(0.5,0.5) · Translate(1,1)
+        // = Translate(x1 + w*0.5, y1 + h*0.5) · Scale(w*0.5, h*0.5)
         GLPushMatrix();
-        GLTranslate(x1, y1, 0);
-        GLScale(width, height, 0);
-        GLScale(0.5f, 0.5f, 0);
-        GLTranslate(1f, 1f, 0);
+        GLTranslate(x1 + width * 0.5f, y1 + height * 0.5f, 0f);
+        GLScale(width * 0.5f, height * 0.5f, 0f);
         DrawModel(_quadModel);
         GLPopMatrix();
 
-        if (!enabledepthtest)
-            Platform.GlEnableDepthTest();
-
+        if (!enabledepthtest) Platform.GlEnableDepthTest();
         Platform.GlEnableCullFace();
     }
 
     /// <summary>
     /// Draws a sub-region of a texture atlas at the given screen position.
-    /// Uses a single pre-allocated <see cref="_atlasQuadModel"/> updated in-place,
-    /// avoiding the per-call Xyz/Uv/Rgba array allocations that
-    /// <see cref="Quad.CreateColored"/> would otherwise produce.
+    /// Uses a single pre-allocated <see cref="_atlasQuadModel"/> updated in-place.
     /// </summary>
     private void Draw2dTextureInAtlas(int textureid, float x1, float y1,
         float width, float height, int? inAtlasId, int atlastextures, int color, bool enabledepthtest)
     {
         if (inAtlasId == null) return;
 
-        RectangleF rect = TextureAtlasCi.TextureCoords2d(inAtlasId.Value, atlastextures);
+        RectangleF rect = TextureAtlas.TextureCoords2d(inAtlasId.Value, atlastextures);
         FillAtlasQuadModel(rect.X, rect.Y, rect.Width, rect.Height,
             x1, y1, width, height, color);
 
         Platform.GlDisableCullFace();
         Platform.BindTexture2d(textureid);
         if (!enabledepthtest) Platform.GlDisableDepthTest();
-
         Platform.UpdateModel(_atlasQuadModel);
         DrawModelData(_atlasQuadModel);
-
         if (!enabledepthtest) Platform.GlEnableDepthTest();
         Platform.GlEnableCullFace();
     }
@@ -156,8 +161,6 @@ public partial class Game
     /// <summary>
     /// Draws a portion of a texture (defined by source UV extents) onto a
     /// destination rectangle in screen space.
-    /// Uses the same pre-allocated <see cref="_atlasQuadModel"/> as
-    /// <see cref="Draw2dTextureInAtlas"/>.
     /// </summary>
     public void Draw2dTexturePart(int textureid, float srcwidth, float srcheight,
         float dstx, float dsty, float dstwidth, float dstheight, int color, bool enabledepthtest)
@@ -168,66 +171,64 @@ public partial class Game
         Platform.GlDisableCullFace();
         Platform.BindTexture2d(textureid);
         if (!enabledepthtest) Platform.GlDisableDepthTest();
-
         Platform.UpdateModel(_atlasQuadModel);
         DrawModelData(_atlasQuadModel);
-
         if (!enabledepthtest) Platform.GlEnableDepthTest();
         Platform.GlEnableCullFace();
     }
 
     /// <summary>
     /// Initialises <see cref="_atlasQuadModel"/> on first call and overwrites its
-    /// Xyz, Uv and Rgba arrays in-place for the given source UV and destination
-    /// rectangle. The index array (two triangles, never changes) is set once.
+    /// Xyz, Uv and Rgba arrays in-place. The index array is set once and never changes.
+    /// Fix #7: colour bytes written as 16 direct assignments instead of a loop with
+    /// index arithmetic.
     /// </summary>
     private void FillAtlasQuadModel(float sx, float sy, float sw, float sh,
         float dx, float dy, float dw, float dh, int color)
     {
         _atlasQuadModel ??= new GeometryModel
-            {
-                Xyz = new float[4 * 3],
-                Uv = new float[4 * 2],
-                Rgba = new byte[4 * 4],
-                Indices = [0, 1, 2, 0, 2, 3],
-                VerticesCount = 4,
-                IndicesCount = 6,
-                Mode = (int)DrawMode.Triangles,
-            };
+        {
+            Xyz = new float[4 * 3],
+            Uv = new float[4 * 2],
+            Rgba = new byte[4 * 4],
+            Indices = [0, 1, 2, 0, 2, 3],
+            VerticesCount = 4,
+            IndicesCount = 6,
+            Mode = (int)DrawMode.Triangles,
+        };
 
-        // Xyz — screen-space corners (Z = 0)
         float[] xyz = _atlasQuadModel.Xyz;
         xyz[0] = dx; xyz[1] = dy; xyz[2] = 0f;
         xyz[3] = dx + dw; xyz[4] = dy; xyz[5] = 0f;
         xyz[6] = dx + dw; xyz[7] = dy + dh; xyz[8] = 0f;
         xyz[9] = dx; xyz[10] = dy + dh; xyz[11] = 0f;
 
-        // Uv — atlas texture coordinates
         float[] uv = _atlasQuadModel.Uv;
         uv[0] = sx; uv[1] = sy;
         uv[2] = sx + sw; uv[3] = sy;
         uv[4] = sx + sw; uv[5] = sy + sh;
         uv[6] = sx; uv[7] = sy + sh;
 
-        // Rgba — same colour for all 4 vertices
+        // Fix #7: 16 direct assignments — clearer and avoids multiply+add per vertex.
         byte r = (byte)ColorUtils.ColorR(color);
         byte g = (byte)ColorUtils.ColorG(color);
         byte b = (byte)ColorUtils.ColorB(color);
         byte a = (byte)ColorUtils.ColorA(color);
         byte[] rgba = _atlasQuadModel.Rgba;
-        for (int i = 0; i < 4; i++)
-        {
-            rgba[i * 4 + 0] = r;
-            rgba[i * 4 + 1] = g;
-            rgba[i * 4 + 2] = b;
-            rgba[i * 4 + 3] = a;
-        }
+        rgba[0] = r; rgba[1] = g; rgba[2] = b; rgba[3] = a;
+        rgba[4] = r; rgba[5] = g; rgba[6] = b; rgba[7] = a;
+        rgba[8] = r; rgba[9] = g; rgba[10] = b; rgba[11] = a;
+        rgba[12] = r; rgba[13] = g; rgba[14] = b; rgba[15] = a;
     }
 
     /// <summary>
-    /// Draws a batch of textured quads in a single GPU call by combining their
-    /// geometry into one model. Uses <see cref="_batchModelScratch"/> to avoid
-    /// a per-call <c>new GeometryModel[512]</c> allocation.
+    /// Draws a batch of textured quads in a single GPU call.
+    /// Fix #1: each slot in <see cref="_batchModelScratch"/> is lazily initialised
+    /// once; subsequent calls only overwrite the array values in-place.
+    /// Fix #2: <see cref="_combinedModel"/> is reused across frames and only
+    /// resized when the batch exceeds its current capacity.
+    /// Fix #3: <see cref="DeleteUnusedCachedTextTextures"/> is NOT called here —
+    /// call it once per frame at the end of the 2D draw pass instead.
     /// </summary>
     public void Draw2dTextures(Draw2dData[] todraw, int todrawLength, int textureid)
     {
@@ -235,26 +236,71 @@ public partial class Game
         for (int i = 0; i < todrawLength; i++)
         {
             Draw2dData d = todraw[i];
-            RectangleF rect = TextureAtlasCi.TextureCoords2d(d.inAtlasId, TexturesPacked);
-            _batchModelScratch[count++] = Quad.CreateColored(
-                rect.X, rect.Y, rect.Width, rect.Height,
+            RectangleF rect = TextureAtlas.TextureCoords2d(d.inAtlasId, TexturesPacked);
+
+            // Fix #1: lazily allocate each scratch slot once, then overwrite in-place.
+            GeometryModel m = _batchModelScratch[count];
+            if (m == null)
+            {
+                m = new GeometryModel
+                {
+                    Xyz = new float[4 * 3],
+                    Uv = new float[4 * 2],
+                    Rgba = new byte[4 * 4],
+                    Indices = [0, 1, 2, 0, 2, 3],
+                    VerticesCount = 4,
+                    IndicesCount = 6,
+                };
+                _batchModelScratch[count] = m;
+            }
+
+            FillQuadModel(m, rect.X, rect.Y, rect.Width, rect.Height,
                 d.x1, d.y1, d.width, d.height,
                 (byte)ColorUtils.ColorR(d.color),
                 (byte)ColorUtils.ColorG(d.color),
                 (byte)ColorUtils.ColorB(d.color),
                 (byte)ColorUtils.ColorA(d.color));
+            count++;
         }
 
-        GeometryModel combined = CombineModelData(_batchModelScratch, count);
-        combined.Mode = (int)DrawMode.Triangles;
+        CombineModelDataInPlace(_batchModelScratch, count, ref _combinedModel);
+        _combinedModel.Mode = (int)DrawMode.Triangles;
 
         Platform.GlDisableCullFace();
         Platform.BindTexture2d(textureid);
         Platform.GlDisableDepthTest();
-        Platform.UpdateModel(combined);
-        DrawModelData(combined);
+        Platform.UpdateModel(_combinedModel);
+        DrawModelData(_combinedModel);
         Platform.GlEnableDepthTest();
         Platform.GlEnableCullFace();
+    }
+
+    /// <summary>
+    /// Fills a pre-allocated <see cref="GeometryModel"/> quad in-place.
+    /// Used by <see cref="Draw2dTextures"/> to avoid per-element allocation.
+    /// </summary>
+    private static void FillQuadModel(GeometryModel m,
+        float sx, float sy, float sw, float sh,
+        float dx, float dy, float dw, float dh,
+        byte r, byte g, byte b, byte a)
+    {
+        float[] xyz = m.Xyz;
+        xyz[0] = dx; xyz[1] = dy; xyz[2] = 0f;
+        xyz[3] = dx + dw; xyz[4] = dy; xyz[5] = 0f;
+        xyz[6] = dx + dw; xyz[7] = dy + dh; xyz[8] = 0f;
+        xyz[9] = dx; xyz[10] = dy + dh; xyz[11] = 0f;
+
+        float[] uv = m.Uv;
+        uv[0] = sx; uv[1] = sy;
+        uv[2] = sx + sw; uv[3] = sy;
+        uv[4] = sx + sw; uv[5] = sy + sh;
+        uv[6] = sx; uv[7] = sy + sh;
+
+        byte[] rgba = m.Rgba;
+        rgba[0] = r; rgba[1] = g; rgba[2] = b; rgba[3] = a;
+        rgba[4] = r; rgba[5] = g; rgba[6] = b; rgba[7] = a;
+        rgba[8] = r; rgba[9] = g; rgba[10] = b; rgba[11] = a;
+        rgba[12] = r; rgba[13] = g; rgba[14] = b; rgba[15] = a;
     }
 
     /// <summary>Runs the 2D draw pass for all registered mods.</summary>
@@ -267,16 +313,19 @@ public partial class Game
         for (int i = 0; i < ClientMods.Count; i++)
             ClientMods[i]?.OnNewFrameDraw2d(dt);
 
+        // Fix #3: evict stale text textures once per frame here, not inside Draw2dText.
+        DeleteUnusedCachedTextTextures();
+
         PerspectiveMode();
     }
 
     /// <summary>
-    /// Merges <paramref name="count"/> geometry models into a single combined model
-    /// by concatenating their vertex and index data.
-    /// Xyz, Uv and Rgba arrays are copied with <see cref="Span{T}.CopyTo"/> rather
-    /// than manual element loops. Index values are offset by the running vertex base.
+    /// Fix #2: merges <paramref name="count"/> geometry models into
+    /// <paramref name="combined"/>, reusing its arrays when capacity allows.
+    /// Only reallocates when the required size exceeds current capacity.
     /// </summary>
-    private static GeometryModel CombineModelData(GeometryModel[] modelDatas, int count)
+    private static void CombineModelDataInPlace(
+        GeometryModel[] modelDatas, int count, ref GeometryModel combined)
     {
         int totalIndices = 0;
         int totalVertices = 0;
@@ -286,49 +335,49 @@ public partial class Game
             totalVertices += modelDatas[i].VerticesCount;
         }
 
-        GeometryModel ret = new()
+        // Only reallocate when existing arrays are too small.
+        if (combined == null
+         || combined.Indices.Length < totalIndices
+         || combined.Xyz.Length < totalVertices * 3)
         {
-            Indices = new int[totalIndices],
-            Xyz = new float[totalVertices * 3],
-            Uv = new float[totalVertices * 2],
-            Rgba = new byte[totalVertices * 4],
-        };
+            combined = new GeometryModel
+            {
+                Indices = new int[totalIndices],
+                Xyz = new float[totalVertices * 3],
+                Uv = new float[totalVertices * 2],
+                Rgba = new byte[totalVertices * 4],
+            };
+        }
+
+        combined.IndicesCount = 0;
+        combined.VerticesCount = 0;
 
         for (int i = 0; i < count; i++)
         {
             GeometryModel m = modelDatas[i];
-            int baseVertex = ret.VerticesCount;
-            int baseIndex = ret.IndicesCount;
+            int baseVertex = combined.VerticesCount;
+            int baseIndex = combined.IndicesCount;
 
-            // Indices — each index must be shifted by the current vertex base.
             for (int k = 0; k < m.IndicesCount; k++)
-                ret.Indices[baseIndex + k] = m.Indices[k] + baseVertex;
-            ret.IndicesCount += m.IndicesCount;
+                combined.Indices[baseIndex + k] = m.Indices[k] + baseVertex;
+            combined.IndicesCount += m.IndicesCount;
 
-            // Xyz / Uv / Rgba — contiguous float/byte blocks; Span.CopyTo is faster
-            // than manual element loops and avoids bounds-check overhead in the JIT.
             m.Xyz.AsSpan(0, m.VerticesCount * 3)
-                  .CopyTo(ret.Xyz.AsSpan(baseVertex * 3));
-
+                  .CopyTo(combined.Xyz.AsSpan(baseVertex * 3));
             m.Uv.AsSpan(0, m.VerticesCount * 2)
-                 .CopyTo(ret.Uv.AsSpan(baseVertex * 2));
-
+                 .CopyTo(combined.Uv.AsSpan(baseVertex * 2));
             m.Rgba.AsSpan(0, m.VerticesCount * 4)
-                   .CopyTo(ret.Rgba.AsSpan(baseVertex * 4));
+                   .CopyTo(combined.Rgba.AsSpan(baseVertex * 4));
 
-            ret.VerticesCount += m.VerticesCount;
+            combined.VerticesCount += m.VerticesCount;
         }
-
-        return ret;
     }
 
     // ── 2D text ───────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Convenience overload that draws <paramref name="text"/> using Arial at the
-    /// given point size. Fonts are cached by size to avoid allocating a new
-    /// <see cref="Font"/> object on every call (this method is called per-frame
-    /// for every visible text element).
+    /// Draws <paramref name="text"/> using Arial at the given point size.
+    /// Fonts are cached by size to avoid per-call allocation.
     /// </summary>
     public void Draw2dText1(string text, int x, int y, int fontsize, int? color, bool enabledepthtest)
     {
@@ -341,14 +390,24 @@ public partial class Game
     }
 
     /// <summary>
+    /// Fix #6: disposes all cached fonts and clears the cache.
+    /// Call when font settings change (e.g. window resize or settings update).
+    /// </summary>
+    public void ClearFontCache()
+    {
+        foreach (Font f in _fontCache.Values)
+            f.Dispose();
+        _fontCache.Clear();
+    }
+
+    /// <summary>
     /// Draws <paramref name="text"/> to the screen using a cached texture.
-    /// The texture is created on first use and evicted when not accessed for
-    /// a configurable duration by <c>DeleteUnusedCachedTextTextures</c>.
+    /// Fix #3: <see cref="DeleteUnusedCachedTextTextures"/> is no longer called
+    /// here — it runs once per frame in <see cref="Draw2d"/> instead.
     /// </summary>
     public void Draw2dText(string text, Font font, float x, float y, int? color, bool enabledepthtest)
     {
-        if (string.IsNullOrWhiteSpace(text))
-            return;
+        if (string.IsNullOrWhiteSpace(text)) return;
 
         color ??= ColorUtils.ColorFromArgb(255, 255, 255, 255);
         TextStyle t = new()
@@ -360,8 +419,6 @@ public partial class Game
             FontStyle = font.Style,
         };
 
-        // Cache lookup — retrieve once and reuse rather than calling
-        // GetCachedTextTexture twice (check-null then retrieve).
         if (!CachedTextTextures.TryGetValue(t, out CachedTexture cached))
         {
             cached = MakeTextTexture(t);
@@ -372,7 +429,6 @@ public partial class Game
         cached.lastuseMilliseconds = Platform.TimeMillisecondsFromStart;
         Draw2dTexture(cached.textureId, x, y, cached.sizeX, cached.sizeY,
             null, 0, ColorUtils.ColorFromArgb(255, 255, 255, 255), enabledepthtest);
-        DeleteUnusedCachedTextTextures();
     }
 
     // ── Primitives ────────────────────────────────────────────────────────────
@@ -381,7 +437,7 @@ public partial class Game
     /// Draws a 2D circle outline at screen position (<paramref name="x"/>,
     /// <paramref name="y"/>) with the given <paramref name="radius"/>.
     /// Uses a pre-allocated <see cref="_circleModelData"/> whose Xyz array is
-    /// updated in-place on each call; only the vertex positions change.
+    /// updated in-place on each call; indices and colours are set once.
     /// </summary>
     public void Circle3i(float x, float y, float radius)
     {
@@ -397,17 +453,14 @@ public partial class Game
                 IndicesCount = CircleSegments * 2,
                 VerticesCount = CircleSegments,
             };
-            // Indices and Rgba never change — built once.
             for (int i = 0; i < CircleSegments; i++)
             {
                 _circleModelData.Indices[i * 2] = i;
                 _circleModelData.Indices[i * 2 + 1] = (i + 1) % CircleSegments;
             }
             _circleModelData.Rgba.AsSpan().Fill(255);
-            // Uv is zero-initialised by default.
         }
 
-        // Update only the Xyz positions — everything else is already correct.
         for (int i = 0; i < CircleSegments; i++)
         {
             float angle = i * 2f * MathF.PI / CircleSegments;
@@ -425,7 +478,12 @@ public partial class Game
     }
 }
 
-public class TextureAtlasCi
+// ── Fix #5: static class — no instances, no state ─────────────────────────────
+
+/// <summary>
+/// Converts packed-atlas tile indices to UV coordinates.
+/// </summary>
+public static class TextureAtlas
 {
     public static RectangleF TextureCoords2d(int textureId, int texturesPacked)
     {
@@ -435,7 +493,7 @@ public class TextureAtlasCi
             X = step * (textureId % texturesPacked),
             Y = step * (textureId / texturesPacked),
             Width = step,
-            Height = step
+            Height = step,
         };
     }
 }

@@ -6,7 +6,6 @@ namespace ManicDigger;
 
 public class AudioOpenAl
 {
-
     public GameExit d_GameExit;
     public AudioOpenAl()
     {

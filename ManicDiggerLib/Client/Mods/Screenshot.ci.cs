@@ -47,7 +47,7 @@ public class ModScreenshot : ModBase
 
     internal void DrawScreenshotFlash()
     {
-        game.Draw2dTexture(game.WhiteTexture(), 0, 0, platform.GetCanvasWidth(), platform.GetCanvasHeight(), null, 0, White, false);
+        game.Draw2dTexture(game.GetOrCreateWhiteTexture(), 0, 0, platform.GetCanvasWidth(), platform.GetCanvasHeight(), null, 0, White, false);
         TextRenderer.TextSize(ScreenshotText, FlashFontSize, out int textWidth, out int textHeight);
         game.Draw2dText(ScreenshotText, FlashFont, game.Xcenter(textWidth), game.Ycenter(textHeight), null, false);
     }

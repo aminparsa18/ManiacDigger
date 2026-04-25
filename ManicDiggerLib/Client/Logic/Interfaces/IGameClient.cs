@@ -65,7 +65,7 @@ public interface IGameClient
     bool EnableDrawPosition { get; set; }
 
     /// <summary>Returns the OpenGL ID of the engine's built-in 1×1 white texture.</summary>
-    int WhiteTexture();
+    int GetOrCreateWhiteTexture();
 
     /// <summary>Draws a textured rectangle in screen space.</summary>
     void Draw2dTexture(int textureid, float x, float y, float width, float height,

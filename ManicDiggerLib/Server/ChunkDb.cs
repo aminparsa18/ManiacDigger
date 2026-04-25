@@ -235,85 +235,6 @@ public class ChunkDbCompressed : IChunkDb
 }
 
 /// <summary>
-/// Dummy chunk storage
-/// </summary>
-public class ChunkDbDummy : IChunkDb
-{
-    private string currentFilename = null;
-    private readonly Dictionary<Xyz, byte[]> chunks = [];
-
-    public void Open(string filename)
-    {
-        if (filename != currentFilename)
-        {
-            currentFilename = filename;
-            chunks.Clear();
-        }
-    }
-
-    public void Backup(string backupFilename)
-    {
-        // TODO: what to do here?
-    }
-
-    public IEnumerable<byte[]> GetChunks(IEnumerable<Xyz> chunkpositions)
-    {
-        foreach (Xyz pos in chunkpositions)
-        {
-            if (chunks.TryGetValue(pos, out byte[] c))
-            {
-                yield return c;
-            }
-            else
-            {
-                yield return null;
-            }
-        }
-    }
-
-    public void DeleteChunks(IEnumerable<Xyz> chunkpositions)
-    {
-        foreach (Xyz pos in chunkpositions)
-        {
-            chunks[pos] = null;
-        }
-    }
-
-    public void SetChunks(IEnumerable<DbChunk> chunks)
-    {
-        foreach (DbChunk c in chunks)
-        {
-            this.chunks[c.Position] = c.Chunk;
-        }
-    }
-
-    public Dictionary<Xyz, byte[]> GetChunksFromFile(IEnumerable<Xyz> chunkpositions, string filename)
-    {
-        // TODO: what to do here?
-        return null;
-    }
-
-    public void SetChunksToFile(IEnumerable<DbChunk> chunks, string filename)
-    {
-        // TODO: what to do here?
-    }
-
-    private byte[] globaldata = null;
-    public byte[] GetGlobalData()
-    {
-        return globaldata;
-    }
-
-    public void SetGlobalData(byte[] data)
-    {
-        globaldata = data;
-    }
-
-    private bool ReadOnly;
-    public bool GetReadOnly() { return ReadOnly; }
-    public void SetReadOnly(bool value) { ReadOnly = value; }
-}
-/// <summary>
 /// Chunk storage using SQLite to store data
 /// </summary>
 public class ChunkDbSqlite : IChunkDb
@@ -415,21 +336,6 @@ public class ChunkDbSqlite : IChunkDb
             }
         }
         return okay;
-    }
-
-    private static void repair(SQLiteConnection sqliteConn)
-    {
-        Console.WriteLine(string.Format("Database: {0}. Repairing database:", sqliteConn.DataSource));
-        /*
-        SQLiteCommand cmd = sqliteConn.CreateCommand();
-        cmd.CommandText = "SELECT data FROM chunks";
-        SQLiteDataReader sqlite_datareader = cmd.ExecuteReader();
-        while (sqlite_datareader.Read())
-        {
-            object data = sqlite_datareader["data"];
-            //return data as byte[];
-        }
-        */
     }
 
     public IEnumerable<byte[]> GetChunks(IEnumerable<Xyz> chunkpositions)
@@ -619,14 +525,7 @@ public class ChunkDbSqlite : IChunkDb
 
     public byte[] GetGlobalData()
     {
-        try
-        {
-            return GetChunk(ulong.MaxValue / 2);
-        }
-        catch
-        {
-            return null;
-        }
+        return GetChunk(ulong.MaxValue / 2);
     }
 
     public void SetGlobalData(byte[] data)

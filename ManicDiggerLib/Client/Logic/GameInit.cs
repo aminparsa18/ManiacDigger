@@ -319,7 +319,7 @@ public partial class Game : IGameClient
     // Speculative block placement
     // -------------------------------------------------------------------------
 
-    private Speculative[] speculative;
+    private Speculative?[] speculative;
     private int speculativeCount;
 
     // -------------------------------------------------------------------------
@@ -537,7 +537,7 @@ public partial class Game : IGameClient
         PacketHandlers = new ClientPacketHandler[256];
         NewBlockTypes = new Packet_BlockType[GlobalVar.MAX_BLOCKTYPES];
         speculativeCount = 0;
-        speculative = new Speculative[speculativeMax];
+        speculative = new Speculative?[speculativeMax];
     }
 
     private void InitChat()

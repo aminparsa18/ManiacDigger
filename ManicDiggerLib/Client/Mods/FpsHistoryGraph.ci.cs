@@ -130,7 +130,7 @@ public class ModFpsHistoryGraph : ModBase
             ColorUtils.ColorFromArgb(255, 255, 0, 0)
         ];
 
-        int whiteTexture = _game.WhiteTexture();
+        int whiteTexture = _game.GetOrCreateWhiteTexture();
 
         for (int i = 0; i < MaxCount; i++)
         {
@@ -155,7 +155,7 @@ public class ModFpsHistoryGraph : ModBase
     /// <summary>Draws a horizontal reference line at the given target FPS level.</summary>
     private void DrawFpsLine(int posy, int fps, int color)
     {
-        int whiteTexture = _game.WhiteTexture();
+        int whiteTexture = _game.GetOrCreateWhiteTexture();
         float y = posy - GraphHeight * (60f / fps);
 
         _game.Draw2dTexture(whiteTexture, GraphPosX, (int)y, MaxCount, 1, -1, 0, color, false);

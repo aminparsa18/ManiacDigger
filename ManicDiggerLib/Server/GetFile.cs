@@ -35,26 +35,14 @@ public class GetFileStream : IGetFileStream
         {
             foreach (string path in DataPaths)
             {
-                try
+                if (!Directory.Exists(path))
                 {
-                    if (!Directory.Exists(path))
-                    {
-                        continue;
-                    }
-                    foreach (string s in Directory.GetFiles(path, "*.*", SearchOption.AllDirectories))
-                    {
-                        try
-                        {
-                            FileInfo f = new(s);
-                            cache[f.Name] = File.ReadAllBytes(s);
-                        }
-                        catch
-                        {
-                        }
-                    }
+                    continue;
                 }
-                catch
+                foreach (string s in Directory.GetFiles(path, "*.*", SearchOption.AllDirectories))
                 {
+                    FileInfo f = new(s);
+                    cache[f.Name] = File.ReadAllBytes(s);
                 }
             }
         }

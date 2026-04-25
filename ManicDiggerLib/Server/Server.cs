@@ -114,14 +114,7 @@ public partial class Server : ICurrentTime, IDropItem
             Directory.CreateDirectory(serverpathlogs);
         }
         string filename = Path.Combine(serverpathlogs, "BuildLog.txt");
-        try
-        {
-            File.AppendAllText(filename, string.Format("{0} {1}\n", DateTime.Now, p));
-        }
-        catch
-        {
-            Console.WriteLine(language.ServerCannotWriteLog(), filename);
-        }
+        File.AppendAllText(filename, string.Format("{0} {1}\n", DateTime.Now, p));
     }
     public void ServerEventLog(string p)
     {
@@ -134,14 +127,7 @@ public partial class Server : ICurrentTime, IDropItem
             Directory.CreateDirectory(serverpathlogs);
         }
         string filename = Path.Combine(serverpathlogs, "ServerEventLog.txt");
-        try
-        {
-            File.AppendAllText(filename, string.Format("{0} {1}\n", DateTime.Now, p));
-        }
-        catch
-        {
-            Console.WriteLine(language.ServerCannotWriteLog(), filename);
-        }
+        File.AppendAllText(filename, string.Format("{0} {1}\n", DateTime.Now, p));
     }
     public void ChatLog(string p)
     {
@@ -154,14 +140,7 @@ public partial class Server : ICurrentTime, IDropItem
             Directory.CreateDirectory(serverpathlogs);
         }
         string filename = Path.Combine(serverpathlogs, "ChatLog.txt");
-        try
-        {
-            File.AppendAllText(filename, string.Format("{0} {1}\n", DateTime.Now, p));
-        }
-        catch
-        {
-            Console.WriteLine(language.ServerCannotWriteLog(), filename);
-        }
+        File.AppendAllText(filename, string.Format("{0} {1}\n", DateTime.Now, p));
     }
 
     public bool Public;
@@ -172,31 +151,24 @@ public partial class Server : ICurrentTime, IDropItem
     public Stopwatch serverUptime = new();
     public void Process()
     {
-        try
+        float dt = (float)stopwatchDt.Elapsed.TotalSeconds;
+        stopwatchDt.Reset();
+        stopwatchDt.Start();
+
+        for (int i = 0; i < systemsCount; i++)
         {
-            float dt = (float)stopwatchDt.Elapsed.TotalSeconds;
-            stopwatchDt.Reset();
-            stopwatchDt.Start();
-
-            for (int i = 0; i < systemsCount; i++)
-            {
-                systems[i].Update(this, dt);
-            }
-            //Save data
-            ProcessSave();
-            //Do server stuff
-            ProcessMain();
-
-            //When a value of 0 or less is given, don't restart
-            if (config.AutoRestartCycle > 0 && serverUptime.Elapsed.TotalHours >= config.AutoRestartCycle)
-            {
-                //Restart interval elapsed
-                Restart();
-            }
+            systems[i].Update(this, dt);
         }
-        catch (Exception e)
+        //Save data
+        ProcessSave();
+        //Do server stuff
+        ProcessMain();
+
+        //When a value of 0 or less is given, don't restart
+        if (config.AutoRestartCycle > 0 && serverUptime.Elapsed.TotalHours >= config.AutoRestartCycle)
         {
-            Console.WriteLine(e);
+            //Restart interval elapsed
+            Restart();
         }
     }
     public void ProcessSave()
@@ -248,9 +220,9 @@ public partial class Server : ICurrentTime, IDropItem
         {
             if (_time.GetQuarterHourPartOfDay() != _nLastHourChangeNotify)
             {
-//#if DEBUG
-//                SendMessageToAll("Time of day: " + _time.Time.ToString(@"hh\:mm\:ss") + " Day: " + (int)_time.Time.Days);
-//#endif
+                //#if DEBUG
+                //                SendMessageToAll("Time of day: " + _time.Time.ToString(@"hh\:mm\:ss") + " Day: " + (int)_time.Time.Days);
+                //#endif
                 //notify clients about the time
                 _nLastHourChangeNotify = _time.GetQuarterHourPartOfDay();
 
@@ -755,19 +727,19 @@ public partial class Server : ICurrentTime, IDropItem
                 }
 
                 // process packet
-                try
-                {
+                //try
+                //{
                     TotalReceivedBytes += msg.Payload.Length;
                     TryReadPacket(clientid, msg.Payload.ToArray());
-                }
-                catch (Exception e)
-                {
-                    //client problem. disconnect client.
-                    Console.WriteLine("Exception at client " + clientid + ". Disconnecting client.");
-                    SendPacket(clientid, ServerPackets.DisconnectPlayer(language.ServerClientException()));
-                    KillPlayer(clientid);
-                    Console.WriteLine(e.ToString());
-                }
+                //}
+                //catch (Exception e)
+                //{
+                //    //client problem. disconnect client.
+                //    Console.WriteLine("Exception at client " + clientid + ". Disconnecting client.");
+                //    SendPacket(clientid, ServerPackets.DisconnectPlayer(language.ServerClientException()));
+                //    KillPlayer(clientid);
+                //    Console.WriteLine(e.ToString());
+                //}
                 break;
             case NetworkMessageType.Disconnect:
                 Console.WriteLine("Client disconnected.");
@@ -1109,29 +1081,29 @@ public partial class Server : ICurrentTime, IDropItem
         }
         for (int i = 0; i < modEventHandlers.onplayerleave.Count; i++)
         {
-            try
-            {
+           // try
+           // {
                 modEventHandlers.onplayerleave[i](clientid);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Mod exception: OnPlayerLeave");
-                Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.StackTrace);
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine("Mod exception: OnPlayerLeave");
+            //    Console.WriteLine(ex.Message);
+            //    Console.WriteLine(ex.StackTrace);
+            //}
         }
         for (int i = 0; i < modEventHandlers.onplayerdisconnect.Count; i++)
         {
-            try
-            {
+            //try
+            //{
                 modEventHandlers.onplayerdisconnect[i](clientid);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Mod exception: OnPlayerDisconnect");
-                Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.StackTrace);
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine("Mod exception: OnPlayerDisconnect");
+            //    Console.WriteLine(ex.Message);
+            //    Console.WriteLine(ex.StackTrace);
+            //}
         }
         string coloredName = clients[clientid].ColoredPlayername(colorNormal);
         string name = clients[clientid].playername;
@@ -1329,16 +1301,16 @@ public partial class Server : ICurrentTime, IDropItem
 
                     for (int i = 0; i < modEventHandlers.onplayerjoin.Count; i++)
                     {
-                        try
-                        {
+                        //try
+                        //{
                             modEventHandlers.onplayerjoin[i](clientid);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("Mod exception: OnPlayerJoin");
-                            Console.WriteLine(ex.Message);
-                            Console.WriteLine(ex.StackTrace);
-                        }
+                        //}
+                        //catch (Exception ex)
+                        //{
+                        //    Console.WriteLine("Mod exception: OnPlayerJoin");
+                        //    Console.WriteLine(ex.Message);
+                        //    Console.WriteLine(ex.StackTrace);
+                        //}
                     }
 
                     SendPacket(clientid, ServerPackets.LevelFinalize());
@@ -1465,16 +1437,16 @@ public partial class Server : ICurrentTime, IDropItem
                         string message = packet.Message.Message;
                         for (int i = 0; i < modEventHandlers.onplayerchat.Count; i++)
                         {
-                            try
-                            {
+                            //try
+                            //{
                                 message = modEventHandlers.onplayerchat[i](clientid, message, packet.Message.IsTeamchat != 0);
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine("Mod exception: OnPlayerChat");
-                                Console.WriteLine(ex.Message);
-                                Console.WriteLine(ex.StackTrace);
-                            }
+                            //}
+                            //catch (Exception ex)
+                            //{
+                            //    Console.WriteLine("Mod exception: OnPlayerChat");
+                            //    Console.WriteLine(ex.Message);
+                            //    Console.WriteLine(ex.StackTrace);
+                            //}
                         }
                         if (clients[clientid].privileges.Contains(ServerClientMisc.Privilege.chat))
                         {
@@ -1543,33 +1515,33 @@ public partial class Server : ICurrentTime, IDropItem
             case PacketType.DialogClick:
                 for (int i = 0; i < modEventHandlers.ondialogclick.Count; i++)
                 {
-                    try
-                    {
+                    //try
+                    //{
                         modEventHandlers.ondialogclick[i](clientid, packet.DialogClick_.WidgetId);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Mod exception: OnDialogClick");
-                        Console.WriteLine(ex.Message);
-                        Console.WriteLine(ex.StackTrace);
-                    }
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    Console.WriteLine("Mod exception: OnDialogClick");
+                    //    Console.WriteLine(ex.Message);
+                    //    Console.WriteLine(ex.StackTrace);
+                    //}
                 }
                 for (int i = 0; i < modEventHandlers.ondialogclick2.Count; i++)
                 {
-                    try
-                    {
+                    //try
+                    //{
                         DialogClickArgs args = new();
                         args.Player = clientid;
                         args.WidgetId = packet.DialogClick_.WidgetId;
                         args.TextBoxValue = packet.DialogClick_.TextBoxValue;
                         modEventHandlers.ondialogclick2[i](args);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Mod exception: OnDialogClick2");
-                        Console.WriteLine(ex.Message);
-                        Console.WriteLine(ex.StackTrace);
-                    }
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    Console.WriteLine("Mod exception: OnDialogClick2");
+                    //    Console.WriteLine(ex.Message);
+                    //    Console.WriteLine(ex.StackTrace);
+                    //}
                 }
                 break;
             case PacketType.Shot:
@@ -1592,31 +1564,31 @@ public partial class Server : ICurrentTime, IDropItem
                     //Handle OnWeaponShot so grenade ammo is correct
                     for (int i = 0; i < modEventHandlers.onweaponshot.Count; i++)
                     {
-                        try
-                        {
+                        //try
+                       // {
                             modEventHandlers.onweaponshot[i](clientid, packet.Shot.WeaponBlock);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("Mod exception: OnWeaponShot");
-                            Console.WriteLine(ex.Message);
-                            Console.WriteLine(ex.StackTrace);
-                        }
+                        //}
+                        //catch (Exception ex)
+                        //{
+                        //    Console.WriteLine("Mod exception: OnWeaponShot");
+                        //    Console.WriteLine(ex.Message);
+                        //    Console.WriteLine(ex.StackTrace);
+                        //}
                     }
                     return;
                 }
                 for (int i = 0; i < modEventHandlers.onweaponshot.Count; i++)
                 {
-                    try
-                    {
+                    //try
+                   // {
                         modEventHandlers.onweaponshot[i](clientid, packet.Shot.WeaponBlock);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Mod exception: OnWeaponShot");
-                        Console.WriteLine(ex.Message);
-                        Console.WriteLine(ex.StackTrace);
-                    }
+                   // }
+                    //catch (Exception ex)
+                    //{
+                    //    Console.WriteLine("Mod exception: OnWeaponShot");
+                    //    Console.WriteLine(ex.Message);
+                    //    Console.WriteLine(ex.StackTrace);
+                    //}
                 }
                 if (clients[clientid].LastPing < 0.3)
                 {
@@ -1625,16 +1597,16 @@ public partial class Server : ICurrentTime, IDropItem
                         //client-side shooting
                         for (int i = 0; i < modEventHandlers.onweaponhit.Count; i++)
                         {
-                            try
-                            {
+                            //try
+                           // {
                                 modEventHandlers.onweaponhit[i](clientid, packet.Shot.HitPlayer, packet.Shot.WeaponBlock, packet.Shot.IsHitHead != 0);
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine("Mod exception: OnWeaponHit");
-                                Console.WriteLine(ex.Message);
-                                Console.WriteLine(ex.StackTrace);
-                            }
+                            //}
+                            //catch (Exception ex)
+                            //{
+                            //    Console.WriteLine("Mod exception: OnWeaponHit");
+                            //    Console.WriteLine(ex.Message);
+                            //    Console.WriteLine(ex.StackTrace);
+                            //}
                         }
                     }
                     return;
@@ -1671,32 +1643,32 @@ public partial class Server : ICurrentTime, IDropItem
                     {
                         for (int i = 0; i < modEventHandlers.onweaponhit.Count; i++)
                         {
-                            try
-                            {
+                            //try
+                            //{
                                 modEventHandlers.onweaponhit[i](clientid, k.Key, packet.Shot.WeaponBlock, true);
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine("Mod exception: OnWeaponHit");
-                                Console.WriteLine(ex.Message);
-                                Console.WriteLine(ex.StackTrace);
-                            }
+                            //}
+                            //catch (Exception ex)
+                            //{
+                            //    Console.WriteLine("Mod exception: OnWeaponHit");
+                            //    Console.WriteLine(ex.Message);
+                            //    Console.WriteLine(ex.StackTrace);
+                            //}
                         }
                     }
                     else if (Intersection.CheckLineBoxExact(pick, bodybox) != null)
                     {
                         for (int i = 0; i < modEventHandlers.onweaponhit.Count; i++)
                         {
-                            try
-                            {
+                            //try
+                            //{
                                 modEventHandlers.onweaponhit[i](clientid, k.Key, packet.Shot.WeaponBlock, false);
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine("Mod exception: OnWeaponHit");
-                                Console.WriteLine(ex.Message);
-                                Console.WriteLine(ex.StackTrace);
-                            }
+                            //}
+                            //catch (Exception ex)
+                            //{
+                            //    Console.WriteLine("Mod exception: OnWeaponHit");
+                            //    Console.WriteLine(ex.Message);
+                            //    Console.WriteLine(ex.StackTrace);
+                            //}
                         }
                     }
                 }
@@ -1704,32 +1676,32 @@ public partial class Server : ICurrentTime, IDropItem
             case PacketType.SpecialKey:
                 for (int i = 0; i < modEventHandlers.onspecialkey.Count; i++)
                 {
-                    try
-                    {
+                    //try
+                    //{
                         modEventHandlers.onspecialkey[i](clientid, (SpecialKey)packet.SpecialKey_.Key_);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Mod exception: OnSpecialKey");
-                        Console.WriteLine(ex.Message);
-                        Console.WriteLine(ex.StackTrace);
-                    }
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    Console.WriteLine("Mod exception: OnSpecialKey");
+                    //    Console.WriteLine(ex.Message);
+                    //    Console.WriteLine(ex.StackTrace);
+                    //}
                 }
                 break;
             case PacketType.ActiveMaterialSlot:
                 clients[clientid].ActiveMaterialSlot = packet.ActiveMaterialSlot.ActiveMaterialSlot;
                 for (int i = 0; i < modEventHandlers.changedactivematerialslot.Count; i++)
                 {
-                    try
-                    {
+                    //try
+                    //{
                         modEventHandlers.changedactivematerialslot[i](clientid);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Mod exception: ChangedActiveMaterialSlot");
-                        Console.WriteLine(ex.Message);
-                        Console.WriteLine(ex.StackTrace);
-                    }
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    Console.WriteLine("Mod exception: ChangedActiveMaterialSlot");
+                    //    Console.WriteLine(ex.Message);
+                    //    Console.WriteLine(ex.StackTrace);
+                    //}
                 }
                 break;
             case PacketType.Leave:
@@ -1861,18 +1833,18 @@ public partial class Server : ICurrentTime, IDropItem
             for (int i = 0; i < modEventHandlers.checkonbuild.Count; i++)
             {
                 // All handlers must return true for operation to be permitted.
-                try
-                {
+                //try
+                //{
                     retval = retval && modEventHandlers.checkonbuild[i](player, x, y, z);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Mod exception: CheckOnBuild");
-                    Console.WriteLine(ex.Message);
-                    Console.WriteLine(ex.StackTrace);
-                    // Do not allow interactions when check fails.
-                    retval = false;
-                }
+                //}
+                //catch (Exception ex)
+                //{
+                //    Console.WriteLine("Mod exception: CheckOnBuild");
+                //    Console.WriteLine(ex.Message);
+                //    Console.WriteLine(ex.StackTrace);
+                //    // Do not allow interactions when check fails.
+                //    retval = false;
+                //}
             }
         }
         else if (mode == PacketBlockSetMode.Destroy)
@@ -1880,18 +1852,18 @@ public partial class Server : ICurrentTime, IDropItem
             for (int i = 0; i < modEventHandlers.checkondelete.Count; i++)
             {
                 // All handlers must return true for operation to be permitted.
-                try
-                {
+                //try
+                //{
                     retval = retval && modEventHandlers.checkondelete[i](player, x, y, z);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Mod exception: CheckOnDelete");
-                    Console.WriteLine(ex.Message);
-                    Console.WriteLine(ex.StackTrace);
-                    // Do not allow interactions when check fails.
-                    retval = false;
-                }
+                //}
+                //catch (Exception ex)
+                //{
+                //    Console.WriteLine("Mod exception: CheckOnDelete");
+                //    Console.WriteLine(ex.Message);
+                //    Console.WriteLine(ex.StackTrace);
+                //    // Do not allow interactions when check fails.
+                //    retval = false;
+                //}
             }
         }
         return retval;
@@ -1914,18 +1886,18 @@ public partial class Server : ICurrentTime, IDropItem
         for (int i = 0; i < modEventHandlers.checkonuse.Count; i++)
         {
             // All handlers must return true for operation to be permitted.
-            try
-            {
+            //try
+            //{
                 retval = retval && modEventHandlers.checkonuse[i](player, x, y, z);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Mod exception: CheckOnUse");
-                Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.StackTrace);
-                // Do not allow interactions when check fails.
-                retval = false;
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine("Mod exception: CheckOnUse");
+            //    Console.WriteLine(ex.Message);
+            //    Console.WriteLine(ex.StackTrace);
+            //    // Do not allow interactions when check fails.
+            //    retval = false;
+            //}
         }
         return retval;
     }
@@ -1970,12 +1942,10 @@ public partial class Server : ICurrentTime, IDropItem
             //Resize the image if it does not have the proper size
             bmp2 = new Bitmap(bmp, 64, 64);
         }
-        using (MemoryStream ms = new())
-        {
-            //Convert image to a byte[] for transfer
-            bmp2.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-            return ms.ToArray();
-        }
+        using MemoryStream ms = new();
+        //Convert image to a byte[] for transfer
+        bmp2.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+        return ms.ToArray();
     }
 
     private static float DeserializeFloat(int p)
@@ -2120,39 +2090,19 @@ public partial class Server : ICurrentTime, IDropItem
     public enum MessageType { Normal, Important, Help, OpUsername, Success, Error, Admin, White, Red, Green, Yellow }
     private string MessageTypeToString(MessageType type)
     {
-        switch (type)
+        return type switch
         {
-            case MessageType.Normal:
-            case MessageType.White:
-                return colorNormal;
-            case MessageType.Important:
-                return colorImportant;
-            case MessageType.Help:
-            case MessageType.Red:
-                return colorHelp;
-            case MessageType.OpUsername:
-            case MessageType.Green:
-                return colorOpUsername;
-            case MessageType.Error:
-                return colorError;
-            case MessageType.Success:
-                return colorSuccess;
-            case MessageType.Admin:
-            case MessageType.Yellow:
-                return colorAdmin;
-            default:
-                return colorNormal;
-        }
+            MessageType.Normal or MessageType.White => colorNormal,
+            MessageType.Important => colorImportant,
+            MessageType.Help or MessageType.Red => colorHelp,
+            MessageType.OpUsername or MessageType.Green => colorOpUsername,
+            MessageType.Error => colorError,
+            MessageType.Success => colorSuccess,
+            MessageType.Admin or MessageType.Yellow => colorAdmin,
+            _ => colorNormal,
+        };
     }
-    private static bool CompareByteArray(byte[] a, byte[] b)
-    {
-        if (a.Length != b.Length) { return false; }
-        for (int i = 0; i < a.Length; i++)
-        {
-            if (a[i] != b[i]) { return false; }
-        }
-        return true;
-    }
+
     private void NotifyBlock(int x, int y, int z, int blocktype)
     {
         foreach (var k in clients)
@@ -2160,7 +2110,7 @@ public partial class Server : ICurrentTime, IDropItem
             SendSetBlock(k.Key, x, y, z, blocktype);
         }
     }
-    private bool ENABLE_FINITEINVENTORY { get { return !config.IsCreative; } }
+
     private bool DoCommandCraft(bool execute, Packet_ClientCraft cmd)
     {
         if (d_Map.GetBlock(cmd.X, cmd.Y, cmd.Z) != d_Data.BlockIdCraftingTable)
@@ -2418,33 +2368,6 @@ public partial class Server : ICurrentTime, IDropItem
         //Console.WriteLine("UnseenChunk: {0},{1},{2} Client: {3}", vx, vy, vz, clientid);
     }
 
-    private void SendFillArea(int clientid, Vector3i a, Vector3i b, int blockType, int blockCount)
-    {
-        // TODO: better to send a chunk?
-
-        Vector3i v = new(a.X / chunksize, a.Y / chunksize, a.Z / chunksize);
-        Vector3i w = new(b.X / chunksize, b.Y / chunksize, b.Z / chunksize);
-
-        // TODO: Is it sufficient to regard only start- and endpoint?
-        if (!ClientSeenChunk(clientid, v.X, v.Y, v.Z) && !ClientSeenChunk(clientid, w.X, w.Y, w.Z))
-        {
-            return;
-        }
-
-        Packet_ServerFillArea p = new()
-        {
-            X1 = a.X,
-            Y1 = a.Y,
-            Z1 = a.Z,
-            X2 = b.X,
-            Y2 = b.Y,
-            Z2 = b.Z,
-            BlockType = blockType,
-            BlockCount = blockCount
-        };
-        SendPacket(clientid, Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.FillArea, FillArea = p }));
-    }
-
     private void SetFillAreaLimit(int clientid)
     {
         ClientOnServer client = GetClient(clientid);
@@ -2481,8 +2404,6 @@ public partial class Server : ICurrentTime, IDropItem
         SendFillAreaLimit(clientid, maxFill);
     }
 
-
-
     private void SendFillAreaLimit(int clientid, int limit)
     {
         Packet_ServerFillAreaLimit p = new()
@@ -2500,16 +2421,16 @@ public partial class Server : ICurrentTime, IDropItem
         {
             for (int i = 0; i < modEventHandlers.onuse.Count; i++)
             {
-                try
-                {
+                //try
+                //{
                     modEventHandlers.onuse[i](player_id, cmd.X, cmd.Y, cmd.Z);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Mod exception: OnUse");
-                    Console.WriteLine(ex.Message);
-                    Console.WriteLine(ex.StackTrace);
-                }
+                //}
+                //catch (Exception ex)
+                //{
+                //    Console.WriteLine("Mod exception: OnUse");
+                //    Console.WriteLine(ex.Message);
+                //    Console.WriteLine(ex.StackTrace);
+                //}
             }
             return true;
         }
@@ -2517,16 +2438,16 @@ public partial class Server : ICurrentTime, IDropItem
         {
             for (int i = 0; i < modEventHandlers.onusewithtool.Count; i++)
             {
-                try
-                {
+                //try
+                //{
                     modEventHandlers.onusewithtool[i](player_id, cmd.X, cmd.Y, cmd.Z, cmd.BlockType);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Mod exception: OnUseWithTool");
-                    Console.WriteLine(ex.Message);
-                    Console.WriteLine(ex.StackTrace);
-                }
+                //}
+                //catch (Exception ex)
+                //{
+                //    Console.WriteLine("Mod exception: OnUseWithTool");
+                //    Console.WriteLine(ex.Message);
+                //    Console.WriteLine(ex.StackTrace);
+                //}
             }
             return true;
         }
@@ -2566,16 +2487,16 @@ public partial class Server : ICurrentTime, IDropItem
                     SetBlockAndNotify(cmd.X, cmd.Y, cmd.Z, item.BlockId);
                     for (int i = 0; i < modEventHandlers.onbuild.Count; i++)
                     {
-                        try
-                        {
+                        //try
+                        //{
                             modEventHandlers.onbuild[i](player_id, cmd.X, cmd.Y, cmd.Z);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("Mod exception: OnBuild");
-                            Console.WriteLine(ex.Message);
-                            Console.WriteLine(ex.StackTrace);
-                        }
+                        //}
+                        //catch (Exception ex)
+                        //{
+                        //    Console.WriteLine("Mod exception: OnBuild");
+                        //    Console.WriteLine(ex.Message);
+                        //    Console.WriteLine(ex.StackTrace);
+                        //}
                     }
                     break;
                 default:
@@ -2598,16 +2519,16 @@ public partial class Server : ICurrentTime, IDropItem
             SetBlockAndNotify(cmd.X, cmd.Y, cmd.Z, SpecialBlockId.Empty);
             for (int i = 0; i < modEventHandlers.ondelete.Count; i++)
             {
-                try
-                {
+                //try
+                //{
                     modEventHandlers.ondelete[i](player_id, cmd.X, cmd.Y, cmd.Z, blockid);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Mod exception: OnDelete");
-                    Console.WriteLine(ex.Message);
-                    Console.WriteLine(ex.StackTrace);
-                }
+                //}
+                //catch (Exception ex)
+                //{
+                //    Console.WriteLine("Mod exception: OnDelete");
+                //    Console.WriteLine(ex.Message);
+                //    Console.WriteLine(ex.StackTrace);
+                //}
             }
         }
         clients[player_id].IsInventoryDirty = true;
@@ -2649,16 +2570,16 @@ public partial class Server : ICurrentTime, IDropItem
         SetBlockAndNotify(cmd.X, cmd.Y, cmd.Z, cmd.BlockType);
         for (int i = 0; i < modEventHandlers.onbuild.Count; i++)
         {
-            try
-            {
+            //try
+            //{
                 modEventHandlers.onbuild[i](player_id, cmd.X, cmd.Y, cmd.Z);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Mod exception: OnBuild");
-                Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.StackTrace);
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine("Mod exception: OnBuild");
+            //    Console.WriteLine(ex.Message);
+            //    Console.WriteLine(ex.StackTrace);
+            //}
         }
 
         clients[player_id].IsInventoryDirty = true;
@@ -2697,16 +2618,16 @@ public partial class Server : ICurrentTime, IDropItem
         SetBlockAndNotify(cmd.X, cmd.Y, cmd.Z, SpecialBlockId.Empty);
         for (int i = 0; i < modEventHandlers.ondelete.Count; i++)
         {
-            try
-            {
+            //try
+            //{
                 modEventHandlers.ondelete[i](player_id, cmd.X, cmd.Y, cmd.Z, blockid);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Mod exception: OnDelete");
-                Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.StackTrace);
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine("Mod exception: OnDelete");
+            //    Console.WriteLine(ex.Message);
+            //    Console.WriteLine(ex.StackTrace);
+            //}
         }
 
         clients[player_id].IsInventoryDirty = true;
@@ -2724,59 +2645,7 @@ public partial class Server : ICurrentTime, IDropItem
         d_Map.SetBlockNotMakingDirty(x, y, z, blocktype);
         NotifyBlock(x, y, z, blocktype);
     }
-    private static int TotalAmount(Dictionary<int, int> inventory)
-    {
-        int sum = 0;
-        foreach (var k in inventory)
-        {
-            sum += k.Value;
-        }
-        return sum;
-    }
-    private void RemoveEquivalent(Dictionary<int, int> inventory, int blocktype, int count)
-    {
-        int removed = 0;
-        for (int i = 0; i < count; i++)
-        {
-            foreach (var k in new Dictionary<int, int>(inventory))
-            {
-                if (EquivalentBlock(k.Key, blocktype)
-                    && k.Value > 0)
-                {
-                    inventory[k.Key]--;
-                    removed++;
-                    goto removenext;
-                }
-            }
-        removenext:
-            ;
-        }
-        if (removed != count)
-        {
-            //throw new Exception();
-        }
-    }
-    private int GetEquivalentCount(Dictionary<int, int> inventory, int blocktype)
-    {
-        int count = 0;
-        foreach (var k in inventory)
-        {
-            if (EquivalentBlock(k.Key, blocktype))
-            {
-                count += k.Value;
-            }
-        }
-        return count;
-    }
-    private bool EquivalentBlock(int blocktypea, int blocktypeb)
-    {
-        if (d_Data.IsRailTile(blocktypea) && d_Data.IsRailTile(blocktypeb))
-        {
-            return true;
-        }
-        return blocktypea == blocktypeb;
-    }
-
+   
     public static byte[] Serialize(Packet_Server p)
     {
         return MemoryPackSerializer.Serialize(p);
@@ -2804,11 +2673,13 @@ public partial class Server : ICurrentTime, IDropItem
 
         return defaultname + appendNumber;
     }
+
     public void ServerMessageToAll(string message, MessageType color)
     {
         this.SendMessageToAll(MessageTypeToString(color) + message);
         ServerEventLog(string.Format("SERVER MESSAGE: {0}.", message));
     }
+
     public void SendMessageToAll(string message)
     {
         Console.WriteLine("Message to all: " + message);
@@ -2817,21 +2688,24 @@ public partial class Server : ICurrentTime, IDropItem
             SendMessage(k.Key, message);
         }
     }
+
     private void SendSetBlock(int clientid, int x, int y, int z, int blocktype)
     {
-    	if (!ClientSeenChunk(clientid, x / chunksize, y / chunksize, z / chunksize))
+        if (!ClientSeenChunk(clientid, x / chunksize, y / chunksize, z / chunksize))
         {
-    		// don't send block updates for chunks a player can not see
+            // don't send block updates for chunks a player can not see
             return;
         }
         Packet_ServerSetBlock p = new() { X = x, Y = y, Z = z, BlockType = blocktype };
         SendPacket(clientid, Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.SetBlock, SetBlock = p }));
     }
+
     public void SendSound(int clientid, string name, int x, int y, int z)
     {
         Packet_ServerSound p = new() { Name = name, X = x, Y = y, Z = z };
         SendPacket(clientid, Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.Sound, Sound = p }));
     }
+
     private void SendPlayerSpawnPosition(int clientid, int x, int y, int z)
     {
         Packet_ServerPlayerSpawnPosition p = new()
@@ -2882,32 +2756,32 @@ public partial class Server : ICurrentTime, IDropItem
         StatTotalPackets++;
         StatTotalPacketsLength += packet.Length;
         TotalSentBytes += packet.Length;
-        try
-        {
+        //try
+        //{
             clients[clientid].socket.SendMessage(packet.AsMemory(), MyNetDeliveryMethod.ReliableOrdered);
-        }
-        catch (Exception)
-        {
-            Console.WriteLine("Network exception.");
-            KillPlayer(clientid);
-        }
+        //}
+        //catch (Exception)
+        //{
+        //    Console.WriteLine("Network exception.");
+        //    KillPlayer(clientid);
+        //}
     }
     private static void EmptyCallback(IAsyncResult result)
     {
     }
     public int drawdistance = 128;
     public const int chunksize = 32;
-    public const double invertedChunkSize = 1.0/chunksize;
+    public const double invertedChunkSize = 1.0 / chunksize;
     public static int invertChunk(int num)
     {
-        return (int)(num*invertedChunkSize);
+        return (int)(num * invertedChunkSize);
     }
     internal int chunkdrawdistance { get { return drawdistance / chunksize; } }
     public byte[] CompressChunkNetwork(ushort[] chunk)
     {
         return d_NetworkCompression.Compress(MemoryMarshal.AsBytes(chunk.AsSpan()));
     }
-    public byte[] CompressChunkNetwork(byte[, ,] chunk)
+    public byte[] CompressChunkNetwork(byte[,,] chunk)
     {
         MemoryStream ms = new();
         BinaryWriter bw = new(ms);
