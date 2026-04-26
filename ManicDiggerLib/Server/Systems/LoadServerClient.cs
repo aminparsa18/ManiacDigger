@@ -1,7 +1,7 @@
-﻿using System.Xml;
-using System.Xml.Serialization;
-using ManicDigger;
+﻿using ManicDigger;
 using OpenTK.Mathematics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 /// <summary>
 /// Server system responsible for loading and saving <c>ServerClient.txt</c>, which
@@ -14,7 +14,13 @@ using OpenTK.Mathematics;
 /// </summary>
 public class ServerSystemLoadServerClient : ServerSystem
 {
-    private const string ClientFilename = "ServerClient.txt";
+    private const string ClientFilename = "ServerClient.json";
+
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
 
     // -------------------------------------------------------------------------
     // Lifecycle
@@ -63,9 +69,9 @@ public class ServerSystemLoadServerClient : ServerSystem
             Console.WriteLine(server.language.ServerClientConfigNotFound());
             SaveServerClient(server);
         }
-        else if (!TryLoadCurrentFormat(server, path))
+        else
         {
-            TryLoadLegacyFormat(server, path);
+            TryLoadCurrentFormat(server, path);
         }
 
         ResolveSpawn(server);
@@ -82,9 +88,9 @@ public class ServerSystemLoadServerClient : ServerSystem
     {
         try
         {
-            using TextReader reader = new StreamReader(path);
-            var deserializer = new XmlSerializer(typeof(ServerClient));
-            server.serverClient = (ServerClient)deserializer.Deserialize(reader);
+            string json = File.ReadAllText(path);
+            server.serverClient = JsonSerializer.Deserialize<ServerClient>(json, JsonOptions)
+                                  ?? new ServerClient();
             server.serverClient.Groups.Sort();
             SaveServerClient(server);
             return true;
@@ -93,27 +99,6 @@ public class ServerSystemLoadServerClient : ServerSystem
         {
             return false;
         }
-    }
-
-    /// <summary>
-    /// Parses the original (pre-serializer) XML format by reading each known field
-    /// via XPath, then re-saves the file in the current format.
-    /// </summary>
-    private static void TryLoadLegacyFormat(Server server, string path)
-    {
-        var d = new XmlDocument();
-        d.Load(new StreamReader(new MemoryStream(File.ReadAllBytes(path))));
-
-        string XmlVal(string xpath) => StringUtils.XmlValue(d, xpath);
-
-        server.serverClient = new ServerClient
-        {
-            Format = int.Parse(XmlVal("/ManicDiggerServerClient/Format")),
-            DefaultGroupGuests = XmlVal("/ManicDiggerServerClient/DefaultGroupGuests"),
-            DefaultGroupRegistered = XmlVal("/ManicDiggerServerClient/DefaultGroupRegistered"),
-        };
-
-        SaveServerClient(server);
     }
 
     // -------------------------------------------------------------------------
@@ -195,8 +180,8 @@ public class ServerSystemLoadServerClient : ServerSystem
 
         server.serverClient.Clients.Sort();
 
-        var serializer = new XmlSerializer(typeof(ServerClient));
-        using TextWriter writer = new StreamWriter(Path.Combine(GameStorePath.gamepathconfig, ClientFilename));
-        serializer.Serialize(writer, server.serverClient);
+        File.WriteAllText(
+            Path.Combine(GameStorePath.gamepathconfig, ClientFilename),
+            JsonSerializer.Serialize(server.serverClient, JsonOptions));
     }
 }

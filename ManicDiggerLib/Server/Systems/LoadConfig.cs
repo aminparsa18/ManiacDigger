@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
-using System.Xml;
-using System.Xml.Serialization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 /// <summary>
 /// Server system responsible for loading and saving the server configuration file
@@ -12,6 +12,11 @@ public class ServerSystemLoadConfig : ServerSystem
 {
     private const string ConfigFilename = "ServerConfig.txt";
 
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
     // -------------------------------------------------------------------------
     // Lifecycle
     // -------------------------------------------------------------------------
@@ -64,7 +69,7 @@ public class ServerSystemLoadConfig : ServerSystem
             return;
         }
 
-        if (!TryLoadCurrentFormat(server, path) && !TryLoadLegacyFormat(server, path))
+        if (!TryLoadCurrentFormat(server, path))
         {
             TryBackupAndReset(server, path);
             return;
@@ -83,68 +88,9 @@ public class ServerSystemLoadConfig : ServerSystem
     {
         try
         {
-            using TextReader reader = new StreamReader(path);
-            var deserializer = new XmlSerializer(typeof(ServerConfig));
-            server.config = (ServerConfig)deserializer.Deserialize(reader);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// Attempts to parse the original (pre-serializer) XML format by reading each
-    /// known field via XPath, then re-saves the file in the current format.
-    /// </summary>
-    /// <returns><c>true</c> on success; <c>false</c> if the legacy parse also fails.</returns>
-    private static bool TryLoadLegacyFormat(Server server, string path)
-    {
-        try
-        {
-            var d = new XmlDocument();
-            d.Load(new StreamReader(new MemoryStream(File.ReadAllBytes(path))));
-
-            string XmlVal(string xpath) => StringUtils.XmlValue(d, xpath);
-
-            server.config = new ServerConfig
-            {
-                Format = int.Parse(XmlVal("/ManicDiggerServerConfig/Format")),
-                Name = XmlVal("/ManicDiggerServerConfig/Name"),
-                Motd = XmlVal("/ManicDiggerServerConfig/Motd"),
-                Port = int.Parse(XmlVal("/ManicDiggerServerConfig/Port")),
-                IsCreative = StringUtils.ReadBool(XmlVal("/ManicDiggerServerConfig/Creative")),
-                Public = StringUtils.ReadBool(XmlVal("/ManicDiggerServerConfig/Public")),
-                AllowGuests = StringUtils.ReadBool(XmlVal("/ManicDiggerServerConfig/AllowGuests")),
-                BuildLogging = bool.Parse(XmlVal("/ManicDiggerServerConfig/BuildLogging")),
-                ServerEventLogging = bool.Parse(XmlVal("/ManicDiggerServerConfig/ServerEventLogging")),
-                ChatLogging = bool.Parse(XmlVal("/ManicDiggerServerConfig/ChatLogging")),
-                AllowScripting = bool.Parse(XmlVal("/ManicDiggerServerConfig/AllowScripting")),
-                ServerMonitor = bool.Parse(XmlVal("/ManicDiggerServerConfig/ServerMonitor")),
-                ClientConnectionTimeout = int.Parse(XmlVal("/ManicDiggerServerConfig/ClientConnectionTimeout")),
-                ClientPlayingTimeout = int.Parse(XmlVal("/ManicDiggerServerConfig/ClientPlayingTimeout")),
-            };
-
-            // Optional fields that may not exist in all legacy files
-            string maxClients = XmlVal("/ManicDiggerServerConfig/MaxClients");
-            if (maxClients != null)
-                server.config.MaxClients = int.Parse(maxClients);
-
-            string key = XmlVal("/ManicDiggerServerConfig/Key");
-            if (key != null)
-                server.config.Key = key;
-
-            string mapSizeX = XmlVal("/ManicDiggerServerConfig/MapSizeX");
-            if (mapSizeX != null)
-            {
-                server.config.MapSizeX = int.Parse(mapSizeX);
-                server.config.MapSizeY = int.Parse(XmlVal("/ManicDiggerServerConfig/MapSizeY"));
-                server.config.MapSizeZ = int.Parse(XmlVal("/ManicDiggerServerConfig/MapSizeZ"));
-            }
-
-            // Upgrade to the current format immediately
-            SaveConfig(server);
+            string json = File.ReadAllText(path);
+            server.config = JsonSerializer.Deserialize<ServerConfig>(json, JsonOptions)
+                            ?? new ServerConfig();
             return true;
         }
         catch
@@ -197,9 +143,9 @@ public class ServerSystemLoadConfig : ServerSystem
         if (server.config.Areas.Count == 0)
             server.config.Areas = ServerConfigMisc.getDefaultAreas();
 
-        var serializer = new XmlSerializer(typeof(ServerConfig));
-        using TextWriter writer = new StreamWriter(Path.Combine(GameStorePath.gamepathconfig, ConfigFilename));
-        serializer.Serialize(writer, server.config);
+        File.WriteAllText(
+            Path.Combine(GameStorePath.gamepathconfig, ConfigFilename),
+            JsonSerializer.Serialize(server.config, JsonOptions));
     }
 
     // -------------------------------------------------------------------------

@@ -1,5 +1,7 @@
-using System.Xml;
-using System.Xml.Serialization;
+
+
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 public class ServerMonitor
 {
@@ -186,35 +188,33 @@ public class ServerMonitor
         }
     }
 
-    private readonly string filename = "ServerMonitor.txt";
+    private readonly string filename = "ServerMonitor.json";
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+
     private void LoadConfig()
     {
-        if (!File.Exists(Path.Combine(GameStorePath.gamepathconfig, filename)))
+        string path = Path.Combine(GameStorePath.gamepathconfig, filename);
+        if (!File.Exists(path))
         {
             Console.WriteLine(server.language.ServerMonitorConfigNotFound());
+            this.config = new ServerMonitorConfig();
             SaveConfig();
         }
         else
         {
             try
             {
-                using TextReader textReader = new StreamReader(Path.Combine(GameStorePath.gamepathconfig, filename));
-                XmlSerializer deserializer = new(typeof(ServerMonitorConfig));
-                this.config = (ServerMonitorConfig)deserializer.Deserialize(textReader);
-                textReader.Close();
-                SaveConfig();
+                string json = File.ReadAllText(path);
+                this.config = JsonSerializer.Deserialize<ServerMonitorConfig>(json, JsonOptions)
+                              ?? new ServerMonitorConfig();
             }
-            catch //This if for the original format
+            catch
             {
-                using (Stream s = new MemoryStream(File.ReadAllBytes(Path.Combine(GameStorePath.gamepathconfig, filename))))
-                {
-                    this.config = new ServerMonitorConfig();
-                    StreamReader sr = new(s);
-                    XmlDocument d = new();
-                    d.Load(sr);
-                }
-                //Save with new version.
-                SaveConfig();
+                this.config = new ServerMonitorConfig();
             }
         }
         Console.WriteLine(server.language.ServerMonitorConfigLoaded());
@@ -222,19 +222,12 @@ public class ServerMonitor
 
     public void SaveConfig()
     {
-        //Verify that we have a directory to place the file into.
         if (!Directory.Exists(GameStorePath.gamepathconfig))
-        {
             Directory.CreateDirectory(GameStorePath.gamepathconfig);
-        }
 
-        XmlSerializer serializer = new(typeof(ServerMonitorConfig));
-        TextWriter textWriter = new StreamWriter(Path.Combine(GameStorePath.gamepathconfig, filename));
-
-        //Check to see if config has been initialized.
         this.config ??= new ServerMonitorConfig();
-        //Serialize the config class to XML.
-        serializer.Serialize(textWriter, this.config);
-        textWriter.Close();
+        File.WriteAllText(
+            Path.Combine(GameStorePath.gamepathconfig, filename),
+            JsonSerializer.Serialize(this.config, JsonOptions));
     }
 }

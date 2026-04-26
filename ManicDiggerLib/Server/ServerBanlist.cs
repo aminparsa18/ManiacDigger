@@ -1,12 +1,6 @@
-﻿using System.Xml.Serialization;
-
-
-[XmlRoot(ElementName = "ManicDiggerServerBanlist")]
-public class ServerBanlist
+﻿public class ServerBanlist
 {
-    [XmlArrayItem(ElementName = "User")]
     public List<UserEntry> BannedUsers { get; set; }
-    [XmlArrayItem(ElementName = "IP")]
     public List<IPEntry> BannedIPs { get; set; }
 
     public bool IsIPBanned(string ipAddress)
@@ -196,9 +190,7 @@ public class UserEntry
 {
     public string UserName { get; set; }
     public string BannedBy { get; set; }
-    [XmlElement(IsNullable = true)]
     public DateTime? BannedUntil { get; set; }
-    [XmlElement(IsNullable = true)]
     public string Reason { get; set; }
 }
 
@@ -206,9 +198,7 @@ public class IPEntry
 {
     public string IPAdress { get; set; }
     public string BannedBy { get; set; }
-    [XmlElement(IsNullable = true)]
     public DateTime? BannedUntil { get; set; }
-    [XmlElement(IsNullable = true)]
     public string Reason { get; set; }
 }
 

@@ -1,4 +1,4 @@
-using System.Xml.Serialization;
+using System.Text.Json.Serialization;
 
 namespace ManicDigger;
 
@@ -7,7 +7,6 @@ namespace ManicDigger;
 /// Serialized to and from XML (typically ServerClient.xml) to persist player groups,
 /// registered clients, and spawn/fill-limit defaults across server restarts.
 /// </summary>
-[XmlRoot(ElementName = "ManicDiggerServerClient")]
 public class ServerClient
 {
     /// <summary>
@@ -34,7 +33,6 @@ public class ServerClient
     /// Moderator, Admin). Groups are ordered by <see cref="Group.Level"/> so
     /// higher-level groups have more privileges.
     /// </summary>
-    [XmlArrayItem(ElementName = "Group")]
     public List<Group> Groups { get; set; }
 
     /// <summary>
@@ -43,7 +41,6 @@ public class ServerClient
     /// Players not listed here fall back to <see cref="DefaultGroupGuests"/> or
     /// <see cref="DefaultGroupRegistered"/>.
     /// </summary>
-    [XmlArrayItem(ElementName = "Client")]
     public List<Client> Clients { get; set; }
 
     /// <summary>
@@ -51,7 +48,6 @@ public class ServerClient
     /// does not have their own <see cref="Spawn"/> override. Null means the
     /// server uses its own built-in default spawn logic.
     /// </summary>
-    [XmlElement(IsNullable = true)]
     public Spawn DefaultSpawn { get; set; }
 
     /// <summary>
@@ -59,7 +55,6 @@ public class ServerClient
     /// may place in a single fill/flood-fill operation. Individual groups and
     /// clients can override this. Null means no limit is enforced globally.
     /// </summary>
-    [XmlElement(IsNullable = true)]
     public int? DefaultFillLimit { get; set; }
 
     /// <summary>
@@ -105,7 +100,6 @@ public class Group : IComparable<Group>
     /// Null or empty means the group cannot be joined by password — it must be
     /// assigned manually by an admin.
     /// </summary>
-    [XmlElement(IsNullable = true)]
     public string Password { get; set; }
 
     /// <summary>
@@ -113,7 +107,6 @@ public class Group : IComparable<Group>
     /// Takes precedence over <see cref="ServerClient.DefaultSpawn"/> but is
     /// overridden by a per-<see cref="Client"/> spawn if one exists.
     /// </summary>
-    [XmlElement(IsNullable = true)]
     public Spawn Spawn { get; set; }
 
     /// <summary>
@@ -121,7 +114,6 @@ public class Group : IComparable<Group>
     /// <see cref="ServerClient.DefaultFillLimit"/>. Null means fall back to the
     /// server default.
     /// </summary>
-    [XmlElement(IsNullable = true)]
     public int? FillLimit { get; set; }
 
     /// <summary>
@@ -129,7 +121,6 @@ public class Group : IComparable<Group>
     /// Use constants from <see cref="ServerClientMisc.Privilege"/> to avoid typos.
     /// Example: <c>new List&lt;string&gt; { Privilege.build, Privilege.chat }</c>
     /// </summary>
-    [XmlArrayItem(ElementName = "Privilege")]
     public List<string> GroupPrivileges { get; set; }
 
     /// <summary>
@@ -232,14 +223,12 @@ public class Client : IComparable<Client>
     /// Optional per-player spawn point. Takes precedence over both the group
     /// spawn and <see cref="ServerClient.DefaultSpawn"/>.
     /// </summary>
-    [XmlElement(IsNullable = true)]
     public Spawn Spawn { get; set; }
 
     /// <summary>
     /// Optional per-player fill limit, overriding both the group fill limit and
     /// <see cref="ServerClient.DefaultFillLimit"/>.
     /// </summary>
-    [XmlElement(IsNullable = true)]
     public int? FillLimit { get; set; }
 
     /// <summary>
@@ -279,12 +268,12 @@ public class Client : IComparable<Client>
 /// </summary>
 public class Spawn
 {
-    /// <remarks>Stored as <see cref="XmlIgnore"/> fields because serialisation
+    /// <remarks>Stored as <see cref="JsonIgnore"/> fields because serialisation
     /// goes through the <see cref="Coords"/> string property instead.</remarks>
-    [XmlIgnore] public int x;
-    [XmlIgnore] public int y;
+    [JsonIgnore] public int x;
+    [JsonIgnore] public int y;
     /// <summary>Optional height (Z axis). Null means use surface level.</summary>
-    [XmlIgnore] public int? z;
+    [JsonIgnore] public int? z;
 
     /// <summary>
     /// Gets or sets the spawn position as a comma-separated string.

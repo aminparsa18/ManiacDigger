@@ -1,8 +1,4 @@
-﻿using System.Xml.Serialization;
-
-
-[XmlRoot(ElementName = "ManicDiggerServerConfig")]
-public class ServerConfig
+﻿public class ServerConfig
 {
     public int Format { get; set; }             //XML Format Version Number
     public string Name { get; set; }
@@ -19,17 +15,14 @@ public class ServerConfig
     public bool ChatLogging { get; set; }
     public bool AllowScripting { get; set; }
     public string Key { get; set; }             //GUID to uniquely identify the server
-    [XmlElement(ElementName = "Creative")]
     public bool IsCreative { get; set; }        //Is this a free build server?
     public bool Public { get; set; }            //Advertise this server?
-    [XmlElement(IsNullable = true)]
     public string Password { get; set; }
     public bool AllowGuests { get; set; }
     public bool Monsters { get; set; }
     public int MapSizeX { get; set; }
     public int MapSizeY { get; set; }
     public int MapSizeZ { get; set; }
-    [XmlArrayItem(ElementName = "Area")]
     public List<AreaConfig> Areas { get; set; }
     public int Seed { get; set; }
     public bool RandomSeed { get; set; }
@@ -109,11 +102,8 @@ public class AreaConfig
     private int z1;
     private int z2;
     private string coords;
-    [XmlArrayItem(ElementName = "Group")]
     public List<string> PermittedGroups { get; set; }
-    [XmlArrayItem(ElementName = "User")]
     public List<string> PermittedUsers { get; set; }
-    [XmlElement(IsNullable = true)]
     public int? Level { get; set; }
 
     public AreaConfig()

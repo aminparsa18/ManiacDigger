@@ -1,6 +1,4 @@
-﻿using System.Xml;
-
-public class StringUtils
+﻿public class StringUtils
 {
     public static string CharArrayToString(int[] charArray, int length)
         => new(Array.ConvertAll(charArray, c => (char)c), 0, length);
@@ -43,10 +41,5 @@ public class StringUtils
     public static string DecodeHTMLEntities(string htmlEncodedString)
     {
         return System.Web.HttpUtility.HtmlDecode(htmlEncodedString);
-    }
-
-    public static string XmlValue(XmlDocument d, string path)
-    {
-        return d.CreateNavigator().SelectSingleNode(path).Value;
     }
 }

@@ -1,9 +1,10 @@
 ﻿using ManicDigger;
-using System.Xml.Serialization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 public class ServerSystemBanList : ServerSystem
 {
-    private const string BanlistFilename = "ServerBanlist.txt";
+    private const string BanlistFilename = "ServerBanlist.json";
 
     protected override void Initialize(Server server)
     {
@@ -353,6 +354,11 @@ public class ServerSystemBanList : ServerSystem
     // -------------------------------------------------------------------------
     // Banlist persistence
     // -------------------------------------------------------------------------
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
 
     public static void LoadBanlist(Server server)
     {
@@ -367,9 +373,9 @@ public class ServerSystemBanList : ServerSystem
 
         try
         {
-            using TextReader reader = new StreamReader(path);
-            var deserializer = new XmlSerializer(typeof(ServerBanlist));
-            server.banlist = (ServerBanlist)deserializer.Deserialize(reader);
+            string json = File.ReadAllText(path);
+            server.banlist = JsonSerializer.Deserialize<ServerBanlist>(json, JsonOptions)
+                             ?? new ServerBanlist();
         }
         catch
         {
@@ -396,9 +402,9 @@ public class ServerSystemBanList : ServerSystem
         Directory.CreateDirectory(GameStorePath.gamepathconfig);
         server.banlist ??= new ServerBanlist();
 
-        var serializer = new XmlSerializer(typeof(ServerBanlist));
-        using TextWriter writer = new StreamWriter(Path.Combine(GameStorePath.gamepathconfig, BanlistFilename));
-        serializer.Serialize(writer, server.banlist);
+        File.WriteAllText(
+            Path.Combine(GameStorePath.gamepathconfig, BanlistFilename),
+            JsonSerializer.Serialize(server.banlist, JsonOptions));
     }
 
     // -------------------------------------------------------------------------

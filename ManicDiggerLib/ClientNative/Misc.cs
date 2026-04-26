@@ -1,8 +1,5 @@
 ﻿using Serilog;
-using System.Drawing.Imaging;
 using System.IO.Compression;
-using System.Xml;
-using System.Xml.XPath;
 
 /// <summary>
 /// Crash reporter backed by Serilog.
