@@ -14,21 +14,22 @@ public class RememberPosition : IMod
     }
 
     private IModManager m;
-    private readonly string filename = $"UserData{Path.DirectorySeparatorChar}StoredPositions.txt";
     public PositionStorage? positions;
+
+    // Resolve path relative to exe, not working directory
+    private static string Filename => Path.Combine(
+        AppContext.BaseDirectory, "UserData", "StoredPositions.txt");
 
     public void LoadData()
     {
         positions = new PositionStorage();
 
-        if (!File.Exists(filename))
-        {
-            //Nothing to load if file does not exist
+        if (!File.Exists(Filename))
             return;
-        }
+
         try
         {
-            string[] lines = File.ReadAllLines(filename);
+            string[] lines = File.ReadAllLines(Filename);
             for (int i = 0; i < lines.Length; i++)
             {
                 string[] linesplit = lines[i].Split(';');
@@ -39,7 +40,6 @@ public class RememberPosition : IMod
                 }
                 catch
                 {
-                    //Skip line when read fails
                     Console.WriteLine("[WARNING] Skipping invalid entry on line {0}.", i + 1);
                 }
             }
@@ -54,12 +54,14 @@ public class RememberPosition : IMod
     {
         try
         {
+            // Ensure directory exists before writing
+            Directory.CreateDirectory(Path.GetDirectoryName(Filename)!);
+
             List<string> lines = [];
             foreach (UserEntry entry in positions.PlayerPositions)
-            {
                 lines.Add(string.Format("{0};{1}", entry.Name, entry.Position));
-            }
-            File.WriteAllLines(filename, lines.ToArray());
+
+            File.WriteAllLines(Filename, lines.ToArray());
         }
         catch
         {

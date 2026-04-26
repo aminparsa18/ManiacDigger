@@ -10,7 +10,7 @@ using System.Text.Json.Serialization;
 /// </summary>
 public class ServerSystemLoadConfig : ServerSystem
 {
-    private const string ConfigFilename = "ServerConfig.txt";
+    private const string ConfigFilename = "ServerConfig.json";
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
