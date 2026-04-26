@@ -519,9 +519,8 @@ public class ModNetworkProcess : ModBase
 
         static DiagLog()
         {
-            // Clear the log file on startup so each run starts fresh.
             try { File.WriteAllText(_path, $"=== DiagLog started {DateTime.Now:yyyy-MM-dd HH:mm:ss} ==={Environment.NewLine}"); }
-            catch { /* ignore if we can't write */ }
+            catch { }
         }
 
         public static void Write(string message)
@@ -534,7 +533,50 @@ public class ModNetworkProcess : ModBase
         }
 
         public static void Write(string format, params object[] args)
-            => Write(string.Format(format, args));
+        {
+            string message = format;
+
+            // First pass: replace named placeholders {Name} sequentially
+            // e.g. "{Img}" with args[0], "{Len}" with args[1], etc.
+            int argIndex = 0;
+            System.Text.StringBuilder sb = new(format.Length + 64);
+            int i = 0;
+
+            while (i < format.Length)
+            {
+                if (format[i] == '{' && i + 1 < format.Length)
+                {
+                    // Find closing brace
+                    int close = format.IndexOf('}', i + 1);
+                    if (close != -1)
+                    {
+                        string placeholder = format.Substring(i + 1, close - i - 1);
+
+                        // Check if it's already indexed {0}, {1}...
+                        if (int.TryParse(placeholder, out int explicitIndex))
+                        {
+                            sb.Append(explicitIndex < args.Length
+                                ? args[explicitIndex]?.ToString() ?? "null"
+                                : $"{{{placeholder}}}");
+                        }
+                        else
+                        {
+                            // Named placeholder — consume next arg in order
+                            sb.Append(argIndex < args.Length
+                                ? args[argIndex++]?.ToString() ?? "null"
+                                : $"{{{placeholder}}}");
+                        }
+
+                        i = close + 1;
+                        continue;
+                    }
+                }
+
+                sb.Append(format[i++]);
+            }
+
+            Write(sb.ToString());
+        }
     }
 
 }

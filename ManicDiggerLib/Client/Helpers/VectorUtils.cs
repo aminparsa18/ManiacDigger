@@ -73,10 +73,10 @@ public class VectorUtils
     {
         RectangleF r = new()
         {
-            Y = 1 / texturesPacked * (textureId / texturesPacked),
-            X = 1 / texturesPacked * (textureId % texturesPacked),
-            Width = 1 / texturesPacked,
-            Height = 1 / texturesPacked
+            Y = 1f / texturesPacked * (textureId / texturesPacked),
+            X = 1f / texturesPacked * (textureId % texturesPacked),
+            Width = 1f / texturesPacked,
+            Height = 1f / texturesPacked
         };
         return r;
     }
