@@ -9,6 +9,8 @@ using OpenTK.Mathematics;
 public class VoxelMap
 {
     public Chunk[] Chunks { get; private set; }
+    public readonly System.Collections.Concurrent.ConcurrentQueue<int> PhantomChunkIndices = new();
+
     internal int MapSizeX;
     internal int MapSizeY;
     internal int MapSizeZ;
@@ -85,6 +87,7 @@ public class VoxelMap
                 baseLight = baseLight
             };
             Chunks[flatIndex] = chunk;
+            PhantomChunkIndices.Enqueue(flatIndex);
         }
 
         return chunk;

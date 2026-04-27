@@ -268,7 +268,7 @@ public class GamePlatformNative : IGamePlatform
 
     public bool IsFastSystem()
     {
-        return true;
+        return false;
     }
 
     private static string GetPreferencesFilePath()

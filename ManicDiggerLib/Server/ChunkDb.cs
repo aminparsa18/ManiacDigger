@@ -84,12 +84,6 @@ public static class ChunkDb
         }
         return chunks[new Xyz() { X = x, Y = y, Z = z }];
     }
-    /*
-    public static void SetChunkToFile(IChunkDb db, int x, int y, int z, byte[] c, string filename)
-    {
-        db.SetChunksToFile(new DbChunk[] { new DbChunk() { Position = new Xyz() { X = x, Y = y, Z = z }, Chunk = c } }, filename);
-    }
-    */
 }
 
 /// <summary>

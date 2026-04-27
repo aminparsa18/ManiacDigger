@@ -44,7 +44,8 @@ public partial class Game
         // Fixed-timestep accumulator — capped at 1 s to prevent spiral-of-death
         // when the renderer stalls (e.g. window resize, focus loss).
         accumulator = Math.Min(accumulator + deltaTime, 1f);
-        while (accumulator >= FixedTickDt)
+        int maxTicksPerFrame = 3; // never run more than 3 physics ticks per render frame
+        while (accumulator >= FixedTickDt && maxTicksPerFrame-- > 0)
         {
             FrameTick(FixedTickDt);
             accumulator -= FixedTickDt;
@@ -129,6 +130,13 @@ public partial class Game
     /// </summary>
     internal void RunDraw2dAndEndFrame(float dt)
     {
+        // ── Drain the commit queue ────────────────────────────────────────────
+        // Cap at 32 actions per frame so a sudden flood can't stall rendering.
+        // Unprocessed actions stay in the queue and drain over subsequent frames.
+        int maxCommitsPerFrame = 32;
+        while (maxCommitsPerFrame-- > 0 && commitActions.TryDequeue(out Action action))
+            action();
+
         SetAmbientLight(ColorUtils.ColorFromArgb(255, 255, 255, 255));
         Draw2d(dt);
 
@@ -224,7 +232,7 @@ public partial class Game
     /// </summary>
     private void UpdateMouseSmoothing(float deltaTime)
     {
-        const float MouseSmoothingDt = 1f / 300f;
+        const float MouseSmoothingDt = 1f / 75f;
         mouseSmoothingAccum += deltaTime;
         while (mouseSmoothingAccum > MouseSmoothingDt)
         {

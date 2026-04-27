@@ -205,9 +205,8 @@ public class TextRenderer
         if (c == 'f') { return 15; }
         return -1;
     }
-    public bool NewFont = true;
 
-    public static SizeF MeasureTextSize(string text, float fontsize)
+    private static SizeF MeasureTextSize(string text, float fontsize)
     {
         string text2 = "";
         fontsize = Math.Max(fontsize, 9);
@@ -237,14 +236,20 @@ public class TextRenderer
     }
 
     private static readonly Dictionary<TextStyle, SizeF> textsizes = [];
+    private const int TextSizeCacheMax = 512;
     private static SizeF TextSize(string text, float fontsize)
     {
-        if (textsizes.TryGetValue(new TextStyle() { Text = text, FontSize = fontsize }, out SizeF size))
-        {
+        TextStyle key = new TextStyle() { Text = text, FontSize = fontsize };
+
+        if (textsizes.TryGetValue(key, out SizeF size))
             return size;
-        }
+
         size = MeasureTextSize(text, fontsize);
-        textsizes[new TextStyle() { Text = text, FontSize = fontsize }] = size;
+
+        if (textsizes.Count >= TextSizeCacheMax)
+            textsizes.Clear();
+
+        textsizes[key] = size;
         return size;
     }
 

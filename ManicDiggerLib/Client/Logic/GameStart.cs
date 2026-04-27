@@ -91,6 +91,7 @@ public partial class Game
         AddMod(new ModNetworkProcess(this, Platform));
         AddMod(new ModNetworkEntity(this));
         AddMod(new ModUnloadRendererChunks(this, Platform));
+        AddMod(new ModDiagLog(this));
 
         // ── Camera ────────────────────────────────────────────────────────────
         AddMod(new ModAutoCamera(this, Platform));

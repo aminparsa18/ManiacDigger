@@ -34,7 +34,7 @@ public class ServerSystemModLoader : ServerSystem
     /// <summary>Tracks which mods have been started to prevent double-starting during dependency resolution.</summary>
     private readonly Dictionary<string, bool> loadedMods = [];
 
-    private static readonly string[] ExtraAssemblyReferences = ["ScriptingApi.dll", "LibNoise.dll", "protobuf-net.dll"];
+    private static readonly string[] ExtraAssemblyReferences = ["ScriptingApi.dll"];
 
     // -------------------------------------------------------------------------
     // Lifecycle
@@ -209,6 +209,13 @@ public class ServerSystemModLoader : ServerSystem
                 out Assembly? combined, out _))
         {
             RegisterModsFromAssembly(combined!);
+
+            // ── Release Roslyn syntax trees from memory ───────────────────────
+            references.Clear();
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+
             return;
         }
 
@@ -350,6 +357,11 @@ public class ServerSystemModLoader : ServerSystem
         var result = compilation.Emit(ms);
 #endif
 
+        // Free the syntax trees — compilation holds the full AST in memory
+        // and Roslyn won't release it until the compilation object is collected.
+        syntaxTrees.Clear();
+        compilation = null!;  // allow GC to collect the AST
+
         foreach (var diag in result.Diagnostics)
         {
             Console.WriteLine($"[Roslyn] {diag.Severity} {diag.Id}: {diag.GetMessage()} " +
@@ -377,6 +389,13 @@ public class ServerSystemModLoader : ServerSystem
 #endif
 
         ms.Dispose();
+
+        // Explicitly clear parse trees before returning
+        // so the load context doesn't root them
+        foreach (var tree in syntaxTrees)
+            ((CSharpSyntaxTree)tree).GetRoot(); // force lazy evaluation then release
+        syntaxTrees.Clear();
+
         Console.WriteLine($"[Roslyn] Assembly name: {assembly.FullName}");
         Console.WriteLine($"[Roslyn] Types: {assembly.GetTypes().Length}");
         return true;

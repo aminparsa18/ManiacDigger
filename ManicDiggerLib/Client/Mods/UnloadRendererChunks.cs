@@ -9,7 +9,9 @@ public class ModUnloadRendererChunks : ModBase
 {
     /// <summary>Reference to the current game instance, refreshed every background tick.</summary>
     private readonly IGameClient _game;
-    private readonly IGamePlatform _platform;
+
+    private int _pendingUnloadIndex = -1;
+    private Action _unloadAction;
 
     /// <summary>Edge length of one chunk in blocks.</summary>
     private int _chunkSize;
@@ -38,8 +40,9 @@ public class ModUnloadRendererChunks : ModBase
     public ModUnloadRendererChunks(IGameClient game, IGamePlatform platform)
     {
         _game = game;
-        _platform = platform;
         _unloadXyzTemp = new Vector3i();
+        _unloadXyzTemp = new Vector3i();
+        _unloadAction = ExecuteUnload; // allocated once, reused forever
     }
 
     /// <summary>
@@ -59,44 +62,53 @@ public class ModUnloadRendererChunks : ModBase
     /// Passing <c>-1</c> is a no-op.
     /// </param>
     /// <returns>An <see cref="Action"/> safe to enqueue via <see cref="Game.QueueActionCommit"/>.</returns>
-    public Action CreateUnloadCommit(int chunkFlatIndex)
+    private void ExecuteUnload()
     {
-        return () =>
+        int chunkFlatIndex = _pendingUnloadIndex;
+        if (chunkFlatIndex == -1) return;
+
+        Chunk chunk = _game.VoxelMap.Chunks[chunkFlatIndex];
+        if (chunk == null) return;
+
+        RenderedChunk rendered = chunk.rendered;
+        if (rendered != null)
         {
-            if (chunkFlatIndex == -1) { return; }
-
-            Chunk chunk = _game.VoxelMap.Chunks[chunkFlatIndex];
-            if (chunk == null) { return; }
-
-            // ── GPU geometry ─────────────────────────────────────────────────
-            RenderedChunk rendered = chunk.rendered;
-            if (rendered != null)
+            for (int k = 0; k < rendered.IdsCount; k++)
+                _game.Batcher.Remove(rendered.Ids[k]);
+            rendered.Ids = null;
+            rendered.Dirty = true;
+            if (rendered.LightRented && rendered.Light != null)
             {
-                for (int k = 0; k < rendered.IdsCount; k++)
-                {
-                    _game.Batcher.Remove(rendered.Ids[k]);
-                }
-                rendered.Ids = null;
-                rendered.Dirty = true;
-                rendered.Light = null;
+                System.Buffers.ArrayPool<byte>.Shared.Return(rendered.Light);
+                rendered.LightRented = false;
             }
+            rendered.Light = null;
+        }
 
-            // ── CPU block data ────────────────────────────────────────────────
-            // Return all rented arrays to ArrayPool before nulling the chunk slot.
-            // Without this call the rented byte[]/int[] arrays would be silently
-            // leaked — never returned to the pool and never collected by the GC
-            // because the pool still holds internal references to them.
-            chunk.Release();
-
-            // Null the slot so the (now empty) Chunk object itself can be GC'd.
-            _game.VoxelMap.Chunks[chunkFlatIndex] = null;
-        };
+        chunk.Release();
+        _game.VoxelMap.Chunks[chunkFlatIndex] = null;
     }
 
     /// <inheritdoc/>
     public override void OnReadOnlyBackgroundThread(float dt)
     {
         RefreshChunkGridDimensions();
+
+        // ── Drain phantom chunks first — these have no rendered geometry
+        // and were created only for lighting neighbour reads.
+        // They must be freed as soon as the lighting pass that created them
+        // is done, which is always before this background tick runs.
+        int phantomDrainLimit = 64;
+        while (phantomDrainLimit-- > 0
+            && _game.VoxelMap.PhantomChunkIndices.TryDequeue(out int phantomIndex))
+        {
+            Chunk phantom = _game.VoxelMap.Chunks[phantomIndex];
+            if (phantom == null) continue;
+            // Only free if it hasn't been promoted to a real chunk
+            // (real chunks have rendered != null or were sent by the server)
+            if (phantom.rendered != null) continue;
+            _game.QueueActionCommit(CreatePhantomUnloadCommit(phantomIndex));
+        }
 
         // Compute the view-distance box in chunk coordinates.
         int px = (int)(_game.LocalPositionX * _invertedChunk);
@@ -115,8 +127,9 @@ public class ModUnloadRendererChunks : ModBase
 
         int totalChunks = _mapSizeXChunks * _mapSizeYChunks * _mapSizeZChunks;
 
-        // Fast systems check more chunks per tick to keep unloading responsive.
-        int checksPerTick = _platform.IsFastSystem() ? 1000 : 250;
+        // scan full array over ~10 frames regardless of machine speed
+        // At 75 ticks/sec this completes a full pass every ~133ms, plenty fast enough
+        int checksPerTick = Math.Max(100, totalChunks / (5 * 75));
 
         for (int i = 0; i < checksPerTick; i++)
         {
@@ -151,7 +164,8 @@ public class ModUnloadRendererChunks : ModBase
             if (x < startX || y < startY || z < startZ
              || x > endX || y > endY || z > endZ)
             {
-                _game.QueueActionCommit(CreateUnloadCommit(flatIndex));
+                _pendingUnloadIndex = flatIndex;
+                _game.QueueActionCommit(_unloadAction);
                 // Rate-limit only for rendered chunks (GPU removal needed).
                 // Data-only chunks are CPU-only and cheap — continue scanning
                 // so we can drain multiple per tick and keep pace with the
@@ -159,6 +173,17 @@ public class ModUnloadRendererChunks : ModBase
                 if (hasRenderedGeometry) { break; }
             }
         }
+    }
+
+    private Action CreatePhantomUnloadCommit(int flatIndex)
+    {
+        return () =>
+        {
+            Chunk chunk = _game.VoxelMap.Chunks[flatIndex];
+            if (chunk == null || chunk.rendered != null) return;
+            chunk.Release();
+            _game.VoxelMap.Chunks[flatIndex] = null;
+        };
     }
 
     /// <summary>

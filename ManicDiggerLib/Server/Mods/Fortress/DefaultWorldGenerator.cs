@@ -326,29 +326,53 @@ public class DefaultWorldGenerator : IMod
 
                 double cont = GetContinent(wx, wy);
                 Biome biome = GetBiome(wx, wy);
-                double normH = (biome == Biome.DeepOcean || biome == Biome.Ocean || biome == Biome.Shore)
-                                 ? System.Math.Clamp(cont / 0.45, 0.0, 1.0)
-                                 : GetNormHeight(wx, wy, cont);
+                double normH = GetSmoothedNormHeight(wx, wy, cont, biome);
                 int surfaceZ = GetSurfaceZ(biome, normH);
 
                 for (int zz = 0; zz < chunksize; zz++)
                 {
                     int wz = oz + zz;
-                    try
+                    int block;
+
+                    if (wz == 0)
                     {
-                        chunk[m.Index3d(xx, yy, zz, chunksize, chunksize)] =
-                            (ushort)BuildBlock(biome, wz, surfaceZ, wx, wy);
+                        block = BLOCK_ADMINIUM;
                     }
-                    catch
+                    else if (wz < surfaceZ - 5)
                     {
-                        chunk[m.Index3d(xx, yy, zz, chunksize, chunksize)] =
-                            (ushort)(wz == 0 ? BLOCK_ADMINIUM : BLOCK_STONE);
+                        // Deep underground — always solid stone, no biome logic needed
+                        block = BLOCK_STONE;
                     }
+                    else
+                    {
+                        try { block = BuildBlock(biome, wz, surfaceZ, wx, wy); }
+                        catch { block = BLOCK_STONE; }
+                    }
+
+                    chunk[m.Index3d(xx, yy, zz, chunksize, chunksize)] = (ushort)block;
                 }
             }
 
         totalGetChunkMs += watch.ElapsedMilliseconds;
         watch.Stop();
+    }
+
+    double GetSmoothedNormHeight(int wx, int wy, double cont, Biome biome)
+    {
+        bool isOcean = biome == Biome.DeepOcean || biome == Biome.Ocean || biome == Biome.Shore;
+        if (isOcean)
+            return System.Math.Clamp(cont / 0.36, 0.0, 1.0);
+
+        // Average over a 5x5 neighbourhood to smooth out sharp biome-boundary jumps
+        const int R = 2;
+        double sum = 0;
+        for (int dx = -R; dx <= R; dx++)
+            for (int dy = -R; dy <= R; dy++)
+            {
+                double nc = GetContinent(wx + dx, wy + dy);
+                sum += GetNormHeight(wx + dx, wy + dy, nc);
+            }
+        return sum / ((2 * R + 1) * (2 * R + 1));
     }
 
     int BuildBlock(Biome biome, int wz, int surfaceZ, int wx, int wy)

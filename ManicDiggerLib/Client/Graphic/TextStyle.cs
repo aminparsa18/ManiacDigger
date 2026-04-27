@@ -21,8 +21,9 @@ public class TextStyle
     /// <summary>
     /// Returns <see langword="true"/> if all fields of this instance equal those of <paramref name="other"/>.
     /// </summary>
-    public bool Equals(TextStyle other)
-        => Text == other.Text
+    public override bool Equals(object obj)
+        => obj is TextStyle other
+        && Text == other.Text
         && FontSize == other.FontSize
         && Color == other.Color
         && FontFamily == other.FontFamily
