@@ -59,12 +59,11 @@ public interface IPlatformMisc
     void SetWindowState(WindowState value);
     void ChangeResolution(int width, int height, int bitsPerPixel, float refreshRate);
     DisplayResolutionCi GetDisplayResolutionDefault();
-    void WebClientUploadDataAsync(string url, byte[] data, int dataLength, HttpResponse response);
+   
     string FileOpenDialog(string extension, string extensionName, string initialDirectory);
     void MouseCursorSetVisible(bool value);
     bool MouseCursorIsVisible();
     void ApplicationDoEvents();
-    void ThreadSpinWait(int iterations);
     void ShowKeyboard(bool show);
     bool IsFastSystem();
     Preferences GetPreferences();
@@ -180,8 +179,6 @@ public interface IPlatformSinglePlayer
     bool SinglePlayerServerLoaded();
     void SinglePlayerServerDisable();
     DummyNetwork SinglePlayerServerGetNetwork();
-    PlayerInterpolationState CastToPlayerInterpolationState(IInterpolatedObject a);
-    EnetNetConnection CastToEnetNetConnection(NetConnection connection);
 }
 
 public class OnCrashHandler

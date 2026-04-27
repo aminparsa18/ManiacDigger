@@ -11,7 +11,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.IO.Compression;
-using System.Net;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -158,76 +157,6 @@ public class GamePlatformNative : IGamePlatform
         gameexit = exit;
     }
 
-    private class UploadData
-    {
-        public string url;
-        public byte[] data;
-        public int dataLength;
-        public HttpResponse response;
-    }
-
-    public void WebClientUploadDataAsync(string url, byte[] data, int dataLength, HttpResponse response)
-    {
-        UploadData d = new()
-        {
-            url = url,
-            data = data,
-            dataLength = dataLength,
-            response = response
-        };
-        ThreadPool.QueueUserWorkItem(DoUploadData, d);
-    }
-
-    private void DoUploadData(object o)
-    {
-        UploadData d = (UploadData)o;
-        try
-        {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(d.url);
-            request.Method = "POST";
-            request.Timeout = 15000; // 15s timeout
-            request.ContentType = "application/x-www-form-urlencoded";
-            request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
-
-            request.ContentLength = d.dataLength;
-
-            ServicePointManager.Expect100Continue = false; // fixes lighthttpd 417 error
-
-            using (Stream requestStream = request.GetRequestStream())
-            {
-                requestStream.Write(d.data, 0, d.dataLength);
-                requestStream.Flush();
-            }
-            WebResponse response_ = request.GetResponse();
-
-            MemoryStream m = new();
-            using (Stream s = response_.GetResponseStream())
-            {
-                CopyTo(s, m);
-            }
-            d.response.Value = m.ToArray();
-            d.response.Done = true;
-
-            request.Abort();
-
-        }
-        catch
-        {
-            d.response.Error = true;
-        }
-    }
-
-    public static void CopyTo(Stream source, Stream destination)
-    {
-        // TODO: Argument validation
-        byte[] buffer = new byte[16384]; // For example...
-        int bytesRead;
-        while ((bytesRead = source.Read(buffer, 0, buffer.Length)) > 0)
-        {
-            destination.Write(buffer, 0, bytesRead);
-        }
-    }
-
     public string FileOpenDialog(string extension, string extensionName, string initialDirectory)
     {
         OpenFileDialog d = new()
@@ -255,11 +184,6 @@ public class GamePlatformNative : IGamePlatform
             Application.DoEvents();
             Thread.Sleep(0);
         }
-    }
-
-    public void ThreadSpinWait(int iterations)
-    {
-        Thread.SpinWait(iterations);
     }
 
     public void ShowKeyboard(bool show)
@@ -1253,15 +1177,6 @@ public class GamePlatformNative : IGamePlatform
         singlePlayerServerAvailable = false;
     }
 
-    public EnetNetConnection CastToEnetNetConnection(NetConnection connection)
-    {
-        return (EnetNetConnection)connection;
-    }
-
-    public PlayerInterpolationState CastToPlayerInterpolationState(IInterpolatedObject a)
-    {
-        return (PlayerInterpolationState)a;
-    }
 
     #endregion
 
@@ -1383,11 +1298,6 @@ public class GamePlatformNative : IGamePlatform
     public void RestoreWindowCursor()
     {
         window.Cursor = MouseCursor.Default;
-    }
-
-    public static int ToGlKey(Keys key)
-    {
-        return (int)key;
     }
 
     public void MouseCursorSetVisible(bool value)
@@ -1549,7 +1459,7 @@ public class GamePlatformNative : IGamePlatform
     {
         KeyEventArgs args = new()
         {
-            KeyChar = ToGlKey(e.Key),
+            KeyChar = (int)(e.Key),
             CtrlPressed = e.Modifiers == KeyModifiers.Control,
             ShiftPressed = e.Modifiers == KeyModifiers.Shift,
             AltPressed = e.Modifiers == KeyModifiers.Alt
@@ -1563,7 +1473,7 @@ public class GamePlatformNative : IGamePlatform
 
     private void GameKeyUp(KeyboardKeyEventArgs e)
     {
-        KeyEventArgs args = new() { KeyChar = ToGlKey(e.Key) };
+        KeyEventArgs args = new() { KeyChar = (int)(e.Key) };
         foreach (var h in keyUpHandlers)
         {
             h(args);

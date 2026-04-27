@@ -60,7 +60,7 @@ public partial class Game
 
         // Fix #4: named constant instead of magic number.
         if (EnableLog == EnableLogSimulateLag)
-            Platform.ThreadSpinWait(20_000_000);
+           Thread.SpinWait(20_000_000);
 
         SetAmbientLight(Terraincolor());
         Platform.GlClearColorBufferAndDepthBuffer();
