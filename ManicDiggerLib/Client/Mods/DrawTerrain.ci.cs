@@ -150,7 +150,6 @@ public class ModDrawTerrain : ModBase
         {
             RedrawChunksAroundLastPlacedBlock();
 
-            // ── Fix #5: NearestDirty returns a nullable tuple ─────────────────
             var nearest = NearestDirty();
             if (nearest.HasValue)
                 RedrawChunk(nearest.Value.x, nearest.Value.y, nearest.Value.z);
@@ -245,7 +244,6 @@ public class ModDrawTerrain : ModBase
                     {
                         Chunk c = _game.VoxelMap.Chunks[Index3d(x, y, z, mapsizexchunks, mapsizeychunks)];
                         if (c?.rendered == null || !c.rendered.Dirty) continue;
-
                         int dx = px - x, dy = py - y, dz = pz - z;
                         int dist = dx * dx + dy * dy + dz * dz;
                         if (dist < nearestDist)

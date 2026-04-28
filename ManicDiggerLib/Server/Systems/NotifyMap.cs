@@ -141,27 +141,27 @@ public class ServerSystemNotifyMap : ServerSystem
 
         if (!IsSolidChunk(chunk.Data) || chunk.Data[0] != 0)
         {
-            // Compress and queue block data for sending
-            compressedChunk = server.CompressChunkNetwork(chunk.Data);
+        // Compress and queue block data for sending
+        compressedChunk = server.CompressChunkNetwork(chunk.Data);
 
-            // Send heightmap for this column
-            ReadOnlySpan<byte> heightmapBytes = MemoryMarshal.AsBytes(
-                server.Map.Heightmap.GetChunk(globalPos.X, globalPos.Y).AsSpan());
+        // Send heightmap for this column
+        ReadOnlySpan<byte> heightmapBytes = MemoryMarshal.AsBytes(
+            server.Map.Heightmap.GetChunk(globalPos.X, globalPos.Y).AsSpan());
 
-            var heightmapPacket = new Packet_ServerHeightmapChunk
-            {
-                X = globalPos.X,
-                Y = globalPos.Y,
-                SizeX = Server.ChunkSize,
-                SizeY = Server.ChunkSize,
-                CompressedHeightmap = server.NetworkCompression.Compress(heightmapBytes)
-            };
-            server.SendPacket(clientId, Server.Serialize(new Packet_Server
-            {
-                Id = Packet_ServerIdEnum.HeightmapChunk,
-                HeightmapChunk = heightmapPacket
-            }));
-            client.heightmapchunksseen[new Vector2i(globalPos.X, globalPos.Y)] = server.SimulationCurrentFrame;
+        var heightmapPacket = new Packet_ServerHeightmapChunk
+        {
+            X = globalPos.X,
+            Y = globalPos.Y,
+            SizeX = Server.ChunkSize,
+            SizeY = Server.ChunkSize,
+            CompressedHeightmap = server.NetworkCompression.Compress(heightmapBytes)
+        };
+        server.SendPacket(clientId, Server.Serialize(new Packet_Server
+        {
+            Id = Packet_ServerIdEnum.HeightmapChunk,
+            HeightmapChunk = heightmapPacket
+        }));
+        client.heightmapchunksseen[new Vector2i(globalPos.X, globalPos.Y)] = server.SimulationCurrentFrame;
         }
 
         // Send block data in 1 KB parts

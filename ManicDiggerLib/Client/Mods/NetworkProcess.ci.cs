@@ -148,7 +148,6 @@ public class ModNetworkProcess : ModBase
         }
     }
 
-    // ── Fix #5: note — each case below is a candidate for extraction into ─────
     // a private Handle*() method to make this switch a clean dispatch table
     // and enable per-handler unit testing. Deferred to keep this diff focused.
     internal void ProcessPacket(Packet_Server packet)
@@ -510,7 +509,7 @@ public class ModNetworkProcess : ModBase
     public static class DiagLog
     {
         private static readonly string _path = Path.Combine(
-            AppDomain.CurrentDomain.BaseDirectory, "diag.log");
+            AppDomain.CurrentDomain.BaseDirectory, "server.log");
 
         private static readonly object _lock = new();
 

@@ -1,267 +1,262 @@
 ﻿using LibNoise;
+using System.Runtime.CompilerServices;
 
 namespace ManicDigger.Mods;
 
 public class TreeGenerator : IMod
 {
-    private readonly int treeCount = 20;
+    private const int TreeCount = 5;
+
     private readonly Random _rnd = new();
-    private readonly Billow treenoise = new();
-    private IModManager m;
+    private readonly Billow _treeNoise = new();
+    private IModManager _m;
 
     private int BLOCK_GRASS;
-    private int BLOCK_OAKTRUNK;
-    private int BLOCK_OAKLEAVES;
-    private int BLOCK_APPLES;
-    private int BLOCK_SPRUCETRUNK;
-    private int BLOCK_SPRUCELEAVES;
-    private int BLOCK_BIRCHTRUNK;
-    private int BLOCK_BIRCHLEAVES;
+    private int BLOCK_OAKTRUNK, BLOCK_OAKLEAVES, BLOCK_APPLES;
+    private int BLOCK_SPRUCETRUNK, BLOCK_SPRUCELEAVES;
+    private int BLOCK_BIRCHTRUNK, BLOCK_BIRCHLEAVES;
 
-    public void PreStart(IModManager m)
-    {
-        m.RequireMod("CoreBlocks");
-    }
+    // ── Pre-computed 8-direction lookup (45° increments) ─────────────────────
+    // Replaces repeated Math.Cos/Sin calls inside tight loops.
+    // Each entry is (dx, dy) for angles 45°, 90°, 135°, ..., 360°.
+    private static readonly (int dx, int dy)[] Dirs8 =
+    [
+        ( 1,  1), ( 0,  1), (-1,  1), (-1,  0),
+        (-1, -1), ( 0, -1), ( 1, -1), ( 1,  0),
+    ];
+
+    // ── IMod ─────────────────────────────────────────────────────────────────
+
+    public void PreStart(IModManager m) => m.RequireMod("CoreBlocks");
 
     public void Start(IModManager manager)
     {
-        m = manager;
-        BLOCK_GRASS = m.GetBlockId("Grass");
-        BLOCK_OAKTRUNK = m.GetBlockId("OakTreeTrunk");
-        BLOCK_OAKLEAVES = m.GetBlockId("OakLeaves");
-        BLOCK_APPLES = m.GetBlockId("Apples");
-        BLOCK_SPRUCETRUNK = m.GetBlockId("SpruceTreeTrunk");
-        BLOCK_SPRUCELEAVES = m.GetBlockId("SpruceLeaves");
-        BLOCK_BIRCHTRUNK = m.GetBlockId("BirchTreeTrunk");
-        BLOCK_BIRCHLEAVES = m.GetBlockId("BirchLeaves");
-        m.RegisterPopulateChunk(PopulateChunk);
+        _m = manager;
+
+        BLOCK_GRASS = _m.GetBlockId("Grass");
+        BLOCK_OAKTRUNK = _m.GetBlockId("OakTreeTrunk");
+        BLOCK_OAKLEAVES = _m.GetBlockId("OakLeaves");
+        BLOCK_APPLES = _m.GetBlockId("Apples");
+        BLOCK_SPRUCETRUNK = _m.GetBlockId("SpruceTreeTrunk");
+        BLOCK_SPRUCELEAVES = _m.GetBlockId("SpruceLeaves");
+        BLOCK_BIRCHTRUNK = _m.GetBlockId("BirchTreeTrunk");
+        BLOCK_BIRCHLEAVES = _m.GetBlockId("BirchLeaves");
+
+        InitNoise(_m.Seed);
+
+        _m.RegisterPopulateChunk(PopulateChunk);
     }
 
-
-    private void Init()
+    private void InitNoise(int seed)
     {
-        int Seed = m.Seed;
-        treenoise.Seed = Seed + 2;
-        treenoise.OctaveCount = 6;
-        treenoise.Frequency = 1f / 180f;
-        treenoise.Lacunarity = treeCount / 20f * (treeCount / 20f) * 2f;
+        // Low-frequency billow — drives forest cluster density across the map.
+        // High lacunarity means clusters form quickly over short distances.
+        _treeNoise.Seed = seed + 2;
+        _treeNoise.OctaveCount = 6;
+        _treeNoise.Frequency = 1f / 180f;
+        _treeNoise.Lacunarity = 2f;
+        _treeNoise.Persistence = 0.5f;
     }
 
+    // ── Chunk population ──────────────────────────────────────────────────────
 
-    private void PopulateChunk(int x, int y, int z)
+    private void PopulateChunk(int cx, int cy, int cz)
     {
-        x *= m.GetChunkSize();
-        y *= m.GetChunkSize();
-        z *= m.GetChunkSize();
-        //forests
-        // forests
-        float count = treenoise.GetValue(x / 512f, 0f, y / 512f) * 1000f;
-        count = MathF.Min(count, 300f);
-        MakeSmallTrees(x, y, z, m.GetChunkSize(), _rnd, (int)count);
-        //random trees
-        MakeSmallTrees(x, y, z, m.GetChunkSize(), _rnd, treeCount + 10 - (10 - treeCount / 10));
+        int chunkSize = _m.GetChunkSize();
+        int ox = cx * chunkSize;
+        int oy = cy * chunkSize;
+        int oz = cz * chunkSize;
+
+        // Forest density: billow value in [-0.5, 1.5] × 1000, capped at 300.
+        // High-value areas get dense forest clusters; low-value areas get sparse trees.
+        float density = _treeNoise.GetValue(ox / 512f, 0f, oy / 512f) * 1000f;
+        int forestCount = (int)MathF.Min(MathF.Max(density, 0f), 300f);
+
+        // Forest cluster pass — concentrated in noise-high areas
+        PlaceTrees(ox, oy, oz, chunkSize, forestCount);
+
+        // Background scatter — always some trees regardless of noise
+        PlaceTrees(ox, oy, oz, chunkSize, TreeCount);
     }
 
-    private void MakeSmallTrees(int cx, int cy, int cz, int chunksize, Random rnd, int count)
+    private void PlaceTrees(int ox, int oy, int oz, int chunkSize, int count)
     {
-        int chooseTreeType;
         for (int i = 0; i < count; i++)
         {
-            int x = cx + rnd.Next(chunksize);
-            int y = cy + rnd.Next(chunksize);
-            int z = cz + rnd.Next(chunksize);
-            if (!m.IsValidPos(x, y, z) || m.GetBlock(x, y, z) != BLOCK_GRASS)
+            int x = ox + _rnd.Next(chunkSize);
+            int y = oy + _rnd.Next(chunkSize);
+
+            // Scan down from chunk top to find the actual surface grass block.
+            // The original picked a random z, which almost never hit the surface.
+            int surfaceZ = FindSurface(x, y, oz, oz + chunkSize - 1);
+            if (surfaceZ == -1) continue;
+
+            switch (_rnd.Next(3))
             {
-                continue;
-            }
-            chooseTreeType = rnd.Next(0, 3);
-            switch (chooseTreeType)
-            {
-                case 0: MakeTreeType1(x, y, z, rnd); break; //Spruce
-                case 1: MakeTreeType2(x, y, z, rnd); break; //Oak
-                case 2: MakeTreeType3(x, y, z, rnd); break; //Birch
-            }
-            ;
-        }
-    }
-
-    private void MakeTreeType1(int x, int y, int z, Random rnd)
-    {
-        int treeHeight = rnd.Next(8, 12);
-        for (int i = 0; i < treeHeight; i++)
-        {
-            SetBlock(x, y, z + i, BLOCK_SPRUCETRUNK);
-            if (i == treeHeight - 4)
-            {
-                SetBlock(x + 1, y, z + i, BLOCK_SPRUCETRUNK);
-                SetBlock(x - 1, y, z + i, BLOCK_SPRUCETRUNK);
-                SetBlock(x, y + 1, z + i, BLOCK_SPRUCETRUNK);
-                SetBlock(x, y - 1, z + i, BLOCK_SPRUCETRUNK);
-            }
-
-            int xx;
-            int yy;
-            int dir = 0;
-            if (i == treeHeight - 3)
-            {
-                for (int j = 1; j < 9; j++)
-                {
-                    dir += 45;
-                    for (int k = 1; k < 4; k++)
-                    {
-                        int length = dir % 90 == 0 ? k : (k / 2);
-                        xx = length * (int)System.Math.Round(System.Math.Cos(dir * System.Math.PI / 180));
-                        yy = length * (int)System.Math.Round(System.Math.Sin(dir * System.Math.PI / 180));
-
-                        SetBlock(x + xx, y + yy, z + i, BLOCK_SPRUCETRUNK);
-                        SetBlockIfEmpty(x + xx, y + yy, z + i + 1, BLOCK_SPRUCELEAVES);
-
-                        SetBlockIfEmpty(x + xx + 1, y + yy, z + i, BLOCK_SPRUCELEAVES);
-                        SetBlockIfEmpty(x + xx - 1, y + yy, z + i, BLOCK_SPRUCELEAVES);
-                        SetBlockIfEmpty(x + xx, y + yy + 1, z + i, BLOCK_SPRUCELEAVES);
-                        SetBlockIfEmpty(x + xx, y + yy - 1, z + i, BLOCK_SPRUCELEAVES);
-                    }
-                }
-            }
-            if (i == treeHeight - 1)
-            {
-                for (int j = 1; j < 9; j++)
-                {
-                    dir += 45;
-                    for (int k = 1; k < 3; k++)
-                    {
-                        int length = dir % 90 == 0 ? k : (k / 2);
-                        xx = length * (int)System.Math.Round(System.Math.Cos(dir * System.Math.PI / 180));
-                        yy = length * (int)System.Math.Round(System.Math.Sin(dir * System.Math.PI / 180));
-
-                        SetBlock(x + xx, y + yy, z + i, BLOCK_SPRUCETRUNK);
-                        SetBlockIfEmpty(x + xx, y + yy, z + i + 1, BLOCK_SPRUCELEAVES);
-
-                        SetBlockIfEmpty(x + xx + 1, y + yy, z + i, BLOCK_SPRUCELEAVES);
-                        SetBlockIfEmpty(x + xx - 1, y + yy, z + i, BLOCK_SPRUCELEAVES);
-                        SetBlockIfEmpty(x + xx, y + yy + 1, z + i, BLOCK_SPRUCELEAVES);
-                        SetBlockIfEmpty(x + xx, y + yy - 1, z + i, BLOCK_SPRUCELEAVES);
-                    }
-                }
+                case 0: MakeSpruce(x, y, surfaceZ); break;
+                case 1: MakeOak(x, y, surfaceZ); break;
+                case 2: MakeBirch(x, y, surfaceZ); break;
             }
         }
     }
 
-    private void MakeTreeType2(int x, int y, int z, Random rnd)
+    /// <summary>
+    /// Scans downward from <paramref name="zTop"/> to <paramref name="zBottom"/>
+    /// and returns the z of the highest grass block, or -1 if none found.
+    /// </summary>
+    private int FindSurface(int x, int y, int zBottom, int zTop)
     {
-        int treeHeight = rnd.Next(4, 6);
-        int xx;
-        int yy;
-        int dir = 0;
-        float chanceToAppleTree = 0.1f;
-        for (int i = 0; i < treeHeight; i++)
+        for (int z = zTop; z >= zBottom; z--)
         {
-            SetBlock(x, y, z + i, BLOCK_OAKTRUNK);
-            if (i == treeHeight - 1)
-            {
-                for (int j = 1; j < 9; j++)
-                {
-                    dir += 45;
-                    for (int k = 1; k < 2; k++)
-                    {
-                        int length = dir % 90 == 0 ? k : (k / 2);
-                        xx = length * (int)System.Math.Round(System.Math.Cos(dir * System.Math.PI / 180));
-                        yy = length * (int)System.Math.Round(System.Math.Sin(dir * System.Math.PI / 180));
+            if (!_m.IsValidPos(x, y, z)) continue;
+            if (_m.GetBlock(x, y, z) == BLOCK_GRASS) return z;
+        }
+        return -1;
+    }
 
-                        SetBlock(x + xx, y + yy, z + i, BLOCK_OAKTRUNK);
-                        if (chanceToAppleTree < rnd.NextSingle())
-                        {
-                            SetBlockIfEmpty(x + xx, y + yy, z + i + 1, BLOCK_OAKLEAVES);
-                            SetBlockIfEmpty(x + xx + 1, y + yy, z + i, BLOCK_OAKLEAVES);
-                            SetBlockIfEmpty(x + xx - 1, y + yy, z + i, BLOCK_OAKLEAVES);
-                            SetBlockIfEmpty(x + xx, y + yy + 1, z + i, BLOCK_OAKLEAVES);
-                            SetBlockIfEmpty(x + xx, y + yy - 1, z + i, BLOCK_OAKLEAVES);
-                        }
-                        else
-                        {
-                            float appleChance = 0.4f;
-                            int tile;
-                            tile = rnd.NextSingle() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES; SetBlockIfEmpty(x + xx, y + yy, z + i + 1, tile);
-                            tile = rnd.NextSingle() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES; SetBlockIfEmpty(x + xx + 1, y + yy, z + i, tile);
-                            tile = rnd.NextSingle() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES; SetBlockIfEmpty(x + xx - 1, y + yy, z + i, tile);
-                            tile = rnd.NextSingle() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES; SetBlockIfEmpty(x + xx, y + yy + 1, z + i, tile);
-                            tile = rnd.NextSingle() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES; SetBlockIfEmpty(x + xx, y + yy - 1, z + i, tile);
-                        }
-                    }
-                }
+    // ── Tree types ────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Spruce — tall, layered conical canopy with two branch tiers.
+    /// </summary>
+    private void MakeSpruce(int x, int y, int z)
+    {
+        int h = _rnd.Next(8, 12);
+
+        for (int i = 0; i < h; i++)
+            Set(x, y, z + i, BLOCK_SPRUCETRUNK);
+
+        // Lower branch tier — wide spread
+        SpruceCanopyTier(x, y, z + h - 3, maxK: 4);
+
+        // Upper branch tier — narrow crown
+        SpruceCanopyTier(x, y, z + h - 1, maxK: 3);
+    }
+
+    private void SpruceCanopyTier(int x, int y, int z, int maxK)
+    {
+        foreach (var (dx, dy) in Dirs8)
+        {
+            // Cardinal directions get full length, diagonals get half
+            bool cardinal = dx == 0 || dy == 0;
+            for (int k = 1; k < maxK; k++)
+            {
+                int length = cardinal ? k : k / 2;
+                if (length == 0) continue;
+
+                int bx = x + dx * length;
+                int by = y + dy * length;
+
+                Set(bx, by, z, BLOCK_SPRUCETRUNK);
+                SetIfEmpty(bx, by, z + 1, BLOCK_SPRUCELEAVES);
+                SetIfEmpty(bx + 1, by, z, BLOCK_SPRUCELEAVES);
+                SetIfEmpty(bx - 1, by, z, BLOCK_SPRUCELEAVES);
+                SetIfEmpty(bx, by + 1, z, BLOCK_SPRUCELEAVES);
+                SetIfEmpty(bx, by - 1, z, BLOCK_SPRUCELEAVES);
             }
         }
     }
 
-    private void MakeTreeType3(int x, int y, int z, Random rnd)
+    /// <summary>
+    /// Oak — short, rounded canopy. Chance to spawn as an apple tree.
+    /// </summary>
+    private void MakeOak(int x, int y, int z)
     {
-        int treeHeight = rnd.Next(6, 9);
-        int xx;
-        int yy;
-        int dir = 0;
-        for (int i = 0; i < treeHeight; i++)
+        int h = _rnd.Next(4, 6);
+        bool isAppleTree = _rnd.NextSingle() < 0.1f;
+
+        for (int i = 0; i < h; i++)
+            Set(x, y, z + i, BLOCK_OAKTRUNK);
+
+        foreach (var (dx, dy) in Dirs8)
         {
-            SetBlock(x, y, z + i, BLOCK_BIRCHTRUNK);
-            if (i % 3 == 0 && i > 3)
+            bool cardinal = dx == 0 || dy == 0;
+            int bx = x + (cardinal ? dx : 0);
+            int by = y + (cardinal ? dy : 0);
+            if (!cardinal) continue; // Oak crown is cross-shaped, skip diagonals
+
+            Set(bx, by, z + h - 1, BLOCK_OAKTRUNK);
+
+            if (isAppleTree)
             {
-                for (int j = 1; j < 9; j++)
-                {
-                    dir += 45;
-                    for (int k = 1; k < 2; k++)
-                    {
-                        int length = dir % 90 == 0 ? k : k / 2;
-                        xx = length * (int)System.Math.Round(System.Math.Cos(dir * System.Math.PI / 180));
-                        yy = length * (int)System.Math.Round(System.Math.Sin(dir * System.Math.PI / 180));
-
-                        SetBlock(x + xx, y + yy, z + i, BLOCK_BIRCHTRUNK);
-                        SetBlockIfEmpty(x + xx, y + yy, z + i + 1, BLOCK_BIRCHLEAVES);
-
-                        SetBlockIfEmpty(x + xx + 1, y + yy, z + i, BLOCK_BIRCHLEAVES);
-                        SetBlockIfEmpty(x + xx - 1, y + yy, z + i, BLOCK_BIRCHLEAVES);
-                        SetBlockIfEmpty(x + xx, y + yy + 1, z + i, BLOCK_BIRCHLEAVES);
-                        SetBlockIfEmpty(x + xx, y + yy - 1, z + i, BLOCK_BIRCHLEAVES);
-                    }
-                }
+                const float appleChance = 0.4f;
+                SetIfEmpty(bx, by, z + h, _rnd.NextSingle() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES);
+                SetIfEmpty(bx + 1, by, z + h - 1, _rnd.NextSingle() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES);
+                SetIfEmpty(bx - 1, by, z + h - 1, _rnd.NextSingle() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES);
+                SetIfEmpty(bx, by + 1, z + h - 1, _rnd.NextSingle() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES);
+                SetIfEmpty(bx, by - 1, z + h - 1, _rnd.NextSingle() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES);
             }
-            if (i % 3 == 2 && i > 3)
+            else
             {
-                dir = 45;
-                for (int j = 1; j < 9; j++)
-                {
-                    dir += 45;
-                    for (int k = 1; k < 3; k++)
-                    {
-                        int length = dir % 90 == 0 ? k : k / 2;
-                        xx = length * (int)System.Math.Round(System.Math.Cos(dir * System.Math.PI / 180));
-                        yy = length * (int)System.Math.Round(System.Math.Sin(dir * System.Math.PI / 180));
-
-                        SetBlock(x + xx, y + yy, z + i, BLOCK_BIRCHTRUNK);
-                        SetBlockIfEmpty(x + xx, y + yy, z + i + 1, BLOCK_BIRCHLEAVES);
-
-                        SetBlockIfEmpty(x + xx + 1, y + yy, z + i, BLOCK_BIRCHLEAVES);
-                        SetBlockIfEmpty(x + xx - 1, y + yy, z + i, BLOCK_BIRCHLEAVES);
-                        SetBlockIfEmpty(x + xx, y + yy + 1, z + i, BLOCK_BIRCHLEAVES);
-                        SetBlockIfEmpty(x + xx, y + yy - 1, z + i, BLOCK_BIRCHLEAVES);
-                    }
-                }
+                SetIfEmpty(bx, by, z + h, BLOCK_OAKLEAVES);
+                SetIfEmpty(bx + 1, by, z + h - 1, BLOCK_OAKLEAVES);
+                SetIfEmpty(bx - 1, by, z + h - 1, BLOCK_OAKLEAVES);
+                SetIfEmpty(bx, by + 1, z + h - 1, BLOCK_OAKLEAVES);
+                SetIfEmpty(bx, by - 1, z + h - 1, BLOCK_OAKLEAVES);
             }
-            SetBlockIfEmpty(x, y, z + treeHeight, BLOCK_BIRCHLEAVES);
         }
     }
 
-    private void SetBlock(int x, int y, int z, int blocktype)
+    /// <summary>
+    /// Birch — medium height, layered branches every 3 blocks above the base.
+    /// Alternates between tight (k=2) and wide (k=3) tiers for a layered look.
+    /// </summary>
+    private void MakeBirch(int x, int y, int z)
     {
-        if (m.IsValidPos(x, y, z))
+        int h = _rnd.Next(6, 9);
+
+        for (int i = 0; i < h; i++)
         {
-            m.SetBlock(x, y, z, blocktype);
+            Set(x, y, z + i, BLOCK_BIRCHTRUNK);
+
+            if (i > 3)
+            {
+                // Alternate between tight and wide canopy tiers every 3 blocks
+                bool wideTier = i % 3 == 2;
+                BirchCanopyTier(x, y, z + i, maxK: wideTier ? 3 : 2);
+            }
+        }
+
+        // Cap
+        SetIfEmpty(x, y, z + h, BLOCK_BIRCHLEAVES);
+    }
+
+    private void BirchCanopyTier(int x, int y, int z, int maxK)
+    {
+        foreach (var (dx, dy) in Dirs8)
+        {
+            bool cardinal = dx == 0 || dy == 0;
+            for (int k = 1; k < maxK; k++)
+            {
+                int length = cardinal ? k : k / 2;
+                if (length == 0) continue;
+
+                int bx = x + dx * length;
+                int by = y + dy * length;
+
+                Set(bx, by, z, BLOCK_BIRCHTRUNK);
+                SetIfEmpty(bx, by, z + 1, BLOCK_BIRCHLEAVES);
+                SetIfEmpty(bx + 1, by, z, BLOCK_BIRCHLEAVES);
+                SetIfEmpty(bx - 1, by, z, BLOCK_BIRCHLEAVES);
+                SetIfEmpty(bx, by + 1, z, BLOCK_BIRCHLEAVES);
+                SetIfEmpty(bx, by - 1, z, BLOCK_BIRCHLEAVES);
+            }
         }
     }
 
-    private void SetBlockIfEmpty(int x, int y, int z, int blocktype)
+    // ── Block helpers ─────────────────────────────────────────────────────────
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void Set(int x, int y, int z, int block)
     {
-        if (m.IsValidPos(x, y, z) && m.GetBlock(x, y, z) == 0)
-        {
-            m.SetBlock(x, y, z, blocktype);
-        }
+        if (_m.IsValidPos(x, y, z))
+            _m.SetBlock(x, y, z, block);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void SetIfEmpty(int x, int y, int z, int block)
+    {
+        if (_m.IsValidPos(x, y, z) && _m.GetBlock(x, y, z) == 0)
+            _m.SetBlock(x, y, z, block);
     }
 }

@@ -9,7 +9,7 @@ public class ModEventHandlers
     public List<ModDelegates.BlockUseWithTool> onusewithtool = [];
     public List<ModDelegates.ChangedActiveMaterialSlot> changedactivematerialslot = [];
     public List<ModDelegates.BlockUpdate> blockticks = [];
-    public List<ModDelegates.PopulateChunk> populatechunk = [];
+    public List<ModDelegates.PopulateChunk> populatechunk { get; set; } = [];
     public List<ModDelegates.Command> oncommand = [];
     public List<ModDelegates.WeaponShot> onweaponshot = [];
     public List<ModDelegates.WeaponHit> onweaponhit = [];

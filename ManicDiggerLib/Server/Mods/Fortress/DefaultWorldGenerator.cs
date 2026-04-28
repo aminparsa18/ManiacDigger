@@ -1,6 +1,8 @@
 ﻿using LibNoise;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using static ManicDigger.Mods.ModNetworkProcess;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 using Math = System.Math;
 
 namespace ManicDigger.Mods;
