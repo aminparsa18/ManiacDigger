@@ -26,16 +26,10 @@ public class DefaultWorldGenerator : IMod
         BLOCK_GRASS = m.GetBlockId("Grass");
         BLOCK_WATER = m.GetBlockId("Water");
         BLOCK_SAND = m.GetBlockId("Sand");
-        BLOCK_GRAVEL = m.GetBlockId("Gravel");
-        BLOCK_CLAY = m.GetBlockId("Clay");
         BLOCK_REDSAND = m.GetBlockId("RedSand");
-        BLOCK_SANDSTONE = m.GetBlockId("Sandstone");
-        BLOCK_REDSANDSTONE = m.GetBlockId("RedSandstone");
         BLOCK_CACTUS = m.GetBlockId("Cactus");
         BLOCK_DEADPLANT = m.GetBlockId("DeadPlant");
         BLOCK_GRASSPLANT = m.GetBlockId("GrassPlant");
-        //BLOCK_SNOW = m.GetBlockId("Snow");
-        //BLOCK_MUD = m.GetBlockId("Mud");
 
         m.RegisterWorldGenerator(GetChunk);
         m.RegisterPopulateChunk(PopulateChunk);
@@ -51,10 +45,10 @@ public class DefaultWorldGenerator : IMod
     private int chunksize, mapSizeX, mapSizeY;
 
     private int BLOCK_AIR, BLOCK_ADMINIUM, BLOCK_STONE, BLOCK_DIRT, BLOCK_GRASS;
-    private int BLOCK_WATER, BLOCK_SAND, BLOCK_GRAVEL, BLOCK_CLAY;
-    private int BLOCK_REDSAND, BLOCK_SANDSTONE, BLOCK_REDSANDSTONE;
+    private int BLOCK_WATER, BLOCK_SAND;
+    private int BLOCK_REDSAND;
     private int BLOCK_CACTUS, BLOCK_DEADPLANT, BLOCK_GRASSPLANT;
-    private readonly int BLOCK_SNOW, BLOCK_MUD;
+    private readonly int BLOCK_MUD;
 
     // Tuned for 256x256 map — biome transitions every ~60-100 blocks
     private const float CONTINENT_SCALE = 180f;
@@ -92,6 +86,8 @@ public class DefaultWorldGenerator : IMod
     private readonly FastNoise vegetationNoise = new();
 
     private readonly Perlin heightDetail = new();
+
+    private readonly FastNoise warpNoise = new();
 
     private void InitNoise(int seed)
     {
@@ -133,29 +129,13 @@ public class DefaultWorldGenerator : IMod
         humidityNoise.Persistence = 0.55f;
         humidityNoise.Lacunarity = 2.0f;
 
+        warpNoise.Seed = seed + 999;
+        warpNoise.Frequency = 1f;
+        warpNoise.OctaveCount = 3;
+        warpNoise.Persistence = 0.5f;
+        warpNoise.Lacunarity = 2.0f;
+
         vegetationNoise.Seed = seed + 7;
-    }
-
-    // =========================================================================
-    //  Biome
-    // =========================================================================
-
-    private enum Biome
-    {
-        DeepOcean,
-        Ocean,
-        Shore,
-        Plains,
-        Forest,
-        Swamp,
-        Savanna,
-        Desert,
-        Dunes,
-        Canyon,
-        Hills,
-        Mountains,
-        SnowyMountains,
-        DesertMountains,
     }
 
     /// <summary>
@@ -185,80 +165,9 @@ public class DefaultWorldGenerator : IMod
         return Math.Clamp((biased + 0.3f) / 1.6f, 0f, 1f);
     }
 
-    // ── GetBiome — receives pre-computed cont and normH, no redundant sampling ────
-    private Biome GetBiome(int wx, int wy, float cont, float normH)
-    {
-        if (cont < 0.18f) return Biome.DeepOcean;
-        if (cont < 0.28f) return Biome.Ocean;
-        if (cont < 0.36f) return Biome.Shore;
-
-        float rawTemp = tempNoise.GetValue(wx / TEMP_SCALE, 0f, wy / TEMP_SCALE);
-        float temp = Math.Clamp((rawTemp + 0.8f) / 1.6f, 0f, 1f);
-        temp = MathF.Max(0f, temp - normH * 0.45f);
-
-        float rawHum = humidityNoise.GetValue(wx / HUMIDITY_SCALE, 0f, wy / HUMIDITY_SCALE);
-        float humidity = Math.Clamp((rawHum + 0.8f) / 1.6f, 0f, 1f);
-
-        return DetermineBiome(normH, temp, humidity);
-    }
-
-    /// <summary>
-    /// Pure lookup table. No noise inside.
-    /// normH    [0..1] : terrain elevation
-    /// temp     [0..1] : 0=frozen, 1=scorching
-    /// humidity [0..1] : 0=wet, 1=dry
-    /// </summary>
-    private static Biome DetermineBiome(float normH, float temp, float humidity)
-    {
-        // High altitude
-        if (normH > 0.58f)
-        {
-            if (temp < 0.30f) return Biome.SnowyMountains;
-            if (humidity < 0.30f) return Biome.DesertMountains;
-            return Biome.Mountains;
-        }
-
-        // Mid elevation
-        if (normH > 0.35f)
-        {
-            if (humidity < 0.30f && temp > 0.60f) return Biome.Canyon;
-            if (humidity < 0.40f && temp > 0.50f) return Biome.Dunes;
-            return Biome.Hills;
-        }
-
-        // Lowlands
-        if (temp > 0.65f && humidity < 0.30f) return Biome.Desert;
-        if (temp > 0.60f && humidity < 0.50f) return Biome.Savanna;
-        if (humidity > 0.72f) return Biome.Swamp;
-        if (humidity > 0.52f) return Biome.Forest;
-        return Biome.Plains;
-    }
-
     // =========================================================================
     //  Terrain height
     // =========================================================================
-
-    /// <summary>
-    /// Normalised height [0..1] for land tiles.
-    /// Mountain noise weight rises inland (away from coast).
-    /// </summary>
-    private float GetNormHeight(int wx, int wy, float cont)
-    {
-        // Below shore threshold: height is fully determined by cont, no noise needed
-        if (cont < 0.28f) return cont / 0.28f;
-        if (cont < 0.36f) return Math.Clamp((cont - 0.28f) / 0.08f, 0f, 1f);
-
-        // Land: 5×5 smoothed noise to avoid sharp chunk-boundary jumps
-        const int R = 2;
-        float sum = 0f;
-        for (int dx = -R; dx <= R; dx++)
-            for (int dy = -R; dy <= R; dy++)
-            {
-                float nc = GetContinent(wx + dx, wy + dy);
-                sum += SampleNormHeight(wx + dx, wy + dy, nc);
-            }
-        return sum / 25f;
-    }
 
     // Raw per-point noise sample — separated so the 5×5 loop stays clean
     private float SampleNormHeight(int wx, int wy, float cont)
@@ -284,42 +193,6 @@ public class DefaultWorldGenerator : IMod
         return Math.Clamp(baseH * 0.82f + dNorm * 0.18f, 0f, 1f);
     }
 
-    /// <summary>
-    /// Converts biome + normalised height to an absolute world block height.
-    /// Land biomes are clamped to always be above LAND_MIN_HEIGHT.
-    /// Ocean biomes are clamped to always be below WATER_LEVEL.
-    /// </summary>
-    private static int GetSurfaceZ(Biome biome, float normH)
-    {
-        (int baseH, int amp) = biome switch
-        {
-            Biome.DeepOcean => (8, 10),
-            Biome.Ocean => (14, 12),
-            Biome.Shore => (18, 14),
-            Biome.Plains => (34, 10),
-            Biome.Forest => (34, 12),
-            Biome.Swamp => (32, 5),
-            Biome.Savanna => (34, 12),
-            Biome.Desert => (34, 14),
-            Biome.Dunes => (36, 26),
-            Biome.Canyon => (52, 28),
-            Biome.Hills => (36, 34),
-            Biome.Mountains => (44, 58),
-            Biome.SnowyMountains => (46, 64),
-            Biome.DesertMountains => (40, 48),
-            _ => (34, 10),
-        };
-
-        int h = (int)(baseH + normH * amp);
-
-        bool isOcean = biome == Biome.DeepOcean || biome == Biome.Ocean;
-        if (isOcean) return Math.Min(h, WATER_LEVEL - 2);
-        if (biome == Biome.Shore) return Math.Clamp(h, 16, WATER_LEVEL + 2);
-
-        h = Math.Max(h, LAND_MIN_HEIGHT);
-        return Math.Min(h, 90);  // ← add this — hard ceiling below map top
-    }
-
     // =========================================================================
     //  Chunk generation
     // =========================================================================
@@ -339,10 +212,19 @@ public class DefaultWorldGenerator : IMod
                 int wx = ox + xx;
                 int wy = oy + yy;
 
-                float cont = GetContinent(wx, wy);
-                float normH = GetNormHeight(wx, wy, cont);        // smoothed [0,1] noise
-                Biome biome = GetBiome(wx, wy, cont, normH);
-                int surfaceZ = ComputeSurfaceZ(cont, normH, biome);
+                var (wxw, wyw) = Warp(wx, wy);
+
+                float cont = GetContinent((int)wxw, (int)wyw);
+                float normH = SampleNormHeight((int)wxw, (int)wyw, cont);
+
+                float rawTemp = tempNoise.GetValue(wxw / TEMP_SCALE, 0f, wyw / TEMP_SCALE);
+                float temp = Math.Clamp((rawTemp + 0.8f) / 1.6f, 0f, 1f);
+
+                float rawHum = humidityNoise.GetValue(wxw / HUMIDITY_SCALE, 0f, wyw / HUMIDITY_SCALE);
+                float humidity = Math.Clamp((rawHum + 0.8f) / 1.6f, 0f, 1f);
+
+                var weights = GetBiomeWeights(normH, temp, humidity);
+                int surfaceZ = ComputeSurfaceZ(cont, normH, weights);
 
                 for (int zz = 0; zz < chunksize; zz++)
                 {
@@ -360,8 +242,7 @@ public class DefaultWorldGenerator : IMod
                     }
                     else
                     {
-                        try { block = BuildBlock(biome, wz, surfaceZ, wx, wy); }
-                        catch { block = BLOCK_STONE; }
+                        block = BuildBlock(weights, wz, surfaceZ, wx, wy);
                     }
 
                     chunk[m.Index3d(xx, yy, zz, chunksize, chunksize)] = (ushort)block;
@@ -384,142 +265,141 @@ public class DefaultWorldGenerator : IMod
         return Lerp(30f, 36f, Math.Clamp((cont - 0.36f) / 0.64f, 0f, 1f));        // land base   z=30→36
     }
 
-    // ── Noise amplitude — zero at coast, grows inland ────────────────────────────
-    // Biome only controls HOW MUCH noise adds on top of the base, not where base is.
-    private static float GetBiomeAmplitude(Biome biome) => biome switch
+    private BiomeWeights GetBiomeWeights(float normH, float temp, float humidity)
     {
-        Biome.SnowyMountains => 64f,
-        Biome.Mountains => 58f,
-        Biome.DesertMountains => 48f,
-        Biome.Hills => 34f,
-        Biome.Canyon => 32f,
-        Biome.Dunes => 26f,
-        Biome.Desert => 16f,
-        Biome.Savanna => 14f,
-        Biome.Forest => 14f,
-        Biome.Plains => 12f,
-        Biome.Swamp => 8f,
-        _ => 12f,
-    };
+        BiomeWeights w = new();
 
-    private static int ComputeSurfaceZ(float cont, float normH, Biome biome)
+        // Height influence
+        w.Mountains = SmoothStep(0.5f, 0.8f, normH);
+        w.Plains = 1f - w.Mountains;
+
+        // Temperature
+        float hot = SmoothStep(0.6f, 1f, temp);
+        float cold = 1f - temp;
+
+        // Humidity
+        float dry = 1f - humidity;
+        float wet = humidity;
+
+        w.Desert = hot * dry * (1f - w.Mountains);
+        w.Forest = wet * (1f - hot) * (1f - w.Mountains);
+        w.Snow = cold * w.Mountains;
+
+        w.Normalize();
+        return w;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static float SmoothStep(float a, float b, float x)
+    {
+        x = Math.Clamp((x - a) / (b - a), 0f, 1f);
+        return x * x * (3f - 2f * x);
+    }
+
+    private int ComputeSurfaceZ(float cont, float normH, BiomeWeights weights)
     {
         float baseZ = ContinentToBaseZ(cont);
-        // Amplitude fades to zero at the coastline — no cliff, smooth transition
+
         float inland = Math.Clamp((cont - 0.36f) / 0.64f, 0f, 1f);
-        float amp = GetBiomeAmplitude(biome) * inland;
+        float amp = GetBlendedAmplitude(weights) * inland;
+
         return Math.Clamp((int)(baseZ + normH * amp), 1, 90);
     }
 
-    private float GetSmoothedNormHeight(int wx, int wy, float cont, Biome biome)
+    private float GetBlendedAmplitude(BiomeWeights w)
     {
-        if (biome == Biome.DeepOcean || biome == Biome.Ocean)
-            return Math.Clamp(cont / 0.28f, 0f, 1f);
-
-        if (biome == Biome.Shore)
-            // 0 at ocean edge (cont=0.28), 1 at land edge (cont=0.36)
-            return Math.Clamp((cont - 0.28f) / 0.08f, 0f, 1f);
-
-        // Average over a 5×5 neighbourhood to smooth out sharp biome-boundary jumps
-        const int R = 2;
-        float sum = 0f;
-        for (int dx = -R; dx <= R; dx++)
-            for (int dy = -R; dy <= R; dy++)
-            {
-                float nc = GetContinent(wx + dx, wy + dy);
-                sum += GetNormHeight(wx + dx, wy + dy, nc);
-            }
-        return sum / ((2 * R + 1) * (2 * R + 1));
+        return
+            w.Plains * 12f +
+            w.Forest * 14f +
+            w.Desert * 18f +
+            w.Mountains * 58f +
+            w.Snow * 64f;
     }
 
-    private int BuildBlock(Biome biome, int wz, int surfaceZ, int wx, int wy)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int BuildBlock(BiomeWeights w, int wz, int surfaceZ, int wx, int wy)
     {
-        if (wz == 0) return BLOCK_ADMINIUM;
+        if (wz <= 0)
+            return BLOCK_ADMINIUM;
 
-        // ── Solid terrain ─────────────────────────────────────────────────────
+        int depth = surfaceZ - wz;
+
+        // ── BELOW SURFACE ─────────────────────────────────────────────
         if (wz <= surfaceZ)
         {
-            switch (biome)
+            // deep underground
+            if (depth > 6)
+                return BLOCK_STONE;
+
+            // blended material selection
+            float sandness = w.Desert;
+            float grassness = w.Plains + w.Forest;
+            float rockness = w.Mountains + w.Snow;
+
+            // normalize just in case
+            float sum = sandness + grassness + rockness;
+            if (sum > 0f)
             {
-                case Biome.DeepOcean:
-                case Biome.Ocean:
-                    return wz < surfaceZ ? BLOCK_STONE : BLOCK_GRAVEL;
-
-                case Biome.Shore:
-                    if (wz < surfaceZ - 1)
-                        return wz < WATER_LEVEL - 3 ? BLOCK_STONE : BLOCK_SAND;
-                    return BLOCK_SAND;
-
-                case Biome.Swamp:
-                    if (wz < surfaceZ - 3) return BLOCK_STONE;
-                    if (wz < surfaceZ) return BLOCK_MUD;
-                    return BLOCK_GRASS;
-
-                case Biome.Plains:
-                case Biome.Forest:
-                case Biome.Savanna:
-                    if (wz < surfaceZ - 4) return BLOCK_STONE;
-                    if (wz < surfaceZ) return BLOCK_DIRT;
-                    return BLOCK_GRASS;
-
-                case Biome.Desert:
-                    return wz < surfaceZ - 4 ? BLOCK_SANDSTONE : BLOCK_SAND;
-
-                case Biome.Dunes:
-                    return wz < surfaceZ - 6 ? BLOCK_SANDSTONE : BLOCK_SAND;
-
-                case Biome.Canyon:
-                    {
-                        if (wz >= surfaceZ - 1) return BLOCK_REDSAND;
-                        int d = surfaceZ - wz;
-                        if (d == 7 || d == 18) return BLOCK_CLAY;
-                        if (d == 8 || d == 20) return BLOCK_SANDSTONE;
-                        if (d == 19) return BLOCK_SAND;
-                        if (d < 28) return BLOCK_REDSANDSTONE;
-                        return BLOCK_STONE;
-                    }
-
-                case Biome.Hills:
-                    if (wz < surfaceZ - 3) return BLOCK_STONE;
-                    if (wz < surfaceZ) return BLOCK_DIRT;
-                    return BLOCK_GRASS;
-
-                case Biome.Mountains:
-                    if (wz < surfaceZ - 3) return BLOCK_STONE;
-                    if (wz < surfaceZ) return BLOCK_DIRT;
-                    return wz > 60 ? BLOCK_STONE : BLOCK_GRASS;
-
-                case Biome.SnowyMountains:
-                    if (wz < surfaceZ - 2) return BLOCK_STONE;
-                    if (wz < surfaceZ) return BLOCK_DIRT;
-                    return BLOCK_SNOW;
-
-                case Biome.DesertMountains:
-                    if (wz < surfaceZ - 4) return BLOCK_STONE;
-                    if (wz < surfaceZ) return BLOCK_SANDSTONE;
-                    return BLOCK_SAND;
-
-                default: return BLOCK_STONE;
+                sandness /= sum;
+                grassness /= sum;
+                rockness /= sum;
             }
+
+            // surface layer
+            if (depth == 0)
+            {
+                if (sandness > 0.5f) return BLOCK_SAND;
+                if (rockness > 0.6f) return BLOCK_STONE;
+                return BLOCK_GRASS;
+            }
+
+            // subsurface
+            if (depth <= 3)
+            {
+                if (sandness > 0.5f) return BLOCK_SAND;
+                return BLOCK_DIRT;
+            }
+
+            // transition to stone
+            if (rockness > 0.5f)
+                return BLOCK_STONE;
+
+            return BLOCK_DIRT;
         }
 
-        // ── Above surface ─────────────────────────────────────────────────────
+        // ── ABOVE SURFACE ─────────────────────────────────────────────
 
-        // Water fill for ocean and low terrain
-        if (wz <= WATER_LEVEL) return BLOCK_WATER;
+        if (wz <= WATER_LEVEL)
+            return BLOCK_WATER;
 
-        // Swamp: shallow water sits just above mud surface
-        if (biome == Biome.Swamp && wz <= surfaceZ + 1) return BLOCK_WATER;
-
-        // Sparse inline grass plants on plains/forest
-        if (wz == surfaceZ + 1 &&
-            (biome == Biome.Plains || biome == Biome.Forest || biome == Biome.Savanna))
+        // simple vegetation (can improve later)
+        if (wz == surfaceZ + 1)
         {
-            if (vegetationNoise.GetValue(wx / 3f, wy / 3f, 0f) > 0.45f)
+            float veg = vegetationNoise.GetValue(wx / 3f, wy / 3f, 0f);
+
+            if (veg > 0.5f && (w.Plains + w.Forest) > 0.4f)
                 return BLOCK_GRASSPLANT;
         }
 
         return BLOCK_AIR;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private (float x, float y) Warp(int wx, int wy)
+    {
+        float scale = 80f;      // controls size of distortion
+        float strength = 35f;   // how strong the warp is
+
+        float nx = wx / scale;
+        float ny = wy / scale;
+
+        float dx = warpNoise.GetValue(nx, ny, 0f);
+        float dy = warpNoise.GetValue(nx + 31.4f, ny + 47.2f, 0f);
+
+        return (
+            wx + dx * strength,
+            wy + dy * strength
+        );
     }
 
     // =========================================================================
@@ -630,4 +510,25 @@ public class DefaultWorldGenerator : IMod
     // ── Lerp helper ───────────────────────────────────────────────────────────────
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static float Lerp(float a, float b, float t) => a + t * (b - a);
+
+    private struct BiomeWeights
+    {
+        public float Plains;
+        public float Desert;
+        public float Forest;
+        public float Mountains;
+        public float Snow;
+
+        public void Normalize()
+        {
+            float sum = Plains + Desert + Forest + Mountains + Snow;
+            if (sum <= 0f) return;
+
+            Plains /= sum;
+            Desert /= sum;
+            Forest /= sum;
+            Mountains /= sum;
+            Snow /= sum;
+        }
+    }
 }
