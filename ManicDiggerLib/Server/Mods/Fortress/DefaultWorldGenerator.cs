@@ -158,7 +158,14 @@ public class DefaultWorldGenerator : IMod
     /// </summary>
     private float GetContinent(int wx, int wy)
     {
-        float raw = continentNoise.GetValue(wx / CONTINENT_SCALE, 0f, wy / CONTINENT_SCALE);
+        float nx = wx / CONTINENT_SCALE;
+        float ny = wy / CONTINENT_SCALE;
+
+        // add secondary noise to break coastlines
+        float coastWarp = heightDetail.GetValue(nx * 2f, 0f, ny * 2f) * 0.15f;
+
+        float raw = continentNoise.GetValue(nx + coastWarp, 0f, ny + coastWarp);
+
         if (!float.IsFinite(raw)) raw = 0f;
         float biased = raw + ContinentBias(wx, wy);
         // Billow output ≈ [-0.5, 1.5] after bias. Normalise to [0,1].
@@ -170,7 +177,7 @@ public class DefaultWorldGenerator : IMod
     // =========================================================================
 
     // Raw per-point noise sample — separated so the 5×5 loop stays clean
-    private float SampleNormHeight(int wx, int wy, float cont)
+    private float SampleNormHeight(float wx, float wy, float cont)
     {
         float hx = wx / HEIGHT_SCALE;
         float hy = wy / HEIGHT_SCALE;
@@ -190,7 +197,17 @@ public class DefaultWorldGenerator : IMod
 
         float mw = MathF.Max(inland * inland, 0.3f);
         float baseH = float.Lerp(sNorm, rNorm, mw);
-        return Math.Clamp(baseH * 0.82f + dNorm * 0.18f, 0f, 1f);
+
+        float h = baseH * 0.82f + dNorm * 0.18f;
+
+        // fake erosion: sharpen high areas, flatten low areas
+        float erosion = h * h * (3f - 2f * h);   // smooth curve
+        h = float.Lerp(h, erosion, 0.5f);
+
+        // optional: exaggerate peaks slightly
+        h = MathF.Pow(h, 1.15f);
+
+        return Math.Clamp(h, 0f, 1f);
     }
 
     // =========================================================================
@@ -215,7 +232,7 @@ public class DefaultWorldGenerator : IMod
                 var (wxw, wyw) = Warp(wx, wy);
 
                 float cont = GetContinent((int)wxw, (int)wyw);
-                float normH = SampleNormHeight((int)wxw, (int)wyw, cont);
+                float normH = SampleNormHeight(wxw, wyw, cont);
 
                 float rawTemp = tempNoise.GetValue(wxw / TEMP_SCALE, 0f, wyw / TEMP_SCALE);
                 float temp = Math.Clamp((rawTemp + 0.8f) / 1.6f, 0f, 1f);
@@ -348,7 +365,14 @@ public class DefaultWorldGenerator : IMod
             // surface layer
             if (depth == 0)
             {
-                if (sandness > 0.5f) return BLOCK_SAND;
+                if (sandness > 0.5f)
+                {
+                    float dune = heightDetail.GetValue(wx * 0.08f, 0f, wy * 0.08f);
+                    if (dune > 0.2f)
+                        return BLOCK_SAND;
+                    else
+                        return BLOCK_REDSAND;
+                }
                 if (rockness > 0.6f) return BLOCK_STONE;
                 return BLOCK_GRASS;
             }
@@ -375,9 +399,10 @@ public class DefaultWorldGenerator : IMod
         // simple vegetation (can improve later)
         if (wz == surfaceZ + 1)
         {
-            float veg = vegetationNoise.GetValue(wx / 3f, wy / 3f, 0f);
+            float density = vegetationNoise.GetValue(wx / 20f, wy / 20f, 0f);  // large clusters
+            float detail = vegetationNoise.GetValue(wx / 3f, wy / 3f, 0f);     // fine variation
 
-            if (veg > 0.5f && (w.Plains + w.Forest) > 0.4f)
+            if (density > 0.2f && detail > 0.5f && (w.Plains + w.Forest) > 0.4f)
                 return BLOCK_GRASSPLANT;
         }
 
