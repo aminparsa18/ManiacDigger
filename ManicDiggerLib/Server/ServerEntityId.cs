@@ -14,6 +14,5 @@ public class ServerEntityId
             ChunkZ = ChunkZ,
             Id = Id
         };
-        return ret;
     }
 }

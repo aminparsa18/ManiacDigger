@@ -97,8 +97,6 @@ public class ClientOnServer
         set => Entity.Position.Pitch = (byte)value;
     }
     internal Timer notifyMonstersTimer;
-    internal IScriptInterpreter Interpreter;
-    internal ScriptConsole Console;
 
     /// <summary>Player stance (standing, crouching, etc).</summary>
     public byte Stance
