@@ -46,28 +46,28 @@ public class DefaultWorldGenerator : IMod
     //  State
     // =========================================================================
 
-    IModManager m;
-    int chunksize, mapSizeX, mapSizeY;
+    private IModManager m;
+    private int chunksize, mapSizeX, mapSizeY;
 
-    int BLOCK_AIR, BLOCK_ADMINIUM, BLOCK_STONE, BLOCK_DIRT, BLOCK_GRASS;
-    int BLOCK_WATER, BLOCK_SAND, BLOCK_GRAVEL, BLOCK_CLAY;
-    int BLOCK_REDSAND, BLOCK_SANDSTONE, BLOCK_REDSANDSTONE;
-    int BLOCK_CACTUS, BLOCK_DEADPLANT, BLOCK_GRASSPLANT;
-    int BLOCK_SNOW, BLOCK_MUD;
+    private int BLOCK_AIR, BLOCK_ADMINIUM, BLOCK_STONE, BLOCK_DIRT, BLOCK_GRASS;
+    private int BLOCK_WATER, BLOCK_SAND, BLOCK_GRAVEL, BLOCK_CLAY;
+    private int BLOCK_REDSAND, BLOCK_SANDSTONE, BLOCK_REDSANDSTONE;
+    private int BLOCK_CACTUS, BLOCK_DEADPLANT, BLOCK_GRASSPLANT;
+    private int BLOCK_SNOW, BLOCK_MUD;
 
     // Tuned for 256x256 map — biome transitions every ~60-100 blocks
-    const float CONTINENT_SCALE = 180f;
-    const float HEIGHT_SCALE = 120f;
-    const float TEMP_SCALE = 220f;
-    const float HUMIDITY_SCALE = 160f;
+    private const float CONTINENT_SCALE = 180f;
+    private const float HEIGHT_SCALE = 120f;
+    private const float TEMP_SCALE = 220f;
+    private const float HUMIDITY_SCALE = 160f;
 
     // Water sits at block 30. Land biomes always generate above this.
-    const int WATER_LEVEL = 30;
-    const int LAND_MIN_HEIGHT = 33;   // guaranteed minimum for any land biome surface
+    private const int WATER_LEVEL = 30;
+    private const int LAND_MIN_HEIGHT = 33;   // guaranteed minimum for any land biome surface
 
-    int getChunkCalls, populateChunkCalls;
-    long totalGetChunkMs, totalPopulateMs;
-    readonly Stopwatch watch = new();
+    private int getChunkCalls, populateChunkCalls;
+    private long totalGetChunkMs, totalPopulateMs;
+    private readonly Stopwatch watch = new();
 
     // =========================================================================
     //  Noise — four fully independent layers
@@ -75,24 +75,24 @@ public class DefaultWorldGenerator : IMod
 
     // Layer 1: Continent — decides ocean vs land
     // Billow with few octaves = large smooth blobs, always has + and - regions
-    Billow continentNoise = new();
+    private Billow continentNoise = new();
 
     // Layer 2: Height — two generators, blended by how far inland we are
-    RidgedMultifractal heightRidged = new();   // sharp mountain ridges
-    Billow heightSmooth = new();   // rolling hills / lowlands
+    private RidgedMultifractal heightRidged = new();   // sharp mountain ridges
+    private Billow heightSmooth = new();   // rolling hills / lowlands
 
     // Layer 3: Temperature — independent Perlin
-    Perlin tempNoise = new();
+    private Perlin tempNoise = new();
 
     // Layer 4: Humidity — FastNoise at a different scale
-    FastNoise humidityNoise = new();
+    private FastNoise humidityNoise = new();
 
     // Vegetation scatter
-    FastNoise vegetationNoise = new();
+    private FastNoise vegetationNoise = new();
 
-    Perlin heightDetail = new();
+    private Perlin heightDetail = new();
 
-    void InitNoise(int seed)
+    private void InitNoise(int seed)
     {
         // Continent — very few octaves so features are large and definite
         continentNoise.Seed = seed + 3;
@@ -139,7 +139,7 @@ public class DefaultWorldGenerator : IMod
     //  Biome
     // =========================================================================
 
-    enum Biome
+    private enum Biome
     {
         DeepOcean,
         Ocean,
@@ -161,7 +161,7 @@ public class DefaultWorldGenerator : IMod
     /// Radial bias — pushes map center above ocean threshold so spawn is always land.
     /// Returns up to +0.6 at center, fading to 0 at the edges.
     /// </summary>
-    float ContinentBias(int wx, int wy)
+    private float ContinentBias(int wx, int wy)
     {
         float cx = mapSizeX * 0.5f;
         float cy = mapSizeY * 0.5f;
@@ -175,7 +175,7 @@ public class DefaultWorldGenerator : IMod
     /// Returns raw continent noise + center bias, normalised to [0, 1].
     /// Values above 0.5 are land, below 0.5 are ocean.
     /// </summary>
-    float GetContinent(int wx, int wy)
+    private float GetContinent(int wx, int wy)
     {
         float raw = continentNoise.GetValue(wx / CONTINENT_SCALE, 0f, wy / CONTINENT_SCALE);
         if (!float.IsFinite(raw)) raw = 0f;
@@ -184,7 +184,7 @@ public class DefaultWorldGenerator : IMod
         return Math.Clamp((biased + 0.3f) / 1.6f, 0f, 1f);
     }
 
-    Biome GetBiome(int wx, int wy)
+    private Biome GetBiome(int wx, int wy)
     {
         float cont = GetContinent(wx, wy);
 
@@ -212,7 +212,7 @@ public class DefaultWorldGenerator : IMod
     /// temp     [0..1] : 0=frozen, 1=scorching
     /// humidity [0..1] : 0=wet, 1=dry
     /// </summary>
-    Biome DetermineBiome(float normH, float temp, float humidity)
+    private static Biome DetermineBiome(float normH, float temp, float humidity)
     {
         // High altitude
         if (normH > 0.58f)
@@ -246,7 +246,7 @@ public class DefaultWorldGenerator : IMod
     /// Normalised height [0..1] for land tiles.
     /// Mountain noise weight rises inland (away from coast).
     /// </summary>
-    float GetNormHeight(int wx, int wy, float cont)
+    private float GetNormHeight(int wx, int wy, float cont)
     {
         float hx = wx / HEIGHT_SCALE;
         float hy = wy / HEIGHT_SCALE;
@@ -275,7 +275,7 @@ public class DefaultWorldGenerator : IMod
     /// Land biomes are clamped to always be above LAND_MIN_HEIGHT.
     /// Ocean biomes are clamped to always be below WATER_LEVEL.
     /// </summary>
-    int GetSurfaceZ(Biome biome, double normH)
+    private static int GetSurfaceZ(Biome biome, double normH)
     {
         (int baseH, int amp) = biome switch
         {
@@ -310,7 +310,7 @@ public class DefaultWorldGenerator : IMod
     //  Chunk generation
     // =========================================================================
 
-    void GetChunk(int cx, int cy, int cz, ushort[] chunk)
+    private void GetChunk(int cx, int cy, int cz, ushort[] chunk)
     {
         getChunkCalls++;
         watch.Restart();
@@ -358,7 +358,7 @@ public class DefaultWorldGenerator : IMod
         watch.Stop();
     }
 
-    double GetSmoothedNormHeight(int wx, int wy, double cont, Biome biome)
+    private double GetSmoothedNormHeight(int wx, int wy, double cont, Biome biome)
     {
         bool isOcean = biome == Biome.DeepOcean || biome == Biome.Ocean || biome == Biome.Shore;
         if (isOcean)
@@ -376,7 +376,7 @@ public class DefaultWorldGenerator : IMod
         return sum / ((2 * R + 1) * (2 * R + 1));
     }
 
-    int BuildBlock(Biome biome, int wz, int surfaceZ, int wx, int wy)
+    private int BuildBlock(Biome biome, int wz, int surfaceZ, int wx, int wy)
     {
         if (wz == 0) return BLOCK_ADMINIUM;
 
@@ -468,9 +468,9 @@ public class DefaultWorldGenerator : IMod
     //  Chunk population
     // =========================================================================
 
-    readonly Random rnd = new();
+    private readonly Random rnd = new();
 
-    void PopulateChunk(int cx, int cy, int cz)
+    private void PopulateChunk(int cx, int cy, int cz)
     {
         populateChunkCalls++;
         watch.Restart();
@@ -514,12 +514,12 @@ public class DefaultWorldGenerator : IMod
         watch.Stop();
     }
 
-    void PlaceGrass(int x, int y, int z)
+    private void PlaceGrass(int x, int y, int z)
     {
         if (rnd.Next(10) == 0) TrySet(x, y, z + 1, BLOCK_GRASSPLANT);
     }
 
-    void PlaceDesert(int x, int y, int z)
+    private void PlaceDesert(int x, int y, int z)
     {
         switch (rnd.Next(4))
         {
@@ -534,12 +534,12 @@ public class DefaultWorldGenerator : IMod
         }
     }
 
-    void PlaceSwamp(int x, int y, int z)
+    private void PlaceSwamp(int x, int y, int z)
     {
         if (rnd.Next(7) == 0) TrySet(x, y, z + 1, BLOCK_GRASSPLANT);
     }
 
-    bool TrySet(int x, int y, int z, int block)
+    private bool TrySet(int x, int y, int z, int block)
     {
         if (!m.IsValidPos(x, y, z)) return false;
         if (m.GetBlock(x, y, z) != BLOCK_AIR) return false;
@@ -551,7 +551,7 @@ public class DefaultWorldGenerator : IMod
     //  Debug / visualisation
     // =========================================================================
 
-    void DisplayTimes()
+    private void DisplayTimes()
     {
         if (getChunkCalls > 0)
         {
@@ -569,7 +569,7 @@ public class DefaultWorldGenerator : IMod
         }
     }
 
-    void SaveImage()
+    private void SaveImage()
     {
         var bmp = new Bitmap(mapSizeX, mapSizeY);
         unsafe
@@ -600,7 +600,7 @@ public class DefaultWorldGenerator : IMod
         Console.WriteLine("[WorldGen] biomes.png saved.");
     }
 
-    static Color BiomeColor(Biome b) => b switch
+    private static Color BiomeColor(Biome b) => b switch
     {
         Biome.DeepOcean => Color.FromArgb(0, 0, 140),
         Biome.Ocean => Color.FromArgb(0, 30, 200),

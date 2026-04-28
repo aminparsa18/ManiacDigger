@@ -16,7 +16,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F9C2C6E0-7CBD-4F42-BE60-7142D3AFE779}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		..\..\..\Downloads\README_fBm.md = ..\..\..\Downloads\README_fBm.md
+		README_fBm.md = README_fBm.md
 		TODOS.txt = TODOS.txt
 	EndProjectSection
 EndProject
