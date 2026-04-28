@@ -1,5 +1,6 @@
 ﻿using LibNoise;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Math = System.Math;
 
 namespace ManicDigger.Mods;
@@ -53,7 +54,7 @@ public class DefaultWorldGenerator : IMod
     private int BLOCK_WATER, BLOCK_SAND, BLOCK_GRAVEL, BLOCK_CLAY;
     private int BLOCK_REDSAND, BLOCK_SANDSTONE, BLOCK_REDSANDSTONE;
     private int BLOCK_CACTUS, BLOCK_DEADPLANT, BLOCK_GRASSPLANT;
-    private int BLOCK_SNOW, BLOCK_MUD;
+    private readonly int BLOCK_SNOW, BLOCK_MUD;
 
     // Tuned for 256x256 map — biome transitions every ~60-100 blocks
     private const float CONTINENT_SCALE = 180f;
@@ -75,22 +76,22 @@ public class DefaultWorldGenerator : IMod
 
     // Layer 1: Continent — decides ocean vs land
     // Billow with few octaves = large smooth blobs, always has + and - regions
-    private Billow continentNoise = new();
+    private readonly Billow continentNoise = new();
 
     // Layer 2: Height — two generators, blended by how far inland we are
-    private RidgedMultifractal heightRidged = new();   // sharp mountain ridges
-    private Billow heightSmooth = new();   // rolling hills / lowlands
+    private readonly RidgedMultifractal heightRidged = new();   // sharp mountain ridges
+    private readonly Billow heightSmooth = new();   // rolling hills / lowlands
 
     // Layer 3: Temperature — independent Perlin
-    private Perlin tempNoise = new();
+    private readonly Perlin tempNoise = new();
 
     // Layer 4: Humidity — FastNoise at a different scale
-    private FastNoise humidityNoise = new();
+    private readonly FastNoise humidityNoise = new();
 
     // Vegetation scatter
-    private FastNoise vegetationNoise = new();
+    private readonly FastNoise vegetationNoise = new();
 
-    private Perlin heightDetail = new();
+    private readonly Perlin heightDetail = new();
 
     private void InitNoise(int seed)
     {
@@ -184,21 +185,16 @@ public class DefaultWorldGenerator : IMod
         return Math.Clamp((biased + 0.3f) / 1.6f, 0f, 1f);
     }
 
-    private Biome GetBiome(int wx, int wy)
+    // ── GetBiome — receives pre-computed cont and normH, no redundant sampling ────
+    private Biome GetBiome(int wx, int wy, float cont, float normH)
     {
-        float cont = GetContinent(wx, wy);
-
-        // Ocean zones — continent mask only, no wasted temp/humidity sampling
         if (cont < 0.18f) return Biome.DeepOcean;
         if (cont < 0.28f) return Biome.Ocean;
         if (cont < 0.36f) return Biome.Shore;
 
-        // Land — sample height, temperature, humidity
-        float normH = GetNormHeight(wx, wy, cont);
-
         float rawTemp = tempNoise.GetValue(wx / TEMP_SCALE, 0f, wy / TEMP_SCALE);
         float temp = Math.Clamp((rawTemp + 0.8f) / 1.6f, 0f, 1f);
-        temp = MathF.Max(0f, temp - normH * 0.45f); // cold at altitude
+        temp = MathF.Max(0f, temp - normH * 0.45f);
 
         float rawHum = humidityNoise.GetValue(wx / HUMIDITY_SCALE, 0f, wy / HUMIDITY_SCALE);
         float humidity = Math.Clamp((rawHum + 0.8f) / 1.6f, 0f, 1f);
@@ -248,11 +244,28 @@ public class DefaultWorldGenerator : IMod
     /// </summary>
     private float GetNormHeight(int wx, int wy, float cont)
     {
+        // Below shore threshold: height is fully determined by cont, no noise needed
+        if (cont < 0.28f) return cont / 0.28f;
+        if (cont < 0.36f) return Math.Clamp((cont - 0.28f) / 0.08f, 0f, 1f);
+
+        // Land: 5×5 smoothed noise to avoid sharp chunk-boundary jumps
+        const int R = 2;
+        float sum = 0f;
+        for (int dx = -R; dx <= R; dx++)
+            for (int dy = -R; dy <= R; dy++)
+            {
+                float nc = GetContinent(wx + dx, wy + dy);
+                sum += SampleNormHeight(wx + dx, wy + dy, nc);
+            }
+        return sum / 25f;
+    }
+
+    // Raw per-point noise sample — separated so the 5×5 loop stays clean
+    private float SampleNormHeight(int wx, int wy, float cont)
+    {
         float hx = wx / HEIGHT_SCALE;
         float hy = wy / HEIGHT_SCALE;
-
         float inland = Math.Clamp((cont - 0.36f) / 0.64f, 0f, 1f);
-        float mw = MathF.Max(inland * inland, 0.3f);
 
         float rRaw = heightRidged.GetValue(hx, 0f, hy);
         float sRaw = heightSmooth.GetValue(hx, 0f, hy);
@@ -266,6 +279,7 @@ public class DefaultWorldGenerator : IMod
         float sNorm = Math.Clamp((sRaw + 0.5f) / 2.0f, 0f, 1f);
         float dNorm = Math.Clamp((dRaw + 0.8f) / 1.6f, 0f, 1f);
 
+        float mw = MathF.Max(inland * inland, 0.3f);
         float baseH = float.Lerp(sNorm, rNorm, mw);
         return Math.Clamp(baseH * 0.82f + dNorm * 0.18f, 0f, 1f);
     }
@@ -275,13 +289,13 @@ public class DefaultWorldGenerator : IMod
     /// Land biomes are clamped to always be above LAND_MIN_HEIGHT.
     /// Ocean biomes are clamped to always be below WATER_LEVEL.
     /// </summary>
-    private static int GetSurfaceZ(Biome biome, double normH)
+    private static int GetSurfaceZ(Biome biome, float normH)
     {
         (int baseH, int amp) = biome switch
         {
             Biome.DeepOcean => (8, 10),
             Biome.Ocean => (14, 12),
-            Biome.Shore => (27, 5),
+            Biome.Shore => (18, 14),
             Biome.Plains => (34, 10),
             Biome.Forest => (34, 12),
             Biome.Swamp => (32, 5),
@@ -300,7 +314,7 @@ public class DefaultWorldGenerator : IMod
 
         bool isOcean = biome == Biome.DeepOcean || biome == Biome.Ocean;
         if (isOcean) return Math.Min(h, WATER_LEVEL - 2);
-        if (biome == Biome.Shore) return Math.Clamp(h, WATER_LEVEL - 1, WATER_LEVEL + 2);
+        if (biome == Biome.Shore) return Math.Clamp(h, 16, WATER_LEVEL + 2);
 
         h = Math.Max(h, LAND_MIN_HEIGHT);
         return Math.Min(h, 90);  // ← add this — hard ceiling below map top
@@ -325,10 +339,10 @@ public class DefaultWorldGenerator : IMod
                 int wx = ox + xx;
                 int wy = oy + yy;
 
-                double cont = GetContinent(wx, wy);
-                Biome biome = GetBiome(wx, wy);
-                double normH = GetSmoothedNormHeight(wx, wy, cont, biome);
-                int surfaceZ = GetSurfaceZ(biome, normH);
+                float cont = GetContinent(wx, wy);
+                float normH = GetNormHeight(wx, wy, cont);        // smoothed [0,1] noise
+                Biome biome = GetBiome(wx, wy, cont, normH);
+                int surfaceZ = ComputeSurfaceZ(cont, normH, biome);
 
                 for (int zz = 0; zz < chunksize; zz++)
                 {
@@ -358,15 +372,57 @@ public class DefaultWorldGenerator : IMod
         watch.Stop();
     }
 
-    private double GetSmoothedNormHeight(int wx, int wy, double cont, Biome biome)
+    // ── Continuous base height from continent value ───────────────────────────────
+    // This replaces the per-biome (baseH, amp) lookup table entirely.
+    // The ocean floor slopes naturally upward through shore and onto land.
+    // Water level is 30 — anything below that fills with water automatically.
+    private static float ContinentToBaseZ(float cont)
     {
-        bool isOcean = biome == Biome.DeepOcean || biome == Biome.Ocean || biome == Biome.Shore;
-        if (isOcean)
-            return Math.Clamp(cont / 0.36, 0.0, 1.0);
+        if (cont < 0.18f) return Lerp(5f, 14f, cont / 0.18f);                    // deep ocean  z= 5→14
+        if (cont < 0.28f) return Lerp(14f, 22f, (cont - 0.18f) / 0.10f);          // ocean       z=14→22
+        if (cont < 0.36f) return Lerp(22f, 30f, (cont - 0.28f) / 0.08f);          // shore slope z=22→30
+        return Lerp(30f, 36f, Math.Clamp((cont - 0.36f) / 0.64f, 0f, 1f));        // land base   z=30→36
+    }
 
-        // Average over a 5x5 neighbourhood to smooth out sharp biome-boundary jumps
+    // ── Noise amplitude — zero at coast, grows inland ────────────────────────────
+    // Biome only controls HOW MUCH noise adds on top of the base, not where base is.
+    private static float GetBiomeAmplitude(Biome biome) => biome switch
+    {
+        Biome.SnowyMountains => 64f,
+        Biome.Mountains => 58f,
+        Biome.DesertMountains => 48f,
+        Biome.Hills => 34f,
+        Biome.Canyon => 32f,
+        Biome.Dunes => 26f,
+        Biome.Desert => 16f,
+        Biome.Savanna => 14f,
+        Biome.Forest => 14f,
+        Biome.Plains => 12f,
+        Biome.Swamp => 8f,
+        _ => 12f,
+    };
+
+    private static int ComputeSurfaceZ(float cont, float normH, Biome biome)
+    {
+        float baseZ = ContinentToBaseZ(cont);
+        // Amplitude fades to zero at the coastline — no cliff, smooth transition
+        float inland = Math.Clamp((cont - 0.36f) / 0.64f, 0f, 1f);
+        float amp = GetBiomeAmplitude(biome) * inland;
+        return Math.Clamp((int)(baseZ + normH * amp), 1, 90);
+    }
+
+    private float GetSmoothedNormHeight(int wx, int wy, float cont, Biome biome)
+    {
+        if (biome == Biome.DeepOcean || biome == Biome.Ocean)
+            return Math.Clamp(cont / 0.28f, 0f, 1f);
+
+        if (biome == Biome.Shore)
+            // 0 at ocean edge (cont=0.28), 1 at land edge (cont=0.36)
+            return Math.Clamp((cont - 0.28f) / 0.08f, 0f, 1f);
+
+        // Average over a 5×5 neighbourhood to smooth out sharp biome-boundary jumps
         const int R = 2;
-        double sum = 0;
+        float sum = 0f;
         for (int dx = -R; dx <= R; dx++)
             for (int dy = -R; dy <= R; dy++)
             {
@@ -390,7 +446,9 @@ public class DefaultWorldGenerator : IMod
                     return wz < surfaceZ ? BLOCK_STONE : BLOCK_GRAVEL;
 
                 case Biome.Shore:
-                    return wz < surfaceZ - 1 ? BLOCK_STONE : BLOCK_SAND;
+                    if (wz < surfaceZ - 1)
+                        return wz < WATER_LEVEL - 3 ? BLOCK_STONE : BLOCK_SAND;
+                    return BLOCK_SAND;
 
                 case Biome.Swamp:
                     if (wz < surfaceZ - 3) return BLOCK_STONE;
@@ -569,53 +627,7 @@ public class DefaultWorldGenerator : IMod
         }
     }
 
-    private void SaveImage()
-    {
-        var bmp = new Bitmap(mapSizeX, mapSizeY);
-        unsafe
-        {
-            var bd = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
-                                     System.Drawing.Imaging.ImageLockMode.ReadWrite, bmp.PixelFormat);
-            int bpp = Image.GetPixelFormatSize(bmp.PixelFormat) / 8;
-            int rowB = bd.Width * bpp;
-            byte* ptr = (byte*)bd.Scan0;
-
-            Parallel.For(0, bd.Height, y =>
-            {
-                byte* line = ptr + y * bd.Stride;
-                int x2 = 0;
-                for (int x = 0; x < rowB; x += bpp)
-                {
-                    var c = BiomeColor(GetBiome(x2, y));
-                    line[x] = (byte)c.B;
-                    line[x + 1] = (byte)c.G;
-                    line[x + 2] = (byte)c.R;
-                    x2++;
-                }
-            });
-
-            bmp.UnlockBits(bd);
-        }
-        bmp.Save("biomes.png");
-        Console.WriteLine("[WorldGen] biomes.png saved.");
-    }
-
-    private static Color BiomeColor(Biome b) => b switch
-    {
-        Biome.DeepOcean => Color.FromArgb(0, 0, 140),
-        Biome.Ocean => Color.FromArgb(0, 30, 200),
-        Biome.Shore => Color.FromArgb(210, 200, 120),
-        Biome.Plains => Color.FromArgb(80, 180, 60),
-        Biome.Forest => Color.FromArgb(30, 110, 30),
-        Biome.Swamp => Color.FromArgb(40, 80, 50),
-        Biome.Savanna => Color.FromArgb(180, 180, 60),
-        Biome.Desert => Color.FromArgb(220, 210, 80),
-        Biome.Dunes => Color.FromArgb(230, 220, 130),
-        Biome.Canyon => Color.FromArgb(180, 90, 20),
-        Biome.Hills => Color.FromArgb(100, 160, 60),
-        Biome.Mountains => Color.FromArgb(140, 140, 140),
-        Biome.SnowyMountains => Color.FromArgb(230, 240, 255),
-        Biome.DesertMountains => Color.FromArgb(170, 140, 90),
-        _ => Color.Pink,
-    };
+    // ── Lerp helper ───────────────────────────────────────────────────────────────
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static float Lerp(float a, float b, float t) => a + t * (b - a);
 }

@@ -169,7 +169,7 @@ public class TreeGenerator : IMod
                         yy = length * (int)System.Math.Round(System.Math.Sin(dir * System.Math.PI / 180));
 
                         SetBlock(x + xx, y + yy, z + i, BLOCK_OAKTRUNK);
-                        if (chanceToAppleTree < rnd.NextDouble())
+                        if (chanceToAppleTree < rnd.NextSingle())
                         {
                             SetBlockIfEmpty(x + xx, y + yy, z + i + 1, BLOCK_OAKLEAVES);
                             SetBlockIfEmpty(x + xx + 1, y + yy, z + i, BLOCK_OAKLEAVES);
@@ -181,11 +181,11 @@ public class TreeGenerator : IMod
                         {
                             float appleChance = 0.4f;
                             int tile;
-                            tile = rnd.NextDouble() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES; SetBlockIfEmpty(x + xx, y + yy, z + i + 1, tile);
-                            tile = rnd.NextDouble() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES; SetBlockIfEmpty(x + xx + 1, y + yy, z + i, tile);
-                            tile = rnd.NextDouble() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES; SetBlockIfEmpty(x + xx - 1, y + yy, z + i, tile);
-                            tile = rnd.NextDouble() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES; SetBlockIfEmpty(x + xx, y + yy + 1, z + i, tile);
-                            tile = rnd.NextDouble() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES; SetBlockIfEmpty(x + xx, y + yy - 1, z + i, tile);
+                            tile = rnd.NextSingle() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES; SetBlockIfEmpty(x + xx, y + yy, z + i + 1, tile);
+                            tile = rnd.NextSingle() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES; SetBlockIfEmpty(x + xx + 1, y + yy, z + i, tile);
+                            tile = rnd.NextSingle() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES; SetBlockIfEmpty(x + xx - 1, y + yy, z + i, tile);
+                            tile = rnd.NextSingle() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES; SetBlockIfEmpty(x + xx, y + yy + 1, z + i, tile);
+                            tile = rnd.NextSingle() < appleChance ? BLOCK_APPLES : BLOCK_OAKLEAVES; SetBlockIfEmpty(x + xx, y + yy - 1, z + i, tile);
                         }
                     }
                 }
