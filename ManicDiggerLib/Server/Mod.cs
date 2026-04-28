@@ -921,7 +921,7 @@ public class ModManager1 : IModManager
 
     public void SetWorldDatabaseReadOnly(bool readOnly)
     {
-        server.ChunkDb.SetReadOnly(readOnly);
+        server.ChunkDb.ReadOnly = readOnly;
     }
 
     public string CurrentWorld => server.GetSaveFilename();

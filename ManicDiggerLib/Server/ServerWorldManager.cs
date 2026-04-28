@@ -129,7 +129,7 @@ public partial class Server
         }
     }
 
-    public void SetChunks(Dictionary<Xyz, ushort[]> chunks)
+    public void SetChunks(Dictionary<Vector3i, ushort[]> chunks)
     {
         if (chunks.Count == 0)
         {
@@ -160,7 +160,7 @@ public partial class Server
         }
     }
 
-    public void SetChunks(int offsetX, int offsetY, int offsetZ, Dictionary<Xyz, ushort[]> chunks)
+    public void SetChunks(int offsetX, int offsetY, int offsetZ, Dictionary<Vector3i, ushort[]> chunks)
     {
         if (chunks.Count == 0)
         {
@@ -224,7 +224,7 @@ public partial class Server
 
     public void DeleteChunks(List<Vector3i> chunkPositions)
     {
-        List<Xyz> chunks = [];
+        List<Vector3i> chunks = [];
         foreach (Vector3i pos in chunkPositions)
         {
             if (VectorUtils.IsValidPos(Map, pos.X, pos.Y, pos.Z))
@@ -233,7 +233,7 @@ public partial class Server
                 int y = pos.Y / ChunkSize;
                 int z = pos.Z / ChunkSize;
                 Map.SetChunkValid(x, y, z, null);
-                chunks.Add(new Xyz() { X = x, Y = y, Z = z });
+                chunks.Add(new Vector3i() { X = x, Y = y, Z = z });
             }
         }
         if (chunks.Count != 0)
@@ -283,7 +283,7 @@ public partial class Server
         return null;
     }
 
-    public Dictionary<Xyz, ushort[]> GetChunksFromDatabase(List<Xyz> chunks, string filename)
+    public Dictionary<Vector3i, ushort[]> GetChunksFromDatabase(List<Vector3i> chunks, string filename)
     {
         if (chunks == null)
         {
@@ -301,8 +301,8 @@ public partial class Server
         }
         string finalFilename = Path.Combine(GameStorePath.gamepathbackup, $"{filename}{FileConstatns.DbFileExtension}");
 
-        Dictionary<Xyz, ushort[]> deserializedChunks = [];
-        Dictionary<Xyz, byte[]> serializedChunks = global::ChunkDbHelper.GetChunksFromFile(ChunkDb, chunks, finalFilename);
+        Dictionary<Vector3i, ushort[]> deserializedChunks = [];
+        Dictionary<Vector3i, byte[]> serializedChunks = global::ChunkDbHelper.GetChunksFromFile(ChunkDb, chunks, finalFilename);
 
         foreach (var k in serializedChunks)
         {
@@ -353,11 +353,11 @@ public partial class Server
             int dz = pos.Z / ChunkSize;
 
             ServerChunk cc = new() { Data = this.GetChunk(pos.X, pos.Y, pos.Z) };
-            dbchunks.Add(new DbChunk() { Position = new Xyz() { X = dx, Y = dy, Z = dz }, Chunk = MemoryPackSerializer.Serialize(cc) });
+            dbchunks.Add(new DbChunk() { Position = new Vector3i() { X = dx, Y = dy, Z = dz }, Chunk = MemoryPackSerializer.Serialize(cc) });
         }
         if (dbchunks.Count != 0)
         {
-            IChunkDb d_ChunkDb = new ChunkDbCompressed() { ChunkDb = new ChunkDbSqlite(), Compression = new CompressionGzip() };
+            IChunkDb d_ChunkDb = new ChunkDbCompressed() { InnerChunkDb = new ChunkDbSqlite(), Compression = new CompressionGzip() };
             d_ChunkDb.SetChunksToFile(dbchunks, finalFilename);
         }
         else

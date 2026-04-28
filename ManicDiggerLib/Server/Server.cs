@@ -249,7 +249,7 @@ public partial class Server : ICurrentTime, IDropItem
         BlockTypeRegistry = data;
         CraftingTableTool = new CraftingTableTool() { d_Map = map, d_Data = data };
         _localConnectionsOnly = true;
-        var chunkdb = new ChunkDbCompressed() { ChunkDb = new ChunkDbSqlite(), Compression = new CompressionGzip() };
+        var chunkdb = new ChunkDbCompressed() { InnerChunkDb = new ChunkDbSqlite(), Compression = new CompressionGzip() };
         ChunkDb = chunkdb;
         map.d_ChunkDb = chunkdb;
         NetworkCompression = new CompressionGzip();
@@ -502,8 +502,8 @@ public partial class Server : ICurrentTime, IDropItem
             //todo load
         }
         var dbcompressed = (ChunkDbCompressed)Map.d_ChunkDb;
-        var db = (ChunkDbSqlite)dbcompressed.ChunkDb;
-        db.temporaryChunks = [];
+        var db = (ChunkDbSqlite)dbcompressed.InnerChunkDb;
+        db.ClearTemporaryChunks();
         Map.Clear();
         LoadGame(filename);
         foreach (var k in Clients)
@@ -534,7 +534,7 @@ public partial class Server : ICurrentTime, IDropItem
                         continue;
                     }
                     c.DirtyForSaving = false;
-                    tosave.Add(new DbChunk() { Position = new Xyz() { X = cx, Y = cy, Z = cz }, Chunk = MemoryPackSerializer.Serialize(c) });
+                    tosave.Add(new DbChunk() { Position = new Vector3i() { X = cx, Y = cy, Z = cz }, Chunk = MemoryPackSerializer.Serialize(c) });
                     if (tosave.Count > 200)
                     {
                         ChunkDb.SetChunks(tosave);

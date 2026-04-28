@@ -23,10 +23,10 @@ public class ScriptConsole
         interpreter.SetFunction("get_height", new Func<double, double, double>(GetHeight));
         interpreter.SetFunction("get_mapsize", new Func<int[]>(GetMapSize));
         interpreter.SetFunction("set_chunk", new Action<double, double, double, ushort[]>(SetChunk));
-        interpreter.SetFunction("set_chunks", new Action<Dictionary<Xyz, ushort[]>>(SetChunks));
-        interpreter.SetFunction("set_chunks_offset", new Action<double, double, double, Dictionary<Xyz, ushort[]>>(SetChunks));
+        interpreter.SetFunction("set_chunks", new Action<Dictionary<Vector3i, ushort[]>>(SetChunks));
+        interpreter.SetFunction("set_chunks_offset", new Action<double, double, double, Dictionary<Vector3i, ushort[]>>(SetChunks));
         interpreter.SetFunction("get_chunk", new Func<double, double, double, ushort[]>(GetChunk));
-        interpreter.SetFunction("get_chunks_from_database", new Func<double, double, double, double, double, double, string, Dictionary<Xyz, ushort[]>>(GetChunksFromDatabase));
+        interpreter.SetFunction("get_chunks_from_database", new Func<double, double, double, double, double, double, string, Dictionary<Vector3i, ushort[]>>(GetChunksFromDatabase));
         interpreter.SetFunction("copy_chunks_to_database", new Action<double, double, double, double, double, double, string>(CopyChunksToDatabase));
         interpreter.SetFunction("delete_chunk", new Action<double, double, double>(DeleteChunk));
         interpreter.SetFunction("delete_chunk_range", new Action<double, double, double, double, double, double>(DeleteChunkRange));
@@ -124,12 +124,12 @@ public class ScriptConsole
         m_server.SetChunk((int)x, (int)y, (int)z, data);
     }
 
-    public void SetChunks(Dictionary<Xyz, ushort[]> chunks)
+    public void SetChunks(Dictionary<Vector3i, ushort[]> chunks)
     {
         m_server.SetChunks(chunks);
     }
 
-    public void SetChunks(double offsetX, double offsetY, double offsetZ, Dictionary<Xyz, ushort[]> chunks)
+    public void SetChunks(double offsetX, double offsetY, double offsetZ, Dictionary<Vector3i, ushort[]> chunks)
     {
         m_server.SetChunks((int)offsetX, (int)offsetY, (int)offsetZ, chunks);
     }
@@ -144,9 +144,9 @@ public class ScriptConsole
         return m_server.GetChunkFromDatabase((int)x, (int)y, (int)z, file);
     }
 
-    public Dictionary<Xyz, ushort[]> GetChunksFromDatabase(double x1, double y1, double z1, double x2, double y2, double z2, string file)
+    public Dictionary<Vector3i, ushort[]> GetChunksFromDatabase(double x1, double y1, double z1, double x2, double y2, double z2, string file)
     {
-        List<Xyz> chunkPositions = [];
+        List<Vector3i> chunkPositions = [];
         int chunksize = Server.ChunkSize;
         for (int x = (int)x1; x < (int)x2; x += chunksize)
         {
@@ -154,12 +154,12 @@ public class ScriptConsole
             {
                 for (int z = (int)z1; z < (int)z2; z += chunksize)
                 {
-                    chunkPositions.Add(new Xyz() { X = x / chunksize, Y = y / chunksize, Z = z / chunksize });
+                    chunkPositions.Add(new Vector3i() { X = x / chunksize, Y = y / chunksize, Z = z / chunksize });
                 }
             }
         }
 
-        Dictionary<Xyz, ushort[]> chunks = m_server.GetChunksFromDatabase(chunkPositions, file);
+        Dictionary<Vector3i, ushort[]> chunks = m_server.GetChunksFromDatabase(chunkPositions, file);
         Print(chunks.Count + " chunks loaded.");
         return chunks;
     }
