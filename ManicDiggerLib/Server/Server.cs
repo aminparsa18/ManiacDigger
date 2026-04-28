@@ -234,7 +234,7 @@ public partial class Server : ICurrentTime, IDropItem
         {
             BlockTypes[i] = new BlockType() { };
         }
-        map.d_Heightmap = new InfiniteMapChunked2dServer() { chunksize = ChunkSize, d_Map = map };
+        map.Heightmap = new InfiniteMapChunked2dServer() { d_Map = map };
         map.Reset(Config.MapSizeX, Config.MapSizeY, Config.MapSizeZ);
         Map = map;
 

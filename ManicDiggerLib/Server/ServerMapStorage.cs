@@ -16,10 +16,7 @@
     public int GetBlock(int x, int y, int z)
     {
         ServerChunk chunk = GetChunk(x, y, z);
-        unchecked
-        {
-            return chunk.Data[VectorIndexUtil.Index3d(ModuloChunk(x), ModuloChunk(y), ModuloChunk(z), chunksize, chunksize)];
-        }
+        return chunk.Data[VectorIndexUtil.Index3d(BlockInChunk(x), BlockInChunk(y), BlockInChunk(z), chunksize, chunksize)];
     }
 
     public void SetBlock(int x, int y, int z, int tileType)
@@ -27,7 +24,7 @@
         ServerChunk chunk = GetChunk(x, y, z);
         unchecked
         {
-            chunk.Data[VectorIndexUtil.Index3d(ModuloChunk(x), ModuloChunk(y), ModuloChunk(z), chunksize, chunksize)] = (ushort)tileType;
+            chunk.Data[VectorIndexUtil.Index3d(BlockInChunk(x), BlockInChunk(y), BlockInChunk(z), chunksize, chunksize)] = (ushort)tileType;
         }
         chunk.LastChange = d_CurrentTime.GetSimulationCurrentFrame();
         chunk.DirtyForSaving = true;
@@ -46,7 +43,7 @@
                 break;
             }
         }
-        d_Heightmap.SetBlock(x, y, height);
+        Heightmap.SetBlock(x, y, height);
     }
 
     public void SetBlockNotMakingDirty(int x, int y, int z, int tileType)
@@ -54,7 +51,7 @@
         ServerChunk chunk = GetChunk(x, y, z);
         unchecked
         {
-            chunk.Data[VectorIndexUtil.Index3d(ModuloChunk(x), ModuloChunk(y), ModuloChunk(z), chunksize, chunksize)] = (ushort)tileType;
+            chunk.Data[VectorIndexUtil.Index3d(BlockInChunk(x), BlockInChunk(y), BlockInChunk(z), chunksize, chunksize)] = (ushort)tileType;
         }
         chunk.DirtyForSaving = true;
         UpdateColumnHeight(x, y);
@@ -76,9 +73,9 @@
 
     public ServerChunk GetChunk(int x, int y, int z)
     {
-        x = InvertChunk(x);
-        y = InvertChunk(y);
-        z = InvertChunk(z);
+        x = BlockToChunk(x);
+        y = BlockToChunk(y);
+        z = BlockToChunk(z);
         ServerChunk chunk = GetChunkValid(x, y, z);
         if (chunk != null)
         {
@@ -143,8 +140,8 @@
                     int inChunkHeight = GetColumnHeightInChunk(GetChunkValid(x, y, z).Data, xx, yy);
                     if (inChunkHeight != 0)
                     {
-                        int oldHeight = d_Heightmap.GetBlock(x * chunksize + xx, y * chunksize + yy);
-                        d_Heightmap.SetBlock(x * chunksize + xx, y * chunksize + yy, Math.Max(oldHeight, inChunkHeight + z * chunksize));
+                        int oldHeight = Heightmap.GetBlock(x * chunksize + xx, y * chunksize + yy);
+                        Heightmap.SetBlock(x * chunksize + xx, y * chunksize + yy, Math.Max(oldHeight, inChunkHeight + z * chunksize));
                     }
                 }
             }
@@ -204,7 +201,7 @@
         }
     }
 
-    public int ModuloChunk(int num)
+    public int BlockInChunk(int num)
     {
         if (isPower2Chunk)
             return num & (chunksize - 1);
@@ -212,7 +209,7 @@
             return num % chunksize;
     }
 
-    public int InvertChunk(int num)
+    public int BlockToChunk(int num)
     {
         return (int)(num * invertedChunkSize);
     }
@@ -222,29 +219,17 @@
         mapSizeX = sizex;
         mapSizeY = sizey;
         mapSizeZ = sizez;
-        chunks = new ServerChunk[InvertChunk(sizex) * InvertChunk(sizey)][];
-        d_Heightmap.Restart();
+        chunks = new ServerChunk[BlockToChunk(sizex) * BlockToChunk(sizey)][];
+        Heightmap.Restart();
     }
 
-    public InfiniteMapChunked2dServer d_Heightmap;
-
-    public ushort[] GetHeightmapChunk(int x, int y)
-    {
-        unchecked
-        {
-            // todo: avoid copy
-            ushort[] source = d_Heightmap.GetChunk(x, y);
-            ushort[] copy = new ushort[chunksize * chunksize];
-            Array.Copy(source, copy, copy.Length);
-            return copy;
-        }
-    }
+    public InfiniteMapChunked2dServer Heightmap;
 
     public ServerChunk GetChunkValid(int cx, int cy, int cz)
     {
         unchecked
         {
-            ServerChunk[] column = chunks[VectorIndexUtil.Index2d(cx, cy, InvertChunk(mapSizeX))];
+            ServerChunk[] column = chunks[VectorIndexUtil.Index2d(cx, cy, BlockToChunk(mapSizeX))];
             if (column == null)
             {
                 return null;
@@ -257,11 +242,11 @@
     {
         unchecked
         {
-            ServerChunk[] column = chunks[VectorIndexUtil.Index2d(cx, cy, InvertChunk(mapSizeX))];
+            ServerChunk[] column = chunks[VectorIndexUtil.Index2d(cx, cy, BlockToChunk(mapSizeX))];
             if (column == null)
             {
-                column = new ServerChunk[InvertChunk(mapSizeZ)];
-                chunks[VectorIndexUtil.Index2d(cx, cy, InvertChunk(mapSizeX))] = column;
+                column = new ServerChunk[BlockToChunk(mapSizeZ)];
+                chunks[VectorIndexUtil.Index2d(cx, cy, BlockToChunk(mapSizeX))] = column;
             }
             column[cz] = chunk;
         }

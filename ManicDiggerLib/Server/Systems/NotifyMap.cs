@@ -146,7 +146,7 @@ public class ServerSystemNotifyMap : ServerSystem
 
             // Send heightmap for this column
             ReadOnlySpan<byte> heightmapBytes = MemoryMarshal.AsBytes(
-                server.Map.GetHeightmapChunk(globalPos.X, globalPos.Y).AsSpan());
+                server.Map.Heightmap.GetChunk(globalPos.X, globalPos.Y).AsSpan());
 
             var heightmapPacket = new Packet_ServerHeightmapChunk
             {
