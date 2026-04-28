@@ -176,10 +176,10 @@ public interface IGameClient
     float AssetsLoadProgress { get; set; }
 
     /// <summary>Texture IDs indexed by <c>[blockTypeId][TileSide]</c>.</summary>
-    List<int[]> TextureId { get; }
+    Dictionary<int, int[]> TextureId { get; }
 
     /// <summary>Per-block-type texture ID used in inventory rendering.</summary>
-    List<int> TextureIdForInventory { get; set; }
+    Dictionary<int, int> TextureIdForInventory { get; set; }
 
     /// <summary>OpenGL ID of the composite terrain texture atlas.</summary>
     int TerrainTexture { get; set; }
@@ -351,10 +351,10 @@ public interface IGameClient
     // =========================================================================
 
     /// <summary>Block type definitions indexed by block type ID.</summary>
-    BlockType[] BlockTypes { get; set; }
+    Dictionary<int, BlockType> BlockTypes { get; set; }
 
     /// <summary>Pending block type definitions received from the server before map load.</summary>
-    BlockType[] NewBlockTypes { get; set; }
+    Dictionary<int, BlockType> NewBlockTypes { get; set; }
 
     /// <summary>Provides per-block-type gameplay data (damage, rail flags, draw type, etc.).</summary>
     BlockTypeRegistry BlockRegistry { get; }

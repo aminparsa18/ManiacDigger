@@ -390,7 +390,6 @@ public partial class Game
     public void MapLoaded()
     {
         RedrawAllBlocks();
-        materialSlots = BlockRegistry.DefaultMaterialSlots;
         GuiStateBackToGame();
 
         PlayerPositionSpawnX = Player.position.x;

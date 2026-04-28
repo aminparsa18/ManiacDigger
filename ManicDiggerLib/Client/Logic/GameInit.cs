@@ -54,8 +54,8 @@ public partial class Game : IGameClient
     internal TextRenderer textRenderer;
 
     /// <summary>Texture IDs indexed by [blockId][TileSide].</summary>
-    public List<int[]> TextureId { get; set; }
-    public List<int> TextureIdForInventory { get; set; }
+    public Dictionary<int, int[]> TextureId { get; set; }
+    public Dictionary<int, int> TextureIdForInventory { get; set; }
 
     public int TerrainTexture { get; set; }
     public int[] TerrainTextures1d { get; set; }
@@ -77,7 +77,6 @@ public partial class Game : IGameClient
 
     public int ActiveMaterial { get; set; }
     public int Font { get; set; }
-    private int[] materialSlots;
 
     public bool ENABLE_DRAW2D { get; set; }
     public bool EnableDrawTestCharacter { get; set; }
@@ -304,8 +303,8 @@ public partial class Game : IGameClient
     internal bool exitToMainMenu;
     private bool startedconnecting;
 
-    public BlockType[] BlockTypes { get; set; }
-    public BlockType[] NewBlockTypes { get; set; }
+    public Dictionary<int, BlockType> BlockTypes { get; set; }
+    public Dictionary<int, BlockType> NewBlockTypes { get; set; }
 
     public string BlobDownloadName { get; set; }
     public string BlobDownloadMd5 { get; set; }
@@ -531,7 +530,7 @@ public partial class Game : IGameClient
     private void InitNetworking()
     {
         PacketHandlers = new ClientPacketHandler[256];
-        NewBlockTypes = new BlockType[GlobalVar.MAX_BLOCKTYPES];
+        NewBlockTypes = [];
         speculativeCount = 0;
         speculative = new Speculative?[speculativeMax];
     }

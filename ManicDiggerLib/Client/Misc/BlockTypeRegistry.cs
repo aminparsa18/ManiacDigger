@@ -195,9 +195,9 @@ public class BlockTypeRegistry
     /// Applies all non-null entries in <paramref name="blocktypes"/> to the
     /// registry by calling <see cref="RegisterBlockType"/> for each.
     /// </summary>
-    public void UseBlockTypes(BlockType[] blocktypes, int count)
+    public void UseBlockTypes(Dictionary<int, BlockType> blocktypes)
     {
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < blocktypes.Count; i++)
         {
             if (blocktypes[i] != null)
                 RegisterBlockType(i, blocktypes[i]);

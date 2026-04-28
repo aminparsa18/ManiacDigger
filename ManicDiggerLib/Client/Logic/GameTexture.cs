@@ -134,11 +134,10 @@ public partial class Game
         int atlas1dHeight = Atlas1dheight();
         TerrainTexturesPerAtlas = atlas1dHeight / (atlas2dWidth / Atlas2DTiles);
 
-        Bitmap[] atlases1d = PixelBuffer.Atlas2dInto1d(
-            atlas2d, Atlas2DTiles, atlas1dHeight, out int atlasesidCount);
+        Bitmap[] atlases1d = PixelBuffer.Atlas2dInto1d(atlas2d, Atlas2DTiles, atlas1dHeight);
 
-        TerrainTextures1d = new int[atlasesidCount];
-        for (int i = 0; i < atlasesidCount; i++)
+        TerrainTextures1d = new int[atlases1d.Length];
+        for (int i = 0; i < atlases1d.Length; i++)
         {
             TerrainTextures1d[i] = Platform.LoadTextureFromBitmap(atlases1d[i]);
             atlases1d[i].Dispose();

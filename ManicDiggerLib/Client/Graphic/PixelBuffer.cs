@@ -160,7 +160,7 @@ public class PixelBuffer
     /// An array of <see cref="Bitmap"/> strips. Only the first <paramref name="retCount"/>
     /// entries are valid; the rest are <see langword="null"/>.
     /// </returns>
-    public static Bitmap[] Atlas2dInto1d(Bitmap atlas2d, int tiles, int atlasSizeLimit, out int retCount)
+    public static Bitmap[] Atlas2dInto1d(Bitmap atlas2d, int tiles, int atlasSizeLimit)
     {
         PixelBuffer orig = FromBitmap(atlas2d);
 
@@ -169,31 +169,36 @@ public class PixelBuffer
         int atlasesCount = Math.Max(1, totalTiles * tilesize / atlasSizeLimit);
         int tilesPerAtlas = totalTiles / atlasesCount;
 
-        Bitmap[] atlases = new Bitmap[128];
+        Bitmap[] atlases = new Bitmap[atlasesCount];
         int atlasIndex = 0;
         PixelBuffer atlas1d = null;
+        int[] src = orig.Argb;
+        int[] dst = null;
 
         for (int i = 0; i < totalTiles; i++)
         {
-            int x = i % tiles;
-            int y = i / tiles;
-
             if (i % tilesPerAtlas == 0)
             {
                 if (atlas1d != null)
                     atlases[atlasIndex++] = atlas1d.ToBitmap();
-
                 atlas1d = Create(tilesize, atlasSizeLimit);
+                dst = atlas1d.Argb;
             }
 
+            int tileX = i % tiles;
+            int tileY = i / tiles;
             int destY = i % tilesPerAtlas * tilesize;
-            for (int yy = 0; yy < tilesize; yy++)
-                for (int xx = 0; xx < tilesize; xx++)
-                    atlas1d.SetPixel(xx, destY + yy, orig.GetPixel(x * tilesize + xx, y * tilesize + yy));
+            int srcBaseY = tileY * tilesize;
+
+            for (int row = 0; row < tilesize; row++)
+            {
+                int srcOffset = (srcBaseY + row) * orig.Width + tileX * tilesize;
+                int dstOffset = (destY + row) * tilesize;
+                Array.Copy(src, srcOffset, dst, dstOffset, tilesize);
+            }
         }
 
         atlases[atlasIndex++] = atlas1d.ToBitmap();
-        retCount = atlasesCount;
         return atlases;
     }
 }

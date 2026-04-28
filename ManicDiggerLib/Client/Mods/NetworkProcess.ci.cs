@@ -442,7 +442,7 @@ public class ModNetworkProcess : ModBase
             case Packet_ServerIdEnum.BlockTypes:
                 {
                     _game.BlockTypes = _game.NewBlockTypes;
-                    _game.NewBlockTypes = new BlockType[GlobalVar.MAX_BLOCKTYPES];
+                    _game.NewBlockTypes = [];
 
                     // Old code: Contains() + IndexOf() scanned a 1024-entry array
                     // for every texture of every block type (up to 7168 scans).
@@ -475,25 +475,19 @@ public class ModNetworkProcess : ModBase
                     string[] textureInAtlasIds = textureList.ToArray();
                     int textureInAtlasIdsCount = textureInAtlasIds.Length;
 
-                    _game.BlockRegistry.UseBlockTypes(_game.BlockTypes, GlobalVar.MAX_BLOCKTYPES);
+                    _game.BlockRegistry.UseBlockTypes(_game.BlockTypes);
 
-                    foreach(BlockType b in _game.BlockTypes)
+                    foreach (var (id, b) in _game.BlockTypes)
                     {
-                        if (b == null)
-                        {
-                            _game.TextureId.Add(null);
-                            continue;
-                        }
-                        _game.TextureId.Add(
-                        [
+                        _game.TextureId[id] = [
                             textureList.IndexOf(b.TextureIdTop),
                             textureList.IndexOf(b.TextureIdBottom),
                             textureList.IndexOf(b.TextureIdFront),
                             textureList.IndexOf(b.TextureIdBack),
                             textureList.IndexOf(b.TextureIdLeft),
                             textureList.IndexOf(b.TextureIdRight),
-                        ]);
-                        _game.TextureIdForInventory.Add(textureList.IndexOf(b.TextureIdForInventory));
+                        ];
+                        _game.TextureIdForInventory[id] = textureList.IndexOf(b.TextureIdForInventory);
                     }
 
                     _game.UseTerrainTextures(textureInAtlasIds, textureInAtlasIdsCount);
