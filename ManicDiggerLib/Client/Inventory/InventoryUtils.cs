@@ -172,5 +172,5 @@ public class InventoryUtils
     /// Returns the array of texture IDs used to render inventory UI elements.
     /// </summary>
     /// <returns>An integer array of texture atlas IDs owned by the game instance.</returns>
-    public int[] TextureIdForInventory() => _game.TextureIdForInventory;
+    public List<int> TextureIdForInventory() => _game.TextureIdForInventory;
 }

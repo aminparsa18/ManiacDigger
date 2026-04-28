@@ -13,8 +13,6 @@ public partial class Game : IGameClient
     // Constants
     // -------------------------------------------------------------------------
 
-    private const int MaxBlockTypes = 1024;
-
     public const int HourDetail = 4;
     public const int ChatFontSize = 11;
     public const int DISCONNECTED_ICON_AFTER_SECONDS = 10;
@@ -56,8 +54,8 @@ public partial class Game : IGameClient
     internal TextRenderer textRenderer;
 
     /// <summary>Texture IDs indexed by [blockId][TileSide].</summary>
-    public int[][] TextureId { get; set; }
-    public int[] TextureIdForInventory { get; set; }
+    public List<int[]> TextureId { get; set; }
+    public List<int> TextureIdForInventory { get; set; }
 
     public int TerrainTexture { get; set; }
     public int[] TerrainTextures1d { get; set; }
@@ -430,11 +428,8 @@ public partial class Game : IGameClient
 
     private void InitTextures()
     {
-        TextureId = new int[MaxBlockTypes][];
-        for (int i = 0; i < MaxBlockTypes; i++)
-            TextureId[i] = new int[6];
-
-        TextureIdForInventory = new int[MaxBlockTypes];
+        TextureId = [];
+        TextureIdForInventory = [];
         handTexture = -1;
         whitetexture = -1;
         textures = [];

@@ -444,7 +444,6 @@ public class ModNetworkProcess : ModBase
                     _game.BlockTypes = _game.NewBlockTypes;
                     _game.NewBlockTypes = new BlockType[GlobalVar.MAX_BLOCKTYPES];
 
-                    // ── Fix #2 + #3: HashSet replaces O(n) linear scans ───────
                     // Old code: Contains() + IndexOf() scanned a 1024-entry array
                     // for every texture of every block type (up to 7168 scans).
                     // Old code also passed textureInAtlasIdsCount=1024 even though
@@ -478,18 +477,23 @@ public class ModNetworkProcess : ModBase
 
                     _game.BlockRegistry.UseBlockTypes(_game.BlockTypes, GlobalVar.MAX_BLOCKTYPES);
 
-                    // ── Fix #1: null check removed — textureInAtlasIds is never null ──
-                    for (int i = 0; i < GlobalVar.MAX_BLOCKTYPES; i++)
+                    foreach(BlockType b in _game.BlockTypes)
                     {
-                        BlockType b = _game.BlockTypes[i];
-                        if (b == null) continue;
-                        _game.TextureId[i][0] = textureList.IndexOf(b.TextureIdTop);
-                        _game.TextureId[i][1] = textureList.IndexOf(b.TextureIdBottom);
-                        _game.TextureId[i][2] = textureList.IndexOf(b.TextureIdFront);
-                        _game.TextureId[i][3] = textureList.IndexOf(b.TextureIdBack);
-                        _game.TextureId[i][4] = textureList.IndexOf(b.TextureIdLeft);
-                        _game.TextureId[i][5] = textureList.IndexOf(b.TextureIdRight);
-                        _game.TextureIdForInventory[i] = textureList.IndexOf(b.TextureIdForInventory);
+                        if (b == null)
+                        {
+                            _game.TextureId.Add(null);
+                            continue;
+                        }
+                        _game.TextureId.Add(
+                        [
+                            textureList.IndexOf(b.TextureIdTop),
+                            textureList.IndexOf(b.TextureIdBottom),
+                            textureList.IndexOf(b.TextureIdFront),
+                            textureList.IndexOf(b.TextureIdBack),
+                            textureList.IndexOf(b.TextureIdLeft),
+                            textureList.IndexOf(b.TextureIdRight),
+                        ]);
+                        _game.TextureIdForInventory.Add(textureList.IndexOf(b.TextureIdForInventory));
                     }
 
                     _game.UseTerrainTextures(textureInAtlasIds, textureInAtlasIdsCount);

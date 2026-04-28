@@ -176,10 +176,10 @@ public interface IGameClient
     float AssetsLoadProgress { get; set; }
 
     /// <summary>Texture IDs indexed by <c>[blockTypeId][TileSide]</c>.</summary>
-    int[][] TextureId { get; }
+    List<int[]> TextureId { get; }
 
     /// <summary>Per-block-type texture ID used in inventory rendering.</summary>
-    int[] TextureIdForInventory { get; set; }
+    List<int> TextureIdForInventory { get; set; }
 
     /// <summary>OpenGL ID of the composite terrain texture atlas.</summary>
     int TerrainTexture { get; set; }
