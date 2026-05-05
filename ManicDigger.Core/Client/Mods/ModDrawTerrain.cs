@@ -12,7 +12,7 @@ public class ModDrawTerrain : ModBase
 
     private const int NoChunk = -1;
 
-    private readonly IGameService _platform;
+    private readonly IGameService _gameService;
     private readonly IVoxelMap _voxelMap;
     private readonly IMeshBatcher _meshBatcher;
     private readonly IChunkWorkQueue _chunkWorkQueue;
@@ -33,7 +33,7 @@ public class ModDrawTerrain : ModBase
         ChunkTessellationDispatcher dispatcher,
         IGame game) : base(game)
     {
-        _platform = platform;
+        _gameService = platform;
         _voxelMap = voxelMap;
         _meshBatcher = meshBatcher;
         _chunkWorkQueue = chunkWorkQueue;
@@ -43,7 +43,7 @@ public class ModDrawTerrain : ModBase
     // ── Public API ────────────────────────────────────────────────────────────
 
     public int TrianglesCount() => _meshBatcher.TotalTriangleCount();
-    internal static int InvertChunk(int num) => (int)(num * (1.0f / GameConstants.CHUNK_SIZE));
+    private static int InvertChunk(int num) => (int)(num * (1.0f / GameConstants.CHUNK_SIZE));
 
     // ── ModBase overrides ─────────────────────────────────────────────────────
 
@@ -86,15 +86,18 @@ public class ModDrawTerrain : ModBase
 
     // ── Initialisation ────────────────────────────────────────────────────────
 
-    public void StartTerrain()
+    private void StartTerrain()
     {
         _dispatcher.Start();
         _terrainStarted = true;
     }
 
-    public void RedrawAllBlocks()
+    private void RedrawAllBlocks()
     {
-        if (!_terrainStarted) StartTerrain();
+        if (!_terrainStarted)
+        {
+            StartTerrain();
+        }
 
         int chunksLength = InvertChunk(Game.MapSizeX)
                          * InvertChunk(Game.MapSizeY)
@@ -103,7 +106,11 @@ public class ModDrawTerrain : ModBase
         for (int i = 0; i < chunksLength; i++)
         {
             Chunk c = _voxelMap.Chunks[i];
-            if (c == null) continue;
+            if (c == null)
+            {
+                continue;
+            }
+
             c.Rendered ??= new RenderedChunk();
             c.Rendered.Dirty = true;
             c.BaseLightDirty = true;
@@ -117,7 +124,9 @@ public class ModDrawTerrain : ModBase
         if (Game.LastplacedblockX == NoChunk
          && Game.LastplacedblockY == NoChunk
          && Game.LastplacedblockZ == NoChunk)
+        {
             return;
+        }
 
         int mapSizeX = InvertChunk(_voxelMap.MapSizeX);
         int mapSizeY = InvertChunk(_voxelMap.MapSizeY);
@@ -134,11 +143,15 @@ public class ModDrawTerrain : ModBase
 
             if (cx < 0 || cy < 0 || cz < 0
              || cx >= mapSizeX || cy >= mapSizeY || cz >= mapSizeZ)
+            {
                 continue;
+            }
 
             Chunk c = _voxelMap.Chunks[VectorIndexUtil.Index3d(cx, cy, cz, mapSizeX, mapSizeY)];
             if (c?.Rendered != null)
+            {
                 c.Rendered.Dirty = true;
+            }
         }
 
         Game.LastplacedblockX = NoChunk;
@@ -148,7 +161,10 @@ public class ModDrawTerrain : ModBase
 
     private (int x, int y, int z)? NearestDirty()
     {
-        if (_voxelMap?.Chunks == null) return null;
+        if (_voxelMap?.Chunks == null)
+        {
+            return null;
+        }
 
         int px = InvertChunk((int)Game.LocalPositionX);
         int py = InvertChunk((int)Game.LocalPositionZ);
@@ -182,14 +198,17 @@ public class ModDrawTerrain : ModBase
                     if (dist < bestDist) { bestDist = dist; bestIdx = i; }
                 }
 
-        if (bestIdx == -1) return null;
+        if (bestIdx == -1)
+        {
+            return null;
+        }
 
         // Mark as no longer dirty immediately so a second OnFrame call this
         // frame doesn't enqueue the same chunk twice.
         _voxelMap.Chunks[bestIdx].Rendered.Dirty = false;
 
         int biz = bestIdx / (mxc * myc);
-        int biy = (bestIdx % (mxc * myc)) / mxc;
+        int biy = bestIdx % (mxc * myc) / mxc;
         int bix = bestIdx % mxc;
         return (bix, biy, biz);
     }
@@ -210,10 +229,10 @@ public class ModDrawTerrain : ModBase
     private void UpdatePerformanceInfo()
     {
         const float MsToSeconds = 1f / 1000f;
-        float elapsed = (_platform.TimeMillisecondsFromStart - _lastPerfUpdateMs) * MsToSeconds;
+        float elapsed = (_gameService.TimeMillisecondsFromStart - _lastPerfUpdateMs) * MsToSeconds;
         if (elapsed < 1f) return;
 
-        _lastPerfUpdateMs = _platform.TimeMillisecondsFromStart;
+        _lastPerfUpdateMs = _gameService.TimeMillisecondsFromStart;
         int updatesThisPeriod = _chunkUpdates - _lastChunkUpdatesSnapshot;
         _lastChunkUpdatesSnapshot = _chunkUpdates;
 
@@ -222,6 +241,4 @@ public class ModDrawTerrain : ModBase
         Game.PerformanceInfo["triangles"] = string.Format(
             Game.Language.Triangles(), TrianglesCount().ToString());
     }
-
-    internal void Clear() => _meshBatcher.Clear();
 }

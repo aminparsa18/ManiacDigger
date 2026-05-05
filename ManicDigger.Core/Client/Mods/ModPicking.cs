@@ -110,10 +110,8 @@ public class ModPicking : ModBase
     }
 
     /// <inheritdoc/>
-    public override void OnRender3d(float dt)
-    {
-        UpdateParticlePhysics(dt);
-    }
+    public override void OnRender3d(float dt) 
+        => UpdateParticlePhysics(dt);
 
     /// <inheritdoc/>
     public override void OnMouseUp(MouseEventArgs args)
