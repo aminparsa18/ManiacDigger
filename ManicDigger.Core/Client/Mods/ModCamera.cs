@@ -67,6 +67,10 @@ public class ModCamera : ModBase
     public override void OnFrame(float deltaTime)
     {
         UpdateSprintFov();
+    }
+
+    public override void OnRender2d(float dt)
+    {
         DrawSprintVignette();
     }
 
