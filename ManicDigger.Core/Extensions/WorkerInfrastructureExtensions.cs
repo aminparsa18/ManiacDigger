@@ -30,8 +30,10 @@ public static class WorkerInfrastructureExtensions
         // can call StartAsync/StopAsync on it) and as IChunkWorkQueue (so anything
         // that enqueues work never takes a dependency on the concrete class).
 
-        services.AddSingleton<IChunkWorkDispatcher, NullChunkWorkDispatcher>();
-        services.AddSingleton(sp => new ChunkWorkerPool(
+        services.AddSingleton<ChunkTessellationDispatcher>()
+        .AddSingleton<IChunkWorkDispatcher>(sp =>
+            sp.GetRequiredService<ChunkTessellationDispatcher>())
+        .AddSingleton(sp => new ChunkWorkerPool(
             sp.GetRequiredService<IChunkWorkDispatcher>(),
             sp.GetRequiredService<ILogger<ChunkWorkerPool>>(),
             workerCount,

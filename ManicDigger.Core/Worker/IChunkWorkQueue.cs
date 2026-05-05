@@ -14,4 +14,8 @@ public interface IChunkWorkQueue
 
     /// <summary>Number of items currently waiting to be processed.</summary>
     int PendingCount { get; }
+
+    // Output side — drain tessellation results on main thread
+    void EnqueueResult(TerrainRendererRedraw redraw);
+    bool TryDequeueResult(out TerrainRendererRedraw redraw);
 }

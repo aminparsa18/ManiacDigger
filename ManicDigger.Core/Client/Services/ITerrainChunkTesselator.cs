@@ -10,6 +10,8 @@
 //   Y
 //
 
+using ManicDigger.Worker;
+
 public interface ITerrainChunkTesselator
 {
     float BlockShadow { get; set; }
@@ -19,8 +21,8 @@ public interface ITerrainChunkTesselator
     Dictionary<int, int[]> TextureId { get; set; }
     bool ENABLE_TEXTURE_TILING { get; set; }
     bool EnableSmoothLight { get; set; }
-
-    VerticesIndicesToLoad[] MakeChunk(int x, int y, int z, int[] chunk18, byte[] shadows18, float[] lightlevels_, out int retCount);
     void RefreshBlockTypeCache();
+    ChunkTessellationContext CreateContext();
+    VerticesIndicesToLoad[] MakeChunk(int x, int y, int z, float[] lightLevels, ChunkTessellationContext ctx, out int retCount);
     void Start();
 }

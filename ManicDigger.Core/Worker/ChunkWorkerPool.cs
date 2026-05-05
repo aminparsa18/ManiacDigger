@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 using System.Threading.Channels;
 
 namespace ManicDigger.Worker;
@@ -16,6 +17,7 @@ public sealed class ChunkWorkerPool : BackgroundService, IChunkWorkQueue
     public static int DefaultWorkerCount =>
         Math.Max(1, Environment.ProcessorCount - 1);
 
+    private readonly ConcurrentQueue<TerrainRendererRedraw> _results = new();
     private readonly Channel<ChunkWorkItem> _channel;
     private readonly IChunkWorkDispatcher _dispatcher;
     private readonly ILogger<ChunkWorkerPool> _logger;
@@ -52,6 +54,12 @@ public sealed class ChunkWorkerPool : BackgroundService, IChunkWorkQueue
 
     public ValueTask EnqueueAsync(ChunkWorkItem item, CancellationToken ct = default)
         => _channel.Writer.WriteAsync(item, ct);
+
+    public void EnqueueResult(TerrainRendererRedraw redraw)
+    => _results.Enqueue(redraw);
+
+    public bool TryDequeueResult(out TerrainRendererRedraw redraw)
+        => _results.TryDequeue(out redraw);
 
     // BackgroundService ────────────────────────────────────────────────────────
 
