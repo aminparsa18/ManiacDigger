@@ -92,9 +92,6 @@ public class ModDrawTerrain : ModBase
         _terrainStarted = true;
     }
 
-
-    
-
     public void RedrawAllBlocks()
     {
         if (!_terrainStarted) StartTerrain();

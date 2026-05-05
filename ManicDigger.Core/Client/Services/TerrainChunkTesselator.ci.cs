@@ -45,7 +45,7 @@ public class TerrainChunkTesselator : ITerrainChunkTesselator
 
     private int _atlasCount;   // was toreturnatlas1dLength
 
-    private int terrainTexturesPerAtlas;
+   // private int terrainTexturesPerAtlas;
     private float terrainTexturesPerAtlasInverse;
 
     // Transparent, Lowered and Fluid flags are packed into a single byte per block.
@@ -212,22 +212,19 @@ public class TerrainChunkTesselator : ITerrainChunkTesselator
 
         _blockFlags = new BlockRenderFlags[GameConstants.MAX_BLOCKTYPES];
 
-        terrainTexturesPerAtlas = TerrainTexturesPerAtlas;
-        terrainTexturesPerAtlasInverse = 1f / TerrainTexturesPerAtlas;
+        RefreshBlockTypeCache();
+    }
 
-        AtiArtifactFix = _platform.IsFastSystem()
-            ? 1 / 32f * 0.25f   // Desktop: 32 pixels per block texture
-            : 1 / 32f * 1.5f;   // WebGL
-
+    public void OnAtlasReady(int texturesPerAtlas)
+    {
+        TerrainTexturesPerAtlas = texturesPerAtlas;
+        terrainTexturesPerAtlasInverse = 1f / texturesPerAtlas;
+        AtiArtifactFix = _platform.IsFastSystem() ? 1 / 32f * 0.25f : 1 / 32f * 1.5f;
         _texrecWidth = 1 - (AtiArtifactFix * 2);
         _texrecHeight = terrainTexturesPerAtlasInverse * (1 - (AtiArtifactFix * 2));
         _texrecLeft = AtiArtifactFix;
         _texrecRight = _texrecLeft + _texrecWidth;
-
-        // Compute atlas count — contexts need this to size their own buffers.
-        _atlasCount = Math.Max(1, GameConstants.MAX_BLOCKTYPES / TerrainTexturesPerAtlas);
-
-        RefreshBlockTypeCache();
+        _atlasCount = Math.Max(1, GameConstants.MAX_BLOCKTYPES / texturesPerAtlas);
     }
 
     /// <summary>
@@ -604,7 +601,7 @@ public class TerrainChunkTesselator : ITerrainChunkTesselator
 
         int sidetexture = GetTextureId(tileType, tileSide);
         GeometryModel toreturn = GetModelData(tileType, sidetexture, ctx);
-        float texrecTop = (terrainTexturesPerAtlasInverse * (sidetexture % terrainTexturesPerAtlas))
+        float texrecTop = (terrainTexturesPerAtlasInverse * (sidetexture % TerrainTexturesPerAtlas))
                            + (AtiArtifactFix * terrainTexturesPerAtlasInverse);
         float texrecBottom = texrecTop + _texrecHeight;
         int lastelement = toreturn.VerticesCount;
@@ -1175,9 +1172,9 @@ public class TerrainChunkTesselator : ITerrainChunkTesselator
         Vector3 b11 = new(botx + sxy, tz, boty + sxy);
 
         // ── Shared texture coords ─────────────────────────────────────────────
-        float sideTexrecTop = terrainTexturesPerAtlasInverse * (ctx.TorchSideTexture % terrainTexturesPerAtlas);
+        float sideTexrecTop = terrainTexturesPerAtlasInverse * (ctx.TorchSideTexture % TerrainTexturesPerAtlas);
         float sideTexrecBottom = sideTexrecTop + _texrecHeight;
-        float topTexrecTop = terrainTexturesPerAtlasInverse * (ctx.TorchTopTexture % terrainTexturesPerAtlas);
+        float topTexrecTop = terrainTexturesPerAtlasInverse * (ctx.TorchTopTexture % TerrainTexturesPerAtlas);
         float topTexrecBottom = topTexrecTop + _texrecHeight;
 
         GeometryModel mSide = GetModelData(tt, ctx.TorchSideTexture, ctx);

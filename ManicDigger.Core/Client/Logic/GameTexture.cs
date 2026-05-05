@@ -137,13 +137,14 @@ public partial class Game
     /// it into 1-D atlas strips for indexed lookup by the tessellator.
     /// calling it twice.
     /// </summary>
-    internal void UseTerrainTextureAtlas2d(Bitmap atlas2d, int atlas2dWidth)
+    private void UseTerrainTextureAtlas2d(Bitmap atlas2d, int atlas2dWidth)
     {
         TerrainTexture = openGlService.LoadTextureFromBitmap(atlas2d);
 
-        // Fix #5: call Atlas1dheight() once and reuse the result.
         int atlas1dHeight = Atlas1dheight();
-        TerrainChunkTesselator.TerrainTexturesPerAtlas = atlas1dHeight / (atlas2dWidth / GameConstants.MAX_BLOCKTYPES_SQRT);
+        int texturesPerAtlas = atlas1dHeight / (atlas2dWidth / GameConstants.MAX_BLOCKTYPES_SQRT);
+
+        TerrainChunkTesselator.OnAtlasReady(texturesPerAtlas);
 
         Bitmap[] atlases1d = PixelBuffer.Atlas2dInto1d(atlas2d, GameConstants.MAX_BLOCKTYPES_SQRT, atlas1dHeight);
 

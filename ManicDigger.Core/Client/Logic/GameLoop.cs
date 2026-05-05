@@ -136,7 +136,6 @@ public partial class Game
 
     private void TryInitialiseConnection()
     {
-        _gameLogger.Client.Debug($"TryInitialiseConnection — IsSinglePlayer={IsSinglePlayer} ServerLoaded={singlePlayerService.SinglePlayerServerLoaded} ServerAvailable={singlePlayerService.SinglePlayerServerAvailable} StartedConnecting={StartedConnecting}");
         if (StartedConnecting) return;
 
         if (!IsSinglePlayer

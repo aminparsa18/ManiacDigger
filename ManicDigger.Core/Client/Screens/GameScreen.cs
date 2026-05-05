@@ -58,7 +58,6 @@ public class ScreenGame(IGameService platform, IOpenGlService openGlService, IAs
     /// </summary>
     private void Connect()
     {
-        _gameLogger.Client.Debug($"Connect() called — singleplayer={singleplayer}");
         if (singleplayer)
         {
             IDummyNetwork network = singlePlayerService.SinglePlayerServerNetwork;
@@ -74,8 +73,6 @@ public class ScreenGame(IGameService platform, IOpenGlService openGlService, IAs
             // Fire-and-forget is fine — startup is fast, socket is already wired above.
             _ = _workerHost.StartAsync();
 
-            // Prime the server inbox so the handshake starts immediately.
-            network.ServerInbox.Enqueue([]);
             game.NetClient = new DummyNetClient(network);
             game.ConnectData = connectData = new ConnectionData { Username = "Local" };
         }

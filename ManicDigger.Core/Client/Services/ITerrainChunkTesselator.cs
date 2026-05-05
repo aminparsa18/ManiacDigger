@@ -25,4 +25,5 @@ public interface ITerrainChunkTesselator
     ChunkTessellationContext CreateContext();
     VerticesIndicesToLoad[] MakeChunk(int x, int y, int z, float[] lightLevels, ChunkTessellationContext ctx, out int retCount);
     void Start();
+    void OnAtlasReady(int texturesPerAtlas);
 }
