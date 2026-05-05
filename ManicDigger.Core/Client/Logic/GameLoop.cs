@@ -13,17 +13,6 @@ public partial class Game
     private const int MaxTicksPerFrame = 3;
     private const int MaxCommitsPerFrame = 32;
 
-    // ── Commit queue (background → main thread) ───────────────────────────────
-
-    /// <summary>
-    /// Thread-safe queue for actions produced by background workers
-    /// (chunk tessellation results, light updates) that must be applied
-    /// on the main thread. Replaces TaskScheduler.CommitActions.
-    /// </summary>
-    public ConcurrentQueue<Action> CommitQueue { get; } = new();
-
-    public void QueueActionCommit(Action action) => CommitQueue.Enqueue(action);
-
     // ── Clear colour cache ────────────────────────────────────────────────────
 
     private float _clearColorRf, _clearColorGf, _clearColorBf, _clearColorAf;
@@ -53,9 +42,6 @@ public partial class Game
             FixedUpdate(FixedTickDt);
             accumulator -= FixedTickDt;
         }
-
-        // Drain results from ChunkWorkerPool and other background workers.
-        DrainCommitQueue();
 
         // Per-frame mod hook (variable dt).
         for (int i = 0; i < ClientMods.Count; i++)
@@ -144,19 +130,6 @@ public partial class Game
         MouseLeftClick = false;
         mouserightclick = false;
         mouseleftdeclick = false;
-    }
-
-    // ── Commit queue ──────────────────────────────────────────────────────────
-
-    /// <summary>
-    /// Drains background-to-main-thread actions, capped at
-    /// <see cref="MaxCommitsPerFrame"/> so a flood can't stall rendering.
-    /// </summary>
-    private void DrainCommitQueue()
-    {
-        int remaining = MaxCommitsPerFrame;
-        while (remaining-- > 0 && CommitQueue.TryDequeue(out Action? action))
-            action();
     }
 
     // ── Connection init ───────────────────────────────────────────────────────

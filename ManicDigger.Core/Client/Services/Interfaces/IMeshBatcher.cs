@@ -64,4 +64,12 @@ public interface IMeshBatcher
     /// Each triangle is represented by 3 indices.
     /// </summary>
     int TotalTriangleCount();
+
+    // Called from worker thread — no OpenGL, just enqueues
+    void StageChunk(Chunk chunk, VerticesIndicesToLoad[] meshes, int meshCount, bool dataRented);
+
+    void StageUnload(Chunk chunk);
+
+    // Called from main thread at start of each frame — drains staged ops, uploads to GPU
+    void FlushPendingUploads(int maxUploadsPerFrame = 8);
 }

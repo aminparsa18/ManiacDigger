@@ -10,9 +10,6 @@ using OpenTK.Windowing.Common;
 /// </summary>
 public interface IGame : IDisposable
 {
-    //temporary : will be replaced in worker pool
-    void QueueActionCommit(Action action);
-
     // =========================================================================
     // Platform & core
     // =========================================================================

@@ -12,7 +12,6 @@ public class ModUnloadRendererChunks : ModBase
     private readonly IMeshBatcher meshBatcher;
 
     private int _pendingUnloadIndex = -1;
-    private readonly Action _unloadAction;
     private int _backgroundRunning; // 0 = idle, 1 = running (Interlocked)
 
     /// <summary>Edge length of one chunk in blocks.</summary>
@@ -45,7 +44,6 @@ public class ModUnloadRendererChunks : ModBase
         this.meshBatcher = meshBatcher;
         _unloadXyzTemp = new Vector3i();
         _unloadXyzTemp = new Vector3i();
-        _unloadAction = ExecuteUnload; // allocated once, reused forever
     }
 
     public override void OnFrame(float dt)
@@ -103,57 +101,15 @@ public class ModUnloadRendererChunks : ModBase
              || x > endX || y > endY || z > endZ)
             {
                 _pendingUnloadIndex = flatIndex;
-                Game.QueueActionCommit(_unloadAction);
+                // Stage geometry removal — main thread flushes it via FlushPendingUploads
+                meshBatcher.StageUnload(chunk);
+                // Release block data and null the slot immediately — safe from background thread
+                chunk.Release();
+                _voxelMap.Chunks[flatIndex] = null;
+
                 if (hasRenderedGeometry) break;
             }
         }
-    }
-
-    /// <summary>
-    /// Creates a main-thread <see cref="Action"/> that removes a single chunk's
-    /// geometry from the batcher and resets its render state so it can be
-    /// re-tessellated when the player approaches again.
-    /// </summary>
-    /// <remarks>
-    /// Block data arrays (<c>data</c>, <c>dataInt</c>, <c>baseLight</c>) are returned to
-    /// <see cref="System.Buffers.ArrayPool{T}.Shared"/> via <see cref="Chunk.Release"/> so
-    /// they can be reused for incoming chunks rather than being garbage-collected.
-    /// The chunk slot is then nulled so the <see cref="Chunk"/> object itself can be GC'd.
-    /// </remarks>
-    /// <param name="game">Game instance used to access the batcher and chunk map.</param>
-    /// <param name="chunkFlatIndex">
-    /// Flat index into <c>game.map.chunks</c> of the chunk to unload.
-    /// Passing <c>-1</c> is a no-op.
-    /// </param>
-    /// <returns>An <see cref="Action"/> safe to enqueue via <see cref="Game.QueueActionCommit"/>.</returns>
-    private void ExecuteUnload()
-    {
-        int chunkFlatIndex = _pendingUnloadIndex;
-        if (chunkFlatIndex == -1) return;
-
-        Chunk chunk = _voxelMap.Chunks[chunkFlatIndex];
-        if (chunk == null) return;
-
-        RenderedChunk rendered = chunk.Rendered;
-        if (rendered != null)
-        {
-            for (int k = 0; k < rendered.IdsCount; k++)
-                meshBatcher.Remove(rendered.Ids[k]);
-
-            rendered.Ids = null;
-            rendered.Dirty = true;
-
-            if (rendered.LightRented && rendered.Light != null)
-            {
-                System.Buffers.ArrayPool<byte>.Shared.Return(rendered.Light);
-                rendered.LightRented = false;
-            }
-
-            rendered.Light = null;
-        }
-
-        chunk.Release();
-        _voxelMap.Chunks[chunkFlatIndex] = null;
     }
 
     /// <summary>

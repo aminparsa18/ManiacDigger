@@ -7,7 +7,6 @@ namespace ManicDigger.Worker;
 ///
 /// Each worker thread gets its own <see cref="ChunkTessellationContext"/> via
 /// <see cref="ThreadLocal{T}"/> — no locking, no shared mutable state.
-/// Results are committed to the main thread via <see cref="IGame.QueueActionCommit"/>.
 /// </summary>
 public sealed class ChunkTessellationDispatcher : IChunkWorkDispatcher
 {
@@ -109,67 +108,8 @@ public sealed class ChunkTessellationDispatcher : IChunkWorkDispatcher
 
         meshData ??= [];
 
-        TerrainRendererRedraw redraw = new(c, meshData, meshCount, dataRented);
-        _game.QueueActionCommit(() => DoRedraw(redraw));
-    }
-
-    // ── Main-thread commit (called via QueueActionCommit) ─────────────────────
-
-    private readonly float _sqrt3Half = MathF.Sqrt(3) * 0.5f;
-
-    private void DoRedraw(TerrainRendererRedraw r)
-    {
-        RenderedChunk rendered = r.Chunk.Rendered;
-
-        if (rendered?.Ids != null)
-            for (int i = 0; i < rendered.IdsCount; i++)
-                _meshBatcher.Remove(rendered.Ids[i]);
-
-        int batcherIdsCount = 0;
-        int[] batcherIds = new int[r.DataCount]; // small, main-thread only
-
-        for (int i = 0; i < r.DataCount; i++)
-        {
-            VerticesIndicesToLoad submesh = r.Data[i];
-            if (submesh.ModelData.IndicesCount == 0)
-            {
-                ReturnModelArrays(submesh.ModelData);
-                continue;
-            }
-
-            float cx = submesh.PositionX + (GameConstants.CHUNK_SIZE * 0.5f);
-            float cy = submesh.PositionZ + (GameConstants.CHUNK_SIZE * 0.5f);
-            float cz = submesh.PositionY + (GameConstants.CHUNK_SIZE * 0.5f);
-            float radius = _sqrt3Half * GameConstants.CHUNK_SIZE;
-
-            batcherIds[batcherIdsCount++] = _meshBatcher.Add(
-                submesh.ModelData, submesh.Transparent, submesh.Texture,
-                cx, cy, cz, radius);
-
-            ReturnModelArrays(submesh.ModelData);
-        }
-
-        if (rendered != null)
-        {
-            if (rendered.Ids == null || rendered.Ids.Length != batcherIdsCount)
-                rendered.Ids = new int[batcherIdsCount];
-
-            for (int i = 0; i < batcherIdsCount; i++)
-                rendered.Ids[i] = batcherIds[i];
-
-            rendered.IdsCount = batcherIdsCount;
-        }
-
-        if (r.DataRented)
-            ArrayPool<VerticesIndicesToLoad>.Shared.Return(r.Data);
-    }
-
-    private static void ReturnModelArrays(GeometryModel model)
-    {
-        if (model.Xyz != null) { ArrayPool<float>.Shared.Return(model.Xyz); model.Xyz = null; }
-        if (model.Uv != null) { ArrayPool<float>.Shared.Return(model.Uv); model.Uv = null; }
-        if (model.Rgba != null) { ArrayPool<byte>.Shared.Return(model.Rgba); model.Rgba = null; }
-        if (model.Indices != null) { ArrayPool<int>.Shared.Return(model.Indices); model.Indices = null; }
+        // Worker thread: just stage it, no OpenGL, no queue injection needed
+        _meshBatcher.StageChunk(c, meshData, meshCount, dataRented);
     }
 
     // ── Shadow / lighting (worker thread) ─────────────────────────────────────
@@ -295,7 +235,6 @@ public sealed class ChunkTessellationDispatcher : IChunkWorkDispatcher
 
 /// <summary>
 /// Carries tessellated geometry for one chunk from a worker thread
-/// to the main thread for GPU upload via <see cref="IGame.QueueActionCommit"/>.
 /// </summary>
 public readonly record struct TerrainRendererRedraw(
     Chunk Chunk,

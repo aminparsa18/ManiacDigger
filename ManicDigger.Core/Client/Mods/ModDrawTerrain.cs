@@ -55,6 +55,7 @@ public class ModDrawTerrain : ModBase
             RedrawAllBlocks();
         }
 
+        _meshBatcher.FlushPendingUploads();
         _meshBatcher.Draw(Game.LocalPositionX, Game.LocalPositionY, Game.LocalPositionZ);
         UpdatePerformanceInfo();
     }

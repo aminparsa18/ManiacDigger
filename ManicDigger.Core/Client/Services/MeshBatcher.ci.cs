@@ -3,6 +3,9 @@
 //everything in two passes: solid geometry first (to fill the depth buffer), then transparent geometry 
 //(water, glass, etc.) on top with back-face culling disabled so both sides of surfaces show.
 
+using System.Buffers;
+using System.Collections.Concurrent;
+
 /// <inheritdoc/>
 public class MeshBatcher : IMeshBatcher
 {
@@ -228,6 +231,85 @@ public class MeshBatcher : IMeshBatcher
         _glTextures.Clear();
         _textureIndexMap.Clear();
     }
+
+    private readonly ConcurrentQueue<PendingUpload> _pendingUploads = new();
+    private readonly ConcurrentQueue<Chunk> _pendingUnloads = new();
+
+    public void StageChunk(Chunk chunk, VerticesIndicesToLoad[] meshes, int meshCount, bool dataRented)
+        => _pendingUploads.Enqueue(new PendingUpload(chunk, meshes, meshCount, dataRented));
+
+    public void StageUnload(Chunk chunk)
+    => _pendingUnloads.Enqueue(chunk);
+
+    // Modify FlushPendingUploads to also drain unloads first
+    public void FlushPendingUploads(int maxUploadsPerFrame = 8)
+    {
+        // Unloads first — free slots before filling them
+        while (_pendingUnloads.TryDequeue(out Chunk chunk))
+        {
+            RenderedChunk rendered = chunk.Rendered;
+            if (rendered == null) continue;
+
+            for (int k = 0; k < rendered.IdsCount; k++)
+                Remove(rendered.Ids[k]);
+
+            rendered.Ids = null;
+            rendered.Dirty = true;
+
+            if (rendered.LightRented && rendered.Light != null)
+            {
+                ArrayPool<byte>.Shared.Return(rendered.Light);
+                rendered.LightRented = false;
+            }
+
+            rendered.Light = null;
+        }
+
+        // Then uploads
+        int count = 0;
+        while (count++ < maxUploadsPerFrame && _pendingUploads.TryDequeue(out PendingUpload p))
+        {
+            DoRedraw(p.Chunk, p.Meshes, p.MeshCount);
+            if (p.DataRented)
+                ArrayPool<VerticesIndicesToLoad>.Shared.Return(p.Meshes);
+        }
+    }
+
+    private readonly float _sqrt3Half = MathF.Sqrt(3) * 0.5f;
+
+    private void DoRedraw(Chunk chunk, VerticesIndicesToLoad[] meshes, int meshCount)
+    {
+        RenderedChunk rendered = chunk.Rendered;
+
+        if (rendered?.Ids != null)
+            for (int i = 0; i < rendered.IdsCount; i++)
+                Remove(rendered.Ids[i]);
+
+        int count = 0;
+        Span<int> ids = stackalloc int[meshCount];
+
+        for (int i = 0; i < meshCount; i++)
+        {
+            VerticesIndicesToLoad submesh = meshes[i];
+            if (submesh.ModelData.IndicesCount == 0) continue;
+
+            float cx = submesh.PositionX + GameConstants.CHUNK_SIZE * 0.5f;
+            float cy = submesh.PositionZ + GameConstants.CHUNK_SIZE * 0.5f;
+            float cz = submesh.PositionY + GameConstants.CHUNK_SIZE * 0.5f;
+
+            ids[count++] = Add(submesh.ModelData, submesh.Transparent, submesh.Texture,
+                               cx, cy, cz, _sqrt3Half * GameConstants.CHUNK_SIZE);
+        }
+
+        rendered.Ids = ids[..count].ToArray();
+        rendered.IdsCount = count;
+    }
+
+    private readonly record struct PendingUpload(
+    Chunk Chunk,
+    VerticesIndicesToLoad[] Meshes,
+    int MeshCount,
+    bool DataRented);
 }
 
 /// <summary>
