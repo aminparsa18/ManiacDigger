@@ -59,9 +59,6 @@ public partial class Server : IServer, IDropItem
 
     public bool EnableShadows { get; set; } = true;
 
-    private readonly DateTimeOffset startedAt = DateTimeOffset.UtcNow;
-    public TimeSpan Uptime => DateTimeOffset.UtcNow - startedAt;
-
     public void Process(float dt)
     {
         for (int i = 0; i < Systems.Count; i++)
@@ -73,30 +70,6 @@ public partial class Server : IServer, IDropItem
         ProcessMain();
     }
    
-    /// <summary>
-    /// Tell the clients the time
-    /// </summary>
-    private void NotifySeason(int clientid)
-    {
-        if (_serverClientService.Clients[clientid].State == ClientStateOnServer.Connecting)
-        {
-            return;
-        }
-
-        Packet_ServerSeason p = new()
-        {
-            Hour = _gameTimer.GetQuarterHourPartOfDay(),
-
-            //DayNightCycleSpeedup is used by the client like this:
-            //day_length_in_seconds = SecondsInADay / packet.Season.DayNightCycleSpeedup;
-
-            //Set it to 1 if we froze the time, to prevent a division by zero
-            DayNightCycleSpeedup = (_gameTimer.SpeedOfTime != 0) ? _gameTimer.SpeedOfTime : 1,
-            Moon = 0,
-        };
-        _serverPacketService.SendPacket(clientid, Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.Season, Season = p }));
-    }
-
     private readonly GameTimer _gameTimer = new();
 
     public void ProcessMain()
@@ -145,10 +118,8 @@ public partial class Server : IServer, IDropItem
         }
 
         //Process Mod timers
-        foreach (KeyValuePair<Timer, Timer.Tick> k in Timers)
-        {
-            k.Key.Update(k.Value);
-        }
+        foreach (ServerTimerRegistration t in Timers)
+            t.Timer.Update(t.Callback);
 
         //Reset data displayed in /stat
         if ((DateTime.UtcNow - statsupdate).TotalSeconds >= 2)
@@ -171,6 +142,30 @@ public partial class Server : IServer, IDropItem
     {
         foreach (KeyValuePair<int, ServerPlayer> c in _serverClientService.Clients)
             NotifySeason(c.Key);
+    }
+
+    /// <summary>
+    /// Tell the clients the time
+    /// </summary>
+    private void NotifySeason(int clientid)
+    {
+        if (_serverClientService.Clients[clientid].State == ClientStateOnServer.Connecting)
+        {
+            return;
+        }
+
+        Packet_ServerSeason p = new()
+        {
+            Hour = _gameTimer.GetQuarterHourPartOfDay(),
+
+            //DayNightCycleSpeedup is used by the client like this:
+            //day_length_in_seconds = SecondsInADay / packet.Season.DayNightCycleSpeedup;
+
+            //Set it to 1 if we froze the time, to prevent a division by zero
+            DayNightCycleSpeedup = (_gameTimer.SpeedOfTime != 0) ? _gameTimer.SpeedOfTime : 1,
+            Moon = 0,
+        };
+        _serverPacketService.SendPacket(clientid, Serialize(new Packet_Server() { Id = Packet_ServerIdEnum.Season, Season = p }));
     }
 
     public void OnConfigLoaded()
@@ -410,13 +405,13 @@ public partial class Server : IServer, IDropItem
                     _serverClientService.Clients[lastClientId] = c;
                 }
                 //clientid = c.Id;
-                c.NotifyMapTimer = new Timer()
+                c.NotifyMapTimer = new ServerTimer
                 {
-                    INTERVAL = 1.0 / SEND_CHUNKS_PER_SECOND,
+                    Interval = TimeSpan.FromSeconds(1.0 / SEND_CHUNKS_PER_SECOND),
                 };
-                c.NotifyMonstersTimer = new Timer()
+                c.NotifyMonstersTimer = new ServerTimer
                 {
-                    INTERVAL = 1.0 / SEND_MONSTER_UDAPTES_PER_SECOND,
+                    Interval = TimeSpan.FromSeconds(1.0 / SEND_MONSTER_UDAPTES_PER_SECOND),
                 };
                 break;
             case NetworkMessageType.Data:
@@ -437,7 +432,7 @@ public partial class Server : IServer, IDropItem
 
     private DateTime statsupdate;
 
-    public Dictionary<Timer, Timer.Tick> Timers { get; set; } = [];
+    public List<ServerTimerRegistration> Timers { get; } = [];
 
     private void NotifyPing(int targetClientId, int ping)
     {
@@ -2547,41 +2542,5 @@ public interface ICurrentTime
     int GetSimulationCurrentFrame();
 }
 
-public class Timer
-{
-    public double INTERVAL { get { return interval; } set { interval = value; } }
-    public double MaxDeltaTime { get { return maxDeltaTime; } set { maxDeltaTime = value; } }
-    private double interval = 1;
-    private double maxDeltaTime = double.PositiveInfinity;
-
-    private double starttime;
-    private double oldtime;
-    public double accumulator;
-    public Timer()
-    {
-        Reset();
-    }
-    public void Reset() => starttime = GetTime();
-    public delegate void Tick();
-    public void Update(Tick tick)
-    {
-        double currenttime = GetTime() - starttime;
-        double deltaTime = currenttime - oldtime;
-        accumulator += deltaTime;
-        double dt = INTERVAL;
-        if (MaxDeltaTime != double.PositiveInfinity && accumulator > MaxDeltaTime)
-        {
-            accumulator = MaxDeltaTime;
-        }
-
-        while (accumulator >= dt)
-        {
-            tick();
-            accumulator -= dt;
-        }
-
-        oldtime = currenttime;
-    }
-
-    private static double GetTime() => (double)DateTime.UtcNow.Ticks / (10 * 1000 * 1000);
-}
+/// <summary>A timer paired with its callback, held in <see cref="Server.Timers"/>.</summary>
+public sealed record ServerTimerRegistration(ServerTimer Timer, Action Callback);

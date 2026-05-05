@@ -26,10 +26,8 @@ public interface IServer
     int Port { get; set; }
     string ReceivedKey { get; set; }
     RenderHint RenderHint { get; set; }
-    Dictionary<Timer, Timer.Tick> Timers { get; set; }
+    List<ServerTimerRegistration> Timers { get; }
     long TotalReceivedBytes { get; set; }
-    TimeSpan Uptime { get; }
-
     abstract int InvertChunk(int num);
     abstract IEnumerable<byte[]> Parts(byte[] blob, int partsize);
     abstract Vector3i PlayerBlockPosition(ServerPlayer c);

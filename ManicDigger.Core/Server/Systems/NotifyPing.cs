@@ -8,7 +8,11 @@
 /// </summary>
 public class ServerSystemNotifyPing : ServerSystem
 {
-    private readonly Timer pingTimer = new() { INTERVAL = 1, MaxDeltaTime = 5 };
+    private readonly ServerTimer pingTimer = new()
+    {
+        Interval = TimeSpan.FromSeconds(1),
+        MaxDeltaTime = TimeSpan.FromSeconds(5),
+    };
     private readonly IGameService gameService;
     private readonly IGameExit gameExit;
     private readonly IClientRegistry _serverClientService;

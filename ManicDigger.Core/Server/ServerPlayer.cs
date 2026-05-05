@@ -96,7 +96,7 @@ public class ServerPlayer
         get => Entity.Position.Pitch;
         set => Entity.Position.Pitch = (byte)value;
     }
-    internal Timer notifyMonstersTimer;
+    internal ServerTimer notifyMonstersTimer;
 
     /// <summary>Player stance (standing, crouching, etc).</summary>
     public byte Stance
@@ -129,7 +129,7 @@ public class ServerPlayer
     public Dictionary<Vector2i, int> heightmapchunksseen { get; set; }
 
     /// <summary>Timer controlling map chunk notification intervals.</summary>
-    public Timer NotifyMapTimer { get; set; }
+    public ServerTimer NotifyMapTimer { get; set; }
 
     /// <summary>Whether the client's inventory needs to be sent.</summary>
     public bool IsInventoryDirty { get; set; }
@@ -172,7 +172,7 @@ public class ServerPlayer
         => $"{color}{PlayerName}{subsequentColor}";
 
     /// <summary>Timer controlling monster notification intervals.</summary>
-    public Timer NotifyMonstersTimer { get; set; }
+    public ServerTimer NotifyMonstersTimer { get; set; }
 
     /// <summary>Script interpreter instance for mod/script execution.</summary>
     public IScriptInterpreter Interpreter { get; set; }

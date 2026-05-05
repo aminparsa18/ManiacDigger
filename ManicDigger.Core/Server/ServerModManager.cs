@@ -176,7 +176,8 @@ public class ServerModManager(IGameExit gameExit, IBlockRegistry blockRegistry, 
 
     public bool IsValidPos(int x, int y, int z) => VectorUtils.IsValidPos(_serverMapStorage, x, y, z);
 
-    public void RegisterTimer(Action a, double interval) => _server.Timers[new Timer() { INTERVAL = interval }] = delegate { a(); };
+    public void RegisterTimer(Action a, double interval) => _server.Timers.Add(new ServerTimerRegistration(
+        new ServerTimer { Interval = TimeSpan.FromSeconds(interval) }, a));
 
     public void PlaySoundAt(int posx, int posy, int posz, string sound) => _server.PlaySoundAt(posx, posy, posz, sound);
 
