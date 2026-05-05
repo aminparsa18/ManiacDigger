@@ -70,13 +70,3 @@ public static class WorkerInfrastructureExtensions
         return services;
     }
 }
-
-/// <summary>
-/// Placeholder until chunk jobs are implemented.
-/// Does nothing — chunk work is still handled by the existing background thread path.
-/// </summary>
-public sealed class NullChunkWorkDispatcher : IChunkWorkDispatcher
-{
-    public Task DispatchAsync(ChunkWorkItem item, CancellationToken ct)
-        => Task.CompletedTask;
-}

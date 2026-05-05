@@ -14,7 +14,6 @@ public sealed class ChunkTessellationDispatcher : IChunkWorkDispatcher
     private const int BufferedChunkVolume = BufferedChunkEdge * BufferedChunkEdge * BufferedChunkEdge;
 
     private readonly IVoxelMap _voxelMap;
-    private readonly IBlockRegistry _blockRegistry;
     private readonly IMeshBatcher _meshBatcher;
     private readonly ILightManager _lightManager;
     private readonly ITerrainChunkTesselator _tesselator;
@@ -27,13 +26,11 @@ public sealed class ChunkTessellationDispatcher : IChunkWorkDispatcher
     public ChunkTessellationDispatcher(
         IVoxelMap voxelMap,
         ITerrainChunkTesselator tesselator,
-        IBlockRegistry blockRegistry,
         ILightManager lightManager,
         IMeshBatcher meshBatcher)
     {
         _voxelMap = voxelMap;
         _tesselator = tesselator;
-        _blockRegistry = blockRegistry;
         _meshBatcher = meshBatcher;
         _lightManager = lightManager;
 
@@ -56,10 +53,10 @@ public sealed class ChunkTessellationDispatcher : IChunkWorkDispatcher
     {
         if (!_started) return Task.CompletedTask;
 
-        switch (item.Type)
+        switch (item)
         {
-            case ChunkWorkType.Tessellate:
-                TessellateChunk(item.ChunkX, item.ChunkY, item.ChunkZ);
+            case TessellationChunkWorkItem tessellationItem:
+                TessellateChunk(tessellationItem);
                 break;
         }
 
@@ -68,19 +65,20 @@ public sealed class ChunkTessellationDispatcher : IChunkWorkDispatcher
 
     // ── Tessellation (runs on worker thread) ──────────────────────────────────
 
-    private void TessellateChunk(int x, int y, int z)
+    private void TessellateChunk(TessellationChunkWorkItem item)
     {
-        int mxc = _voxelMap.Mapsizexchunks;
-        int myc = _voxelMap.Mapsizeychunks;
-
-        Chunk c = _voxelMap.Chunks[VectorIndexUtil.Index3d(x, y, z, mxc, myc)];
+        Chunk c = item.Chunk;
         if (c == null) return;
 
-        c.Rendered ??= new RenderedChunk();
+        c.Rendered ??= new RenderedChunk();     // safe: only ever set from null on one thread
+                                                // (main thread pre-allocated it before enqueue;
+                                                //  see design note below)
 
         ChunkTessellationContext ctx = _context.Value;
 
-        GetExtendedChunk(ctx, x, y, z);
+        // Block data read — safe: only the main thread writes block IDs,
+        // and it does so between frames, not mid-tessellation.
+        GetExtendedChunk(ctx, item.ChunkX, item.ChunkY, item.ChunkZ);
 
         int meshCount = 0;
         VerticesIndicesToLoad[] meshData = null;
@@ -88,10 +86,13 @@ public sealed class ChunkTessellationDispatcher : IChunkWorkDispatcher
 
         if (!IsUniformChunk(ctx.CurrentChunk, BufferedChunkVolume))
         {
-            CalculateShadows(ctx, x, y, z);
+            // Copy the pre-computed lighting snapshot into the per-thread shadow buffer.
+            // item.ShadowBuffer is read-only from the worker's perspective.
+            item.ShadowBuffer.AsSpan(0, BufferedChunkVolume)
+                             .CopyTo(ctx.CurrentChunkShadows.AsSpan(0, BufferedChunkVolume));
 
             VerticesIndicesToLoad[] meshes = _tesselator.MakeChunk(
-                x, y, z,
+                item.ChunkX, item.ChunkY, item.ChunkZ,
                 _lightManager.LightLevels,
                 ctx,
                 out meshCount);
@@ -105,74 +106,12 @@ public sealed class ChunkTessellationDispatcher : IChunkWorkDispatcher
             }
         }
 
-        meshData ??= [];
+        // Shadow buffer is no longer needed — return it unconditionally here.
+        // This is safe even if tessellation was skipped (uniform chunk path above).
+        if (item.ShadowBufferRented)
+            ArrayPool<byte>.Shared.Return(item.ShadowBuffer);
 
-        // Worker thread: just stage it, no OpenGL, no queue injection needed
-        _meshBatcher.StageChunk(c, meshData, meshCount, dataRented);
-    }
-
-    // ── Shadow / lighting (worker thread) ─────────────────────────────────────
-
-    private void CalculateShadows(ChunkTessellationContext ctx, int cx, int cy, int cz)
-    {
-        if (ctx.BlockTypeCacheDirty)
-        {
-            foreach ((int id, BlockType? blockType) in _blockRegistry.BlockTypes)
-            {
-                ctx.ShadowLightRadius[id] = blockType.LightRadius;
-                ctx.ShadowIsTransparent[id] = IsTransparentForLight(id);
-            }
-            ctx.BlockTypeCacheDirty = false;
-        }
-
-        bool anyBaseLightChanged = false;
-
-        for (int xx = 0; xx < 3; xx++)
-            for (int yy = 0; yy < 3; yy++)
-                for (int zz = 0; zz < 3; zz++)
-                {
-                    int cx1 = cx + xx - 1;
-                    int cy1 = cy + yy - 1;
-                    int cz1 = cz + zz - 1;
-                    if (!_voxelMap.IsValidChunkPos(cx1, cy1, cz1)) continue;
-
-                    int nIdx = VectorIndexUtil.Index3d(
-                        cx1, cy1, cz1,
-                        _voxelMap.Mapsizexchunks,
-                        _voxelMap.Mapsizeychunks);
-
-                    Chunk neighbour = _voxelMap.Chunks[nIdx];
-                    if (neighbour == null) continue;
-
-                    if (neighbour.BaseLightDirty)
-                    {
-                        ctx.LightBase.CalculateChunkBaseLight(
-                            cx1, cy1, cz1,
-                            ctx.ShadowLightRadius, ctx.ShadowIsTransparent);
-                        neighbour.BaseLightDirty = false;
-                        anyBaseLightChanged = true;
-                    }
-                }
-
-        RenderedChunk rendered = _voxelMap
-            .GetChunk(cx * _chunkSize, cy * _chunkSize, cz * _chunkSize).Rendered;
-
-        if (rendered.Light == null)
-        {
-            rendered.Light = ArrayPool<byte>.Shared.Rent(BufferedChunkVolume);
-            rendered.LightRented = true;
-            rendered.Light.AsSpan(0, BufferedChunkVolume).Fill(15);
-            anyBaseLightChanged = true;
-        }
-
-        if (anyBaseLightChanged)
-        {
-            ctx.LightBetweenChunks.CalculateLightBetweenChunks(cx, cy, cz,
-                ctx.ShadowLightRadius, ctx.ShadowIsTransparent);
-        }
-
-        rendered.Light.AsSpan(0, BufferedChunkVolume)
-                      .CopyTo(ctx.CurrentChunkShadows.AsSpan(0, BufferedChunkVolume));
+        _meshBatcher.StageChunk(c, meshData ?? [], meshCount, dataRented);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -191,12 +130,6 @@ public sealed class ChunkTessellationDispatcher : IChunkWorkDispatcher
         for (int i = 1; i < length; i++)
             if (chunk[i] != first) return false;
         return true;
-    }
-
-    public bool IsTransparentForLight(int blockId)
-    {
-        BlockType b = _blockRegistry.BlockTypes[blockId];
-        return b.DrawType is not DrawType.Solid and not DrawType.ClosedDoor;
     }
 
     private static VerticesIndicesToLoad CloneVerticesIndicesToLoad(VerticesIndicesToLoad source)
@@ -239,3 +172,24 @@ public readonly record struct TerrainRendererRedraw(
     VerticesIndicesToLoad[] Data,
     int DataCount,
     bool DataRented);
+
+/// <summary>
+/// Tessellation-specific work item. Carries the pre-baked shadow snapshot
+/// and the chunk reference so the worker thread never touches lighting state.
+/// <see cref="ChunkWorkType.Tessellate"/> is baked into the base constructor
+/// call — a mismatched Type is structurally impossible.
+/// </summary>
+public record TessellationChunkWorkItem(
+    int ChunkX,
+    int ChunkY,
+    int ChunkZ,
+    Chunk Chunk,
+    /// <summary>
+    /// ArrayPool-rented 18³ (5 832-byte) snapshot of rendered.Light,
+    /// computed on the main thread before enqueue. Read-only on the worker.
+    /// The worker returns it to the pool after MakeChunk, in all paths.
+    /// </summary>
+    byte[] ShadowBuffer,
+    bool ShadowBufferRented,
+    TaskCompletionSource? Completion = null
+) : ChunkWorkItem(ChunkX, ChunkY, ChunkZ, ChunkWorkType.Tessellate, Completion);
