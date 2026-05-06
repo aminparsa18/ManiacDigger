@@ -41,12 +41,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Include="..\Packet.Serializer.ci.cs">
-			<Link>Common\Packet.Serializer.ci.cs</Link>
-		</Compile>
-	</ItemGroup>
-
-	<ItemGroup>
 		<RuntimeHostConfigurationOption Include="System.Runtime.InteropServices.NativeLibrary.AlwaysGenerateEvents" Value="true" />
 	</ItemGroup>
 

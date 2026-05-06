@@ -1,7 +1,5 @@
 ﻿#if DEBUG
 using System.Collections.Concurrent;
-using System.Threading;
-using Microsoft.Extensions.Logging;
 
 namespace ManicDigger;
 

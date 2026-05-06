@@ -191,7 +191,6 @@ public class Program
         services.AddSingleton<ServerSystemBootstraper>();
 
         services.AddWorkerInfrastructure();
-        services.AddSingleton<WorkerHostAccessor>();
 
     }
 

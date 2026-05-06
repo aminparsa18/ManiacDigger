@@ -71,5 +71,5 @@ public interface IMeshBatcher
     void StageUnload(Chunk chunk);
 
     // Called from main thread at start of each frame — drains staged ops, uploads to GPU
-    void FlushPendingUploads(int maxUploadsPerFrame = 8);
+    void FlushPendingUploads(int maxUploadsPerFrame = 512);
 }

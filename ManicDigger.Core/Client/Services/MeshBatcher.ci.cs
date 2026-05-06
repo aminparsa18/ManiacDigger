@@ -15,8 +15,8 @@ public class MeshBatcher : IMeshBatcher
     /// <summary>Maximum number of distinct textures that can be batched.</summary>
     private const int MaxTextures = 10;
       
-    private readonly IOpenGlService _platform;
-    private readonly IMeshDrawer meshDrawer;
+    private readonly IOpenGlService _openGlService;
+    private readonly IMeshDrawer _meshDrawer;
     private readonly IGameLogger _gameLogger;
 
     /// <summary>
@@ -52,8 +52,8 @@ public class MeshBatcher : IMeshBatcher
     /// </summary>
     public MeshBatcher(IOpenGlService platform, IMeshDrawer meshDrawer, IGameLogger gameLogger)
     {
-        _platform = platform;
-        this.meshDrawer = meshDrawer;
+        _openGlService = platform;
+        this._meshDrawer = meshDrawer;
         _gameLogger = gameLogger;
         _models = new BatchEntry[ModelsMax];
 
@@ -84,14 +84,10 @@ public class MeshBatcher : IMeshBatcher
         _models[id] = new BatchEntry
         {
             IndicesCount = modelData.IndicesCount,
-            CenterX = centerX,
-            CenterY = centerY,
-            CenterZ = centerZ,
-            Radius = radius,
             Transparent = transparent,
             Empty = false,
             Texture = GetTextureId(texture),
-            Model = _platform.CreateModel(modelData),
+            Model = _openGlService.CreateModel(modelData),
         };
 
         return id;
@@ -100,7 +96,7 @@ public class MeshBatcher : IMeshBatcher
     /// <inheritdoc/>
     public void Remove(int id)
     {
-        _platform.DeleteModel(_models[id].Model);
+        _openGlService.DeleteModel(_models[id].Model);
         _models[id] = _models[id] with { Empty = true };
         _freeSlots.Push(id);
     }
@@ -120,14 +116,14 @@ public class MeshBatcher : IMeshBatcher
 
             if (BindTexture)
             {
-                _platform.BindTexture2d(_glTextures[i]);
+                _openGlService.BindTexture2d(_glTextures[i]);
             }
 
-            meshDrawer.DrawModels(_tocallSolid[i], _tocallSolid[i].Count);
+            _meshDrawer.DrawModels(_tocallSolid[i], _tocallSolid[i].Count);
         }
 
         // Transparent pass: back-face culling disabled so water surfaces etc. render correctly.
-        _platform.GlDisableCullFace();
+        _openGlService.GlDisableCullFace();
         for (int i = 0; i < _glTextures.Count; i++)
         {
             if (_tocallTransparent[i].Count == 0)
@@ -137,13 +133,13 @@ public class MeshBatcher : IMeshBatcher
 
             if (BindTexture)
             {
-                _platform.BindTexture2d(_glTextures[i]);
+                _openGlService.BindTexture2d(_glTextures[i]);
             }
 
-            meshDrawer.DrawModels(_tocallTransparent[i], _tocallTransparent[i].Count);
+            _meshDrawer.DrawModels(_tocallTransparent[i], _tocallTransparent[i].Count);
         }
 
-        _platform.GlEnableCullFace();
+        _openGlService.GlEnableCullFace();
     }
 
     /// <summary>
@@ -331,18 +327,6 @@ public readonly record struct BatchEntry
 
     /// <summary>Total index count of the model's geometry (triangle count × 3).</summary>
     public int IndicesCount { get; init; }
-
-    /// <summary>World-space X coordinate of the model's bounding sphere centre.</summary>
-    public float CenterX { get; init; }
-
-    /// <summary>World-space Y coordinate of the model's bounding sphere centre.</summary>
-    public float CenterY { get; init; }
-
-    /// <summary>World-space Z coordinate of the model's bounding sphere centre.</summary>
-    public float CenterZ { get; init; }
-
-    /// <summary>Radius of the model's bounding sphere, used for frustum culling.</summary>
-    public float Radius { get; init; }
 
     /// <summary>
     /// Whether this model belongs to the transparent render pass.
