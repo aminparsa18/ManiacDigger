@@ -10,13 +10,13 @@ namespace ManicDigger;
 /// <remarks>
 /// Call <see cref="Play"/> to start the thread. The thread exits naturally when
 /// a non-looping clip finishes, when <see cref="Stop"/> is called, or when the
-/// application signals <see cref="IGameExit.Exit"/>.
+/// application signals <see cref="IGameExitService.Exit"/>.
 /// </remarks>
 /// <param name="gameExit">Application-exit signal; terminates the audio thread when raised.</param>
 /// <param name="data">Decoded PCM data to play back.</param>
-public sealed class AudioTask(IGameExit gameExit, AudioData data)
+public sealed class AudioTask(IGameExitService gameExit, AudioData data)
 {
-    private readonly IGameExit _gameExit = gameExit;
+    private readonly IGameExitService _gameExit = gameExit;
     private readonly AudioData _data = data;
 
     private volatile bool _started;

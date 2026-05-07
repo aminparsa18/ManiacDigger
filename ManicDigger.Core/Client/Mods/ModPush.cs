@@ -17,34 +17,34 @@ public class ModPush : ModBase
         Game.PushY = 0;
         Game.PushZ = 0;
 
-        float pX = Game.Player.position.x;
-        float pY = Game.Player.position.y;
-        float pZ = Game.Player.position.z;
+        float pX = Game.Player.Position.X;
+        float pY = Game.Player.Position.Y;
+        float pZ = Game.Player.Position.Z;
         for (int i = 0; i < Game.Entities.Count; i++)
         {
             Entity entity = Game.Entities[i];
-            if (entity?.push == null)
+            if (entity?.Push == null)
             {
                 continue;
             }
 
-            if (entity.networkPosition != null && !entity.networkPosition.PositionLoaded)
+            if (entity.NetworkPosition != null && !entity.NetworkPosition.PositionLoaded)
             {
                 continue;
             }
 
-            float kX = EncodingHelper.DecodeFixedPoint(entity.push.XFloat);
-            float kY = EncodingHelper.DecodeFixedPoint(entity.push.ZFloat);
-            float kZ = EncodingHelper.DecodeFixedPoint(entity.push.YFloat);
+            float kX = EncodingHelper.DecodeFixedPoint(entity.Push.XFloat);
+            float kY = EncodingHelper.DecodeFixedPoint(entity.Push.ZFloat);
+            float kZ = EncodingHelper.DecodeFixedPoint(entity.Push.YFloat);
 
-            if (entity.push.IsRelativeToPlayerPosition != 0)
+            if (entity.Push.IsRelativeToPlayerPosition != 0)
             {
                 kX += pX;
                 kY += pY;
                 kZ += pZ;
             }
 
-            if (Vector3.Distance(new Vector3(kX, kY, kZ), new Vector3(pX, pY, pZ)) < EncodingHelper.DecodeFixedPoint(entity.push.RangeFloat))
+            if (Vector3.Distance(new Vector3(kX, kY, kZ), new Vector3(pX, pY, pZ)) < EncodingHelper.DecodeFixedPoint(entity.Push.RangeFloat))
             {
                 Game.PushX += pX - kX;
                 Game.PushY += pY - kY;

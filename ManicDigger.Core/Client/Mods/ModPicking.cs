@@ -103,7 +103,7 @@ public class ModPicking : ModBase
     /// <inheritdoc/>
     public override void OnFrame(float deltaTime)
     {
-        if (Game.GuiState == GuiState.Normal)
+        if (Game.GuiState == GameState.Normal)
         {
             UpdatePicking();
         }
@@ -116,7 +116,7 @@ public class ModPicking : ModBase
     /// <inheritdoc/>
     public override void OnMouseUp(MouseEventArgs args)
     {
-        if (Game.GuiState == GuiState.Normal)
+        if (Game.GuiState == GameState.Normal)
         {
             UpdatePicking();
         }
@@ -125,7 +125,7 @@ public class ModPicking : ModBase
     /// <inheritdoc/>
     public override void OnMouseDown(MouseEventArgs args)
     {
-        if (Game.GuiState == GuiState.Normal)
+        if (Game.GuiState == GameState.Normal)
         {
             UpdatePicking();
             UpdateEntityHit();
@@ -268,9 +268,9 @@ public class ModPicking : ModBase
         }
 
         bool playerTileEmpty = Game.IsTileEmptyForPhysics(
-            (int)Game.Player.position.x, (int)Game.Player.position.z, (int)(Game.Player.position.y + 0.5f));
+            (int)Game.Player.Position.X, (int)Game.Player.Position.Z, (int)(Game.Player.Position.Y + 0.5f));
         bool playerTileEmptyClose = Game.IsTileEmptyForPhysicsClose(
-            (int)Game.Player.position.x, (int)Game.Player.position.z, (int)(Game.Player.position.y + 0.5f));
+            (int)Game.Player.Position.X, (int)Game.Player.Position.Z, (int)(Game.Player.Position.Y + 0.5f));
 
         BlockPosSide pick0 = new();
         if (pick2count > 0 && ((pickDistanceOk && (playerTileEmpty || playerTileEmptyClose)) || Game.OverheadCamera))
@@ -589,8 +589,8 @@ public class ModPicking : ModBase
         }
 
         // Apply recoil.
-        Game.Player.position.rotx -= random.Next() * Game.CurrentRecoil();
-        Game.Player.position.roty += (random.Next() * Game.CurrentRecoil() * 2) - Game.CurrentRecoil();
+        Game.Player.Position.RotX -= random.Next() * Game.CurrentRecoil();
+        Game.Player.Position.RotY += (random.Next() * Game.CurrentRecoil() * 2) - Game.CurrentRecoil();
 
         // Burst fire.
         bulletsShot++;
@@ -609,24 +609,24 @@ public class ModPicking : ModBase
         ArraySegment<BlockPosSide> pick2, int pick2count,
         bool isGrenade, ref Packet_ClientShot shot)
     {
-        float eyeX = Game.Player.position.x, eyeY = Game.Player.position.y, eyeZ = Game.Player.position.z;
+        float eyeX = Game.Player.Position.X, eyeY = Game.Player.Position.Y, eyeZ = Game.Player.Position.Z;
 
         for (int i = 0; i < Game.Entities.Count; i++)
         {
             Entity entity = Game.Entities[i];
-            if (entity?.drawModel == null || entity.networkPosition == null)
+            if (entity?.DrawModel == null || entity.NetworkPosition == null)
             {
                 continue;
             }
 
-            if (!entity.networkPosition.PositionLoaded)
+            if (!entity.NetworkPosition.PositionLoaded)
             {
                 continue;
             }
 
-            float fx = entity.position.x, fy = entity.position.y, fz = entity.position.z;
-            float headSize = (entity.drawModel.ModelHeight - entity.drawModel.eyeHeight) * 2;
-            float bodyH = entity.drawModel.ModelHeight - headSize;
+            float fx = entity.Position.X, fy = entity.Position.Y, fz = entity.Position.Z;
+            float headSize = (entity.DrawModel.ModelHeight - entity.DrawModel.EyeHeight) * 2;
+            float bodyH = entity.DrawModel.ModelHeight - headSize;
             const float r = 0.35f;
 
             Box3 bodyBox = new(new Vector3(fx - r, fy, fz - r), new Vector3(fx + r, fy + bodyH, fz + r));
@@ -657,8 +657,8 @@ public class ModPicking : ModBase
             {
                 Entity blood = new()
                 {
-                    sprite = new Sprite { positionX = hit.Value.X, positionY = hit.Value.Y, positionZ = hit.Value.Z, image = "blood.png" },
-                    expires = Expires.Create(0.2f)
+                    Sprite = new Sprite { PositionX = hit.Value.X, PositionY = hit.Value.Y, PositionZ = hit.Value.Z, Image = "blood.png" },
+                    Expires = Expiry.Create(0.2f)
                 };
                 Game.EntityAddLocal(blood);
             }
@@ -689,24 +689,24 @@ public class ModPicking : ModBase
 
         Entity grenadeEntity = new()
         {
-            sprite = new Sprite
+            Sprite = new Sprite
             {
-                image = "ChemicalGreen.png",
-                size = 14,
-                animationcount = 0,
-                positionX = pick.Start[0],
-                positionY = pick.Start[1],
-                positionZ = pick.Start[2]
+                Image = "ChemicalGreen.png",
+                Size = 14,
+                AnimationCount = 0,
+                PositionX = pick.Start[0],
+                PositionY = pick.Start[1],
+                PositionZ = pick.Start[2]
             },
-            grenade = new Grenade
+            Grenade = new Grenade
             {
-                velocityX = vX,
-                velocityY = vY,
-                velocityZ = vZ,
-                block = item.BlockId,
-                sourcePlayer = Game.LocalPlayerId
+                VelocityX = vX,
+                VelocityY = vY,
+                VelocityZ = vZ,
+                Block = item.BlockId,
+                SourcePlayer = Game.LocalPlayerId
             },
-            expires = Expires.Create(fuseRemaining)
+            Expires = Expiry.Create(fuseRemaining)
         };
         Game.EntityAddLocal(grenadeEntity);
     }
@@ -884,15 +884,15 @@ public class ModPicking : ModBase
 
             Game.EntityAddLocal(new Entity
             {
-                sprite = new Sprite
+                Sprite = new Sprite
                 {
-                    positionX = cx + ox,
-                    positionY = cy + oy,
-                    positionZ = cz + oz,
-                    image = "Gray.png",
-                    size = size
+                    PositionX = cx + ox,
+                    PositionY = cy + oy,
+                    PositionZ = cz + oz,
+                    Image = "Gray.png",
+                    Size = size
                 },
-                expires = Expires.Create(life)
+                Expires = Expiry.Create(life)
             });
         }
     }
@@ -924,22 +924,22 @@ public class ModPicking : ModBase
                 p.VY -= ParticleGravity * dt;
 
                 // Euler integration.
-                p.Ent.sprite.positionX += p.VX * dt;
-                p.Ent.sprite.positionY += p.VY * dt;
-                p.Ent.sprite.positionZ += p.VZ * dt;
+                p.Ent.Sprite.PositionX += p.VX * dt;
+                p.Ent.Sprite.PositionY += p.VY * dt;
+                p.Ent.Sprite.PositionZ += p.VZ * dt;
 
                 // ── Ground detection ─────────────────────────────────────────
                 // SampleGroundY reads the voxel map to find the actual terrain
                 // surface, so particles land on the real block geometry rather
                 // than an arbitrary flat plane.
                 float groundY = SampleGroundY(
-                    p.Ent.sprite.positionX,
-                    p.Ent.sprite.positionY,
-                    p.Ent.sprite.positionZ);
+                    p.Ent.Sprite.PositionX,
+                    p.Ent.Sprite.PositionY,
+                    p.Ent.Sprite.PositionZ);
 
-                if (p.Ent.sprite.positionY < groundY)
+                if (p.Ent.Sprite.PositionY < groundY)
                 {
-                    p.Ent.sprite.positionY = groundY;
+                    p.Ent.Sprite.PositionY = groundY;
 
                     float bounceSpeed = MathF.Abs(p.VY) * ParticleBounce;
 
@@ -1044,15 +1044,15 @@ public class ModPicking : ModBase
         // ── Layer 1: impact flash ─────────────────────────────────────────────
         Game.EntityAddLocal(new Entity
         {
-            sprite = new Sprite
+            Sprite = new Sprite
             {
-                positionX = cx,
-                positionY = cy,
-                positionZ = cz,
-                image = GetParticleTexture(blockType),   // replace with block-coloured texture later
-                size = 22
+                PositionX = cx,
+                PositionY = cy,
+                PositionZ = cz,
+                Image = GetParticleTexture(blockType),   // replace with block-coloured texture later
+                Size = 22
             },
-            expires = Expires.Create(0.06f)
+            Expires = Expiry.Create(0.06f)
         });
 
         // ── Layer 2: physics particles ────────────────────────────────────────
@@ -1075,15 +1075,15 @@ public class ModPicking : ModBase
 
             Entity e = new()
             {
-                sprite = new Sprite
+                Sprite = new Sprite
                 {
-                    positionX = cx + ox,
-                    positionY = cy + oy,
-                    positionZ = cz + oz,
-                    image = GetParticleTexture(blockType),
-                    size = size
+                    PositionX = cx + ox,
+                    PositionY = cy + oy,
+                    PositionZ = cz + oz,
+                    Image = GetParticleTexture(blockType),
+                    Size = size
                 },
-                expires = Expires.Create(life)
+                Expires = Expiry.Create(life)
             };
             Game.EntityAddLocal(e);
 
@@ -1224,34 +1224,34 @@ public class ModPicking : ModBase
         Game.SelectedEntityId = -1;
         Game.CurrentlyAttackedEntity = -1;
 
-        float eyeX = Game.Player.position.x, eyeY = Game.Player.position.y, eyeZ = Game.Player.position.z;
+        float eyeX = Game.Player.Position.X, eyeY = Game.Player.Position.Y, eyeZ = Game.Player.Position.Z;
 
         for (int i = 0; i < Game.Entities.Count; i++)
         {
             Entity entity = Game.Entities[i];
-            if (entity?.drawModel == null || i == Game.LocalPlayerId)
+            if (entity?.DrawModel == null || i == Game.LocalPlayerId)
             {
                 continue;
             }
 
-            if (entity.networkPosition == null || !entity.networkPosition.PositionLoaded)
+            if (entity.NetworkPosition == null || !entity.NetworkPosition.PositionLoaded)
             {
                 continue;
             }
 
-            if (!entity.usable)
+            if (!entity.IsUsable)
             {
                 continue;
             }
 
-            float fx = entity.position.x, fy = entity.position.y, fz = entity.position.z;
-            if (Vector3.Distance(new Vector3(fx, fy, fz), new Vector3(Game.Player.position.x, Game.Player.position.y, Game.Player.position.z)) > 5)
+            float fx = entity.Position.X, fy = entity.Position.Y, fz = entity.Position.Z;
+            if (Vector3.Distance(new Vector3(fx, fy, fz), new Vector3(Game.Player.Position.X, Game.Player.Position.Y, Game.Player.Position.Z)) > 5)
             {
                 continue;
             }
 
             const float r = 0.35f;
-            float h = entity.drawModel.ModelHeight;
+            float h = entity.DrawModel.ModelHeight;
             Box3 bodyBox = new(new Vector3(fx - r, fy, fz - r), new Vector3(fx + r, fy + h, fz + r));
 
             Vector3? hit = Intersection.CheckLineBoxExact(pick, bodyBox);

@@ -22,7 +22,7 @@ public class ModFallDamageToPlayer : ModBase
 
     public override void OnUpdate(float args)
     {
-        if (Game.GuiState == GuiState.MapLoading)
+        if (Game.GuiState == GameState.MapLoading)
         {
             return;
         }

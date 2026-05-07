@@ -20,7 +20,7 @@ public class ModGuiPlayerStats : ModBase
 
     public override void OnRender2d(float deltaTime)
     {
-        if (Game.GuiState == GuiState.MapLoading || Game.PlayerStats == null)
+        if (Game.GuiState == GameState.MapLoading || Game.PlayerStats == null)
         {
             return;
         }

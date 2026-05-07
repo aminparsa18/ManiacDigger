@@ -10,13 +10,13 @@ public class ClientPacketHandlerEntityDespawn(IGameService gameService, IGame ga
         Entity entity = game.Entities[id];
 
         // Clean up a downloaded player skin if one was loaded for this entity.
-        if (entity?.drawModel?.DownloadSkin == true)
+        if (entity?.DrawModel?.DownloadSkin == true)
         {
-            int currentTex = entity.drawModel.CurrentTexture;
+            int currentTex = entity.DrawModel.CurrentTexture;
             if (currentTex > 0 && currentTex != game.GetTexture("mineplayer.png"))
             {
-                entity.drawModel.CurrentTexture = -1;
-                game.DeleteTexture(entity.drawName.Name);
+                entity.DrawModel.CurrentTexture = -1;
+                game.DeleteTexture(entity.DrawName.Name);
             }
         }
 

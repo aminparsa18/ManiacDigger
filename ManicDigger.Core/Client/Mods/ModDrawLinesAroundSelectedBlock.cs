@@ -37,8 +37,8 @@ public class ModDrawLinesAroundSelectedBlock : ModBase
             return;
         }
 
-        float height = e.drawModel.ModelHeight;
-        lines.Draw(e.position.x, e.position.y + (height / 2), e.position.z,
+        float height = e.DrawModel.ModelHeight;
+        lines.Draw(e.Position.X, e.Position.Y + (height / 2), e.Position.Z,
             SelectionScale, SelectionScale * height, SelectionScale);
     }
 

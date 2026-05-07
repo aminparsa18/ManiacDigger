@@ -585,7 +585,7 @@ public class ModGuiEscapeMenu : ModBase
         // handles). Now explicitly delete each texture before clearing the dictionary.
         foreach (CachedTexture ct in Game.CachedTextTextures.Values)
         {
-            openGlService.GLDeleteTexture(ct.textureId);
+            openGlService.GLDeleteTexture(ct.TextureId);
         }
 
         Game.CachedTextTextures.Clear();
@@ -632,7 +632,7 @@ public class ModGuiEscapeMenu : ModBase
             SetEscapeMenuState(EscapeMenuState.Main);
         }
 
-        if (Game.GuiState != GuiState.EscapeMenu)
+        if (Game.GuiState != GameState.EscapeMenu)
         {
             return;
         }

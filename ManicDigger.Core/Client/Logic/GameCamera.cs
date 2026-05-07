@@ -27,7 +27,7 @@ public partial class Game
                 OverheadCamera = true;
                 SetFreeMouse(true);
                 EnableTppView = true;
-                PlayerDestination = new Vector3(Player.position.x, Player.position.y, Player.position.z);
+                PlayerDestination = new Vector3(Player.Position.X, Player.Position.Y, Player.Position.Z);
                 break;
         }
     }
@@ -52,7 +52,7 @@ public partial class Game
                 OverheadCamera = true;
                 SetFreeMouse(true);
                 EnableTppView = true;
-                PlayerDestination = new Vector3(Player.position.x, Player.position.y, Player.position.z);
+                PlayerDestination = new Vector3(Player.Position.X, Player.Position.Y, Player.Position.Z);
                 break;
 
             case CameraType.Overhead:

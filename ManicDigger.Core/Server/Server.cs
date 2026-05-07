@@ -5,13 +5,12 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using static ManicDigger.Mods.ModNetworkProcess;
 using static ManicDigger.ServerPacketService;
 
 public partial class Server : IServer, IDropItem
 {
     private readonly IGameService gameplatform;
-    private readonly IGameExit _gameExit;
+    private readonly IGameExitService _gameExit;
     private readonly IBlockRegistry _blockRegistry;
     private readonly IAssetManager _assetManager;
     private readonly IModEvents _modEvents;
@@ -21,16 +20,16 @@ public partial class Server : IServer, IDropItem
     private readonly ILanguageService _languageService;
     private readonly IServerConfig _config;
     private readonly ISaveGameService _saveGameService;
-    private readonly PlayerStatusService _playerStatusService;
+    private readonly IPlayerStatusService _playerStatusService;
     private readonly IClientRegistry _serverClientService;
     private readonly IServerPacketService _serverPacketService;
     private readonly IGameLogger _gameLogger;
 
     public List<ServerSystem> Systems { get; set; }
 
-    public Server(IGameExit gameExit, IGameService gameService, IBlockRegistry blockRegistry, IChunkDbCompressed chunkDb, ILanguageService languageService,
+    public Server(IGameExitService gameExit, IGameService gameService, IBlockRegistry blockRegistry, IChunkDbCompressed chunkDb, ILanguageService languageService,
     IAssetManager assetManager, IModEvents modEvents,ICompression compression, IServerMapStorage serverMapStorage, IServerPacketService serverPacketService,
-    IServerConfig config, ISaveGameService saveGameService, PlayerStatusService playerStatusService, IClientRegistry serverClientService, IGameLogger gameLogger)
+    IServerConfig config, ISaveGameService saveGameService, IPlayerStatusService playerStatusService, IClientRegistry serverClientService, IGameLogger gameLogger)
     {
         gameplatform = gameService;
         _gameExit = gameExit;

@@ -127,23 +127,23 @@ public class ModRail : ModBase
             return;
         }
 
-        localMinecart = new Entity { minecart = new Minecart() };
+        localMinecart = new Entity { Minecart = new Minecart() };
         Game.EntityAddLocal(localMinecart);
     }
 
     /// <summary>Copies current rail state onto the minecart entity for rendering.</summary>
     private void SyncMinecartEntity()
     {
-        localMinecart.minecart.Enabled = railriding;
+        localMinecart.Minecart.Enabled = railriding;
         if (!railriding)
         {
             return;
         }
 
-        Minecart m = localMinecart.minecart;
-        m.PositionX = localMinecart.position?.x ?? 0;
-        m.PositionY = localMinecart.position?.y ?? 0;
-        m.PositionZ = localMinecart.position?.z ?? 0;
+        Minecart m = localMinecart.Minecart;
+        m.PositionX = localMinecart.Position?.X ?? 0;
+        m.PositionY = localMinecart.Position?.Y ?? 0;
+        m.PositionZ = localMinecart.Position?.Z ?? 0;
         m.Direction = currentdirection;
         m.LastDirection = lastdirection;
         m.Progress = currentrailblockprogress;
@@ -159,9 +159,9 @@ public class ModRail : ModBase
         Game.EnableMove = false;
 
         Vector3 railPos = CurrentRailPos();
-        Game.Player.position.x = railPos.X;
-        Game.Player.position.y = railPos.Y;
-        Game.Player.position.z = railPos.Z;
+        Game.Player.Position.X = railPos.X;
+        Game.Player.Position.Y = railPos.Y;
+        Game.Player.Position.Z = railPos.Z;
 
         currentrailblockprogress += currentvehiclespeed * dt;
 
@@ -272,7 +272,7 @@ public class ModRail : ModBase
         else if (railriding)
         {
             ExitVehicle();
-            Game.Player.position.y += 0.7f;
+            Game.Player.Position.Y += 0.7f;
         }
     }
 
@@ -283,9 +283,9 @@ public class ModRail : ModBase
     /// </summary>
     private void TryEnterMinecart()
     {
-        currentrailblockX = (int)Game.Player.position.x;
-        currentrailblockY = (int)Game.Player.position.z;
-        currentrailblockZ = (int)Game.Player.position.y - 1;
+        currentrailblockX = (int)Game.Player.Position.X;
+        currentrailblockY = (int)Game.Player.Position.Z;
+        currentrailblockZ = (int)Game.Player.Position.Y - 1;
         if (!_voxelMap.IsValidPos(currentrailblockX, currentrailblockY, currentrailblockZ))
         {
             ExitVehicle();

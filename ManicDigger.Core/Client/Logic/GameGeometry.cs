@@ -308,7 +308,7 @@ public partial class Game
         for ( int i = 0; i < todrawLength; i++)
         {
             Draw2dData d = todraw[i];
-            RectangleF rect = TextureAtlas.TextureCoords2d(d.inAtlasId, GameConstants.MAX_BLOCKTYPES_SQRT);
+            RectangleF rect = TextureAtlas.TextureCoords2d(d.InAtlasId, GameConstants.MAX_BLOCKTYPES_SQRT);
 
             // Fix #1: lazily allocate each scratch slot once, then overwrite in-place.
             GeometryModel m = _batchModelScratch[count];
@@ -327,11 +327,11 @@ public partial class Game
             }
 
             FillQuadModel(m, rect.X, rect.Y, rect.Width, rect.Height,
-                d.x1, d.y1, d.width, d.height,
-                (byte)ColorUtils.ColorR(d.color),
-                (byte)ColorUtils.ColorG(d.color),
-                (byte)ColorUtils.ColorB(d.color),
-                (byte)ColorUtils.ColorA(d.color));
+                d.X1, d.Y1, d.Width, d.Height,
+                (byte)ColorUtils.ColorR(d.Color),
+                (byte)ColorUtils.ColorG(d.Color),
+                (byte)ColorUtils.ColorB(d.Color),
+                (byte)ColorUtils.ColorA(d.Color));
             count++;
         }
 
@@ -541,8 +541,8 @@ public partial class Game
             CachedTextTextures[t] = cached;
         }
 
-        cached.lastuseMilliseconds = gameService.TimeMillisecondsFromStart;
-        Draw2dTexture(cached.textureId, x, y, cached.sizeX, cached.sizeY,
+        cached.LastUseMilliseconds = gameService.TimeMillisecondsFromStart;
+        Draw2dTexture(cached.TextureId, x, y, cached.SizeX, cached.SizeY,
             null, 0, ColorUtils.ColorFromArgb(255, 255, 255, 255), enabledepthtest);
     }
 

@@ -56,7 +56,7 @@ public class ScreenManager : IScreenManager
     private int previousTouchY;
 
 
-    private readonly LoginClientCi loginClient;
+    private readonly LoginService loginClient;
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -69,7 +69,7 @@ public class ScreenManager : IScreenManager
         _gameService = platform;
         _platformOpenGl = platformOpenGl;
         _lang = languageService;
-        loginClient = new LoginClientCi();
+        loginClient = new LoginService();
         _assetManager = assetManager;
     }
 

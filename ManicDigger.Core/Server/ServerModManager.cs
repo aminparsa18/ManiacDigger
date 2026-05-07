@@ -3,18 +3,18 @@ using System.Runtime.InteropServices;
 
 namespace ManicDigger;
 
-public class ServerModManager(IGameExit gameExit, IBlockRegistry blockRegistry, IChunkDbCompressed chunkDb,
+public class ServerModManager(IGameExitService gameExit, IBlockRegistry blockRegistry, IChunkDbCompressed chunkDb,
     IServerMapStorage serverMapStorage, ILanguageService languageService, IServerConfig config, IServerPacketService serverPacketService,
-    Server server, ISaveGameService saveGameService, IClientRegistry serverClientService, PlayerStatusService playerStatusService) : IServerModManager
+    Server server, ISaveGameService saveGameService, IClientRegistry serverClientService, IPlayerStatusService playerStatusService) : IServerModManager
 {
-    private readonly IGameExit gameExit = gameExit;
+    private readonly IGameExitService gameExit = gameExit;
     private readonly IBlockRegistry _blockRegistry = blockRegistry;
     private readonly IChunkDbCompressed _chunkDb = chunkDb;
     private readonly IServerMapStorage _serverMapStorage = serverMapStorage;
     private readonly ILanguageService _languageService = languageService;
     private readonly IServerConfig _config = config;
     private readonly IClientRegistry _serverClientService = serverClientService;
-    private readonly PlayerStatusService _playerStatusService = playerStatusService;
+    private readonly IPlayerStatusService _playerStatusService = playerStatusService;
     private readonly IServerPacketService _serverPacketService = serverPacketService;
 
     public int GetMaxBlockTypes() => GameConstants.MAX_BLOCKTYPES;

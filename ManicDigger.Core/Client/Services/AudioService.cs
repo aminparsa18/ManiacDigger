@@ -10,7 +10,7 @@ namespace ManicDigger;
 /// </summary>
 public sealed class AudioService : IAudioService, IDisposable
 {
-    private readonly IGameExit _gameExit;
+    private readonly IGameExitService _gameExit;
     private readonly object _initLock = new();
     private ALDevice _device;
     private ALContext _context;
@@ -21,7 +21,7 @@ public sealed class AudioService : IAudioService, IDisposable
     /// Application-exit signal forwarded to every <see cref="AudioTask"/> so their
     /// threads terminate cleanly on shutdown.
     /// </param>
-    public AudioService(IGameExit gameExit)
+    public AudioService(IGameExitService gameExit)
     {
         _gameExit = gameExit;
     }

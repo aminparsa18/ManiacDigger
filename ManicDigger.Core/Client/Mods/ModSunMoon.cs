@@ -37,9 +37,9 @@ public class ModSunMoon(IMeshDrawer meshDrawer, ILightManager lightManager, IGam
 
         UpdateSunMoonPosition(dt);
 
-        float bodyX = (_lightManager.isNight ? _lightManager.moonPosition.X : _lightManager.sunPosition.X) + Game.Player.position.x;
-        float bodyY = (_lightManager.isNight ? _lightManager.moonPosition.Y : _lightManager.sunPosition.Y) + Game.Player.position.y;
-        float bodyZ = (_lightManager.isNight ? _lightManager.moonPosition.Z : _lightManager.sunPosition.Z) + Game.Player.position.z;
+        float bodyX = (_lightManager.isNight ? _lightManager.moonPosition.X : _lightManager.sunPosition.X) + Game.Player.Position.X;
+        float bodyY = (_lightManager.isNight ? _lightManager.moonPosition.Y : _lightManager.sunPosition.Y) + Game.Player.Position.Y;
+        float bodyZ = (_lightManager.isNight ? _lightManager.moonPosition.Z : _lightManager.sunPosition.Z) + Game.Player.Position.Z;
 
         meshDrawer.GLMatrixModeModelView();
         meshDrawer.GLPushMatrix();

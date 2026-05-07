@@ -26,7 +26,7 @@ public class ModGuiMapLoading : ModBase
 
     public override void OnRender2d(float deltaTime)
     {
-        if (Game.GuiState != GuiState.MapLoading)
+        if (Game.GuiState != GameState.MapLoading)
         {
             return;
         }

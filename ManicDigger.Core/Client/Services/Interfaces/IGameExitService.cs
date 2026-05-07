@@ -1,4 +1,4 @@
-﻿public interface IGameExit
+﻿public interface IGameExitService
 {
     bool Exit { get; set; }
 

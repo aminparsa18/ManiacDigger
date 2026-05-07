@@ -544,7 +544,7 @@ public class AdvanceWorldGenerator : IMod
     //  Chunk population
     // =========================================================================
 
-    private readonly Random rnd = new();
+    private readonly Random _rnd = new();
 
     private void PopulateChunk(PopulateChunkArgs args)
     {
@@ -559,10 +559,10 @@ public class AdvanceWorldGenerator : IMod
         int oy = args.Y * chunksize;
         int oz = args.Z * chunksize;
 
-        for (int i = 0; i < rnd.Next(30, 120); i++)
+        for (int i = 0; i < _rnd.Next(30, 120); i++)
         {
-            int x = ox + rnd.Next(chunksize);
-            int y = oy + rnd.Next(chunksize);
+            int x = ox + _rnd.Next(chunksize);
+            int y = oy + _rnd.Next(chunksize);
 
             if (!m.IsValidPos(x, y, oz))
                 continue; // skip whole column if base invalid
@@ -600,16 +600,16 @@ public class AdvanceWorldGenerator : IMod
 
     private void PlaceGrass(int x, int y, int z)
     {
-        if (rnd.Next(10) == 0)
+        if (_rnd.Next(10) == 0)
             TrySet(x, y, z + 1, BLOCK_GRASSPLANT);
     }
 
     private void PlaceDesert(int x, int y, int z)
     {
-        switch (rnd.Next(4))
+        switch (_rnd.Next(4))
         {
             case 0:
-                int h = rnd.Next(2, 5);
+                int h = _rnd.Next(2, 5);
                 for (int j = 1; j <= h; j++)
                     if (!TrySet(x, y, z + j, BLOCK_CACTUS)) break;
                 break;
@@ -621,7 +621,7 @@ public class AdvanceWorldGenerator : IMod
 
     private void PlaceSwamp(int x, int y, int z)
     {
-        if (rnd.Next(7) == 0)
+        if (_rnd.Next(7) == 0)
             TrySet(x, y, z + 1, BLOCK_GRASSPLANT);
     }
 

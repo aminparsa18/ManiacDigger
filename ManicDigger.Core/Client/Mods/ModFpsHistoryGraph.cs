@@ -162,12 +162,12 @@ public class ModFpsHistoryGraph : ModBase
         for (int i = 0; i < MaxCount; i++)
         {
             float barHeight = dtHistory[i] * 60 * GraphHeight;
-            todraw[i].x1 = posx + i;
-            todraw[i].y1 = posy - barHeight;
-            todraw[i].width = 1;
-            todraw[i].height = barHeight;
-            todraw[i].inAtlasId = -1;
-            todraw[i].color = ColorUtils.InterpolateColor((float)i / MaxCount, colors, 2);
+            todraw[i].X1 = posx + i;
+            todraw[i].Y1 = posy - barHeight;
+            todraw[i].Width = 1;
+            todraw[i].Height = barHeight;
+            todraw[i].InAtlasId = -1;
+            todraw[i].Color = ColorUtils.InterpolateColor((float)i / MaxCount, colors, 2);
         }
 
         Game.Draw2dTextures(todraw, MaxCount, whiteTexture);

@@ -8,15 +8,14 @@ public class GameWindowNative : GameWindow
         : base(
             new GameWindowSettings
             {
-
-                UpdateFrequency = 60.0, // Cap at 60 updates/sec
+                UpdateFrequency = 60.0 // Cap at 60 updates/sec
             },
             new NativeWindowSettings
             {
                 ClientSize = new Vector2i(1280, 720),
                 Title = "",
-                WindowState = WindowState.Normal,
-                Profile = ContextProfile.Compatability,
+                WindowState = WindowState.Maximized,
+                Profile = ContextProfile.Compatability
                 // APIVersion = new Version(3, 3),
             })
     {

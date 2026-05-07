@@ -46,7 +46,7 @@ public partial class Game
         _textStylesToRemove.Clear();
         foreach ((TextStyle? style, CachedTexture? tex) in CachedTextTextures)
         {
-            if ((now - tex.lastuseMilliseconds) / 1000f > 1f)
+            if ((now - tex.LastUseMilliseconds) / 1000f > 1f)
             {
                 _textStylesToRemove.Add(style);
             }
@@ -54,7 +54,7 @@ public partial class Game
 
         foreach (TextStyle key in _textStylesToRemove)
         {
-            openGlService.GLDeleteTexture(CachedTextTextures[key].textureId);
+            openGlService.GLDeleteTexture(CachedTextTextures[key].TextureId);
             CachedTextTextures.Remove(key);
         }
     }
@@ -69,9 +69,9 @@ public partial class Game
         using Bitmap bmp = TextColorRenderer.CreateTextTexture(t);
         return new CachedTexture
         {
-            sizeX = bmp.Width,
-            sizeY = bmp.Height,
-            textureId = openGlService.LoadTextureFromBitmap(bmp),
+            SizeX = bmp.Width,
+            SizeY = bmp.Height,
+            TextureId = openGlService.LoadTextureFromBitmap(bmp),
         };
     }
 

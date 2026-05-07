@@ -80,7 +80,7 @@ public class ModAutoCamera : ModBase
     private float _previousOrientationX, _previousOrientationY, _previousOrientationZ;
 
     /// <summary>Freemove level that was active before playback started, restored on stop.</summary>
-    private FreemoveLevel _previousFreemove;
+    private FreeMoveLevel _previousFreemove;
 
     // ── AVI recording ─────────────────────────────────────────────────────────
 
@@ -322,7 +322,7 @@ public class ModAutoCamera : ModBase
 
         Game.EnableDraw2d = false;
         _previousFreemove = Game.FreemoveLevel;
-        Game.FreemoveLevel = FreemoveLevel.Noclip;
+        Game.FreemoveLevel = FreeMoveLevel.Noclip;
         Game.EnableCameraControl = false;
     }
 

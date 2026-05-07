@@ -132,12 +132,12 @@
                 for (int i = 0; i < Entities.Count; i++)
                 {
                     Entity entity = Entities[i];
-                    if (entity == null || entity.drawName == null || !entity.drawName.ClientAutoComplete)
+                    if (entity == null || entity.DrawName == null || !entity.DrawName.ClientAutoComplete)
                     {
                         continue;
                     }
 
-                    AddChatLine(string.Format("{0} {1}", i.ToString(), entity.drawName.Name));
+                    AddChatLine(string.Format("{0} {1}", i.ToString(), entity.DrawName.Name));
                 }
 
                 break;

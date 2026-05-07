@@ -25,7 +25,7 @@ public class ModDrawPlayerNames : ModBase
         for (int i = 0; i < Game.Entities.Count; i++)
         {
             Entity e = Game.Entities[i];
-            if (e?.drawName == null)
+            if (e?.DrawName == null)
             {
                 continue;
             }
@@ -35,21 +35,21 @@ public class ModDrawPlayerNames : ModBase
                 continue;
             }
 
-            if (e.networkPosition != null && !e.networkPosition.PositionLoaded)
+            if (e.NetworkPosition != null && !e.NetworkPosition.PositionLoaded)
             {
                 continue;
             }
 
-            DrawName p = e.drawName;
+            DrawName p = e.DrawName;
             if (p.OnlyWhenSelected)
             {
                 continue;
             }
 
-            float posX = p.TextX + e.position.x;
-            float posY = p.TextY + e.position.y + e.drawModel.ModelHeight + NameTagHeightOffset;
-            float posZ = p.TextZ + e.position.z;
-            bool nearEnough = Vector3.Distance(new(Game.Player.position.x, Game.Player.position.y, Game.Player.position.z), new(posX, posY, posZ)) < NameTagDrawDistance;
+            float posX = p.TextX + e.Position.X;
+            float posY = p.TextY + e.Position.Y + e.DrawModel.ModelHeight + NameTagHeightOffset;
+            float posZ = p.TextZ + e.Position.Z;
+            bool nearEnough = Vector3.Distance(new(Game.Player.Position.X, Game.Player.Position.Y, Game.Player.Position.Z), new(posX, posY, posZ)) < NameTagDrawDistance;
             bool altHeld = Game.KeyboardState[KeyConstants.KeyAltLeft] || Game.KeyboardState[KeyConstants.KeyAltRight];
             if (!nearEnough && !altHeld)
             {

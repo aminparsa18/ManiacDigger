@@ -25,11 +25,11 @@ public class ClientPacketHandlerEntitySpawn : ClientPacketHandler
 
         if (id == game.LocalPlayerId)
         {
-            entity.networkPosition = null;
+            entity.NetworkPosition = null;
             game.Player = entity;
             if (!game.Spawned)
             {
-                entity.scripts[entity.scriptsCount++] = new ScriptCharacterPhysics(voxelMap, blockTypeRegistry, game);
+                entity.Scripts.Add(new ScriptCharacterPhysics(voxelMap, blockTypeRegistry, game));
                 game.MapLoaded();
                 game.Spawned = true;
             }
@@ -41,20 +41,20 @@ public class ClientPacketHandlerEntitySpawn : ClientPacketHandler
 
     /// <summary>
     /// Decodes a fixed-point <see cref="Packet_PositionAndOrientation"/> into an
-    /// <see cref="EntityPosition_"/>. Used on the spawn path (cold) and by
+    /// <see cref="EntityPosition"/>. Used on the spawn path (cold) and by
     /// <see cref="ToClientEntity"/> when initialising a newly arrived entity.
     /// Position-update packets use in-place field mutation instead — see
     /// <see cref="ClientPacketHandlerEntityPosition"/>.
     /// </summary>
-    public static EntityPosition_ ToClientEntityPosition(Packet_PositionAndOrientation pos)
+    public static EntityPosition ToClientEntityPosition(Packet_PositionAndOrientation pos)
     {
-        return new EntityPosition_
+        return new EntityPosition
         {
-            x = pos.X / 32f,
-            y = pos.Y / 32f,
-            z = pos.Z / 32f,
-            rotx = Angle256ToRad(pos.Pitch),
-            roty = Angle256ToRad(pos.Heading),
+            X = pos.X / 32f,
+            Y = pos.Y / 32f,
+            Z = pos.Z / 32f,
+            RotX = Angle256ToRad(pos.Pitch),
+            RotY = Angle256ToRad(pos.Heading),
         };
     }
 
@@ -65,22 +65,22 @@ public class ClientPacketHandlerEntitySpawn : ClientPacketHandler
     /// </summary>
     public Entity ToClientEntity(Packet_ServerEntity entity, Entity old, bool updatePosition)
     {
-        if (entity.Position != null && (old.position == null || updatePosition))
+        if (entity.Position != null && (old.Position == null || updatePosition))
         {
-            old.networkPosition = ToClientEntityPosition(entity.Position);
-            old.networkPosition.PositionLoaded = true;
-            old.networkPosition.LastUpdateMilliseconds = gameService.TimeMillisecondsFromStart;
-            old.position = ToClientEntityPosition(entity.Position);
+            old.NetworkPosition = ToClientEntityPosition(entity.Position);
+            old.NetworkPosition.PositionLoaded = true;
+            old.NetworkPosition.LastUpdateMilliseconds = gameService.TimeMillisecondsFromStart;
+            old.Position = ToClientEntityPosition(entity.Position);
         }
 
         if (entity.DrawModel != null)
         {
-            old.drawModel = new EntityDrawModel
+            old.DrawModel = new EntityDrawModel
             {
-                eyeHeight = EncodingHelper.DecodeFixedPoint(entity.DrawModel.EyeHeight),
+                EyeHeight = EncodingHelper.DecodeFixedPoint(entity.DrawModel.EyeHeight),
                 ModelHeight = EncodingHelper.DecodeFixedPoint(entity.DrawModel.ModelHeight),
                 Texture_ = entity.DrawModel.Texture_,
-                Model_ = entity.DrawModel.Model_ ?? "player.txt",
+                Model = entity.DrawModel.Model_ ?? "player.txt",
                 DownloadSkin = entity.DrawModel.DownloadSkin != 0,
             };
         }
@@ -96,7 +96,7 @@ public class ClientPacketHandlerEntitySpawn : ClientPacketHandler
                 name = string.Format("&f{0}", name);
             }
 
-            old.drawName = new DrawName
+            old.DrawName = new DrawName
             {
                 Name = name,
                 OnlyWhenSelected = entity.DrawName_.OnlyWhenSelected,
@@ -106,34 +106,34 @@ public class ClientPacketHandlerEntitySpawn : ClientPacketHandler
 
         if (entity.DrawText != null)
         {
-            old.drawText = new EntityDrawText
+            old.DrawText = new EntityDrawText
             {
-                text = entity.DrawText.Text,
-                dx = entity.DrawText.Dx / 32f,
-                dy = entity.DrawText.Dy / 32f,
-                dz = entity.DrawText.Dz / 32f,
+                Text = entity.DrawText.Text,
+                X = entity.DrawText.Dx / 32f,
+                Y = entity.DrawText.Dy / 32f,
+                Z = entity.DrawText.Dz / 32f,
             };
         }
         else
         {
-            old.drawText = null;
+            old.DrawText = null;
         }
 
-        old.push = entity.Push != null
+        old.Push = entity.Push != null
             ? new Packet_ServerExplosion { RangeFloat = entity.Push.RangeFloat }
             : null;
 
-        old.usable = entity.Usable;
+        old.IsUsable = entity.Usable;
 
-        old.drawArea = entity.DrawArea != null
+        old.DrawArea = entity.DrawArea != null
             ? new EntityDrawArea
             {
-                x = entity.DrawArea.X,
-                y = entity.DrawArea.Y,
-                z = entity.DrawArea.Z,
-                sizex = entity.DrawArea.Sizex,
-                sizey = entity.DrawArea.Sizey,
-                sizez = entity.DrawArea.Sizez,
+                X = entity.DrawArea.X,
+                Y = entity.DrawArea.Y,
+                Z = entity.DrawArea.Z,
+                SizeX = entity.DrawArea.Sizex,
+                SizeY = entity.DrawArea.Sizey,
+                SizeZ = entity.DrawArea.Sizez,
             }
             : null;
 

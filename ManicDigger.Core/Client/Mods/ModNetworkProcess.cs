@@ -499,35 +499,35 @@ public class ModNetworkProcess : ModBase
             case Packet_ServerIdEnum.Explosion:
                 Game.EntityAddLocal(new Entity
                 {
-                    expires = new Expires
+                    Expires = new Expiry
                     {
-                        timeLeft = EncodingHelper.DecodeFixedPoint(packet.Explosion.TimeFloat)
+                        TimeLeft = EncodingHelper.DecodeFixedPoint(packet.Explosion.TimeFloat)
                     },
-                    push = packet.Explosion,
+                    Push = packet.Explosion,
                 });
                 break;
 
             case Packet_ServerIdEnum.Projectile:
                 Game.EntityAddLocal(new Entity
                 {
-                    sprite = new Sprite
+                    Sprite = new Sprite
                     {
-                        image = "ChemicalGreen.png",
-                        size = 14,
-                        animationcount = 0,
-                        positionX = EncodingHelper.DecodeFixedPoint(packet.Projectile.FromXFloat),
-                        positionY = EncodingHelper.DecodeFixedPoint(packet.Projectile.FromYFloat),
-                        positionZ = EncodingHelper.DecodeFixedPoint(packet.Projectile.FromZFloat),
+                        Image = "ChemicalGreen.png",
+                        Size = 14,
+                        AnimationCount = 0,
+                        PositionX = EncodingHelper.DecodeFixedPoint(packet.Projectile.FromXFloat),
+                        PositionY = EncodingHelper.DecodeFixedPoint(packet.Projectile.FromYFloat),
+                        PositionZ = EncodingHelper.DecodeFixedPoint(packet.Projectile.FromZFloat),
                     },
-                    grenade = new Grenade
+                    Grenade = new Grenade
                     {
-                        velocityX = EncodingHelper.DecodeFixedPoint(packet.Projectile.VelocityXFloat),
-                        velocityY = EncodingHelper.DecodeFixedPoint(packet.Projectile.VelocityYFloat),
-                        velocityZ = EncodingHelper.DecodeFixedPoint(packet.Projectile.VelocityZFloat),
-                        block = packet.Projectile.BlockId,
-                        sourcePlayer = packet.Projectile.SourcePlayerID,
+                        VelocityX = EncodingHelper.DecodeFixedPoint(packet.Projectile.VelocityXFloat),
+                        VelocityY = EncodingHelper.DecodeFixedPoint(packet.Projectile.VelocityYFloat),
+                        VelocityZ = EncodingHelper.DecodeFixedPoint(packet.Projectile.VelocityZFloat),
+                        Block = packet.Projectile.BlockId,
+                        SourcePlayer = packet.Projectile.SourcePlayerID,
                     },
-                    expires = Expires.Create(EncodingHelper.DecodeFixedPoint(packet.Projectile.ExplodesAfterFloat)),
+                    Expires = Expiry.Create(EncodingHelper.DecodeFixedPoint(packet.Projectile.ExplodesAfterFloat)),
                 });
                 break;
 

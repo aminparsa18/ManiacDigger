@@ -51,7 +51,7 @@ public class GameRunner
         // ── Infrastructure ────────────────────────────────────────────────────
         services.AddSingleton<GameWindowNative>();
         services.AddSingleton<IVoxelMap, VoxelMap>();
-        services.AddSingleton<IGameExit, GameExit>();
+        services.AddSingleton<IGameExitService, GameExitService>();
         services.AddSingleton<IGameService, GameService>();
         services.AddSingleton<ICameraService, CameraService>();
         services.AddSingleton<IAudioService, AudioService>();

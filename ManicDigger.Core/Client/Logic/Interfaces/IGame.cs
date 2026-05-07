@@ -340,7 +340,7 @@ public interface IGame : IDisposable
     byte LocalStance { get; set; }
 
     /// <summary>Current GUI / game-phase state.</summary>
-    GuiState GuiState { get; set; }
+    GameState GuiState { get; set; }
 
     /// <summary>Hint data driving local player animations.</summary>
     AnimationHint LocalPlayerAnimationHint { get; set; }
@@ -412,7 +412,7 @@ public interface IGame : IDisposable
     /// Gets or sets the current freemove level.
     /// See <see cref="FreemoveLevelEnum"/> for valid values.
     /// </summary>
-    FreemoveLevel FreemoveLevel { get; set; }
+    FreeMoveLevel FreemoveLevel { get; set; }
 
     /// <summary>Whether auto-jump is enabled.</summary>
     bool AutoJumpEnabled { get; set; }

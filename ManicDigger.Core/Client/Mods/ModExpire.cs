@@ -19,18 +19,18 @@ public class ModExpire : ModBase
         for (int i = 0; i < Game.Entities.Count; i++)
         {
             Entity entity = Game.Entities[i];
-            if (entity?.expires == null)
+            if (entity?.Expires == null)
             {
                 continue;
             }
 
-            entity.expires.timeLeft -= dt;
-            if (entity.expires.timeLeft > 0)
+            entity.Expires.TimeLeft -= dt;
+            if (entity.Expires.TimeLeft > 0)
             {
                 continue;
             }
 
-            if (entity.grenade != null)
+            if (entity.Grenade != null)
             {
                 GrenadeExplosion(i);
             }
@@ -42,29 +42,29 @@ public class ModExpire : ModBase
     private void GrenadeExplosion(int grenadeEntityId)
     {
         Entity grenadeEntity = Game.Entities[grenadeEntityId];
-        Sprite sprite = grenadeEntity.sprite;
-        Grenade grenade = grenadeEntity.grenade;
-        BlockType blockType = _blockRegistry.BlockTypes[grenade.block];
+        Sprite sprite = grenadeEntity.Sprite;
+        Grenade grenade = grenadeEntity.Grenade;
+        BlockType blockType = _blockRegistry.BlockTypes[grenade.Block];
 
-        float posX = sprite.positionX;
-        float posY = sprite.positionY;
-        float posZ = sprite.positionZ;
+        float posX = sprite.PositionX;
+        float posY = sprite.PositionY;
+        float posZ = sprite.PositionZ;
 
         Game.PlayAudioAt("grenadeexplosion.ogg", posX, posY, posZ);
 
         // Spawn explosion animation sprite
         Game.EntityAddLocal(new Entity
         {
-            sprite = new Sprite
+            Sprite = new Sprite
             {
-                image = "ani5.png",
-                positionX = posX,
-                positionY = posY + 1,
-                positionZ = posZ,
-                size = 200,
-                animationcount = 4
+                Image = "ani5.png",
+                PositionX = posX,
+                PositionY = posY + 1,
+                PositionZ = posZ,
+                Size = 200,
+                AnimationCount = 4
             },
-            expires = Expires.Create(1)
+            Expires = Expiry.Create(1)
         });
 
         // Spawn explosion push entity
@@ -73,7 +73,7 @@ public class ModExpire : ModBase
 
         Game.EntityAddLocal(new Entity
         {
-            push = new Packet_ServerExplosion
+            Push = new Packet_ServerExplosion
             {
                 XFloat = EncodingHelper.EncodeFixedPoint(posX),
                 YFloat = EncodingHelper.EncodeFixedPoint(posZ),
@@ -82,15 +82,15 @@ public class ModExpire : ModBase
                 IsRelativeToPlayerPosition = 0,
                 TimeFloat = (int)blockType.ExplosionTime
             },
-            expires = new Expires { timeLeft = explosionTime }
+            Expires = new Expiry { TimeLeft = explosionTime }
         });
 
         // Apply damage to local player based on distance
-        float dist = Vector3.Distance(new Vector3(Game.Player.position.x, Game.Player.position.y, Game.Player.position.z), new Vector3(posX, posY, posZ));
+        float dist = Vector3.Distance(new Vector3(Game.Player.Position.X, Game.Player.Position.Y, Game.Player.Position.Z), new Vector3(posX, posY, posZ));
         float dmg = (1f - (dist / explosionRange)) * blockType.DamageBody;
         if (dmg > 0)
         {
-            Game.ApplyDamageToPlayer((int)dmg, DeathReason.Explosion, grenade.sourcePlayer);
+            Game.ApplyDamageToPlayer((int)dmg, DeathReason.Explosion, grenade.SourcePlayer);
         }
     }
 }

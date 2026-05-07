@@ -155,14 +155,14 @@ public partial class Game
             mouseSmoothingVelY = mouseDeltaY;
         }
 
-        if (GuiState == GuiState.Normal && enableCameraControl && gameService.Focused())
+        if (GuiState == GameState.Normal && enableCameraControl && gameService.Focused())
         {
             if (!OverheadCamera && gameService.IsMousePointerLocked())
             {
                 float rotScale = rotationspeed / 75f;
-                Player.position.roty += mouseSmoothingVelX * rotScale;
-                Player.position.rotx += mouseSmoothingVelY * rotScale;
-                Player.position.rotx = Math.Clamp(Player.position.rotx,
+                Player.Position.RotY += mouseSmoothingVelX * rotScale;
+                Player.Position.RotX += mouseSmoothingVelY * rotScale;
+                Player.Position.RotX = Math.Clamp(Player.Position.RotX,
                     (MathF.PI / 2) + (15 / 1000),
                     (MathF.PI / 2) + MathF.PI - (15 / 1000));
             }
@@ -170,8 +170,8 @@ public partial class Game
             if (!OverheadCamera)
             {
                 float touchScale = constRotationSpeed * (1f / 75);
-                Player.position.rotx += TouchOrientationDy * touchScale;
-                Player.position.roty += TouchOrientationDx * touchScale;
+                Player.Position.RotX += TouchOrientationDy * touchScale;
+                Player.Position.RotY += TouchOrientationDx * touchScale;
                 TouchOrientationDx = 0;
                 TouchOrientationDy = 0;
             }
@@ -317,7 +317,7 @@ public partial class Game
     {
         KeyboardStateRaw[eKey.KeyChar] = true;
 
-        if (GuiState != GuiState.MapLoading)
+        if (GuiState != GameState.MapLoading)
         {
             foreach (IModBase mod in ClientMods)
             {
@@ -341,17 +341,17 @@ public partial class Game
         if (eKey.KeyChar == GetKey(Keys.F6))
         {
             float lagSeconds = (gameService.TimeMillisecondsFromStart - LastReceivedMilliseconds) / 1000;
-            if (lagSeconds >= GameConstants.DISCONNECTED_ICON_AFTER_SECONDS || GuiState == GuiState.MapLoading)
+            if (lagSeconds >= GameConstants.DISCONNECTED_ICON_AFTER_SECONDS || GuiState == GameState.MapLoading)
             {
                 Reconnect();
             }
         }
 
-        if (GuiState == GuiState.Normal)
+        if (GuiState == GameState.Normal)
         {
             KeyDownNormal(eKey.KeyChar);
         }
-        else if (GuiState == GuiState.Inventory)
+        else if (GuiState == GameState.Inventory)
         {
             if (eKey.KeyChar == GetKey(Keys.B) || eKey.KeyChar == GetKey(Keys.Escape))
             {
@@ -361,7 +361,7 @@ public partial class Game
             return;
         }
 
-        else if (GuiState == GuiState.MapLoading)
+        else if (GuiState == GameState.MapLoading)
         {
             if (eKey.KeyChar == GetKey(Keys.Escape))
             {
@@ -369,7 +369,7 @@ public partial class Game
             }
         }
 
-        else if (GuiState == GuiState.CraftingRecipes)
+        else if (GuiState == GameState.CraftingRecipes)
         {
             if (eKey.KeyChar == GetKey(Keys.Escape))
             {
@@ -377,7 +377,7 @@ public partial class Game
             }
         }
 
-        if (GuiState == GuiState.Normal)
+        if (GuiState == GameState.Normal)
         {
             if (eKey.KeyChar == GetKey(Keys.Escape))
             {
@@ -447,8 +447,8 @@ public partial class Game
             DrawBlockInfo = !DrawBlockInfo;
         }
 
-        int playerx = (int)Player.position.x;
-        int playery = (int)Player.position.z;
+        int playerx = (int)Player.Position.X;
+        int playery = (int)Player.Position.Z;
         if (playerx >= 0 && playerx < _voxelMap.MapSizeX && playery >= 0 && playery < _voxelMap.MapSizeY)
         {
             performanceinfo["height"] = string.Format("height:{0}", _voxelMap.Heightmap.GetBlock(playerx, playery).ToString());
@@ -533,11 +533,11 @@ public partial class Game
         if (eKey == GetKey(Keys.P))
         {
             SendPacketClient(ClientPackets.SpecialKeySetSpawn());
-            PlayerPositionSpawnX = Player.position.x;
-            PlayerPositionSpawnY = Player.position.y;
-            PlayerPositionSpawnZ = Player.position.z;
-            Player.position.x = (int)Player.position.x + (1f / 2);
-            Player.position.z = (int)Player.position.z + (1f / 2);
+            PlayerPositionSpawnX = Player.Position.X;
+            PlayerPositionSpawnY = Player.Position.Y;
+            PlayerPositionSpawnZ = Player.Position.Z;
+            Player.Position.X = (int)Player.Position.X + (1f / 2);
+            Player.Position.Z = (int)Player.Position.Z + (1f / 2);
         }
 
         if (eKey == GetKey(Keys.F))
@@ -569,9 +569,9 @@ public partial class Game
             {
                 if (_blockRegistry.IsRailTile(blocktype))
                 {
-                    Player.position.x = posX + (1f / 2);
-                    Player.position.y = posZ + 1;
-                    Player.position.z = posY + (1f / 2);
+                    Player.Position.X = posX + (1f / 2);
+                    Player.Position.Y = posZ + 1;
+                    Player.Position.Z = posY + (1f / 2);
                     Controls.FreeMove = false;
                 }
                 else
@@ -581,7 +581,7 @@ public partial class Game
             }
         }
 
-        if (CurrentlyAttackedEntity != -1 && Entities[CurrentlyAttackedEntity].usable)
+        if (CurrentlyAttackedEntity != -1 && Entities[CurrentlyAttackedEntity].IsUsable)
         {
             OnUseEntityArgs args = new() { Id = CurrentlyAttackedEntity };
             foreach (IModBase t in ClientMods)

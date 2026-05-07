@@ -14,11 +14,11 @@ public class ServerSystemNotifyPing : ServerSystem
         MaxDeltaTime = TimeSpan.FromSeconds(5),
     };
     private readonly IGameService gameService;
-    private readonly IGameExit gameExit;
+    private readonly IGameExitService gameExit;
     private readonly IClientRegistry _serverClientService;
     private readonly IServerPacketService _serverPacketService;
 
-    public ServerSystemNotifyPing(IGameService gameService, IGameExit gameExit, IModEvents modEvents, IClientRegistry serverClientService, 
+    public ServerSystemNotifyPing(IGameService gameService, IGameExitService gameExit, IModEvents modEvents, IClientRegistry serverClientService, 
         IServerPacketService serverPacketService) : base(modEvents)
     {
         this.gameService = gameService;

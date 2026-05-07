@@ -10,7 +10,7 @@ public partial class Game
     /// <summary>Enters map-loading state, locks the mouse, and initialises progress tracking.</summary>
     public void MapLoadingStart()
     {
-        GuiState = GuiState.MapLoading;
+        GuiState = GameState.MapLoading;
         maploadingprogress = new MapLoadingProgressEventArgs();
         FontMapLoading = new Font("Arial", 14, FontStyle.Regular);
         SetFreeMouse(true);
@@ -127,7 +127,7 @@ public partial class Game
     {
         for (int i = 0; i < Dialogs.Count; i++)
         {
-            if (Dialogs[i]?.key == name)
+            if (Dialogs[i]?.Key == name)
             {
                 return i;
             }
@@ -154,7 +154,7 @@ public partial class Game
 
         for (int i = 0; i < Entities.Count; i++)
         {
-            if (Entities[i]?.drawName?.Name == Follow)
+            if (Entities[i]?.DrawName?.Name == Follow)
             {
                 return i;
             }
@@ -228,14 +228,14 @@ public partial class Game
     /// <summary>Returns to in-game GUI state and releases the free mouse.</summary>
     public void GuiStateBackToGame()
     {
-        GuiState = GuiState.Normal;
+        GuiState = GameState.Normal;
         SetFreeMouse(false);
     }
 
     /// <summary>Opens the escape menu and releases the mouse pointer lock.</summary>
     public void EscapeMenuStart()
     {
-        GuiState = GuiState.EscapeMenu;
+        GuiState = GameState.EscapeMenu;
         MenuState = new MenuState();
         EscapeMenuRestart = true;
         gameService.ExitMousePointerLock();
@@ -244,7 +244,7 @@ public partial class Game
     /// <summary>Shows the escape menu in free-mouse mode.</summary>
     public void ShowEscapeMenu()
     {
-        GuiState = GuiState.EscapeMenu;
+        GuiState = GameState.EscapeMenu;
         MenuState = new MenuState();
         SetFreeMouse(true);
     }
@@ -252,7 +252,7 @@ public partial class Game
     /// <summary>Opens the inventory screen in free-mouse mode.</summary>
     public void ShowInventory()
     {
-        GuiState = GuiState.Inventory;
+        GuiState = GameState.Inventory;
         MenuState = new MenuState();
         SetFreeMouse(true);
     }
@@ -364,7 +364,7 @@ public partial class Game
 
         foreach (CachedTexture ct in CachedTextTextures.Values)
         {
-            openGlService.GLDeleteTexture(ct.textureId);
+            openGlService.GLDeleteTexture(ct.TextureId);
         }
     }
 

@@ -25,7 +25,7 @@ public class ModFly : ModBase
     // ── Toggle on F ───────────────────────────────────────────────────────────
     public override void OnKeyDown(KeyEventArgs args)
     {
-        if (Game.GuiState != GuiState.Normal || Game.GuiTyping != TypingState.None)
+        if (Game.GuiState != GameState.Normal || Game.GuiTyping != TypingState.None)
         {
             return;
         }

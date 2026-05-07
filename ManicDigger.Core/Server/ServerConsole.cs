@@ -1,9 +1,9 @@
 public class ServerConsole
 {
     private readonly Server server;
-    public IGameExit Exit;
+    public IGameExitService Exit;
 
-    public ServerConsole(Server server, IGameExit exit)
+    public ServerConsole(Server server, IGameExitService exit)
     {
         this.server = server;
         Exit = exit;

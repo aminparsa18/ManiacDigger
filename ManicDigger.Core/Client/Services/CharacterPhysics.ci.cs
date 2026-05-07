@@ -97,7 +97,7 @@ public class ScriptCharacterPhysics : IEntityScript
     /// </summary>
     public void OnNewFrameFixed(int entity, float dt)
     {
-        if (game.GuiState == GuiState.MapLoading)
+        if (game.GuiState == GameState.MapLoading)
         {
             return;
         }
@@ -123,10 +123,10 @@ public class ScriptCharacterPhysics : IEntityScript
             move.WantsJump = false;
         }
 
-        Update(game.Player.position, move, dt,
+        Update(game.Player.Position, move, dt,
             out bool soundNow,
             new Vector3(game.PushX, game.PushY, game.PushZ),
-            game.Entities[game.LocalPlayerId].drawModel.ModelHeight);
+            game.Entities[game.LocalPlayerId].DrawModel.ModelHeight);
 
         game.soundnow = soundNow;
     }
@@ -143,7 +143,7 @@ public class ScriptCharacterPhysics : IEntityScript
     /// <param name="soundnow">Set to true when the player initiates a jump (footstep sound cue).</param>
     /// <param name="push">External impulse vector (e.g. explosions, conveyors).</param>
     /// <param name="modelheight">Entity model height in blocks; values ≥ 2 enable tall-player collision.</param>
-    public void Update(EntityPosition_ stateplayerposition, Controls move, float dt,
+    public void Update(EntityPosition stateplayerposition, Controls move, float dt,
         out bool soundnow, Vector3 push, float modelheight)
     {
         if (game.StopPlayerMove)
@@ -190,7 +190,7 @@ public class ScriptCharacterPhysics : IEntityScript
             move.MovedX * movespeednow * dt,
             0,
             move.MovedY * movespeednow * dt,
-            stateplayerposition.rotx, stateplayerposition.roty, ref diff1);
+            stateplayerposition.RotX, stateplayerposition.RotY, ref diff1);
 
         // ── Apply normalised external push ────────────────────────────────────
         // Use LengthSquared to avoid sqrt for the magnitude check.
@@ -208,9 +208,9 @@ public class ScriptCharacterPhysics : IEntityScript
 
         // ── Gravity: only after the chunk under the player has arrived ─────────
         bool loaded = false;
-        int cx = (int)(game.Player.position.x / GameConstants.CHUNK_SIZE);
-        int cy = (int)(game.Player.position.z / GameConstants.CHUNK_SIZE);
-        int cz = (int)(game.Player.position.y / GameConstants.CHUNK_SIZE);
+        int cx = (int)(game.Player.Position.X / GameConstants.CHUNK_SIZE);
+        int cy = (int)(game.Player.Position.Z / GameConstants.CHUNK_SIZE);
+        int cz = (int)(game.Player.Position.Y / GameConstants.CHUNK_SIZE);
         if (voxelMap.IsValidChunkPos(cx, cy, cz))
         {
             // Use cached chunk-count properties instead of recomputing / BlockConstants.CHUNK_SIZE.
@@ -279,19 +279,19 @@ public class ScriptCharacterPhysics : IEntityScript
         Vector3 newposition = Vector3.Zero;
         if (!move.FreeMove)
         {
-            newposition.X = stateplayerposition.x + curspeed.X;
-            newposition.Y = stateplayerposition.y + curspeed.Y;
-            newposition.Z = stateplayerposition.z + curspeed.Z;
+            newposition.X = stateplayerposition.X + curspeed.X;
+            newposition.Y = stateplayerposition.Y + curspeed.Y;
+            newposition.Z = stateplayerposition.Z + curspeed.Z;
             // Horizontal-only movement when not swimming (vertical handled by movedz).
             if (!swimmingBody)
             {
-                newposition.Y = stateplayerposition.y;
+                newposition.Y = stateplayerposition.Y;
             }
 
             // Re-normalise horizontal displacement then scale by actual speed.
-            float diffx = newposition.X - stateplayerposition.x;
-            float diffy = newposition.Y - stateplayerposition.y;
-            float diffz = newposition.Z - stateplayerposition.z;
+            float diffx = newposition.X - stateplayerposition.X;
+            float diffy = newposition.Y - stateplayerposition.Y;
+            float diffz = newposition.Z - stateplayerposition.Z;
             float difflength = MathF.Sqrt((diffx * diffx) + (diffy * diffy) + (diffz * diffz));
             if (difflength > 0)
             {
@@ -301,15 +301,15 @@ public class ScriptCharacterPhysics : IEntityScript
                 diffz *= inv;
             }
 
-            newposition.X = stateplayerposition.x + (diffx * dt);
-            newposition.Y = stateplayerposition.y + (diffy * dt);
-            newposition.Z = stateplayerposition.z + (diffz * dt);
+            newposition.X = stateplayerposition.X + (diffx * dt);
+            newposition.Y = stateplayerposition.Y + (diffy * dt);
+            newposition.Z = stateplayerposition.Z + (diffz * dt);
         }
         else
         {
-            newposition.X = stateplayerposition.x + (curspeed.X * dt);
-            newposition.Y = stateplayerposition.y + (curspeed.Y * dt);
-            newposition.Z = stateplayerposition.z + (curspeed.Z * dt);
+            newposition.X = stateplayerposition.X + (curspeed.X * dt);
+            newposition.Y = stateplayerposition.Y + (curspeed.Y * dt);
+            newposition.Z = stateplayerposition.Z + (curspeed.Z * dt);
         }
 
         // Apply accumulated vertical velocity (gravity + jump).
@@ -318,18 +318,18 @@ public class ScriptCharacterPhysics : IEntityScript
         if (!move.NoClip)
         {
             Vector3 v = WallSlide(
-                new Vector3(stateplayerposition.x, stateplayerposition.y, stateplayerposition.z),
+                new Vector3(stateplayerposition.X, stateplayerposition.Y, stateplayerposition.Z),
                 newposition,
                 modelheight);
-            stateplayerposition.x = v.X;
-            stateplayerposition.y = v.Y;
-            stateplayerposition.z = v.Z;
+            stateplayerposition.X = v.X;
+            stateplayerposition.Y = v.Y;
+            stateplayerposition.Z = v.Z;
         }
         else
         {
-            stateplayerposition.x = newposition.X;
-            stateplayerposition.y = newposition.Y;
-            stateplayerposition.z = newposition.Z;
+            stateplayerposition.X = newposition.X;
+            stateplayerposition.Y = newposition.Y;
+            stateplayerposition.Z = newposition.Z;
         }
 
         if (!move.FreeMove)

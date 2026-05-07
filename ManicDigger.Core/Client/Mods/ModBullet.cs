@@ -17,33 +17,45 @@ public class ModBullet : ModBase
         for (int i = 0; i < _game.Entities.Count; i++)
         {
             Entity entity = _game.Entities[i];
-            if (entity?.bullet == null)
+            if (entity?.Bullet == null)
             {
                 continue;
             }
 
-            Bullet b = entity.bullet;
-            b.progress = MathF.Max(b.progress, 1f);
+            Bullet b = entity.Bullet;
+            b.Progress = MathF.Max(b.Progress, 1f);
 
-            float dirX = b.toX - b.fromX;
-            float dirY = b.toY - b.fromY;
-            float dirZ = b.toZ - b.fromZ;
+            float dirX = b.ToX - b.FromX;
+            float dirY = b.ToY - b.FromY;
+            float dirZ = b.ToZ - b.FromZ;
             float length = Vector3.Distance(Vector3.Zero, new Vector3(dirX, dirY, dirZ));
 
             dirX /= length;
             dirY /= length;
             dirZ /= length;
 
-            b.progress += b.speed * dt;
+            b.Progress += b.Speed * dt;
 
-            entity.sprite.positionX = b.fromX + (dirX * b.progress);
-            entity.sprite.positionY = b.fromY + (dirY * b.progress);
-            entity.sprite.positionZ = b.fromZ + (dirZ * b.progress);
+            entity.Sprite.PositionX = b.FromX + (dirX * b.Progress);
+            entity.Sprite.PositionY = b.FromY + (dirY * b.Progress);
+            entity.Sprite.PositionZ = b.FromZ + (dirZ * b.Progress);
 
-            if (b.progress > length)
+            if (b.Progress > length)
             {
                 _game.Entities[i] = null;
             }
         }
     }
+}
+
+public class Bullet
+{
+    public float FromX { get; set; }
+    public float FromY { get; set; }
+    public float FromZ { get; set; }
+    public float ToX { get; set; }
+    public float ToY { get; set; }
+    public float ToZ { get; set; }
+    public float Speed { get; set; }
+    public float Progress { get; set; }
 }

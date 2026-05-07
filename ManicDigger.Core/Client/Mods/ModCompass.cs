@@ -26,7 +26,7 @@ public class ModCompass : ModBase
 
     public override void OnRender2d(float dt)
     {
-        if (Game.GuiState == GuiState.MapLoading)
+        if (Game.GuiState == GameState.MapLoading)
         {
             return;
         }
@@ -62,7 +62,7 @@ public class ModCompass : ModBase
 
         float posX = platform.CanvasWidth - CompassPosX;
         float posY = CompassPosY;
-        float playerOrientation = -(game.Player.position.roty / (2 * MathF.PI)) * 360f;
+        float playerOrientation = -(game.Player.Position.RotY / (2 * MathF.PI)) * 360f;
 
         // Spring-damper smoothing toward player orientation
         compassVelocity += (playerOrientation - compassAngle) / NeedleStiffness;

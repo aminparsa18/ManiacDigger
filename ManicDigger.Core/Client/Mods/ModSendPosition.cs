@@ -21,11 +21,11 @@ public class ModSendPosition : ModBase
 
         Game.LastPositionSentMilliseconds = platform.TimeMillisecondsFromStart;
 
-        EntityPosition_ pos = Game.Player.position;
+        EntityPosition pos = Game.Player.Position;
         Game.SendPacketClient(ClientPackets.PositionAndOrientation(
             Game.LocalPlayerId,
-            pos.x, pos.y, pos.z,
-            pos.rotx, pos.roty, pos.rotz,
+            pos.X, pos.Y, pos.Z,
+            pos.RotX, pos.RotY, pos.RotZ,
             Game.LocalStance));
     }
 }

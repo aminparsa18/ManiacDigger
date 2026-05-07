@@ -39,15 +39,15 @@ public sealed class ModAudio : ModBase
     /// <inheritdoc/>
     public override void OnUpdate(float dt)
     {
-        if (Game.GuiState == GuiState.MapLoading)
+        if (Game.GuiState == GameState.MapLoading)
         {
             return;
         }
 
-        float orientationX = MathF.Sin(Game.Player.position.roty);
-        float orientationZ = -MathF.Cos(Game.Player.position.roty);
+        float orientationX = MathF.Sin(Game.Player.Position.RotY);
+        float orientationZ = -MathF.Cos(Game.Player.Position.RotY);
         _audioService.UpdateListener(
-            Game.Player.position.x, Game.Player.position.y, Game.Player.position.z,
+            Game.Player.Position.X, Game.Player.Position.Y, Game.Player.Position.Z,
             orientationX, 0f, orientationZ);
     }
 

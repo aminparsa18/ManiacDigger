@@ -3,13 +3,13 @@
 public sealed class ServerSimulationStep : ISimulationStep
 {
     private readonly Server _server;
-    private readonly IGameExit _gameExit;                  
+    private readonly IGameExitService _gameExit;                  
     private readonly ISinglePlayerService _singlePlayerService;
     private readonly ServerLifetime _lifetime;
 
     public ServerSimulationStep(
         Server server,
-        IGameExit gameExit,
+        IGameExitService gameExit,
         ISinglePlayerService singlePlayerService,
         ServerLifetime lifetime)
     {

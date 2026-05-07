@@ -91,11 +91,11 @@ public class ModCamera : ModBase
     private Matrix4 FppCamera()
     {
         Vector3 forward = new();
-        VectorUtils.ToVectorInFixedSystem(0, 0, 1, Game.Player.position.rotx, Game.Player.position.roty, ref forward);
+        VectorUtils.ToVectorInFixedSystem(0, 0, 1, Game.Player.Position.RotX, Game.Player.Position.RotY, ref forward);
 
-        float eyeX = Game.Player.position.x;
-        float eyeY = Game.Player.position.y + Game.GetCharacterEyesHeight();
-        float eyeZ = Game.Player.position.z;
+        float eyeX = Game.Player.Position.X;
+        float eyeY = Game.Player.Position.Y + Game.GetCharacterEyesHeight();
+        float eyeZ = Game.Player.Position.Z;
         Vector3 eye, target;
 
         if (!Game.EnableTppView)
@@ -216,7 +216,7 @@ public class ModCamera : ModBase
     {
         if (_vignetteInitialised) return;
         for (int i = 0; i < _vignetteQuads.Length; i++)
-            _vignetteQuads[i] = new Draw2dData { inAtlasId = -1 };
+            _vignetteQuads[i] = new Draw2dData { InAtlasId = -1 };
         _vignetteInitialised = true;
     }
 
@@ -246,27 +246,27 @@ public class ModCamera : ModBase
             int color = ColorUtils.ColorFromArgb(alpha, 0, 0, 0);
 
             // Top — full width
-            _vignetteQuads[idx].x1 = 0; _vignetteQuads[idx].y1 = offset;
-            _vignetteQuads[idx].width = w; _vignetteQuads[idx].height = strip;
-            _vignetteQuads[idx].color = color; idx++;
+            _vignetteQuads[idx].X1 = 0; _vignetteQuads[idx].Y1 = offset;
+            _vignetteQuads[idx].Width = w; _vignetteQuads[idx].Height = strip;
+            _vignetteQuads[idx].Color = color; idx++;
 
             // Bottom — full width
-            _vignetteQuads[idx].x1 = 0; _vignetteQuads[idx].y1 = h - offset - strip;
-            _vignetteQuads[idx].width = w; _vignetteQuads[idx].height = strip;
-            _vignetteQuads[idx].color = color; idx++;
+            _vignetteQuads[idx].X1 = 0; _vignetteQuads[idx].Y1 = h - offset - strip;
+            _vignetteQuads[idx].Width = w; _vignetteQuads[idx].Height = strip;
+            _vignetteQuads[idx].Color = color; idx++;
 
             // Left + Right — clipped vertically so corners aren't double-darkened
             float sideY = offset + strip;
             float sideH = h - 2f * sideY;
             if (sideH > 0)
             {
-                _vignetteQuads[idx].x1 = offset; _vignetteQuads[idx].y1 = sideY;
-                _vignetteQuads[idx].width = strip; _vignetteQuads[idx].height = sideH;
-                _vignetteQuads[idx].color = color; idx++;
+                _vignetteQuads[idx].X1 = offset; _vignetteQuads[idx].Y1 = sideY;
+                _vignetteQuads[idx].Width = strip; _vignetteQuads[idx].Height = sideH;
+                _vignetteQuads[idx].Color = color; idx++;
 
-                _vignetteQuads[idx].x1 = w - offset - strip; _vignetteQuads[idx].y1 = sideY;
-                _vignetteQuads[idx].width = strip; _vignetteQuads[idx].height = sideH;
-                _vignetteQuads[idx].color = color; idx++;
+                _vignetteQuads[idx].X1 = w - offset - strip; _vignetteQuads[idx].Y1 = sideY;
+                _vignetteQuads[idx].Width = strip; _vignetteQuads[idx].Height = sideH;
+                _vignetteQuads[idx].Color = color; idx++;
             }
         }
 

@@ -20,7 +20,7 @@ public class ClientPacketHandlerDialog : ClientPacketHandler
         if (d.Dialog == null)
         {
             // Server is closing this dialog.
-            if (dialogIdx != -1 && game.Dialogs[dialogIdx].value.IsModal)
+            if (dialogIdx != -1 && game.Dialogs[dialogIdx].Value.IsModal)
             {
                 game.GuiStateBackToGame();
             }
@@ -40,11 +40,11 @@ public class ClientPacketHandlerDialog : ClientPacketHandler
             // Server is opening or updating a dialog.
             VisibleDialog d2 = new()
             {
-                key = d.DialogId,
-                value = d.Dialog,
+                Key = d.DialogId,
+                Value = d.Dialog,
             };
-            d2.screen = ConvertDialog(d2.value);
-            d2.screen.SetGame(game);
+            d2.Screen = ConvertDialog(d2.Value);
+            d2.Screen.SetGame(game);
 
             if (dialogIdx == -1)
             {
@@ -57,7 +57,7 @@ public class ClientPacketHandlerDialog : ClientPacketHandler
 
             if (d.Dialog.IsModal)
             {
-                game.GuiState = GuiState.ModalDialog;
+                game.GuiState = GameState.ModalDialog;
                 game.SetFreeMouse(true);
             }
         }

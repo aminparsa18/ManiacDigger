@@ -81,13 +81,13 @@ public partial class Game : IGame
     public Entity Player { get; set; }
     public int LocalPlayerId { get; set; }
 
-    public float LocalPositionX { get => Player.position.x; set => Player.position.x = value; }
-    public float LocalPositionY { get => Player.position.y; set => Player.position.y = value; }
-    public float LocalPositionZ { get => Player.position.z; set => Player.position.z = value; }
+    public float LocalPositionX { get => Player.Position.X; set => Player.Position.X = value; }
+    public float LocalPositionY { get => Player.Position.Y; set => Player.Position.Y = value; }
+    public float LocalPositionZ { get => Player.Position.Z; set => Player.Position.Z = value; }
 
-    public float LocalOrientationX { get => Player.position.rotx; set => Player.position.rotx = value; }
-    public float LocalOrientationY { get => Player.position.roty; set => Player.position.roty = value; }
-    public float LocalOrientationZ { get => Player.position.rotz; set => Player.position.rotz = value; }
+    public float LocalOrientationX { get => Player.Position.RotX; set => Player.Position.RotX = value; }
+    public float LocalOrientationY { get => Player.Position.RotY; set => Player.Position.RotY = value; }
+    public float LocalOrientationZ { get => Player.Position.RotZ; set => Player.Position.RotZ = value; }
 
     public float PlayerPositionSpawnX { get; set; }
     public float PlayerPositionSpawnY { get; set; }
@@ -108,7 +108,7 @@ public partial class Game : IGame
     public bool IsPlayerOnGround { get; set; }
     public bool IsShiftPressed { get; set; }
     public byte LocalStance { get; set; }
-    public GuiState GuiState { get; set; }
+    public GameState GuiState { get; set; }
     public AnimationHint LocalPlayerAnimationHint { get; set; }
 
     public Packet_ServerPlayerStats PlayerStats { get; set; }
@@ -308,23 +308,23 @@ public partial class Game : IGame
     public Dictionary<string, string> PerformanceInfo => performanceinfo;
 
     public float LocalEyeHeight
-        => Entities[LocalPlayerId].drawModel.eyeHeight;
+        => Entities[LocalPlayerId].DrawModel.EyeHeight;
 
-    public FreemoveLevel FreemoveLevel
+    public FreeMoveLevel FreemoveLevel
     {
         get
         {
             if (!Controls.FreeMove)
             {
-                return FreemoveLevel.None;
+                return FreeMoveLevel.None;
             }
 
-            return Controls.NoClip ? FreemoveLevel.Noclip : FreemoveLevel.Freemove;
+            return Controls.NoClip ? FreeMoveLevel.Noclip : FreeMoveLevel.Freemove;
         }
         set
         {
-            Controls.FreeMove = value != FreemoveLevel.None;
-            Controls.NoClip = value == FreemoveLevel.Noclip;
+            Controls.FreeMove = value != FreeMoveLevel.None;
+            Controls.NoClip = value == FreeMoveLevel.Noclip;
         }
     }
 
@@ -400,7 +400,7 @@ public partial class Game : IGame
 
     private void InitPlayer()
     {
-        Player = new Entity { position = new EntityPosition_() };
+        Player = new Entity { Position = new EntityPosition() };
         LocalPlayerId = -1;
         CurrentlyAttackedEntity = -1;
         playertexturedefault = -1;

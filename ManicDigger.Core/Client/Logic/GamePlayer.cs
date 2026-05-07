@@ -8,22 +8,22 @@ public partial class Game
     // -------------------------------------------------------------------------
 
     /// <summary>World-space X of the player's eye point.</summary>
-    public float EyesPosX => Player.position.x;
+    public float EyesPosX => Player.Position.X;
 
     /// <summary>
     /// World-space Y of the player's eye point.
     /// Offset above the entity origin by <see cref="GetCharacterEyesHeight"/>.
     /// </summary>
-    public float EyesPosY => Player.position.y + GetCharacterEyesHeight();
+    public float EyesPosY => Player.Position.Y + GetCharacterEyesHeight();
 
     /// <summary>World-space Z of the player's eye point.</summary>
-    public float EyesPosZ => Player.position.z;
+    public float EyesPosZ => Player.Position.Z;
 
     /// <summary>Returns the eye height of the local player's draw model in world units.</summary>
-    public float GetCharacterEyesHeight() => Entities[LocalPlayerId].drawModel.eyeHeight;
+    public float GetCharacterEyesHeight() => Entities[LocalPlayerId].DrawModel.EyeHeight;
 
     /// <summary>Sets the eye height of the local player's draw model.</summary>
-    public void SetCharacterEyesHeight(float value) => Entities[LocalPlayerId].drawModel.eyeHeight = value;
+    public void SetCharacterEyesHeight(float value) => Entities[LocalPlayerId].DrawModel.EyeHeight = value;
 
     /// <summary>Block X coordinate at the player's eye level.</summary>
     public int PlayerEyesBlockX => (int)MathF.Floor(EyesPosX);
@@ -53,7 +53,7 @@ public partial class Game
 
         if (!_voxelMap.IsValidPos(bx, by, bz))
         {
-            return Player.position.y < WaterLevel() ? -1 : 0;
+            return Player.Position.Y < WaterLevel() ? -1 : 0;
         }
 
         return _voxelMap.GetBlockValid(bx, by, bz);
@@ -85,9 +85,9 @@ public partial class Game
     public bool SwimmingBody()
     {
         int block = _voxelMap.GetBlock(
-            (int)Player.position.x,
-            (int)Player.position.z,
-            (int)(Player.position.y + 1));
+            (int)Player.Position.X,
+            (int)Player.Position.Z,
+            (int)(Player.Position.Y + 1));
 
         if (block == -1)
         {
@@ -123,17 +123,17 @@ public partial class Game
     public int BlockUnderPlayer()
     {
         if (!_voxelMap.IsValidPos(
-                (int)Player.position.x,
-                (int)Player.position.z,
-                (int)Player.position.y - 1))
+                (int)Player.Position.X,
+                (int)Player.Position.Z,
+                (int)Player.Position.Y - 1))
         {
             return -1;
         }
 
         return _voxelMap.GetBlock(
-            (int)Player.position.x,
-            (int)Player.position.z,
-            (int)Player.position.y - 1);
+            (int)Player.Position.X,
+            (int)Player.Position.Z,
+            (int)Player.Position.Y - 1);
     }
 
     /// <summary>
@@ -184,7 +184,7 @@ public partial class Game
         else if (KeyboardState[GetKey(Keys.LeftShift)])
         {
             // Shift = sprint; faster multiplier in freemove/noclip mode.
-            speed *= FreemoveLevel == FreemoveLevel.Freemove ? 4f : 2f;
+            speed *= FreemoveLevel == FreeMoveLevel.Freemove ? 4f : 2f;
         }
 
         InventoryItem item = Inventory.RightHand[ActiveMaterial];
@@ -310,23 +310,23 @@ public partial class Game
         for (int i = 0; i < Entities.Count; i++)
         {
             Entity e = Entities[i];
-            if (e?.drawModel == null)
+            if (e?.DrawModel == null)
             {
                 continue;
             }
 
-            if (e.networkPosition == null || e.networkPosition.PositionLoaded)
+            if (e.NetworkPosition == null || e.NetworkPosition.PositionLoaded)
             {
-                if (IsPlayerInPos(e.position.x, e.position.y, e.position.z,
-                    blockposX, blockposY, blockposZ, e.drawModel.ModelHeight))
+                if (IsPlayerInPos(e.Position.X, e.Position.Y, e.Position.Z,
+                    blockposX, blockposY, blockposZ, e.DrawModel.ModelHeight))
                 {
                     return true;
                 }
             }
         }
 
-        return IsPlayerInPos(Player.position.x, Player.position.y, Player.position.z,
-            blockposX, blockposY, blockposZ, Player.drawModel.ModelHeight);
+        return IsPlayerInPos(Player.Position.X, Player.Position.Y, Player.Position.Z,
+            blockposX, blockposY, blockposZ, Player.DrawModel.ModelHeight);
     }
 
     /// <summary>

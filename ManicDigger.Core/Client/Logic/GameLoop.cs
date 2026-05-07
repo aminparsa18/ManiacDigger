@@ -50,7 +50,7 @@ public partial class Game
         TryInitialiseConnection();
 
         // Map loading — only 2D pass needed.
-        if (GuiState == GuiState.MapLoading)
+        if (GuiState == GameState.MapLoading)
         {
             Render2d(dt);
             return;
@@ -77,24 +77,24 @@ public partial class Game
         {
             Entity e = Entities[i];
             if (e == null) continue;
-            for (int k = 0; k < e.scriptsCount; k++)
-                e.scripts[k].OnNewFrameFixed(i, dt);
+            for (int k = 0; k < e.Scripts.Count; k++)
+                e.Scripts[k].OnNewFrameFixed(i, dt);
         }
 
         RevertSpeculative(dt);
 
-        if (GuiState == GuiState.MapLoading)
+        if (GuiState == GameState.MapLoading)
             return;
 
         Vector3 vel;
-        vel.X = (Player.position.x - lastplayerpositionX) * FixedTickRate;
-        vel.Y = (Player.position.y - lastplayerpositionY) * FixedTickRate;
-        vel.Z = (Player.position.z - lastplayerpositionZ) * FixedTickRate;
+        vel.X = (Player.Position.X - lastplayerpositionX) * FixedTickRate;
+        vel.Y = (Player.Position.Y - lastplayerpositionY) * FixedTickRate;
+        vel.Z = (Player.Position.Z - lastplayerpositionZ) * FixedTickRate;
         playervelocity = vel;
 
-        lastplayerpositionX = Player.position.x;
-        lastplayerpositionY = Player.position.y;
-        lastplayerpositionZ = Player.position.z;
+        lastplayerpositionX = Player.Position.X;
+        lastplayerpositionY = Player.Position.Y;
+        lastplayerpositionZ = Player.Position.Z;
     }
 
     // ── Render passes ─────────────────────────────────────────────────────────
@@ -170,7 +170,7 @@ public partial class Game
 
     private void UpdateClearColor()
     {
-        if (GuiState == GuiState.MapLoading)
+        if (GuiState == GameState.MapLoading)
         {
             openGlService.GlClearColorRgbaf(0f, 0f, 0f, 1f);
             return;

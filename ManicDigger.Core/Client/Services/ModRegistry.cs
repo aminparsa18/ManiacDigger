@@ -10,16 +10,15 @@ public interface IModRegistry
 
 public sealed class ModRegistry : IModRegistry
 {
-    private IReadOnlyList<IModBase> _mods = [];
-    public IReadOnlyList<IModBase> Mods => _mods;
+    public IReadOnlyList<IModBase> Mods { get; private set; } = [];
 
     public void Initialise(IEnumerable<IModBase> mods)
     {
-        if (_mods.Count > 0)
+        if (Mods.Count > 0)
         {
             throw new InvalidOperationException("ModRegistry already initialised.");
         }
 
-        _mods = [.. mods];
+        Mods = [.. mods];
     }
 }

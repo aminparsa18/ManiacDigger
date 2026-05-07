@@ -18,13 +18,13 @@ public class ModCameraKeys : ModBase
 
     public override void OnUpdate(float args)
     {
-        if (Game.GuiState == GuiState.MapLoading)
+        if (Game.GuiState == GameState.MapLoading)
         {
             return;
         }
 
         float dt = args;
-        bool isNormal = Game.GuiState == GuiState.Normal;
+        bool isNormal = Game.GuiState == GameState.Normal;
         bool isTyping = Game.GuiTyping != TypingState.None;
         UpdateJumpAndShift(isNormal, isTyping);
 
@@ -89,8 +89,8 @@ public class ModCameraKeys : ModBase
             cameraService.TurnLeft(dt * OverheadCameraSpeed);
         }
 
-        cameraService.Center = new Vector3(Game.Player.position.x,
-            Game.Player.position.y, Game.Player.position.z);
+        cameraService.Center = new Vector3(Game.Player.Position.X,
+            Game.Player.Position.Y, Game.Player.Position.Z);
         CameraMoveArgs m = new()
         {
             Distance = cameraService.OverHeadCameraDistance,
@@ -101,7 +101,7 @@ public class ModCameraKeys : ModBase
 
         // Click-to-move: steer player toward destination
         float toDest = Vector3.Distance(
-            new Vector3(Game.Player.position.x, Game.Player.position.y, Game.Player.position.z),
+            new Vector3(Game.Player.Position.X, Game.Player.Position.Y, Game.Player.Position.Z),
             new Vector3(Game.PlayerDestination.X + 0.5f, Game.PlayerDestination.Y - 0.5f, Game.PlayerDestination.Z + 0.5f));
 
         if (toDest >= 1)
@@ -112,10 +112,10 @@ public class ModCameraKeys : ModBase
                 Game.Controls.WantsJump = true;
             }
 
-            float qX = Game.PlayerDestination.X - Game.Player.position.x;
-            float qZ = Game.PlayerDestination.Z - Game.Player.position.z;
-            Game.Player.position.roty = (MathF.PI / 2) + MathF.Atan2(qX, qZ);
-            Game.Player.position.rotx = MathF.PI;
+            float qX = Game.PlayerDestination.X - Game.Player.Position.X;
+            float qZ = Game.PlayerDestination.Z - Game.Player.Position.Z;
+            Game.Player.Position.RotY = (MathF.PI / 2) + MathF.Atan2(qX, qZ);
+            Game.Player.Position.RotX = MathF.PI;
         }
     }
 

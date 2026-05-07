@@ -21,22 +21,22 @@ public class ModDrawText : ModBase
         for (int i = 0; i < Game.Entities.Count; i++)
         {
             Entity e = Game.Entities[i];
-            if (e?.drawText == null)
+            if (e?.DrawText == null)
             {
                 continue;
             }
 
-            if (e.networkPosition != null && !e.networkPosition.PositionLoaded)
+            if (e.NetworkPosition != null && !e.NetworkPosition.PositionLoaded)
             {
                 continue;
             }
 
-            EntityDrawText p = e.drawText;
-            float posX = (-MathF.Sin(e.position.roty) * p.dx) + e.position.x;
-            float posY = p.dy + e.position.y;
-            float posZ = (MathF.Cos(e.position.roty) * p.dz) + e.position.z;
+            EntityDrawText p = e.DrawText;
+            float posX = (-MathF.Sin(e.Position.RotY) * p.X) + e.Position.X;
+            float posY = p.Y + e.Position.Y;
+            float posZ = (MathF.Cos(e.Position.RotY) * p.Z) + e.Position.Z;
 
-            bool nearEnough = Vector3.Distance(new Vector3(Game.Player.position.x, Game.Player.position.y, Game.Player.position.z), new Vector3(posX, posY, posZ)) < TextDrawDistance;
+            bool nearEnough = Vector3.Distance(new Vector3(Game.Player.Position.X, Game.Player.Position.Y, Game.Player.Position.Z), new Vector3(posX, posY, posZ)) < TextDrawDistance;
             bool altHeld = Game.KeyboardState[KeyConstants.KeyAltLeft] || Game.KeyboardState[KeyConstants.KeyAltRight];
             if (!nearEnough && !altHeld)
             {
@@ -52,9 +52,9 @@ public class ModDrawText : ModBase
         meshDrawer.GLPushMatrix();
         meshDrawer.GLTranslate(posX, posY, posZ);
         meshDrawer.GLRotate(180, 1, 0, 0);
-        meshDrawer.GLRotate(float.RadiansToDegrees(e.position.roty), 0, 1, 0);
+        meshDrawer.GLRotate(float.RadiansToDegrees(e.Position.RotY), 0, 1, 0);
         meshDrawer.GLScale(TextScale, TextScale, TextScale);
-        Game.Draw2dText(p.text, Font, -Game.TextSizeWidth(p.text, 14) / 2, 0, ColorUtils.ColorFromArgb(255, 255, 255, 255), true);
+        Game.Draw2dText(p.Text, Font, -Game.TextSizeWidth(p.Text, 14) / 2, 0, ColorUtils.ColorFromArgb(255, 255, 255, 255), true);
         meshDrawer.GLPopMatrix();
     }
 }

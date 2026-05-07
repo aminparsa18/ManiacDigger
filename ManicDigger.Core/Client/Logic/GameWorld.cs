@@ -369,9 +369,9 @@ public partial class Game
         RedrawAllBlocks();
         GuiStateBackToGame();
 
-        PlayerPositionSpawnX = Player.position.x;
-        PlayerPositionSpawnY = Player.position.y;
-        PlayerPositionSpawnZ = Player.position.z;
+        PlayerPositionSpawnX = Player.Position.X;
+        PlayerPositionSpawnY = Player.Position.Y;
+        PlayerPositionSpawnZ = Player.Position.Z;
     }
 
     /// <summary>Returns the Z coordinate of the water surface (half the map height).</summary>

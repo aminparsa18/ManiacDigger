@@ -1,143 +1,31 @@
 ﻿using ManicDigger;
-using OpenTK.Mathematics;
-
-public class LoginData
-{
-    internal string ServerAddress;
-    internal int Port;
-    internal string AuthCode; //Md5(private server key + player name)
-    internal string Token;
-
-    internal bool PasswordCorrect;
-    internal bool ServerCorrect;
-}
-
-public class LoginClientCi
-{
-    internal LoginResult loginResult;
-
-    public void Login(IGameService platform, string user, string password, string publicServerKey, string token, LoginResult result, LoginData resultLoginData_) => loginResult = result;
-}
-
-public class GameExit : IGameExit
-{
-    public bool Exit { get; set; }
-    public bool Restart { get; set; }
-}
-
-public class Sprite
-{
-    public Sprite()
-    {
-        size = 40;
-    }
-    internal float positionX;
-    internal float positionY;
-    internal float positionZ;
-    internal string image;
-    internal int size;
-    internal int animationcount;
-}
-
-public class PlayerDrawInfo
-{
-    public PlayerDrawInfo()
-    {
-    }
-
-    internal NetworkInterpolation interpolation;
-    internal float lastnetworkposX;
-    internal float lastnetworkposY;
-    internal float lastnetworkposZ;
-    internal float lastcurposX;
-    internal float lastcurposY;
-    internal float lastcurposZ;
-    internal float lastnetworkrotx;
-    internal float lastnetworkroty;
-    internal float lastnetworkrotz;
-    internal Vector3 Velocity = Vector3.Zero;
-    internal bool moves;
-}
-
-public class PlayerInterpolationState : IInterpolatedObject
-{
-    internal float positionX;
-    internal float positionY;
-    internal float positionZ;
-    internal float rotx;
-    internal float roty;
-    internal float rotz;
-    internal byte heading;
-    internal byte pitch;
-}
-
-public class Bullet
-{
-    internal float fromX;
-    internal float fromY;
-    internal float fromZ;
-    internal float toX;
-    internal float toY;
-    internal float toZ;
-    internal float speed;
-    internal float progress;
-}
-
-public class Expires
-{
-    internal static Expires Create(float p)
-    {
-        Expires expires = new()
-        {
-            totalTime = p,
-            timeLeft = p
-        };
-        return expires;
-    }
-
-    internal float totalTime;
-    internal float timeLeft;
-}
-
-public class DrawName
-{
-    internal float TextX;
-    internal float TextY;
-    internal float TextZ;
-    internal string Name;
-    internal bool DrawHealth;
-    internal float Health;
-    internal bool OnlyWhenSelected;
-    internal bool ClientAutoComplete;
-}
 
 public class Entity
 {
     public Entity()
     {
-        scripts = new IEntityScript[8];
-        scriptsCount = 0;
+        Scripts = [];
     }
-    internal Expires expires;
-    internal Sprite sprite;
-    internal Grenade grenade;
-    internal Bullet bullet;
-    internal Minecart minecart;
-    internal PlayerDrawInfo playerDrawInfo;
 
-    internal IEntityScript[] scripts;
-    internal int scriptsCount;
+    public Expiry Expires { get; set; }
+    public Sprite Sprite { get; set; }
+    public Grenade Grenade { get; set; }
+    public Bullet Bullet { get; set; }
+    public Minecart Minecart { get; set; }
+    public PlayerDrawInfo PlayerDrawInfo { get; set; }
+
+    public IList<IEntityScript> Scripts { get; set; }
 
     // network
-    internal EntityPosition_ networkPosition;
-    internal EntityPosition_ position;
-    internal DrawName drawName;
-    internal EntityDrawModel drawModel;
-    internal EntityDrawText drawText;
-    internal Packet_ServerExplosion push;
-    internal bool usable;
-    internal Packet_ServerPlayerStats playerStats;
-    internal EntityDrawArea drawArea;
+    public EntityPosition NetworkPosition { get; set; } 
+    public EntityPosition Position { get; set; }
+    public DrawName DrawName { get; set; }
+    public EntityDrawModel DrawModel { get; set; }
+    public EntityDrawText DrawText { get; set; }
+    public Packet_ServerExplosion Push {  get; set; }
+    public bool IsUsable { get; set; }
+    public Packet_ServerPlayerStats PlayerStats { get; set; }
+    public EntityDrawArea DrawArea { get; set; }
 
     /// <summary>Creates a bullet entity travelling from <paramref name="fromX/Y/Z"/> to <paramref name="toX/Y/Z"/>.</summary>
     public static Entity CreateBullet(
@@ -147,21 +35,21 @@ public class Entity
     {
         return new Entity
         {
-            bullet = new Bullet
+            Bullet = new Bullet
             {
-                fromX = fromX,
-                fromY = fromY,
-                fromZ = fromZ,
-                toX = toX,
-                toY = toY,
-                toZ = toZ,
-                speed = speed,
+                FromX = fromX,
+                FromY = fromY,
+                FromZ = fromZ,
+                ToX = toX,
+                ToY = toY,
+                ToZ = toZ,
+                Speed = speed,
             },
-            sprite = new Sprite
+            Sprite = new Sprite
             {
-                image = "Sponge.png",
-                size = 4,
-                animationcount = 0,
+                Image = "Sponge.png",
+                Size = 4,
+                AnimationCount = 0,
             },
         };
     }
@@ -169,402 +57,60 @@ public class Entity
 
 public class EntityDrawArea
 {
-    internal int x;
-    internal int y;
-    internal int z;
-    internal int sizex;
-    internal int sizey;
-    internal int sizez;
-    internal bool visible;
+    public int X { get; set; }
+    public int Y { get; set; }
+    public int Z { get; set; }
+    public int SizeX { get; set; }
+    public int SizeY { get; set; }
+    public int SizeZ { get; set; }
+    public bool Visible { get; set; }
 }
 
-public class EntityPosition_
+public class EntityPosition
 {
-    internal float x;
-    internal float y;
-    internal float z;
-    internal float rotx;
-    internal float roty;
-    internal float rotz;
-
-    internal bool PositionLoaded;
-    internal int LastUpdateMilliseconds;
+    public float X { get; set; }
+    public float Y { get; set; }
+    public float Z { get; set; }
+    public float RotX  { get; set; }
+    public float RotY { get; set; }
+    public float RotZ { get; set; }
+    public bool PositionLoaded { get; set; }
+    public int LastUpdateMilliseconds { get; set; }
 }
 
 public class EntityDrawModel
 {
-    public EntityDrawModel()
-    {
-        CurrentTexture = -1;
-    }
-    internal float eyeHeight;
-    internal string Model_;
-    internal float ModelHeight;
-    internal string Texture_;
-    internal bool DownloadSkin;
-
-    internal int CurrentTexture;
-    internal HttpResponse SkinDownloadResponse;
-    internal AnimatedModelRenderer renderer;
+    public float EyeHeight { get; set; }
+    public string Model { get; set; }
+    public float ModelHeight { get; set; }
+    public string Texture_ { get; set; }
+    public bool DownloadSkin { get; set; }
+    public int CurrentTexture { get; set; } = -1;
+    public HttpResponse SkinDownloadResponse { get; set; }
+    public AnimatedModelRenderer Renderer { get; set; }
 }
 
 public class EntityDrawText
 {
-    internal float dx;
-    internal float dy;
-    internal float dz;
-    internal float rotx;
-    internal float roty;
-    internal float rotz;
-    internal string text;
+    public float X { get; set; }
+    public float Y { get; set; }
+    public float Z { get; set; }
+    public float RotX { get; set; }
+    public float RotY { get; set; }
+    public float RotZ { get; set; }
+    public string Text { get; set; }
 }
 
 public class VisibleDialog
 {
-    internal string key;
-    internal Dialog value;
-    internal ModScreen screen;
-}
-
-public enum RailDirection
-{
-    Horizontal,
-    Vertical,
-    UpLeft,
-    UpRight,
-    DownLeft,
-    DownRight
-}
-
-public enum TileExitDirection
-{
-    Up,
-    Down,
-    Left,
-    Right
-}
-
-public enum TileEnterDirection
-{
-    Up,
-    Down,
-    Left,
-    Right
-}
-
-/// <summary>
-/// Each RailDirection on tile can be traversed by train in two directions.
-/// </summary>
-/// <example>
-/// RailDirection.Horizontal -> VehicleDirection12.HorizontalLeft (vehicle goes left and decreases x position),
-/// and VehicleDirection12.HorizontalRight (vehicle goes right and increases x position).
-/// </example>
-public enum VehicleDirection12
-{
-    HorizontalLeft,
-    HorizontalRight,
-    VerticalUp,
-    VerticalDown,
-
-    UpLeftUp,
-    UpLeftLeft,
-    UpRightUp,
-    UpRightRight,
-
-    DownLeftDown,
-    DownLeftLeft,
-    DownRightDown,
-    DownRightRight
-}
-
-public class VehicleDirection12Flags
-{
-    public const int None = 0;
-    public const int HorizontalLeft = 1 << 0;
-    public const int HorizontalRight = 1 << 1;
-    public const int VerticalUp = 1 << 2;
-    public const int VerticalDown = 1 << 3;
-
-    public const int UpLeftUp = 1 << 4;
-    public const int UpLeftLeft = 1 << 5;
-    public const int UpRightUp = 1 << 6;
-    public const int UpRightRight = 1 << 7;
-
-    public const int DownLeftDown = 1 << 8;
-    public const int DownLeftLeft = 1 << 9;
-    public const int DownRightDown = 1 << 10;
-    public const int DownRightRight = 1 << 11;
-}
-
-public class DirectionUtils
-{
-    /// <summary>
-    /// VehicleDirection12.UpRightRight -> returns Direction4.Right
-    /// </summary>
-    /// <param name="direction"></param>
-    /// <returns></returns>
-    public static TileExitDirection ResultExit(VehicleDirection12 direction)
-    {
-        return direction switch
-        {
-            VehicleDirection12.HorizontalLeft => TileExitDirection.Left,
-            VehicleDirection12.HorizontalRight => TileExitDirection.Right,
-            VehicleDirection12.VerticalUp => TileExitDirection.Up,
-            VehicleDirection12.VerticalDown => TileExitDirection.Down,
-            VehicleDirection12.UpLeftUp => TileExitDirection.Up,
-            VehicleDirection12.UpLeftLeft => TileExitDirection.Left,
-            VehicleDirection12.UpRightUp => TileExitDirection.Up,
-            VehicleDirection12.UpRightRight => TileExitDirection.Right,
-            VehicleDirection12.DownLeftDown => TileExitDirection.Down,
-            VehicleDirection12.DownLeftLeft => TileExitDirection.Left,
-            VehicleDirection12.DownRightDown => TileExitDirection.Down,
-            VehicleDirection12.DownRightRight => TileExitDirection.Right,
-            _ => TileExitDirection.Down,
-        };
-    }
-
-    public static RailDirection ToRailDirection(VehicleDirection12 direction)
-    {
-        return direction switch
-        {
-            VehicleDirection12.HorizontalLeft => RailDirection.Horizontal,
-            VehicleDirection12.HorizontalRight => RailDirection.Horizontal,
-            VehicleDirection12.VerticalUp => RailDirection.Vertical,
-            VehicleDirection12.VerticalDown => RailDirection.Vertical,
-            VehicleDirection12.UpLeftUp => RailDirection.UpLeft,
-            VehicleDirection12.UpLeftLeft => RailDirection.UpLeft,
-            VehicleDirection12.UpRightUp => RailDirection.UpRight,
-            VehicleDirection12.UpRightRight => RailDirection.UpRight,
-            VehicleDirection12.DownLeftDown => RailDirection.DownLeft,
-            VehicleDirection12.DownLeftLeft => RailDirection.DownLeft,
-            VehicleDirection12.DownRightDown => RailDirection.DownRight,
-            VehicleDirection12.DownRightRight => RailDirection.DownRight,
-            _ => RailDirection.DownLeft,
-        };
-    }
-
-    public static int ToRailDirectionFlags(RailDirection direction)
-    {
-        return direction switch
-        {
-            RailDirection.DownLeft => (int)RailDirectionFlags.DownLeft,
-            RailDirection.DownRight => (int)RailDirectionFlags.DownRight,
-            RailDirection.Horizontal => (int)RailDirectionFlags.Horizontal,
-            RailDirection.UpLeft => (int)RailDirectionFlags.UpLeft,
-            RailDirection.UpRight => (int)RailDirectionFlags.UpRight,
-            RailDirection.Vertical => (int)RailDirectionFlags.Vertical,
-            _ => 0,
-        };
-    }
-
-    public static VehicleDirection12 Reverse(VehicleDirection12 direction)
-    {
-        return direction switch
-        {
-            VehicleDirection12.HorizontalLeft => VehicleDirection12.HorizontalRight,
-            VehicleDirection12.HorizontalRight => VehicleDirection12.HorizontalLeft,
-            VehicleDirection12.VerticalUp => VehicleDirection12.VerticalDown,
-            VehicleDirection12.VerticalDown => VehicleDirection12.VerticalUp,
-            VehicleDirection12.UpLeftUp => VehicleDirection12.UpLeftLeft,
-            VehicleDirection12.UpLeftLeft => VehicleDirection12.UpLeftUp,
-            VehicleDirection12.UpRightUp => VehicleDirection12.UpRightRight,
-            VehicleDirection12.UpRightRight => VehicleDirection12.UpRightUp,
-            VehicleDirection12.DownLeftDown => VehicleDirection12.DownLeftLeft,
-            VehicleDirection12.DownLeftLeft => VehicleDirection12.DownLeftDown,
-            VehicleDirection12.DownRightDown => VehicleDirection12.DownRightRight,
-            VehicleDirection12.DownRightRight => VehicleDirection12.DownRightDown,
-            _ => VehicleDirection12.DownLeftDown,
-        };
-    }
-
-    public static int ToVehicleDirection12Flags(VehicleDirection12 direction)
-    {
-        return direction switch
-        {
-            VehicleDirection12.HorizontalLeft => VehicleDirection12Flags.HorizontalLeft,
-            VehicleDirection12.HorizontalRight => VehicleDirection12Flags.HorizontalRight,
-            VehicleDirection12.VerticalUp => VehicleDirection12Flags.VerticalUp,
-            VehicleDirection12.VerticalDown => VehicleDirection12Flags.VerticalDown,
-            VehicleDirection12.UpLeftUp => VehicleDirection12Flags.UpLeftUp,
-            VehicleDirection12.UpLeftLeft => VehicleDirection12Flags.UpLeftLeft,
-            VehicleDirection12.UpRightUp => VehicleDirection12Flags.UpRightUp,
-            VehicleDirection12.UpRightRight => VehicleDirection12Flags.UpRightRight,
-            VehicleDirection12.DownLeftDown => VehicleDirection12Flags.DownLeftDown,
-            VehicleDirection12.DownLeftLeft => VehicleDirection12Flags.DownLeftLeft,
-            VehicleDirection12.DownRightDown => VehicleDirection12Flags.DownRightDown,
-            VehicleDirection12.DownRightRight => VehicleDirection12Flags.DownRightRight,
-            _ => 0,
-        };
-    }
-
-    public static TileEnterDirection ResultEnter(TileExitDirection direction)
-    {
-        return direction switch
-        {
-            TileExitDirection.Up => TileEnterDirection.Down,
-            TileExitDirection.Down => TileEnterDirection.Up,
-            TileExitDirection.Left => TileEnterDirection.Right,
-            TileExitDirection.Right => TileEnterDirection.Left,
-            _ => TileEnterDirection.Down,
-        };
-    }
-    public static int RailDirectionFlagsCount(int railDirectionFlags)
-    {
-        int count = 0;
-        if ((railDirectionFlags & ToRailDirectionFlags(RailDirection.DownLeft)) != 0)
-        {
-            count++;
-        }
-
-        if ((railDirectionFlags & ToRailDirectionFlags(RailDirection.DownRight)) != 0)
-        {
-            count++;
-        }
-
-        if ((railDirectionFlags & ToRailDirectionFlags(RailDirection.Horizontal)) != 0)
-        {
-            count++;
-        }
-
-        if ((railDirectionFlags & ToRailDirectionFlags(RailDirection.UpLeft)) != 0)
-        {
-            count++;
-        }
-
-        if ((railDirectionFlags & ToRailDirectionFlags(RailDirection.UpRight)) != 0)
-        {
-            count++;
-        }
-
-        if ((railDirectionFlags & ToRailDirectionFlags(RailDirection.Vertical)) != 0)
-        {
-            count++;
-        }
-
-        return count;
-    }
-
-    public static int ToVehicleDirection12Flags_(VehicleDirection12[] directions, int directionsCount)
-    {
-        int flags = VehicleDirection12Flags.None;
-        for (int i = 0; i < directionsCount; i++)
-        {
-            VehicleDirection12 d = directions[i];
-            flags = flags | ToVehicleDirection12Flags(d);
-        }
-
-        return flags;
-    }
-
-    /// <summary>
-    /// Enter at TileEnterDirection.Left -> yields VehicleDirection12.UpLeftUp,
-    /// VehicleDirection12.HorizontalRight,
-    /// VehicleDirection12.DownLeftDown
-    /// </summary>
-    /// <param name="enter_at"></param>
-    /// <returns></returns>
-    public static VehicleDirection12[] PossibleNewRails3(TileEnterDirection enter_at)
-    {
-        VehicleDirection12[] ret = new VehicleDirection12[3];
-        switch (enter_at)
-        {
-            case TileEnterDirection.Left:
-                ret[0] = VehicleDirection12.UpLeftUp;
-                ret[1] = VehicleDirection12.HorizontalRight;
-                ret[2] = VehicleDirection12.DownLeftDown;
-                break;
-            case TileEnterDirection.Down:
-                ret[0] = VehicleDirection12.DownLeftLeft;
-                ret[1] = VehicleDirection12.VerticalUp;
-                ret[2] = VehicleDirection12.DownRightRight;
-                break;
-            case TileEnterDirection.Up:
-                ret[0] = VehicleDirection12.UpLeftLeft;
-                ret[1] = VehicleDirection12.VerticalDown;
-                ret[2] = VehicleDirection12.UpRightRight;
-                break;
-            case TileEnterDirection.Right:
-                ret[0] = VehicleDirection12.UpRightUp;
-                ret[1] = VehicleDirection12.HorizontalLeft;
-                ret[2] = VehicleDirection12.DownRightDown;
-                break;
-            default:
-                return null;
-        }
-
-        return ret;
-    }
-}
-
-public enum CameraType
-{
-    Fpp,
-    Tpp,
-    Overhead
-}
-
-public enum TypingState
-{
-    None,
-    Typing,
-    Ready
-}
-
-public class Grenade
-{
-    internal float velocityX;
-    internal float velocityY;
-    internal float velocityZ;
-    internal int block;
-    internal int sourcePlayer;
-    internal bool settled;
+    public string Key { get; set; }
+    public Dialog Value { get; set; }
+    public ModScreen Screen { get; set; }
 }
 
 public class MenuState
 {
     internal int selected;
-}
-
-public class Draw2dData
-{
-    internal float x1;
-    internal float y1;
-    internal float width;
-    internal float height;
-    internal int inAtlasId;
-    internal int color;
-}
-
-public interface IAviWriter
-{
-    void Open(string filename, int framerate, int width, int height);
-    void AddFrame(Bitmap bitmap);
-    void Close();
-}
-
-public enum FreemoveLevel
-{
-    None = 0,
-    Freemove = 1,
-    Noclip = 2
-}
-
-public sealed class CachedTexture
-{
-    internal int textureId;
-    internal float sizeX;
-    internal float sizeY;
-    internal int lastuseMilliseconds;
-}
-
-public enum GuiState
-{
-    Normal,
-    EscapeMenu,
-    Inventory,
-    MapLoading,
-    CraftingRecipes,
-    ModalDialog
 }
 
 public class SpecialBlockId

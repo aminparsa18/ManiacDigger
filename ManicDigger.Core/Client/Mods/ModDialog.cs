@@ -34,15 +34,15 @@ public class ModDialog : ModBase
                 continue;
             }
 
-            d.screen.screenx = (platform.CanvasWidth / 2) - (d.value.Width / 2);
-            d.screen.screeny = (platform.CanvasHeight / 2) - (d.value.Height / 2);
-            d.screen.DrawWidgets(game);
+            d.Screen.screenx = (platform.CanvasWidth / 2) - (d.Value.Width / 2);
+            d.Screen.screeny = (platform.CanvasHeight / 2) - (d.Value.Height / 2);
+            d.Screen.DrawWidgets(game);
         }
     }
 
     public override void OnKeyPress(KeyPressEventArgs args)
     {
-        if (Game.GuiState is not GuiState.ModalDialog and not GuiState.Normal)
+        if (Game.GuiState is not GameState.ModalDialog and not GameState.Normal)
         {
             return;
         }
@@ -52,7 +52,7 @@ public class ModDialog : ModBase
             return;
         }
 
-        ForEachDialog(d => d.screen.OnKeyPress(args));
+        ForEachDialog(d => d.Screen.OnKeyPress(args));
 
         for (int k = 0; k < Game.Dialogs.Count; k++)
         {
@@ -62,9 +62,9 @@ public class ModDialog : ModBase
                 continue;
             }
 
-            for (int i = 0; i < d.value.Widgets.Length; i++)
+            for (int i = 0; i < d.Value.Widgets.Length; i++)
             {
-                Widget w = d.value.Widgets[i];
+                Widget w = d.Value.Widgets[i];
                 if (w == null)
                 {
                     continue;
@@ -82,11 +82,11 @@ public class ModDialog : ModBase
 
     public override void OnKeyDown(KeyEventArgs args)
     {
-        ForEachDialog(d => d.screen.OnKeyDown(args));
+        ForEachDialog(d => d.Screen.OnKeyDown(args));
 
         bool isEsc = args.KeyChar == (int)Keys.Escape;
 
-        if (Game.GuiState == GuiState.Normal && isEsc)
+        if (Game.GuiState == GameState.Normal && isEsc)
         {
             for (int i = 0; i < Game.Dialogs.Count; i++)
             {
@@ -96,7 +96,7 @@ public class ModDialog : ModBase
                     continue;
                 }
 
-                if (d.value.IsModal)
+                if (d.Value.IsModal)
                 {
                     Game.Dialogs[i] = null;
                     return;
@@ -108,14 +108,14 @@ public class ModDialog : ModBase
             return;
         }
 
-        if (Game.GuiState == GuiState.ModalDialog)
+        if (Game.GuiState == GameState.ModalDialog)
         {
             if (isEsc)
             {
                 // Close all modal dialogs
                 for (int i = 0; i < Game.Dialogs.Count; i++)
                 {
-                    if (Game.Dialogs[i]?.value.IsModal == true)
+                    if (Game.Dialogs[i]?.Value.IsModal == true)
                     {
                         Game.Dialogs[i] = null;
                     }
@@ -134,12 +134,12 @@ public class ModDialog : ModBase
     }
 
     public override void OnKeyUp(KeyEventArgs args)
-        => ForEachDialog(d => d.screen.OnKeyUp(args));
+        => ForEachDialog(d => d.Screen.OnKeyUp(args));
 
     public override void OnMouseDown(MouseEventArgs args)
-        => ForEachDialog(d => d.screen.OnMouseDown(args));
+        => ForEachDialog(d => d.Screen.OnMouseDown(args));
     public override void OnMouseUp(MouseEventArgs args)
-        => ForEachDialog(d => d.screen.OnMouseUp(args));
+        => ForEachDialog(d => d.Screen.OnMouseUp(args));
 
     /// <summary>Iterates all non-null dialogs and applies an action to each.</summary>
     private void ForEachDialog(Action<VisibleDialog> action)

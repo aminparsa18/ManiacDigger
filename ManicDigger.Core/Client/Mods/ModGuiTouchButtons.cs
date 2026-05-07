@@ -74,7 +74,7 @@ public class ModGuiTouchButtons : ModScreen
             return;
         }
 
-        if (game.GuiState != GuiState.Normal)
+        if (game.GuiState != GameState.Normal)
         {
             return;
         }

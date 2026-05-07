@@ -120,7 +120,7 @@ public class ModGuiInventory : ModBase
     /// <inheritdoc/>
     public override void OnKeyPress(KeyPressEventArgs args)
     {
-        if (Game.GuiState != GuiState.Inventory)
+        if (Game.GuiState != GameState.Inventory)
         {
             return;
         }
@@ -141,7 +141,7 @@ public class ModGuiInventory : ModBase
     /// <inheritdoc/>
     public override void OnMouseDown(MouseEventArgs args)
     {
-        if (Game.GuiState != GuiState.Inventory)
+        if (Game.GuiState != GameState.Inventory)
         {
             return;
         }
@@ -190,7 +190,7 @@ public class ModGuiInventory : ModBase
                 controller.InventoryClick(mainClick);
             }
 
-            if (Game.GuiState == GuiState.Inventory)
+            if (Game.GuiState == GameState.Inventory)
             {
                 args.SetHandled(true);
             }
@@ -246,7 +246,7 @@ public class ModGuiInventory : ModBase
     /// <inheritdoc/>
     public override void OnMouseUp(MouseEventArgs args)
     {
-        if (Game != null && Game.GuiState != GuiState.Inventory)
+        if (Game != null && Game.GuiState != GameState.Inventory)
         {
             return;
         }
@@ -261,15 +261,15 @@ public class ModGuiInventory : ModBase
         float delta = args.OffsetY;
         bool shiftHeld = Game.KeyboardState[Game.GetKey(Keys.LeftShift)];
 
-        bool inNormalOrOutsideCells = Game.GuiState == GuiState.Normal
-            || (Game.GuiState == GuiState.Inventory && !IsMouseOverCells());
+        bool inNormalOrOutsideCells = Game.GuiState == GameState.Normal
+            || (Game.GuiState == GameState.Inventory && !IsMouseOverCells());
 
         if (inNormalOrOutsideCells && !shiftHeld)
         {
             Game.ActiveMaterial = (((Game.ActiveMaterial - (int)delta) % 10) + 10) % 10;
         }
 
-        if (IsMouseOverCells() && Game.GuiState == GuiState.Inventory)
+        if (IsMouseOverCells() && Game.GuiState == GameState.Inventory)
         {
             if (delta > 0)
             {
@@ -293,14 +293,14 @@ public class ModGuiInventory : ModBase
             inventoryUtil = Game.InventoryUtil;
         }
 
-        if (Game.GuiState == GuiState.MapLoading)
+        if (Game.GuiState == GameState.MapLoading)
         {
             return;
         }
 
         DrawMaterialSelector();
 
-        if (Game.GuiState != GuiState.Inventory)
+        if (Game.GuiState != GameState.Inventory)
         {
             return;
         }

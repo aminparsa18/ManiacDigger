@@ -15,7 +15,7 @@ public class ModDrawTestModel : ModBase
 
     public override void OnRender3d(float deltaTime)
     {
-        if (Game.GuiState == GuiState.MapLoading)
+        if (Game.GuiState == GameState.MapLoading)
         {
             return;
         }

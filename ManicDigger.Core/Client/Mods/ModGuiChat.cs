@@ -115,7 +115,7 @@ public class ModGuiChat : ModBase
     /// <inheritdoc/>
     public override void OnRender2d(float deltaTime)
     {
-        if (Game.GuiState == GuiState.MapLoading)
+        if (Game.GuiState == GameState.MapLoading)
         {
             return;
         }
@@ -160,7 +160,7 @@ public class ModGuiChat : ModBase
     /// <inheritdoc/>
     public override void OnKeyDown(KeyEventArgs args)
     {
-        if (Game.GuiState != GuiState.Normal)
+        if (Game.GuiState != GameState.Normal)
         {
             return;
         }
@@ -270,7 +270,7 @@ public class ModGuiChat : ModBase
     /// <inheritdoc/>
     public override void OnKeyPress(KeyPressEventArgs args)
     {
-        if (Game.GuiState != GuiState.Normal)
+        if (Game.GuiState != GameState.Normal)
         {
             return;
         }
@@ -407,7 +407,7 @@ public class ModGuiChat : ModBase
 
         for (int i = 0; i < Game.Entities.Count; i++)
         {
-            DrawName drawName = Game.Entities[i]?.drawName;
+            DrawName drawName = Game.Entities[i]?.DrawName;
             if (drawName == null || !drawName.ClientAutoComplete)
             {
                 continue;

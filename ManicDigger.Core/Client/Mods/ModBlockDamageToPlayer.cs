@@ -31,7 +31,7 @@ public class ModBlockDamageToPlayer : ModBase
 
     public override void OnUpdate(float args)
     {
-        if (Game.GuiState == GuiState.MapLoading || Game.FollowId() != null)
+        if (Game.GuiState == GameState.MapLoading || Game.FollowId() != null)
         {
             return;
         }

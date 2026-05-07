@@ -230,9 +230,9 @@ public class ModDrawHand3d : ModBase
     /// </summary>
     public float Light()
     {
-        float posx = Game.Player.position.x;
-        float posy = Game.Player.position.y;
-        float posz = Game.Player.position.z;
+        float posx = Game.Player.Position.X;
+        float posy = Game.Player.Position.Y;
+        float posz = Game.Player.Position.Z;
         int light = _lightManager.GetLight((int)posx, (int)posz, (int)posy);
         return 1f * light / MaxLight;
     }
@@ -396,13 +396,13 @@ public class ModDrawHand3d : ModBase
         bool onGround = Game.IsPlayerOnGround && Game.FreemoveLevel == 0;
 
         bool moved = onGround
-                  && (_prevPlayerX != Game.Player.position.x
-                   || _prevPlayerY != Game.Player.position.y
-                   || _prevPlayerZ != Game.Player.position.z);
+                  && (_prevPlayerX != Game.Player.Position.X
+                   || _prevPlayerY != Game.Player.Position.Y
+                   || _prevPlayerZ != Game.Player.Position.Z);
 
-        _prevPlayerX = Game.Player.position.x;
-        _prevPlayerY = Game.Player.position.y;
-        _prevPlayerZ = Game.Player.position.z;
+        _prevPlayerX = Game.Player.Position.X;
+        _prevPlayerY = Game.Player.Position.Y;
+        _prevPlayerZ = Game.Player.Position.Z;
 
         float speedScale = Game.MoveSpeed > 0f ? Game.MoveSpeedNow() / Game.MoveSpeed : 1f;
 

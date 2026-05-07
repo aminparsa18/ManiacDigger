@@ -18,7 +18,7 @@ public class ModGrenade : ModBase
         for (int i = 0; i < Game.Entities.Count; i++)
         {
             Entity entity = Game.Entities[i];
-            if (entity?.grenade == null)
+            if (entity?.Grenade == null)
             {
                 continue;
             }
@@ -30,15 +30,15 @@ public class ModGrenade : ModBase
     private void UpdateGrenade(int grenadeEntityId, float dt)
     {
         Entity grenadeEntity = Game.Entities[grenadeEntityId];
-        Sprite grenadeSprite = grenadeEntity.sprite;
-        Grenade grenade = grenadeEntity.grenade;
+        Sprite grenadeSprite = grenadeEntity.Sprite;
+        Grenade grenade = grenadeEntity.Grenade;
 
-        if (grenade.settled) return;
+        if (grenade.Settled) return;
 
         // Fix gravity ordering — update velocity first, then integrate
-        grenade.velocityY -= ProjectileGravity * dt;
+        grenade.VelocityY -= ProjectileGravity * dt;
 
-        Vector3 velocity = new(grenade.velocityX, grenade.velocityY, grenade.velocityZ);
+        Vector3 velocity = new(grenade.VelocityX, grenade.VelocityY, grenade.VelocityZ);
 
         // Substep to prevent tunneling — cap movement to half a block per step
         const float maxStepSize = 0.4f;
@@ -46,7 +46,7 @@ public class ModGrenade : ModBase
         int steps = Math.Max(1, (int)MathF.Ceiling(totalDist / maxStepSize));
         float subDt = dt / steps;
 
-        Vector3 pos = new(grenadeSprite.positionX, grenadeSprite.positionY, grenadeSprite.positionZ);
+        Vector3 pos = new(grenadeSprite.PositionX, grenadeSprite.PositionY, grenadeSprite.PositionZ);
 
         for (int s = 0; s < steps; s++)
         {
@@ -58,15 +58,15 @@ public class ModGrenade : ModBase
         if (velocity.LengthSquared < 0.05f)
         {
             velocity = Vector3.Zero;
-            grenade.settled = true;
+            grenade.Settled = true;
         }
 
-        grenade.velocityX = velocity.X;
-        grenade.velocityY = velocity.Y;
-        grenade.velocityZ = velocity.Z;
-        grenadeSprite.positionX = pos.X;
-        grenadeSprite.positionY = pos.Y;
-        grenadeSprite.positionZ = pos.Z;
+        grenade.VelocityX = velocity.X;
+        grenade.VelocityY = velocity.Y;
+        grenade.VelocityZ = velocity.Z;
+        grenadeSprite.PositionX = pos.X;
+        grenadeSprite.PositionY = pos.Y;
+        grenadeSprite.PositionZ = pos.Z;
     }
 
     internal Vector3 GrenadeBounce(Vector3 oldPos, Vector3 newPos, ref Vector3 velocity, float dt)

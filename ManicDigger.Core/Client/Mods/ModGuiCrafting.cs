@@ -85,7 +85,7 @@ public class ModGuiCrafting : ModBase
             _handlerRegistered = true;
         }
 
-        if (Game.GuiState == GuiState.CraftingRecipes)
+        if (Game.GuiState == GameState.CraftingRecipes)
         {
             DrawCraftingRecipes();
         }
@@ -93,7 +93,7 @@ public class ModGuiCrafting : ModBase
 
     public override void OnUpdate(float args)
     {
-        if (Game.GuiState == GuiState.CraftingRecipes)
+        if (Game.GuiState == GameState.CraftingRecipes)
         {
             CraftingMouse();
         }
@@ -276,7 +276,7 @@ public class ModGuiCrafting : ModBase
             }
         }
 
-        Game.GuiState = GuiState.CraftingRecipes;
+        Game.GuiState = GameState.CraftingRecipes;
         Game.MenuState = new MenuState();
         Game.SetFreeMouse(true);
     }

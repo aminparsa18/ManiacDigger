@@ -18,14 +18,14 @@ public interface IScreenGame : IScreenBase
 /// embedded server lifecycle, and handles reconnect / exit-to-menu transitions.
 /// </summary>
 public class ScreenGame(IGameService platform, IOpenGlService openGlService, IAssetManager assetManager, ISaveGameService saveGameService,
-    ISinglePlayerService singlePlayerService, IPreferences preferences, IGameExit gameExit, IScreenManager menu, IGameLogger gameLogger,
+    ISinglePlayerService singlePlayerService, IPreferences preferences, IGameExitService gameExit, IScreenManager menu, IGameLogger gameLogger,
     IDummyNetwork dummyNetwork, IGame game, IServiceProvider serviceProvider, WorkerHost workerHost) : ScreenBase(platform, openGlService, assetManager), IScreenGame
 {
     /// <summary>The game instance owned by this screen.</summary>
     private readonly IGame game = game;
     private ConnectionData connectData;
     private bool singleplayer;
-    private readonly IGameExit gameExit = gameExit;
+    private readonly IGameExitService gameExit = gameExit;
     private readonly IScreenManager _menu = menu;
     private readonly IDummyNetwork _dummyNetwork = dummyNetwork;
     private readonly WorkerHost _workerHost = workerHost;
@@ -164,7 +164,7 @@ public class ScreenGame(IGameService platform, IOpenGlService openGlService, IAs
             return;
         }
 
-        LoginClientCi lic = new();
+        LoginService lic = new();
         LoginData lidata = new();
         string token = qresult.PublicHash.Split('=')[1];
 

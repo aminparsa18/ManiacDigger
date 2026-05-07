@@ -6,14 +6,14 @@ using static ManicDigger.ServerPacketService;
 public class ServerMonitor
 {
     private ServerMonitorConfig config;
-    public IGameExit Exit;
+    public IGameExitService Exit;
     private readonly ILanguageService _languageService;
     private readonly IClientRegistry _serverClientService;
     private readonly IServerPacketService _serverPacketService;
     private readonly Server server;
     private readonly Dictionary<int, MonitorClient> monitorClients;
 
-    public ServerMonitor(Server server, IGameExit exit, ILanguageService languageService, IClientRegistry serverClientService, IServerPacketService serverPacketService)
+    public ServerMonitor(Server server, IGameExitService exit, ILanguageService languageService, IClientRegistry serverClientService, IServerPacketService serverPacketService)
     {
         this.server = server;
         _serverClientService = serverClientService;

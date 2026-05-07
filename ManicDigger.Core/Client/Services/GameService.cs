@@ -15,10 +15,10 @@ public class GameService : IGameService
 {
     #region Misc
 
-    public readonly IGameExit _gameExit;
+    public readonly IGameExitService _gameExit;
     private readonly CrashReporter _crashReporter;
 
-    public GameService(IGameExit gameExit, GameWindowNative gameWindowNative, CrashReporter crashReporter)
+    public GameService(IGameExitService gameExit, GameWindowNative gameWindowNative, CrashReporter crashReporter)
     {
         _gameExit = gameExit;
         Window = gameWindowNative;

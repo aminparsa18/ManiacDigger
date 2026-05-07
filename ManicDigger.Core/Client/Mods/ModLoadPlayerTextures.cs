@@ -27,7 +27,7 @@ public class ModLoadPlayerTextures : ModBase
     /// <inheritdoc/>
     public override void OnFrame(float args)
     {
-        if (Game.GuiState == GuiState.MapLoading)
+        if (Game.GuiState == GameState.MapLoading)
         {
             return;
         }
@@ -73,12 +73,12 @@ public class ModLoadPlayerTextures : ModBase
         for (int i = 0; i < Game.Entities.Count; i++)
         {
             Entity e = Game.Entities[i];
-            if (e?.drawModel == null)
+            if (e?.DrawModel == null)
             {
                 continue;
             }
 
-            if (e.drawModel.CurrentTexture != -1)
+            if (e.DrawModel.CurrentTexture != -1)
             {
                 continue;
             }
@@ -109,39 +109,39 @@ public class ModLoadPlayerTextures : ModBase
     private bool TryLoadDownloadedSkin(Entity e)
     {
         if (Game.IsSinglePlayer
-         || !e.drawModel.DownloadSkin
+         || !e.DrawModel.DownloadSkin
          || skinserver == null
-         || e.drawModel.Texture_ != null)
+         || e.DrawModel.Texture_ != null)
         {
             return false;
         }
 
         // Initiate the download on first visit.
-        if (e.drawModel.SkinDownloadResponse == null)
+        if (e.DrawModel.SkinDownloadResponse == null)
         {
-            e.drawModel.SkinDownloadResponse = new HttpResponse();
-            string url = string.Concat(skinserver, e.drawName.Name[2..], ".png");
+            e.DrawModel.SkinDownloadResponse = new HttpResponse();
+            string url = string.Concat(skinserver, e.DrawName.Name[2..], ".png");
             return true; // still downloading
         }
 
-        if (e.drawModel.SkinDownloadResponse.Error)
+        if (e.DrawModel.SkinDownloadResponse.Error)
         {
             return false;
         }
 
-        if (!e.drawModel.SkinDownloadResponse.Done)
+        if (!e.DrawModel.SkinDownloadResponse.Done)
         {
             return true;
         }
 
         // Download finished — decode and upload.
         Bitmap bmp = PixelBuffer.BitmapFromPng(
-            e.drawModel.SkinDownloadResponse.Value,
-            e.drawModel.SkinDownloadResponse.Value.Length);
+            e.DrawModel.SkinDownloadResponse.Value,
+            e.DrawModel.SkinDownloadResponse.Value.Length);
 
         if (bmp != null)
         {
-            e.drawModel.CurrentTexture = Game.GetTextureOrLoad(e.drawName.Name, bmp);
+            e.DrawModel.CurrentTexture = Game.GetTextureOrLoad(e.DrawName.Name, bmp);
             bmp.Dispose();
         }
 
@@ -155,27 +155,27 @@ public class ModLoadPlayerTextures : ModBase
     /// </summary>
     private bool TryLoadFileSkin(Entity e)
     {
-        if (e.drawModel.Texture_ == null)
+        if (e.DrawModel.Texture_ == null)
         {
-            e.drawModel.CurrentTexture = Game.GetTexture("mineplayer.png");
+            e.DrawModel.CurrentTexture = Game.GetTexture("mineplayer.png");
             return true;
         }
 
-        byte[] file = Game.GetAssetFile(e.drawModel.Texture_);
+        byte[] file = Game.GetAssetFile(e.DrawModel.Texture_);
         if (file == null)
         {
-            e.drawModel.CurrentTexture = 0;
+            e.DrawModel.CurrentTexture = 0;
             return true;
         }
 
         Bitmap bmp = PixelBuffer.BitmapFromPng(file, file.Length);
         if (bmp == null)
         {
-            e.drawModel.CurrentTexture = 0;
+            e.DrawModel.CurrentTexture = 0;
             return true;
         }
 
-        e.drawModel.CurrentTexture = Game.GetTextureOrLoad(e.drawModel.Texture_, bmp);
+        e.DrawModel.CurrentTexture = Game.GetTextureOrLoad(e.DrawModel.Texture_, bmp);
         bmp.Dispose();
         return true;
     }

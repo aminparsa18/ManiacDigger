@@ -32,7 +32,7 @@ public class ModDrawPlayers : ModBase
         for (int i = 0; i < Game.Entities.Count; i++)
         {
             Entity p = Game.Entities[i];
-            if (p?.drawModel == null)
+            if (p?.DrawModel == null)
             {
                 continue;
             }
@@ -42,32 +42,32 @@ public class ModDrawPlayers : ModBase
                 continue;
             }
 
-            if (p.networkPosition != null && !p.networkPosition.PositionLoaded)
+            if (p.NetworkPosition != null && !p.NetworkPosition.PositionLoaded)
             {
                 continue;
             }
 
-            if (!_frustumCulling.SphereInFrustum(p.position.x, p.position.y, p.position.z, 3))
+            if (!_frustumCulling.SphereInFrustum(p.Position.X, p.Position.Y, p.Position.Z, 3))
             {
                 continue;
             }
 
-            if (p.drawModel.CurrentTexture == -1)
+            if (p.DrawModel.CurrentTexture == -1)
             {
                 continue;
             }
 
-            int cx = (int)p.position.x / GameConstants.CHUNK_SIZE;
-            int cy = (int)p.position.z / GameConstants.CHUNK_SIZE;
-            int cz = (int)p.position.y / GameConstants.CHUNK_SIZE;
+            int cx = (int)p.Position.X / GameConstants.CHUNK_SIZE;
+            int cy = (int)p.Position.Z / GameConstants.CHUNK_SIZE;
+            int cz = (int)p.Position.Y / GameConstants.CHUNK_SIZE;
             if (_voxelMap.IsValidChunkPos(cx, cy, cz) && !_voxelMap.IsChunkRendered(cx, cy, cz))
             {
                 continue;
             }
 
-            p.playerDrawInfo ??= new PlayerDrawInfo();
+            p.PlayerDrawInfo ??= new PlayerDrawInfo();
 
-            float shadow = (float)_lightManager.GetLight((int)p.position.x, (int)p.position.z, (int)p.position.y) / GameConstants.maxlight;
+            float shadow = (float)_lightManager.GetLight((int)p.Position.X, (int)p.Position.Z, (int)p.Position.Y) / GameConstants.maxlight;
             float speed = i == Game.LocalPlayerId ? GetLocalPlayerSpeed(Game) : GetNetworkPlayerSpeed(p, deltaTime);
 
             EnsureRenderer(p);
@@ -78,31 +78,31 @@ public class ModDrawPlayers : ModBase
     /// <summary>Calculates movement speed for the local player based on physics velocity.</summary>
     private float GetLocalPlayerSpeed(IGame game)
     {
-        game.Player.playerDrawInfo ??= new PlayerDrawInfo();
+        game.Player.PlayerDrawInfo ??= new PlayerDrawInfo();
 
         float speed = new Vector3(
             game.playervelocity.X / 60f,
             game.playervelocity.Y / 60f,
             game.playervelocity.Z / 60f).Length * 1.5f;
 
-        game.Player.playerDrawInfo.moves = speed != 0;
+        game.Player.PlayerDrawInfo.Moves = speed != 0;
         return speed;
     }
 
     /// <summary>Calculates movement speed for a network entity based on interpolated velocity.</summary>
-    private static float GetNetworkPlayerSpeed(Entity p, float dt) => p.playerDrawInfo.Velocity.Length / dt * 0.04f;
+    private static float GetNetworkPlayerSpeed(Entity p, float dt) => p.PlayerDrawInfo.Velocity.Length / dt * 0.04f;
 
     /// <summary>Loads and initializes the animated model renderer for an entity if not already done.</summary>
     private void EnsureRenderer(Entity p)
     {
-        if (p.drawModel.renderer != null)
+        if (p.DrawModel.Renderer != null)
         {
             return;
         }
 
-        p.drawModel.renderer = new AnimatedModelRenderer(_meshDrawer, _openGlService);
-        byte[] data = Game.GetAssetFile(p.drawModel.Model_);
-        int dataLength = Game.GetAssetFileLength(p.drawModel.Model_);
+        p.DrawModel.Renderer = new AnimatedModelRenderer(_meshDrawer, _openGlService);
+        byte[] data = Game.GetAssetFile(p.DrawModel.Model);
+        int dataLength = Game.GetAssetFileLength(p.DrawModel.Model);
         if (data == null)
         {
             return;
@@ -110,17 +110,17 @@ public class ModDrawPlayers : ModBase
 
         string dataString = Encoding.UTF8.GetString(data, 0, dataLength);
         AnimatedModel model = AnimatedModelSerializer.Deserialize(dataString);
-        p.drawModel.renderer.Start(Game, model);
+        p.DrawModel.Renderer.Start(Game, model);
     }
 
     /// <summary>Renders the entity's animated model at its current world position and orientation.</summary>
     private void DrawEntity(Entity p, float dt, float shadow, float speed)
     {
         _meshDrawer.GLPushMatrix();
-        _meshDrawer.GLTranslate(p.position.x, p.position.y, p.position.z);
-        _meshDrawer.GLRotate(float.RadiansToDegrees(-p.position.roty + MathF.PI), 0, 1, 0);
-        _openGlService.BindTexture2d(p.drawModel.CurrentTexture);
-        p.drawModel.renderer.Render(dt, float.RadiansToDegrees(p.position.rotx + MathF.PI), true, p.playerDrawInfo.moves, shadow);
+        _meshDrawer.GLTranslate(p.Position.X, p.Position.Y, p.Position.Z);
+        _meshDrawer.GLRotate(float.RadiansToDegrees(-p.Position.RotY + MathF.PI), 0, 1, 0);
+        _openGlService.BindTexture2d(p.DrawModel.CurrentTexture);
+        p.DrawModel.Renderer.Render(dt, float.RadiansToDegrees(p.Position.RotX + MathF.PI), true, p.PlayerDrawInfo.Moves, shadow);
         _meshDrawer.GLPopMatrix();
     }
 }

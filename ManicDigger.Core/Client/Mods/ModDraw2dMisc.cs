@@ -21,12 +21,12 @@ public class ModDraw2dMisc : ModBase
 
     public override void OnRender2d(float deltaTime)
     {
-        if (Game.GuiState == GuiState.Normal)
+        if (Game.GuiState == GameState.Normal)
         {
             DrawAim(Game);
         }
 
-        if (Game.GuiState != GuiState.MapLoading)
+        if (Game.GuiState != GameState.MapLoading)
         {
             DrawEnemyHealthBlock(Game);
             DrawAmmo(Game);
@@ -96,14 +96,14 @@ public class ModDraw2dMisc : ModBase
                 return;
             }
 
-            float health = e.playerStats != null
-                ? (float)e.playerStats.CurrentHealth / e.playerStats.MaxHealth
+            float health = e.PlayerStats != null
+                ? (float)e.PlayerStats.CurrentHealth / e.PlayerStats.MaxHealth
                 : 1f;
 
-            string name = e.drawName?.Name ?? "Unknown";
+            string name = e.DrawName?.Name ?? "Unknown";
             string translatedName = game.Language.Get(name);
 
-            if (e.usable)
+            if (e.IsUsable)
             {
                 DrawEnemyHealthUseInfo(translatedName, health, useInfo: true);
             }
@@ -225,15 +225,15 @@ public class ModDraw2dMisc : ModBase
         }
 
         float heading = EncodingHelper.HeadingByte(
-            Game.Player.position.rotx, Game.Player.position.roty, Game.Player.position.rotz);
+            Game.Player.Position.RotX, Game.Player.Position.RotY, Game.Player.Position.RotZ);
         float pitch = EncodingHelper.PitchByte(
-            Game.Player.position.rotx, Game.Player.position.roty, Game.Player.position.rotz);
+            Game.Player.Position.RotX, Game.Player.Position.RotY, Game.Player.Position.RotZ);
 
         // Single interpolated string replaces seven string.Concat calls.
         string postext =
-            $"X: {MathF.Floor(Game.Player.position.x)},\t" +
-            $"Y: {MathF.Floor(Game.Player.position.z)},\t" +
-            $"Z: {MathF.Floor(Game.Player.position.y)}\n" +
+            $"X: {MathF.Floor(Game.Player.Position.X)},\t" +
+            $"Y: {MathF.Floor(Game.Player.Position.Z)},\t" +
+            $"Z: {MathF.Floor(Game.Player.Position.Y)}\n" +
             $"Heading: {MathF.Floor(heading)}\n" +
             $"Pitch: {MathF.Floor(pitch)}";
 

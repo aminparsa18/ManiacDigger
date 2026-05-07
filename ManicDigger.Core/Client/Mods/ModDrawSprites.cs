@@ -16,26 +16,26 @@ public class ModDrawSprites : ModBase
         for (int i = 0; i < Game.Entities.Count; i++)
         {
             Entity entity = Game.Entities[i];
-            if (entity?.sprite == null)
+            if (entity?.Sprite == null)
             {
                 continue;
             }
 
-            Sprite b = entity.sprite;
+            Sprite b = entity.Sprite;
             int? frame = null;
-            if (b.animationcount > 0)
+            if (b.AnimationCount > 0)
             {
-                float progress = 1f - (entity.expires.timeLeft / entity.expires.totalTime);
-                frame = (int)(progress * ((b.animationcount * b.animationcount) - 1));
+                float progress = 1f - (entity.Expires.TimeLeft / entity.Expires.TotalTime);
+                frame = (int)(progress * ((b.AnimationCount * b.AnimationCount) - 1));
             }
 
             meshDrawer.GLMatrixModeModelView();
             meshDrawer.GLPushMatrix();
-            meshDrawer.GLTranslate(b.positionX, b.positionY, b.positionZ);
+            meshDrawer.GLTranslate(b.PositionX, b.PositionY, b.PositionZ);
             VectorUtils.Billboard(meshDrawer);
             meshDrawer.GLScale(SpriteScale, SpriteScale, SpriteScale);
-            meshDrawer.GLTranslate(-b.size / 2, -b.size / 2, 0);
-            Game.Draw2dTexture(Game.GetTexture(b.image), 0, 0, b.size, b.size, frame, b.animationcount, ColorUtils.ColorFromArgb(255, 255, 255, 255), true);
+            meshDrawer.GLTranslate(-b.Size / 2, -b.Size / 2, 0);
+            Game.Draw2dTexture(Game.GetTexture(b.Image), 0, 0, b.Size, b.Size, frame, b.AnimationCount, ColorUtils.ColorFromArgb(255, 255, 255, 255), true);
             meshDrawer.GLPopMatrix();
         }
     }

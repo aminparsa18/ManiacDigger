@@ -93,6 +93,7 @@ public class ChunkDbCompressed : IChunkDbCompressed
         }
     }
 }
+
 public interface IChunkDbCompressed : IChunkDb 
 {
     IChunkDbRegion InnerChunkDb { get; }
