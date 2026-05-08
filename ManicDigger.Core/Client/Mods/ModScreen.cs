@@ -1,4 +1,5 @@
 ﻿using OpenTK.Windowing.Common;
+using TextCopy;
 
 /// <summary>
 /// Base class for all in-game menu screens. Manages a fixed-size pool of
@@ -101,9 +102,10 @@ public class ModScreen : ModBase
 
             if (key == 22) // paste (Ctrl+V)
             {
-                if (Clipboard.ContainsText())
+                var clipboard = new Clipboard();
+                if (!string.IsNullOrEmpty(clipboard.GetText()))
                 {
-                    w.Text = string.Concat(w.Text, Clipboard.GetText());
+                    w.Text = string.Concat(w.Text, clipboard.GetText());
                 }
 
                 return;

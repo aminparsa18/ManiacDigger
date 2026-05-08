@@ -39,12 +39,13 @@ public sealed class CrashReporter
 
     private static bool s_isConsole;
     private static ILogger<CrashReporter>? s_bootstrapLogger;
-
     private readonly ILogger<CrashReporter> _logger;
     private readonly string _crashFilePath;
 
     /// <summary>Optional cleanup hook — called (with timeout) before shutdown.</summary>
     public Action? OnCrash { get; set; }
+    public Action<bool>? SetCursorVisible { get; set; }
+    public Action<string, string>? ShowErrorDialog { get; set; }
 
     // ── Constructor (DI) ──────────────────────────────────────────────────────
 
@@ -71,13 +72,13 @@ public sealed class CrashReporter
     ///   <c>true</c>  — errors written to stderr.<br/>
     ///   <c>false</c> — errors shown in a <c>MessageBox</c>.
     /// </param>
-    public static void EnableGlobalExceptionHandling(bool isConsole)
+    public void EnableGlobalExceptionHandling(bool isConsole)
     {
         s_isConsole = isConsole;
         AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
     }
 
-    private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+    private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
         if (s_isConsole)
         {
@@ -97,7 +98,7 @@ public sealed class CrashReporter
         {
             // Host not yet built — write directly via Serilog's global logger
             // and a standalone crash file.
-            Serilog.Log.Fatal(ex, "Unhandled exception (pre-DI)");
+            Log.Fatal(ex, "Unhandled exception (pre-DI)");
             string crashPath = Path.Combine(
                 GameStorePath.GetStorePath(), "logs", CrashFileName);
             WriteCrashFile(ex, crashPath);
@@ -205,7 +206,7 @@ public sealed class CrashReporter
         return sb.ToString();
     }
 
-    private static void DisplayToUser(string message)
+    private void DisplayToUser(string message)
     {
         if (s_isConsole)
         {
@@ -215,12 +216,10 @@ public sealed class CrashReporter
         {
             for (int i = 0; i < 3; i++)
             {
-                Cursor.Show();
+                SetCursorVisible?.Invoke(true);
                 Thread.Sleep(50);
-                Application.DoEvents();
             }
-
-            MessageBox.Show(message, "Critical Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            ShowErrorDialog?.Invoke(message, "Critical Error");
         }
     }
 }

@@ -4,7 +4,7 @@
 
     public static string GetStorePath()
     {
-        string apppath = Path.GetDirectoryName(Application.ExecutablePath);
+        string apppath = Path.GetDirectoryName(AppContext.BaseDirectory);
         DirectoryInfo di = new(apppath);
         if (di.Name.Equals("AutoUpdaterTemp", StringComparison.InvariantCultureIgnoreCase))
         {

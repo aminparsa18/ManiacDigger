@@ -120,7 +120,7 @@ public class SpecialBlockId
 
 public class OnCrashHandlerLeave : OnCrashHandler
 {
-    public static OnCrashHandlerLeave Create(Game game)
+    public static OnCrashHandlerLeave Create(IGame game)
     {
         OnCrashHandlerLeave oncrash = new()
         {
@@ -128,6 +128,6 @@ public class OnCrashHandlerLeave : OnCrashHandler
         };
         return oncrash;
     }
-    private Game g;
+    private IGame g;
     public override void OnCrash() => g.SendLeave(PacketLeaveReason.Crash);
 }

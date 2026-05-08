@@ -1,6 +1,5 @@
 ﻿using ManicDigger;
 using OpenTK.Mathematics;
-using static ManicDigger.Mods.ModNetworkProcess;
 
 /// <summary>
 /// Owns the lifetime of a save session: which file is active, serialising and

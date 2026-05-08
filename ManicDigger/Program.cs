@@ -18,8 +18,6 @@ public class Program
 
     public Program(string[] args)
     {
-        CrashReporter.EnableGlobalExceptionHandling(false);
-
         ServiceCollection services = new();
         ConfigureServices(services);
         ServiceProvider = services.BuildServiceProvider();
@@ -55,6 +53,9 @@ public class Program
         {
             throw new InvalidOperationException("ServiceProvider is not initialized.");
         }
+
+        CrashReporter crashReporter = ServiceProvider.GetRequiredService<CrashReporter>();
+        crashReporter.EnableGlobalExceptionHandling(false);
 
         // 1. Mods constructed — each gets IGame injected (Game already exists)
         IEnumerable<IModBase> mods = ServiceProvider.GetServices<IModBase>();

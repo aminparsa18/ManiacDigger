@@ -199,20 +199,13 @@ public class SingleplayerScreen : ScreenBase, ISingleplayerScreen
         return savegames;
     }
 
-    private static string FileOpenDialog(string extension, string extensionName, string initialDirectory)
+    private static string GetDefaultSavePath(string extension)
     {
-        OpenFileDialog d = new()
-        {
-            InitialDirectory = initialDirectory,
-            FileName = "Default." + extension,
-            Filter = string.Format("{1}|*.{0}|All files|*.*", extension, extensionName),
-            CheckFileExists = false,
-            CheckPathExists = true
-        };
-        string dir = Environment.CurrentDirectory;
-        DialogResult result = d.ShowDialog();
-        Environment.CurrentDirectory = dir;
-        return result == DialogResult.OK ? d.FileName : null;
+        string folder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+            "Manic Digger Save");
+        Directory.CreateDirectory(folder); // no-op if already exists
+        return Path.Combine(folder, "Default." + extension);
     }
 
     /// <inheritdoc/>
@@ -242,17 +235,14 @@ public class SingleplayerScreen : ScreenBase, ISingleplayerScreen
         if (w == open)
         {
             string extension = singlePlayerService.SinglePlayerServerAvailable ? "mddbs" : "mdss";
-            string result = FileOpenDialog(extension, "Manic Digger Savegame", GameService.GameSavePath);
+            string path = GetDefaultSavePath(extension);
 
-            if (result != null)
-                saveGameService.InitialiseSession(SaveTarget.FromFile(result));
-            else
-                saveGameService.InitialiseSession(SaveTarget.NewGame());
+            saveGameService.InitialiseSession(
+                File.Exists(path)
+                    ? SaveTarget.FromFile(path)
+                    : SaveTarget.NewGame());
 
-            if (result != null)
-            {
-                _menu.ConnectToSingleplayer();
-            }
+            _menu.ConnectToSingleplayer();
         }
     }
 }

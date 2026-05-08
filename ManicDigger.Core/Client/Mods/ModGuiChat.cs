@@ -1,4 +1,5 @@
-﻿using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
+﻿using TextCopy;
+using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 /// <summary>
 /// Handles chat display, the typing input buffer, clickable chat links,
@@ -71,6 +72,7 @@ public class ModGuiChat : ModBase
     // -------------------------------------------------------------------------
 
     private readonly IGameService _platform;
+    private readonly Clipboard _clipboard;
 
     /// <summary>Visible chat lines for the current frame, populated by <see cref="DrawChatLines"/>.</summary>
     private readonly Chatline[] _visibleLines;
@@ -100,7 +102,7 @@ public class ModGuiChat : ModBase
         ChatScreenExpireTimeSeconds = 20;
         ChatLinesMaxToDraw = 10;
         _visibleLines = new Chatline[1024];
-
+        _clipboard = new Clipboard();
         // Build initial fonts at unscaled size; they will be rebuilt on the
         // first frame once Game.Scale() is known.
         _currentScaledFontSize = DefaultChatFontSize;
@@ -225,9 +227,9 @@ public class ModGuiChat : ModBase
         if (Game.KeyboardStateRaw[Game.GetKey(Keys.LeftControl)]
          || Game.KeyboardStateRaw[Game.GetKey(Keys.RightControl)])
         {
-            if (eKey == Game.GetKey(Keys.V) && Clipboard.ContainsText())
+            if (eKey == Game.GetKey(Keys.V) && !string.IsNullOrEmpty(_clipboard.GetText()))
             {
-                Game.GuiTypingBuffer += Clipboard.GetText();
+                Game.GuiTypingBuffer += _clipboard.GetText();
             }
 
             args.Handled = true;

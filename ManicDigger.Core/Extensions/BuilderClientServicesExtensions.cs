@@ -20,6 +20,7 @@ public static class BuilderClientServicesExtensions
         services.AddSingleton<IMeshDrawer, MeshDrawer>();
         services.AddSingleton<ITerrainChunkTesselator, TerrainChunkTesselator>();
         services.AddSingleton<IBlockChangeNotifier, BlockChangeNotifier>();
+        services.AddSingleton<IDisplayService, DisplayService>();
 
         services.AddSingleton<ILightManager>(sp =>  
             new LightManager(sp.GetRequiredService<IVoxelMap>(), sp.GetRequiredService<IBlockRegistry>(),

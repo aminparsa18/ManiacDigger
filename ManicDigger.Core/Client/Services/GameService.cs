@@ -11,21 +11,25 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
-public class GameService : IGameService
+public partial class GameService : IGameService
 {
     #region Misc
 
     public readonly IGameExitService _gameExit;
     private readonly CrashReporter _crashReporter;
+    private readonly IDisplayService _displayService;
 
-    public GameService(IGameExitService gameExit, GameWindowNative gameWindowNative, CrashReporter crashReporter)
+    public GameService(IGameExitService gameExit, IDisplayService displayService, GameWindowNative gameWindowNative, CrashReporter crashReporter)
     {
         _gameExit = gameExit;
+        _displayService = displayService;
         Window = gameWindowNative;
         ThreadPool.SetMinThreads(32, 32);
         ThreadPool.SetMaxThreads(128, 128);
         start.Start();
         _crashReporter = crashReporter;
+        _crashReporter.SetCursorVisible = MouseCursorSetVisible;
+        _crashReporter.ShowErrorDialog = MessageBoxShowError;
     }
 
     public INetworkService NetworkService { get; set; }
@@ -65,7 +69,17 @@ public class GameService : IGameService
         return true;
     }
 
-    public void MessageBoxShowError(string text, string caption) => MessageBox.Show(text, caption, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+    public void MessageBoxShowError(string text, string caption)
+    {
+        // On Windows only, show the native box without WinForms
+        if (OperatingSystem.IsWindows())
+        {
+            MessageBoxW(text, caption);
+        }
+    }
+
+    [LibraryImport("user32.dll", StringMarshalling = StringMarshalling.Utf16)]
+    private static partial int MessageBoxW(string text, string caption);
 
     public void ApplicationDoEvents()
     {
@@ -231,14 +245,14 @@ public class GameService : IGameService
         if (resolutions == null)
         {
             resolutions = [];
-            foreach (Screen screen in Screen.AllScreens)
+            foreach (var screen in _displayService.GetDisplayResolutions())
             {
                 DisplayResolutionCi resolution = new()
                 {
-                    Width = screen.Bounds.Width,
-                    Height = screen.Bounds.Height,
+                    Width = screen.Width,
+                    Height = screen.Height,
                     BitsPerPixel = screen.BitsPerPixel,
-                    RefreshRate = 60 // Screen doesn't expose refresh rate
+                    RefreshRate = screen.RefreshRate
                 };
 
                 if (resolution.Width < 800 || resolution.Height < 600 || resolution.BitsPerPixel < 16)
@@ -259,18 +273,7 @@ public class GameService : IGameService
 
     public void ChangeResolution(int width, int height, int bitsPerPixel, float refreshRate) => Window.Size = new Vector2i(width, height);
 
-    public DisplayResolutionCi GetDisplayResolutionDefault()
-    {
-        Screen screen = Screen.PrimaryScreen!;
-        DisplayResolutionCi r = new()
-        {
-            Width = screen.Bounds.Width,
-            Height = screen.Bounds.Height,
-            BitsPerPixel = screen.BitsPerPixel,
-            RefreshRate = 60
-        };
-        return r;
-    }
+    public DisplayResolutionCi GetDisplayResolutionDefault() => _displayService.GetDisplayResolutionDefault();
 
     #endregion
 
@@ -304,8 +307,10 @@ public class GameService : IGameService
         KeyPressHandlers.Add(onKeyPress);
     }
 
-    public List<KeyEventHandler> keyEventHandlers = new();
-    public void AddOnKeyEvent(KeyEventHandler handler) => keyEventHandlers.Add(handler);
+    public delegate void GameKeyEventHandler(KeyEventArgs e);
+
+    public List<GameKeyEventHandler> keyEventHandlers { get; set; } = new();
+    public void AddOnKeyEvent(GameKeyEventHandler handler) => keyEventHandlers.Add(handler);
 
     public void AddOnMouseEvent(
         Action<MouseEventArgs> onMouseDown,

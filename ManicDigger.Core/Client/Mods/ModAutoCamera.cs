@@ -14,6 +14,7 @@
 //When playback ends or is stopped, the player's original position and camera control are restored.
 
 using System.Text;
+using TextCopy;
 
 /// <summary>
 /// A client-side mod that records a sequence of camera waypoints and plays
@@ -336,7 +337,6 @@ public class ModAutoCamera : ModBase
     /// </remarks>
     private void SavePointsToClipboard()
     {
-        // ── Fix #1: StringBuilder instead of repeated string.Format ───────────
         StringBuilder sb = new("1,");
         for (int i = 0; i < _cameraPointsCount; i++)
         {
@@ -353,7 +353,8 @@ public class ModAutoCamera : ModBase
             }
         }
 
-        Clipboard.SetText(sb.ToString());
+        var clipboard = new Clipboard();
+        clipboard.SetText(sb.ToString());
         Game.AddChatLine("Camera points copied to clipboard.");
     }
 

@@ -1,5 +1,6 @@
 ﻿using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
+using TextCopy;
 using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 /// <summary>
@@ -120,9 +121,10 @@ public class ScreenBase(IGameService gameService, IOpenGlService openGlService, 
 
             if (e.CtrlPressed && key == (int)Keys.V)
             {
-                if (Clipboard.ContainsText())
+                Clipboard clipboardText = new Clipboard();
+                if (!string.IsNullOrEmpty(clipboardText.GetText()))
                 {
-                    w.Text = string.Concat(w.Text, Clipboard.GetText());
+                    w.Text = string.Concat(w.Text, clipboardText.GetText());
                 }
 
                 return;
