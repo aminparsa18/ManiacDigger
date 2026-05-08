@@ -21,7 +21,11 @@ jobs:
         run: dotnet workload install maui-windows
 
       - name: Publish
-        run: dotnet publish ManicDigger.Maui/ManicDigger.Maui.csproj -c Release
+        run: |
+    $version = "${{ github.ref_name }}".TrimStart('v')  # strips the 'v' from v1.0.1
+    dotnet publish ManicDigger.Maui/ManicDigger.Maui.csproj `
+      -c Release `
+      /p:Version=$version
 
       - name: Zip output
         run: |
