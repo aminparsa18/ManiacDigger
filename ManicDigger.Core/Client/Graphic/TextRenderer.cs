@@ -1,4 +1,7 @@
-﻿using System.Drawing.Drawing2D;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 
 public class TextRenderer
 {
@@ -11,7 +14,7 @@ public class TextRenderer
         //outlined font looks smaller
         t.FontSize = Math.Max(t.FontSize, 9);
         t.FontSize *= 1.65f;
-        Font font = new("Arial", t.FontSize, t.FontStyle);
+        Font font = new(new FontFamily("Arial"), t.FontSize, t.FontStyle);
 
         SizeF size;
         using (Bitmap bmp = new(1, 1))
@@ -59,7 +62,7 @@ public class TextRenderer
 
     private static Bitmap BlackBackgroundFont(TextStyle t)
     {
-        Font font = new("Verdana", t.FontSize, t.FontStyle);
+        Font font = new(new FontFamily("Verdana"), t.FontSize, t.FontStyle);
         SizeF size;
         using (Bitmap bmp = new(1, 1))
         {
@@ -88,7 +91,7 @@ public class TextRenderer
 
     private static Bitmap SimpleFont(TextStyle t)
     {
-        Font font = new("Arial", (float)t.FontSize, t.FontStyle);
+        Font font = new(new FontFamily("Arial"), (float)t.FontSize, t.FontStyle);
 
         SizeF size;
         using (Bitmap bmp = new(1, 1))
@@ -124,7 +127,7 @@ public class TextRenderer
         Font font;
         fontsize = Math.Max(fontsize, 9);
         fontsize *= 1.1f;
-        font = new Font(t.FontFamily, fontsize, t.FontStyle);
+        font = new Font(new FontFamily(t.FontFamily), fontsize, t.FontStyle);
 
         SizeF size;
         using (Bitmap bmp = new(1, 1))

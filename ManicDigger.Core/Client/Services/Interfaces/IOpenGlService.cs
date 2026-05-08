@@ -1,4 +1,6 @@
 ﻿using OpenTK.Mathematics;
+using System.Collections.Generic;
+using System.Drawing;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // OpenGL

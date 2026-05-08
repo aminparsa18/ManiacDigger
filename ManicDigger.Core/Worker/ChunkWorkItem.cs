@@ -1,4 +1,6 @@
-﻿namespace ManicDigger.Worker;
+﻿using System.Threading.Tasks;
+
+namespace ManicDigger.Worker;
 
 /// <summary>
 /// Describes a single unit of background chunk work.

@@ -1,4 +1,8 @@
-﻿namespace ManicDigger.Worker;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace ManicDigger.Worker;
 
 public sealed class SaveGameTask : IScheduledTask
 {

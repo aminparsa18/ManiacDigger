@@ -1,5 +1,7 @@
 ﻿// Copyright (c) 2011 by Henon <meinrad.recheis@gmail.com>
 using Jint;
+using System;
+using System.Collections.Generic;
 
 public interface IScriptInterpreter
 {

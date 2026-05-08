@@ -1,5 +1,10 @@
 ﻿using ManicDigger;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading;
+using System.Threading.Tasks;
 
 /// <summary>
 /// Sends a heartbeat to the public server list every 60 seconds when the server

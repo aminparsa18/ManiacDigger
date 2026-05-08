@@ -3,6 +3,9 @@
 //
 // The query is async with a real timeout — no busy-wait spin loop.
 
+using System;
+using System.Threading.Tasks;
+
 public sealed class QueryClient
 {
     private readonly INetworkService _platform;

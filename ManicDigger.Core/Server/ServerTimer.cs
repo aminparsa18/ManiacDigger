@@ -1,4 +1,6 @@
+using System;
 using System.Diagnostics;
+
 /// <summary>
 /// A mod-registered recurring callback driven by <see cref="Server.ProcessMain"/>.
 /// Not to be confused with <see cref="PeriodicTaskScheduler"/> which handles

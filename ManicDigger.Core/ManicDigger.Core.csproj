@@ -2,15 +2,30 @@
 
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
-		<TargetFramework>net10.0-windows</TargetFramework>
-		<RootNamespace>ManicDigger</RootNamespace>
-		<AssemblyName>ManicDiggerLib</AssemblyName>
-		<PlatformTarget>x64</PlatformTarget>
+		<!-- not WinExe -->
+		<TargetFramework>net10.0</TargetFramework>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-		<UseWindowsForms>true</UseWindowsForms>
+
+		<!-- Same metadata as the main project -->
+		<Version>1.0.0</Version>
+		<AssemblyVersion>1.0.0.0</AssemblyVersion>
+		<FileVersion>1.0.0.0</FileVersion>
+		<Authors>Amin Parsa</Authors>
+		<Product>Manic Digger</Product>
+		<Description>Core game logic for Manic Digger</Description>
+		<Copyright>Copyright © 2026 Amin Parsa</Copyright>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+		<Optimize>false</Optimize>
+		<DebugType>full</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<Optimize>true</Optimize>
+		<DebugType>none</DebugType>
+		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -31,6 +46,7 @@
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
 		<PackageReference Include="Jint" Version="4.7.1" />
+		<PackageReference Include="System.Drawing.Common" Version="10.0.7" />
 		<PackageReference Include="WebSocketSharp-netstandard" Version="1.0.1" />
 	</ItemGroup>
 

@@ -1,6 +1,9 @@
 ﻿namespace ManicDigger.Worker;
 
+using System;
 using System.Buffers;
+using System.Threading;
+using System.Threading.Tasks;
 
 /// <summary>
 /// IChunkWorkDispatcher for the lighting stage.

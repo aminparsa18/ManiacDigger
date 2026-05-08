@@ -71,7 +71,6 @@ public class GameService : IGameService
     {
         if (IsMono)
         {
-            Application.DoEvents();
             Thread.Sleep(0);
         }
     }

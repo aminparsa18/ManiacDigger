@@ -1,4 +1,7 @@
-﻿namespace ManicDigger;
+﻿using System;
+using System.Collections.Generic;
+
+namespace ManicDigger;
 
 public interface IServerModManager
 {

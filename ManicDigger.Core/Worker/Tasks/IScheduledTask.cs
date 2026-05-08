@@ -1,4 +1,8 @@
-﻿namespace ManicDigger.Worker;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace ManicDigger.Worker;
 
 /// <summary>
 /// A single recurring task. Implement this for any work that should run on a

@@ -1,4 +1,6 @@
-﻿/// <summary>
+﻿using System.Drawing;
+
+/// <summary>
 /// Renders cuboid (box) geometry with UV-mapped faces using a standard
 /// Minecraft-style cuboid net layout in the texture atlas.
 /// </summary>

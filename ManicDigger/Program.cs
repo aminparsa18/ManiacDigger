@@ -1,6 +1,9 @@
 ﻿using ManicDigger.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 
 public class Program
 {
@@ -45,7 +48,7 @@ public class Program
     {
         if (!Debugger.IsAttached)
         {
-            Environment.CurrentDirectory = Path.GetDirectoryName(Application.ExecutablePath)!;
+            Environment.CurrentDirectory = Path.GetDirectoryName(AppContext.BaseDirectory)!;
         }
 
         if(ServiceProvider == null)

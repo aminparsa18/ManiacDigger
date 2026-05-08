@@ -1,4 +1,7 @@
-﻿namespace ManicDigger.Worker;
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace ManicDigger.Worker;
 
 /// <summary>
 /// Enqueues chunk work items. Inject this anywhere that needs to schedule chunk work

@@ -1,5 +1,7 @@
 ﻿using ManicDigger;
 using OpenTK.Mathematics;
+using System;
+using System.Drawing;
 
 /// <summary>
 /// Client-side mod that renders the player's held item (or empty hand) as a 3-D model
