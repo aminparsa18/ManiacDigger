@@ -101,6 +101,7 @@ public class GameService : IGameService
     }
 
     public string Cachepath() => Path.Combine(StoragePath, "Cache");
+
     public void Checkcachedir()
     {
         if (!Directory.Exists(Cachepath()))
@@ -195,18 +196,18 @@ public class GameService : IGameService
 
     public void SetVSync(bool enabled) => Window.VSync = enabled ? VSyncMode.On : VSyncMode.Off;
 
-    private readonly Screenshot screenshot = new();
+    private readonly Screenshot _screenshot = new();
 
     public void SaveScreenshot()
     {
-        screenshot.d_GameWindow = Window;
-        screenshot.SaveScreenshot();
+        _screenshot.d_GameWindow = Window;
+        _screenshot.SaveScreenshot();
     }
 
     public Bitmap GrabScreenshot()
     {
-        screenshot.d_GameWindow = Window;
-        Bitmap bmp = screenshot.GrabScreenshot();
+        _screenshot.d_GameWindow = Window;
+        Bitmap bmp = _screenshot.GrabScreenshot();
         return bmp;
     }
 
@@ -220,12 +221,7 @@ public class GameService : IGameService
 
     public string KeyName(int key)
     {
-        if (Enum.IsDefined(typeof(Keys), key))
-        {
-            return Enum.GetName(typeof(Keys), key)!;
-        }
-
-        return key.ToString();
+        return Enum.IsDefined(typeof(Keys), key) ? Enum.GetName(typeof(Keys), key)! : key.ToString();
     }
 
     private List<DisplayResolutionCi> resolutions;
