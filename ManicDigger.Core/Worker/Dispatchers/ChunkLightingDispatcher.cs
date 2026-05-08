@@ -102,21 +102,10 @@ public sealed class ChunkLightingDispatcher : IChunkWorkDispatcher
 
                     if (!neighbour.TryClaimBaseLightDirty()) continue;
 
-                    lock (neighbour.BaseLightLock)
-                    {
-#if DEBUG
-                        BaseLightRaceDetector.BeginWrite(
-                            _voxelMap.ChunkFlatIndex(cx1, cy1, cz1), "LightBase");
-#endif
-                        ctx.LightBase.CalculateChunkBaseLight(
-                            cx1, cy1, cz1,
-                            ctx.ShadowLightRadius,
-                            ctx.ShadowIsTransparent);
-#if DEBUG
-                        BaseLightRaceDetector.EndWrite(
-                            _voxelMap.ChunkFlatIndex(cx1, cy1, cz1));
-#endif
-                    }
+                    ctx.LightBase.CalculateChunkBaseLight(
+                        cx1, cy1, cz1,
+                        ctx.ShadowLightRadius,
+                        ctx.ShadowIsTransparent);
 
                     anyBaseLightChanged = true;
                 }

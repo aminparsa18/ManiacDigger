@@ -1,65 +1,52 @@
 ﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
+using System.Threading.Channels;
 
 namespace ManicDigger.Worker;
 
 /// <summary>
 /// Reads from <see cref="IChunkWorkQueue"/> using a configurable number of parallel
 /// workers — one <see cref="Task"/> per worker, each running on the thread pool.
-///
-/// Items are dequeued in ascending <see cref="ChunkWorkItem.Priority"/> order
-/// (lower value = nearer to player = processed first). Priority is supplied by
-/// the enqueuer at submission time as squared chunk-space distance to the player.
-///
-/// The queue is unbounded. Backpressure is not needed because the dirty-flag claim
-/// in <see cref="Chunk.TryClaimBaseLightDirty"/> ensures each chunk is enqueued
-/// at most once per dirty cycle, bounding live queue depth to the number of
-/// loaded chunks.
 /// </summary>
 public class ChunkWorkerPool : BackgroundService, IChunkWorkQueue
 {
-    // How many parallel workers process chunk jobs.
-    // Default: leave one logical core free for the main/render thread.
     public static int DefaultWorkerCount =>
         Math.Max(1, Environment.ProcessorCount - 1);
 
     private readonly ConcurrentQueue<TerrainRendererRedraw> _results = new();
-    private readonly PriorityQueue<ChunkWorkItem, int> _queue = new();
-    private readonly object _queueLock = new();
-    private readonly SemaphoreSlim _signal = new(0);
+    private readonly Channel<ChunkWorkItem> _channel;
     private readonly IChunkWorkDispatcher _dispatcher;
     private readonly IGameLogger _logger;
     private readonly int _workerCount;
 
-    // Exposed so callers can monitor queue depth (HUD, diagnostics).
-    public int PendingCount { get { lock (_queueLock) return _queue.Count; } }
+    public int PendingCount => _channel.Reader.Count;
 
     public ChunkWorkerPool(
         IChunkWorkDispatcher dispatcher,
         IGameLogger logger,
-        int workerCount = 0,        // 0 = use DefaultWorkerCount
-        int channelCapacity = 512)  // kept for API compatibility, no longer used
+        int workerCount = 0,
+        int channelCapacity = 512)
     {
         _dispatcher = dispatcher;
         _logger = logger;
         _workerCount = workerCount > 0 ? workerCount : DefaultWorkerCount;
 
+        _channel = Channel.CreateBounded<ChunkWorkItem>(new BoundedChannelOptions(channelCapacity)
+        {
+            SingleReader = false,
+            SingleWriter = false,
+            FullMode = BoundedChannelFullMode.DropOldest,
+        });
+
         _logger.Client.Information(
-            "ChunkWorkerPool: {Workers} workers, priority queue (unbounded)",
-            _workerCount);
+            "ChunkWorkerPool: {Workers} workers, channel capacity {Capacity}",
+            _workerCount, channelCapacity);
     }
 
     // IChunkWorkQueue ──────────────────────────────────────────────────────────
 
     public ValueTask EnqueueAsync(ChunkWorkItem item, CancellationToken ct = default)
-    {
-        lock (_queueLock)
-            _queue.Enqueue(item, item.Priority);
-
-        _signal.Release();
-        return ValueTask.CompletedTask;
-    }
+        => _channel.Writer.WriteAsync(item, ct);
 
     public void EnqueueResult(TerrainRendererRedraw redraw)
         => _results.Enqueue(redraw);
@@ -79,6 +66,8 @@ public class ChunkWorkerPool : BackgroundService, IChunkWorkQueue
                 () => WorkerLoopAsync(workerId, stoppingToken), stoppingToken);
         }
 
+        stoppingToken.Register(() => _channel.Writer.TryComplete());
+
         return Task.WhenAll(workers);
     }
 
@@ -86,23 +75,8 @@ public class ChunkWorkerPool : BackgroundService, IChunkWorkQueue
     {
         _logger.Client.Debug("Chunk worker {Id} started", workerId);
 
-        while (!ct.IsCancellationRequested)
+        await foreach (ChunkWorkItem item in _channel.Reader.ReadAllAsync(ct))
         {
-            try
-            {
-                await _signal.WaitAsync(ct);
-            }
-            catch (OperationCanceledException)
-            {
-                break;
-            }
-
-            ChunkWorkItem? item;
-            lock (_queueLock)
-                _queue.TryDequeue(out item, out _);
-
-            if (item == null) continue;
-
             try
             {
                 await _dispatcher.DispatchAsync(item, ct);
@@ -120,7 +94,6 @@ public class ChunkWorkerPool : BackgroundService, IChunkWorkQueue
                     workerId, item.Type, item.ChunkX, item.ChunkY, item.ChunkZ);
 
                 item.Completion?.TrySetException(ex);
-                // Worker continues — one bad chunk should not kill the pool.
             }
         }
 

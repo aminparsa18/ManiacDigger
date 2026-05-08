@@ -126,19 +126,8 @@ public class LightBetweenChunks
                     for (int i = 0; i < CVol; i++)
                         data[i] = chunk.GetBlock(i);
 
-                    lock (chunk.BaseLightLock)
-                    {
-#if DEBUG
-                        BaseLightRaceDetector.BeginRead(
-                            _voxelMap.ChunkFlatIndex(pcx, pcy, pcz),
-                            "LightBetweenChunks.InputFromLiveChunks");
-#endif
-                        Array.Copy(chunk.BaseLight, light, CVol);
-#if DEBUG
-                        BaseLightRaceDetector.EndRead(
-                            _voxelMap.ChunkFlatIndex(pcx, pcy, pcz));
-#endif
-                    }
+                    Array.Copy(chunk.BaseLight, light, CVol);
+
                 }
     }
 

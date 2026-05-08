@@ -113,8 +113,6 @@ public class Chunk
     /// </summary>
     public bool HasData() => Data != null || dataInt != null;
 
-    public object BaseLightLock { get; } = new();
-
     /// <summary>
     /// Copies <see cref="BaseLight"/> into <paramref name="destination"/> (first
     /// <paramref name="length"/> bytes) under <see cref="BaseLightLock"/>.
@@ -125,19 +123,10 @@ public class Chunk
     /// </summary>
     public void SnapshotBaseLight(byte[] destination, int length, int chunkIndex = -1)
     {
-        lock (BaseLightLock)
-        {
-#if DEBUG
-            if (chunkIndex >= 0) BaseLightRaceDetector.BeginRead(chunkIndex, "SnapshotBaseLight");
-#endif
-            if (BaseLight != null)
-                BaseLight.AsSpan(0, length).CopyTo(destination.AsSpan(0, length));
-            else
-                destination.AsSpan(0, length).Fill(0);
-#if DEBUG
-            if (chunkIndex >= 0) BaseLightRaceDetector.EndRead(chunkIndex);
-#endif
-        }
+        if (BaseLight != null)
+            BaseLight.AsSpan(0, length).CopyTo(destination.AsSpan(0, length));
+        else
+            destination.AsSpan(0, length).Fill(0);
     }
 
     /// <summary>
