@@ -8,7 +8,7 @@
 		<RootNamespace>ManicDigger.Maui</RootNamespace>
 		<ApplicationTitle>Manic Digger</ApplicationTitle>
 		<ApplicationId>com.parsoft.manicdigger</ApplicationId>
-		<ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
+		<ApplicationDisplayVersion>1.0.6</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
