@@ -13,9 +13,9 @@ public class ModScreenshot : ModBase
     private bool takeScreenshot;
     private int screenshotFlashFramesLeft;
 
-    private readonly IGameService platform;
+    private readonly IGameWindowService platform;
 
-    public ModScreenshot(IGameService platform, IGame game) : base(game)
+    public ModScreenshot(IGameWindowService platform, IGame game) : base(game)
     {
         this.platform = platform;
     }

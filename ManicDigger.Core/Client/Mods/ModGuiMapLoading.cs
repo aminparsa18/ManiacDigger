@@ -15,10 +15,10 @@ public class ModGuiMapLoading : ModBase
         ColorUtils.ColorFromArgb(255, 0,   255, 0),  // green
     ];
 
-    private readonly IGameService platform;
+    private readonly IGameWindowService platform;
     private readonly ISinglePlayerService singlePlayerService;
 
-    public ModGuiMapLoading(IGameService platform, ISinglePlayerService singlePlayerService, IGame game) : base(game)
+    public ModGuiMapLoading(IGameWindowService platform, ISinglePlayerService singlePlayerService, IGame game) : base(game)
     {
         this.platform = platform;
         this.singlePlayerService = singlePlayerService;

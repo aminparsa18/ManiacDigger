@@ -32,7 +32,7 @@ public class TerrainChunkTesselator : ITerrainChunkTesselator
     public bool EnableSmoothLight { get; set; }
 
     private readonly IVoxelMap _voxelMap;
-    private readonly IGameService _platform;
+    private readonly IGameWindowService _platform;
     private readonly IBlockRegistry _blockTypeRegistry;
 
     private const int chunksize = 16;
@@ -72,7 +72,7 @@ public class TerrainChunkTesselator : ITerrainChunkTesselator
     // Populated once in the constructor; read-only thereafter.
     private readonly int[,] _cornerHeightLookup;
 
-    public TerrainChunkTesselator(IVoxelMap voxelMap, IGameService platform, IBlockRegistry blockTypeRegistry)
+    public TerrainChunkTesselator(IVoxelMap voxelMap, IGameWindowService platform, IBlockRegistry blockTypeRegistry)
     {
         _voxelMap = voxelMap;
         _platform = platform;

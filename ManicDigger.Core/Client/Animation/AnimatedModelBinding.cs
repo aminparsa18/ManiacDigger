@@ -268,7 +268,7 @@ public class AnimatedModelBinding : ITableBinding
         counts[3] = 1;
     }
 
-    /// <summary>Parses a string to int, as required by <see cref="IGameService"/>.</summary>
+    /// <summary>Parses a string to int, as required by <see cref="IGameWindowService"/>.</summary>
     private static int IntParse(string s)
     {
         _ = int.TryParse(s, out int ret);

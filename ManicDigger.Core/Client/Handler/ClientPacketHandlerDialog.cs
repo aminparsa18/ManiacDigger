@@ -6,7 +6,7 @@
 /// </summary>
 public class ClientPacketHandlerDialog : ClientPacketHandler
 {
-    public ClientPacketHandlerDialog(IGameService gameService, IGame game) : base(gameService, game)
+    public ClientPacketHandlerDialog(IGameWindowService gameService, IGame game) : base(gameService, game)
     {
     }
 

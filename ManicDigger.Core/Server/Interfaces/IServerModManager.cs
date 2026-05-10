@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace ManicDigger;
+﻿namespace ManicDigger;
 
 public interface IServerModManager
 {
@@ -166,9 +163,7 @@ public interface IServerModManager
     /// <param name="p">Privilege to register</param>
     void RegisterPrivilege(string p);
 
-    void RegisterOptionBool(string optionname, bool default_);
     int GetChunkSize();
-    object GetOption(string optionname);
 
     /// <summary>
     /// Get the seed used to generate the current world
@@ -255,8 +250,6 @@ public interface IServerModManager
 
     long GetCurrentTick();
 
-    long SetCurrentTick(int tick);
-
     /// <summary>
     /// Gets the number of real hours that one ingame day takes
     /// </summary>
@@ -272,11 +265,6 @@ public interface IServerModManager
     void SetDaysPerYear(int days);
     int GetDaysPerYear();
 
-    int GetHour();
-    double GetTotalHours();
-    int GetDay();
-    double GetTotalDays();
-    int GetYear();
     int GetSeason();
 
     /// <summary>
@@ -284,7 +272,6 @@ public interface IServerModManager
     /// </summary>
     void UpdateBlockTypes();
 
-    void EnableShadows(bool value);
     float GetPlayerPositionX(int player);
     float GetPlayerPositionY(int player);
     float GetPlayerPositionZ(int player);
@@ -297,10 +284,8 @@ public interface IServerModManager
     /// <param name="y">y coordinate</param>
     /// <param name="z">z coordinate</param>
     void SetPlayerPosition(int player, float x, float y, float z);
-
     int GetPlayerHeading(int player);
     int GetPlayerPitch(int player);
-    int GetPlayerStance(int player);
 
     /// <summary>
     /// Sets the player's orientation
@@ -354,9 +339,6 @@ public interface IServerModManager
     int GetPlayerHealth(int player);
     int GetPlayerMaxHealth(int player);
     void SetPlayerHealth(int player, int health, int maxhealth);
-    int GetPlayerOxygen(int player);
-    int GetPlayerMaxOxygen(int player);
-    void SetPlayerOxygen(int player, int oxygen, int maxoxygen);
 
     /// <summary>
     /// Returns the default spawn position of a certain player.
@@ -366,20 +348,6 @@ public interface IServerModManager
     /// <param name="player">Player ID</param>
     /// <returns>Spawnpoint valid for the given player</returns>
     float[] GetDefaultSpawnPosition(int player);
-
-    /// <summary>
-    /// Retrieves the default spawnpoint
-    /// </summary>
-    /// <returns>Default spawnpoint</returns>
-    int[] GetDefaultSpawnPosition();
-
-    /// <summary>
-    /// Permanently sets the default spawnpoint
-    /// </summary>
-    /// <param name="x">X coordinate of new spawnpoint</param>
-    /// <param name="y">Y coordinate of new spawnpoint</param>
-    /// <param name="z">Z coordinate of new spawnpoint</param>
-    void SetDefaultSpawnPosition(int x, int y, int z);
 
     string ServerName { get; }
 
@@ -429,7 +397,6 @@ public interface IServerModManager
     /// <param name="player"></param>
     /// <param name="isSpectator">Player invisible to non-spectators (true) or visible for all (false)</param>
     void SetPlayerSpectator(int player, bool isSpectator);
-    bool IsPlayerSpectator(int player);
 
     /// <summary>
     /// Get the BlockType object of a certain block ID. This method causes an exception when the ID is not found
@@ -464,7 +431,6 @@ public interface IServerModManager
     /// <param name="serverEvent">log message</param>
     void LogServerEvent(string serverEvent);
     void SetWorldDatabaseReadOnly(bool readOnly);
-    string[] ModPaths { get; }
 
     /// <summary>
     /// Sends an explosion to the player. This does not inflict damage. It just pushes the player.
@@ -477,19 +443,6 @@ public interface IServerModManager
     /// <param name="range">How far from center should the effect stop</param>
     /// <param name="time">How long the effect lasts</param>
     void SendExplosion(int targetplayer, float dx, float dy, float dz, bool relativeposition, float range, float time);
-
-    /// <summary>
-    /// Disconnects (kicks) a player from the server
-    /// </summary>
-    /// <param name="player"></param>
-    void DisconnectPlayer(int player);
-
-    /// <summary>
-    /// Disconnects (kicks) a player from the server
-    /// </summary>
-    /// <param name="player"></param>
-    /// <param name="message">Message displayed to the player</param>
-    void DisconnectPlayer(int player, string message);
 
     /// <summary>
     /// Returns the color of the player group
@@ -505,55 +458,7 @@ public interface IServerModManager
     /// <returns>A string containing the group name</returns>
     string GetGroupName(int player);
 
-    /// <summary>
-    /// Registers a new HTTP handler with the integrated HTTP server
-    /// </summary>
-    /// <param name="name">Internal name of the module. Displayed on module overview page.</param>
-    /// <param name="description">Description of the module</param>
-    /// <param name="module">The actual module</param>
-    void InstallHttpModule(string name, Func<string> description, IHttpModule module);
-
-    int MaxPlayers { get; }
-
-    ServerRoster GetServerClient();
-    long TotalReceivedBytes { get; }
-
-    long TotalSentBytes { get; }
-
-    /// <summary>
-    /// Changes the color of the player name.
-    /// </summary>
-    /// <param name="player"></param>
-    /// <param name="color">Color code given in format: &0</param>
-    void SetPlayerNameColor(int player, string color);
-
-    /// <summary>
-    /// Returns the restart interval of the server.
-    /// </summary>
-    /// <returns>Value of AutoRestartCycle</returns>
-    int AutoRestartInterval { get; }
-
-    /// <summary>
-    /// Sends a redirection request to the specified client. The target server has to be public!
-    /// </summary>
-    /// <param name="player"></param>
-    /// <param name="ip">The IP of the target server</param>
-    /// <param name="port">The Port of the target server</param>
-    void SendPlayerRedirect(int player, string ip, int port);
-
-    /// <summary>
-    /// Determines if the server process has been asked to terminate.
-    /// Use this when you need to save data in a method registered using RegisterOnSave() before server quits.
-    /// </summary>
-    /// <returns><i>true</i> if server is about to shutdown</returns>
-    bool IsShuttingDown { get; }
-
     List<string> required { get; set; }
-}
-
-public class ModInfo
-{
-    public string[] RequiredMods;
 }
 
 public interface IMod
@@ -563,10 +468,10 @@ public interface IMod
     /// </summary>
     /// <param name="m">ModManager object</param>
     void PreStart(IServerModManager m);
+
     /// <summary>
     /// Called once when the Mod is started. Use this if you need to initialize fields, etc...
     /// </summary>
     /// <param name="m">ModManager object</param>
     void Start(IServerModManager m, IModEvents modEvents);
 }
-

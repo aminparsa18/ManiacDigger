@@ -60,7 +60,7 @@ public class ModGuiCrafting : ModBase
     private readonly IVoxelMap voxelMap;
     private readonly IBlockRegistry blockTypeRegistry;
 
-    public ModGuiCrafting(IGameService gameService, IVoxelMap voxelMap, IBlockRegistry blockTypeRegistry, IGame game) : base(game)
+    public ModGuiCrafting(IGameWindowService gameService, IVoxelMap voxelMap, IBlockRegistry blockTypeRegistry, IGame game) : base(game)
     {
         this.voxelMap = voxelMap;
         this.blockTypeRegistry = blockTypeRegistry;

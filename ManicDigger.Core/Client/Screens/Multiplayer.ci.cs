@@ -10,7 +10,7 @@ public class MultiplayerScreen : ScreenBase, IScreenMultiplayer
     private readonly ILanguageService _languageService;
     private readonly IScreenManager _menu;
 
-    public MultiplayerScreen(IGameService platform, IOpenGlService openGlService, IPreferences preferences,
+    public MultiplayerScreen(IGameWindowService platform, IOpenGlService openGlService, IPreferences preferences,
         ILanguageService languageService, IAssetManager assetManager, IScreenManager menu)
         : base(platform,
                openGlService,

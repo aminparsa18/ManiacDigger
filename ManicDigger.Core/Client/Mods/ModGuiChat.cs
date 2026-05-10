@@ -71,7 +71,7 @@ public class ModGuiChat : ModBase
     // Private state
     // -------------------------------------------------------------------------
 
-    private readonly IGameService _platform;
+    private readonly IGameWindowService _platform;
     private readonly Clipboard _clipboard;
 
     /// <summary>Visible chat lines for the current frame, populated by <see cref="DrawChatLines"/>.</summary>
@@ -95,7 +95,7 @@ public class ModGuiChat : ModBase
     /// Initialises the chat module with default display settings and pre-allocates
     /// the visible-line buffer.
     /// </summary>
-    public ModGuiChat(IGameService platform, IGame game) : base(game)
+    public ModGuiChat(IGameWindowService platform, IGame game) : base(game)
     {
         _platform = platform;
         ChatFontSize = DefaultChatFontSize;

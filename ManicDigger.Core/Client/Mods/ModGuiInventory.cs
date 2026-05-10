@@ -11,7 +11,7 @@ using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 public class ModGuiInventory : ModBase
 {
     /// <summary>Reference to the current game instance.</summary>
-    private readonly IGameService platform;
+    private readonly IGameWindowService platform;
 
     /// <summary>Item data helpers (texture IDs, sizes, display info).</summary>
     private IInventoryService inventoryService;
@@ -66,7 +66,7 @@ public class ModGuiInventory : ModBase
     private int _scrollingDownTimeMs;
 
     /// <summary>Initialises cell dimensions and wear-place layout data.</summary>
-    public ModGuiInventory(IGameService platform, IGame game, IBlockRegistry blockRegistry) : base(game)
+    public ModGuiInventory(IGameWindowService platform, IGame game, IBlockRegistry blockRegistry) : base(game)
     {
         this.platform = platform;
         _blockTypeRegistry = blockRegistry;

@@ -73,7 +73,7 @@ public class ModPicking : ModBase
     /// <summary>All currently active physics particles, updated every draw frame.</summary>
     private readonly List<PhysicsParticle> _physicsParticles = new(64);
 
-    private readonly IGameService platform;
+    private readonly IGameWindowService platform;
     private readonly IVoxelMap voxelMap;
     private readonly ICameraService cameraService;
     private readonly IMeshDrawer meshDrawer;
@@ -83,7 +83,7 @@ public class ModPicking : ModBase
     private readonly ITerrainChunkTesselator _terrainChunkTesselator;
     private readonly Random random;
 
-    public ModPicking(IGameService platform, IVoxelMap voxelMap, ICameraService cameraService,
+    public ModPicking(IGameWindowService platform, IVoxelMap voxelMap, ICameraService cameraService,
         ITerrainChunkTesselator terrainChunkTesselator, IMeshBatcher meshBatcher,
         IMeshDrawer meshDrawer, IModRegistry modRegistry, IBlockRegistry blockTypeRegistry, IGame game) : base(game)
     {

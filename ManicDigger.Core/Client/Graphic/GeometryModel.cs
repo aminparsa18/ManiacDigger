@@ -5,7 +5,7 @@
 /// Geometry is described by parallel arrays of positions (<see cref="Xyz"/>), texture coordinates
 /// (<see cref="Uv"/>), and vertex colours (<see cref="Rgba"/>), indexed by <see cref="Indices"/>.
 /// GPU handles (<see cref="VaoId"/>, <see cref="VertexVboId"/> etc.) are populated by
-/// <see cref="IGameService.CreateModel"/> and must not be modified directly.
+/// <see cref="IGameWindowService.CreateModel"/> and must not be modified directly.
 /// </summary>
 public partial class GeometryModel
 {

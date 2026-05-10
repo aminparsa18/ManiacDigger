@@ -10,7 +10,7 @@
 /// </remarks>
 public class MainScreen : ScreenBase, IMainScreen
 {
-    public MainScreen(IGameService platform, ISinglePlayerService singlePlayerService, IOpenGlService openGlService,
+    public MainScreen(IGameWindowService platform, ISinglePlayerService singlePlayerService, IOpenGlService openGlService,
         ILanguageService languageService, IAssetManager assetManager, INavigator navigator)
         : base(platform, openGlService, assetManager)
     {

@@ -4,12 +4,12 @@ using OpenTK.Mathematics;
 public class ModDraw2dMisc : ModBase
 {
     private readonly IOpenGlService _platformOpenGl;
-    private readonly IGameService _platform;
+    private readonly IGameWindowService _platform;
     private readonly ISinglePlayerService _singlePlayerService;
     private readonly IVoxelMap _voxelMap;
     private readonly IBlockRegistry _blockTypeRegistry;
 
-    public ModDraw2dMisc(IOpenGlService platformOpenGl, IGameService platform, ISinglePlayerService singlePlayerService,
+    public ModDraw2dMisc(IOpenGlService platformOpenGl, IGameWindowService platform, ISinglePlayerService singlePlayerService,
         IVoxelMap voxelMap, IBlockRegistry blockTypeRegistry, IGame game) : base(game)
     {
         _platformOpenGl = platformOpenGl;

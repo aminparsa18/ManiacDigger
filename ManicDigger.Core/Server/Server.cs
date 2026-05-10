@@ -7,9 +7,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using static ManicDigger.ServerPacketService;
 
-public partial class Server : IServer, IDropItem
+public partial class Server : IServer, IDropItem, IDisposable
 {
-    private readonly IGameService gameplatform;
+    private readonly IGameWindowService gameplatform;
     private readonly IGameExitService _gameExit;
     private readonly IBlockRegistry _blockRegistry;
     private readonly IAssetManager _assetManager;
@@ -27,7 +27,7 @@ public partial class Server : IServer, IDropItem
 
     public List<ServerSystem> Systems { get; set; }
 
-    public Server(IGameExitService gameExit, IGameService gameService, IBlockRegistry blockRegistry, IChunkDbCompressed chunkDb, ILanguageService languageService,
+    public Server(IGameExitService gameExit, IGameWindowService gameService, IBlockRegistry blockRegistry, IChunkDbCompressed chunkDb, ILanguageService languageService,
     IAssetManager assetManager, IModEvents modEvents,ICompression compression, IServerMapStorage serverMapStorage, IServerPacketService serverPacketService,
     IServerConfig config, ISaveGameService saveGameService, IPlayerStatusService playerStatusService, IClientRegistry serverClientService, IGameLogger gameLogger)
     {
@@ -297,7 +297,6 @@ public partial class Server : IServer, IDropItem
     private ServerMonitor serverMonitor;
 
     public List<string> AllPrivileges { get; set; } = [];
-    public List<string> ModPaths { get; set; } = [];
     public string GameMode { get; set; } = "Fortress";
 
     public void ReceiveServerConsole(string message)
@@ -310,7 +309,7 @@ public partial class Server : IServer, IDropItem
         if (message.StartsWith('/'))
         {
             int spaceIndex = message.IndexOf(' ');
-            string command = (spaceIndex < 0 ? message[1..] : message[1..spaceIndex]);
+            string command = spaceIndex < 0 ? message[1..] : message[1..spaceIndex];
             string argument = spaceIndex < 0 ? "" : message[(spaceIndex + 1)..];
             CommandInterpreter(GameConstants.ServerConsoleId, command, argument);
             return;

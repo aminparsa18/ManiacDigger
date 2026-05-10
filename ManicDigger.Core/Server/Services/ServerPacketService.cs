@@ -11,12 +11,12 @@ public interface IServerPacketService
     void SendPacket(int clientid, byte[] packet);
     int StatTotalPackets { get; set; }
     int StatTotalPacketsLength { get; set; }
-    long TotalSentBytes { get; set; }
 }
 
 public class ServerPacketService : IServerPacketService
 {
     private readonly IClientRegistry _serverClientService;
+
     public ServerPacketService(IClientRegistry serverClientService)
     {
         _serverClientService = serverClientService;
@@ -62,8 +62,6 @@ public class ServerPacketService : IServerPacketService
     public int StatTotalPackets { get; set; }
     public int StatTotalPacketsLength { get; set; }
 
-    public long TotalSentBytes { get; set; }
-
     public void SendPacket(int clientid, Packet_Server packet) => SendPacket(clientid, MemoryPackSerializer.Serialize(packet));
 
     public void SendPacket(int clientid, byte[] packet)
@@ -75,7 +73,6 @@ public class ServerPacketService : IServerPacketService
 
         StatTotalPackets++;
         StatTotalPacketsLength += packet.Length;
-        TotalSentBytes += packet.Length;
         _serverClientService.Clients[clientid].Socket.SendMessage(packet.AsMemory(), MyNetDeliveryMethod.ReliableOrdered);
     }
 }

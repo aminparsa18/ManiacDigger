@@ -36,7 +36,7 @@ public class Ping
     /// Completes the in-flight ping and records the round-trip time.
     /// </summary>
     /// <returns><see langword="true"/> if the ping was received; <see langword="false"/> if no ping was in-flight.</returns>
-    public bool Receive(IGameService platform)
+    public bool Receive(IGameWindowService platform)
     {
         if (IsReady)
         {

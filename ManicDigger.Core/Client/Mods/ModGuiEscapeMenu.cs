@@ -3,12 +3,12 @@ using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 public class ModGuiEscapeMenu : ModBase
 {
-    private readonly IGameService platform;
+    private readonly IGameWindowService platform;
     private readonly IPreferences preferences;
     private readonly IOpenGlService openGlService;
     private readonly ITerrainChunkTesselator _terrainChunkTesselator;
 
-    public ModGuiEscapeMenu(IGameService platform, IPreferences preferences, IOpenGlService openGlService, IGame game, ITerrainChunkTesselator terrainChunkTesselator) : base(game)
+    public ModGuiEscapeMenu(IGameWindowService platform, IPreferences preferences, IOpenGlService openGlService, IGame game, ITerrainChunkTesselator terrainChunkTesselator) : base(game)
     {
         this.platform = platform;
         this.preferences = preferences;

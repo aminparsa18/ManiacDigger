@@ -21,7 +21,7 @@ public class ModGuiTextEditor : ModScreen
     private int cursorLine;
     private bool visible;
 
-    public ModGuiTextEditor(IGameService gameService, IGame game) : base(gameService, game)
+    public ModGuiTextEditor(IGameWindowService gameService, IGame game) : base(gameService, game)
     {
         for (int i = 0; i < MaxLines; i++)
         {

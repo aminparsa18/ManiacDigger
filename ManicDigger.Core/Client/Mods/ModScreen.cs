@@ -10,7 +10,7 @@ using TextCopy;
 public class ModScreen : ModBase
 {
     /// <summary>Reference to the current game instance.</summary>
-    private readonly IGameService platform;
+    private readonly IGameWindowService platform;
 
     /// <summary>Maximum number of widgets this screen can hold.</summary>
     internal int WidgetCount;
@@ -25,7 +25,7 @@ public class ModScreen : ModBase
     internal int screeny;
 
     /// <summary>Initialises the widget pool with a capacity of 64.</summary>
-    public ModScreen(IGameService platform, IGame game) : base(game)
+    public ModScreen(IGameWindowService platform, IGame game) : base(game)
     {
         this.platform = platform;
         WidgetCount = 64;

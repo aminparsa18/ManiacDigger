@@ -12,7 +12,7 @@ public class ModDrawTerrain : ModBase
     public const int MaxLight = 15;
     private const int NoChunk = -1;
 
-    private readonly IGameService _gameService;
+    private readonly IGameWindowService _gameService;
     private readonly IVoxelMap _voxelMap;
     private readonly IMeshBatcher _meshBatcher;
     private readonly ILightingWorkQueue _lightingQueue;
@@ -27,7 +27,7 @@ public class ModDrawTerrain : ModBase
     private readonly Vector3i[] _blocksAround7Buffer = new Vector3i[7];
 
     public ModDrawTerrain(
-        IGameService platform,
+        IGameWindowService platform,
         IVoxelMap voxelMap,
         IMeshBatcher meshBatcher,
         ILightingWorkQueue lightingQueue,

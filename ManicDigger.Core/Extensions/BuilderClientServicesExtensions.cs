@@ -10,7 +10,7 @@ public static class BuilderClientServicesExtensions
         services.AddSingleton<GameWindowNative>();
 
         services.AddSingleton<IGameExitService, GameExitService>();
-        services.AddSingleton<IGameService, GameService>();
+        services.AddSingleton<IGameWindowService, GameWindowService>();
         services.AddSingleton<ICameraService, CameraService>();
         services.AddSingleton<IAudioService, AudioService>();
         services.AddSingleton<IPreferences, Preferences>();

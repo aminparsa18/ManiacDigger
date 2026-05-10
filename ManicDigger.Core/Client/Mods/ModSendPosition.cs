@@ -4,9 +4,9 @@
 public class ModSendPosition : ModBase
 {
     private const int SendIntervalMs = 100;
-    private readonly IGameService platform;
+    private readonly IGameWindowService platform;
 
-    public ModSendPosition(IGameService platform, IGame game) : base(game)
+    public ModSendPosition(IGameWindowService platform, IGame game) : base(game)
     {
         this.platform = platform;
     }

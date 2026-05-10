@@ -10,9 +10,9 @@ public class ModDialog : ModBase
     private const string TypableChars = "abcdefghijklmnopqrstuvwxyz1234567890\t ";
 
     private readonly ClientPacketHandler packetHandler;
-    private readonly IGameService platform;
+    private readonly IGameWindowService platform;
 
-    public ModDialog(IGameService platform, IGame game) : base(game)
+    public ModDialog(IGameWindowService platform, IGame game) : base(game)
     {
         this.platform = platform;
         packetHandler = new ClientPacketHandlerDialog(platform, game);

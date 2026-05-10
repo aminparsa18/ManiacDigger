@@ -18,14 +18,14 @@ namespace ManicDigger.Mods;
 
 public class ModNetworkProcess : ModBase
 {
-    private readonly IGameService _platform;
+    private readonly IGameWindowService _platform;
     private readonly IVoxelMap voxelMap;
     private readonly IBlockRegistry blockTypeRegistry;
     private readonly IGameLogger _gameLogger;
     private readonly ITerrainChunkTesselator _terrainChunkTesselator;
     private readonly ILightManager _lightManager;
 
-    public ModNetworkProcess(IGameService gamePlatform, IVoxelMap voxelMap, IBlockRegistry blockTypeRegistry,
+    public ModNetworkProcess(IGameWindowService gamePlatform, IVoxelMap voxelMap, IBlockRegistry blockTypeRegistry,
         IGameLogger gameLogger, ITerrainChunkTesselator terrainChunkTesselator, ILightManager lightManager, IGame game) : base(game)
     {
         _platform = gamePlatform;

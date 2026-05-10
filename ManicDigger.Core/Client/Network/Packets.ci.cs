@@ -23,7 +23,7 @@ public class ClientPackets
         PositionAndOrientation = s_positionPayload
     };
 
-    public static Packet_Client CreateLoginPacket(IGameService platform, string username, string verificationKey)
+    public static Packet_Client CreateLoginPacket(IGameWindowService platform, string username, string verificationKey)
     {
         Packet_ClientIdentification p = new();
         {
@@ -40,7 +40,7 @@ public class ClientPackets
         return pp;
     }
 
-    public static Packet_Client CreateLoginPacket_(IGameService platform, string username, string verificationKey, string serverPassword)
+    public static Packet_Client CreateLoginPacket_(IGameWindowService platform, string username, string verificationKey, string serverPassword)
     {
         Packet_ClientIdentification p = new();
         {

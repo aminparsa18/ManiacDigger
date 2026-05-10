@@ -54,7 +54,7 @@ public class LoginScreen : ScreenBase, ILoginScreen
     private readonly IPreferences preferences;
     private readonly ILanguageService _languageService;
 
-    public LoginScreen(IGameService platform, IPreferences preferences, IOpenGlService openGlService, IAssetManager assetManager, ILanguageService languageService, IScreenManager menu)
+    public LoginScreen(IGameWindowService platform, IPreferences preferences, IOpenGlService openGlService, IAssetManager assetManager, ILanguageService languageService, IScreenManager menu)
         : base(platform, openGlService, assetManager)
     {
         this.preferences = preferences;

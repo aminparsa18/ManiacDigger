@@ -1,7 +1,8 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using OpenTK.Graphics.ES30;
 using OpenTK.Mathematics;
 using System.Drawing.Imaging;
 using System.Numerics;
+using PixelFormat = OpenTK.Graphics.ES30.PixelFormat;
 using Vector3 = OpenTK.Mathematics.Vector3;
 using Vector4 = OpenTK.Mathematics.Vector4;
 
@@ -464,21 +465,21 @@ public sealed class OpenGlService : IOpenGlService
             ImageLockMode.ReadOnly,
             System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
+        GL.TexImage2D(TextureTarget2d.Texture2D, 0, TextureComponentCount.Rgba,
             bmpData.Width, bmpData.Height, 0,
-            OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, bmpData.Scan0);
+            PixelFormat.Bgra, PixelType.UnsignedByte, bmpData.Scan0);
 
         bmp.UnlockBits(bmpData);   // data is on the GPU — safe to unlock
 
         // ── 5. Generate mipmaps from the uploaded GPU texture ─────────────────────
         if (EnableMipmaps)
-            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            GL.GenerateMipmap(TextureTarget.Texture2D);
 
         // ── 6. Blending ───────────────────────────────────────────────────────────
         if (EnableTransparency)
         {
             GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
         }
 
         // ── 7. Cleanup ────────────────────────────────────────────────────────────

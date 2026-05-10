@@ -17,11 +17,11 @@ public class ModBlockDamageToPlayer : ModBase
     private int lastOxygenTickMilliseconds;
     private readonly DamageTimer blockDamageTimer;
 
-    private readonly IGameService _platform;
+    private readonly IGameWindowService _platform;
     private readonly IVoxelMap voxelMap;
     private readonly IBlockRegistry blockTypeRegistry;
 
-    public ModBlockDamageToPlayer(IGameService platform, IGame game, IVoxelMap voxelMap, IBlockRegistry blockTypeRegistry) : base(game)
+    public ModBlockDamageToPlayer(IGameWindowService platform, IGame game, IVoxelMap voxelMap, IBlockRegistry blockTypeRegistry) : base(game)
     {
         _platform = platform;
         blockDamageTimer = new DamageTimer(BlockDamageToPlayerEvery, BlockDamageToPlayerEvery * 2);
@@ -113,7 +113,7 @@ public class ModBlockDamageToPlayer : ModBase
 
 public class DialogScreen : ModScreen
 {
-    public DialogScreen(IGameService gameService, IGame game) : base(gameService, game)
+    public DialogScreen(IGameWindowService gameService, IGame game) : base(gameService, game)
     {
     }
 

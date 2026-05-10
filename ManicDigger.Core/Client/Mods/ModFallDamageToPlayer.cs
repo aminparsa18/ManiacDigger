@@ -11,11 +11,11 @@ public class ModFallDamageToPlayer : ModBase
     private bool _wasSpawned;
     private bool fallSoundPlaying;
     private int lastFallDamageTimeMilliseconds;
-    private readonly IGameService _gameService;
+    private readonly IGameWindowService _gameService;
     private readonly IVoxelMap voxelMap;
     private readonly IBlockRegistry _blockRegistry;
 
-    public ModFallDamageToPlayer(IGameService platform, IVoxelMap voxelMap, IGame game, IBlockRegistry blockRegistry) : base(game)
+    public ModFallDamageToPlayer(IGameWindowService platform, IVoxelMap voxelMap, IGame game, IBlockRegistry blockRegistry) : base(game)
     {
         this._gameService = platform;
         this.voxelMap = voxelMap;

@@ -35,7 +35,7 @@ public class SingleplayerScreen : ScreenBase, ISingleplayerScreen
 
     private string title;
 
-    public SingleplayerScreen(IGameService platform, IOpenGlService platformOpenGl, IAssetManager assetManager,
+    public SingleplayerScreen(IGameWindowService platform, IOpenGlService platformOpenGl, IAssetManager assetManager,
         ISinglePlayerService singlePlayerService, ILanguageService languageService, IScreenManager menu, ISaveGameService saveGameService) : base(platform, platformOpenGl, assetManager)
     {
         play = new MenuWidget
@@ -179,7 +179,7 @@ public class SingleplayerScreen : ScreenBase, ISingleplayerScreen
     // -------------------------------------------------------------------------
 
     /// <summary>
-    /// Scans <see cref="GameService.GameSavePath"/> for <c>.mddbs</c> files
+    /// Scans <see cref="GameWindowService.GameSavePath"/> for <c>.mddbs</c> files
     /// and returns their paths. Files without the expected extension are excluded.
     /// </summary>
     /// <returns>List of fully-qualified paths to every discovered <c>.mddbs</c> save file.</returns>

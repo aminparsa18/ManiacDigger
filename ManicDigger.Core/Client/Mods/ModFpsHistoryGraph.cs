@@ -12,7 +12,7 @@ public class ModFpsHistoryGraph : ModBase
     private const int GraphPosX = 25;
     private const int PerLine = 2;
 
-    private readonly IGameService _platform;
+    private readonly IGameWindowService _platform;
     private readonly IMeshDrawer meshDrawer;
 
     private readonly float[] dtHistory = new float[MaxCount];
@@ -25,7 +25,7 @@ public class ModFpsHistoryGraph : ModBase
     private bool drawFpsText;
     private bool drawFpsGraph;
 
-    public ModFpsHistoryGraph(IGameService platform, IMeshDrawer meshDrawer, IGame game) : base(game)
+    public ModFpsHistoryGraph(IGameWindowService platform, IMeshDrawer meshDrawer, IGame game) : base(game)
     {
         _platform = platform;
         this.meshDrawer = meshDrawer;

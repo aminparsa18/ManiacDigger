@@ -12,9 +12,9 @@ using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 /// widget interactions. Override <see cref="Render"/> to draw screen-specific
 /// content on top of the shared widget layer.
 /// </remarks>
-public class ScreenBase(IGameService gameService, IOpenGlService openGlService, IAssetManager assetManager) : IScreenBase
+public class ScreenBase(IGameWindowService gameService, IOpenGlService openGlService, IAssetManager assetManager) : IScreenBase
 {
-    protected IGameService GameService { get; set; } = gameService;
+    protected IGameWindowService GameService { get; set; } = gameService;
     protected IOpenGlService OpenGlService { get; set; } = openGlService;
     protected IAssetManager AssetManager { get; set; } = assetManager;
 

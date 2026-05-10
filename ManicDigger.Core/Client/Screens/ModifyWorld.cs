@@ -11,7 +11,7 @@ public class ModifyWorldScreen : ScreenBase
     private readonly ILanguageService _languageService;
     private readonly IScreenManager _menu;
 
-    public ModifyWorldScreen(IGameService platform, IOpenGlService openGlService, ILanguageService languageService, IAssetManager assetManager, IScreenManager menu)
+    public ModifyWorldScreen(IGameWindowService platform, IOpenGlService openGlService, ILanguageService languageService, IAssetManager assetManager, IScreenManager menu)
         : base(platform, openGlService, assetManager)
     {
         _languageService = languageService;

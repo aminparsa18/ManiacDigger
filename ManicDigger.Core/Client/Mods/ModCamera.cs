@@ -9,7 +9,7 @@ public class ModCamera : ModBase
     private Vector3 overheadCameraEye;
     private readonly ICameraService cameraService;
     private readonly IMeshDrawer _meshDrawer;
-    private readonly IGameService _gameService;
+    private readonly IGameWindowService _gameService;
 
     // ── Camera bob state ──────────────────────────────────────────────────────
 
@@ -51,7 +51,7 @@ public class ModCamera : ModBase
 
     // ─────────────────────────────────────────────────────────────────────────
 
-    public ModCamera(ICameraService cameraService, IGame game, IMeshDrawer meshDrawer, IGameService gameService) : base(game)
+    public ModCamera(ICameraService cameraService, IGame game, IMeshDrawer meshDrawer, IGameWindowService gameService) : base(game)
     {
         this.cameraService = cameraService;
         this._meshDrawer = meshDrawer;

@@ -6,7 +6,7 @@ using OpenTK.Windowing.Desktop;
 // GamePlatformNative implements this; everything else depends on it.
 // ─────────────────────────────────────────────────────────────────────────────
 
-public interface IGameService
+public interface IGameWindowService
 {
     INetworkService NetworkService { get; set; }
     void AddOnNewFrame(Action<float> handler);

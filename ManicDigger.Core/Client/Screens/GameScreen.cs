@@ -17,7 +17,7 @@ public interface IScreenGame : IScreenBase
 /// Bridges platform input events to the game, manages the singleplayer
 /// embedded server lifecycle, and handles reconnect / exit-to-menu transitions.
 /// </summary>
-public class ScreenGame(IGameService platform, IOpenGlService openGlService, IAssetManager assetManager, ISaveGameService saveGameService,
+public class ScreenGame(IGameWindowService platform, IOpenGlService openGlService, IAssetManager assetManager, ISaveGameService saveGameService,
     ISinglePlayerService singlePlayerService, IPreferences preferences, IGameExitService gameExit, IScreenManager menu, IGameLogger gameLogger,
     IDummyNetwork dummyNetwork, IGame game, IServiceProvider serviceProvider, WorkerHost workerHost) : ScreenBase(platform, openGlService, assetManager), IScreenGame
 {

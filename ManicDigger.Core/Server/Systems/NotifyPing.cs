@@ -13,12 +13,12 @@ public class ServerSystemNotifyPing : ServerSystem
         Interval = TimeSpan.FromSeconds(1),
         MaxDeltaTime = TimeSpan.FromSeconds(5),
     };
-    private readonly IGameService gameService;
+    private readonly IGameWindowService gameService;
     private readonly IGameExitService gameExit;
     private readonly IClientRegistry _serverClientService;
     private readonly IServerPacketService _serverPacketService;
 
-    public ServerSystemNotifyPing(IGameService gameService, IGameExitService gameExit, IModEvents modEvents, IClientRegistry serverClientService, 
+    public ServerSystemNotifyPing(IGameWindowService gameService, IGameExitService gameExit, IModEvents modEvents, IClientRegistry serverClientService, 
         IServerPacketService serverPacketService) : base(modEvents)
     {
         this.gameService = gameService;

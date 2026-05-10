@@ -26,7 +26,7 @@ public class ConnectionScreen : ScreenBase, IConnectionScreen
     private string title;
     private bool loaded;
 
-    public ConnectionScreen(ILanguageService languageService, IGameService platform, IPreferences preferences, IOpenGlService openGlService, IAssetManager assetManager)
+    public ConnectionScreen(ILanguageService languageService, IGameWindowService platform, IPreferences preferences, IOpenGlService openGlService, IAssetManager assetManager)
         : base(platform, openGlService, assetManager)
     {
         buttonConnect = new MenuWidget { Text = "Connect", Type = UIWidgetType.Button, NextWidget = 3 };

@@ -44,10 +44,10 @@ public class ModGuiTouchButtons : ModScreen
     private int _touchRotateStartY;
 
     private readonly IGame game;
-    private readonly IGameService platform;
+    private readonly IGameWindowService platform;
 
     /// <summary>Initialises all four touch buttons and assigns them to widget slots 0–3.</summary>
-    public ModGuiTouchButtons(IGameService platform, IGame game) : base(platform, game)
+    public ModGuiTouchButtons(IGameWindowService platform, IGame game) : base(platform, game)
     {
         this.game = game;
         this.platform = platform;

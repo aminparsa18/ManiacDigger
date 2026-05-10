@@ -13,11 +13,11 @@ public class ModCompass : ModBase
     private int needleId = -1;
     private float compassAngle;
     private float compassVelocity;
-    private readonly IGameService platform;
+    private readonly IGameWindowService platform;
     private readonly IMeshDrawer meshDrawer;
     private readonly IBlockRegistry blockTypeRegistry;
 
-    public ModCompass(IGameService platform, IMeshDrawer meshDrawer, IBlockRegistry blockTypeRegistry, IGame game) : base(game)
+    public ModCompass(IGameWindowService platform, IMeshDrawer meshDrawer, IBlockRegistry blockTypeRegistry, IGame game) : base(game)
     {
         this.platform = platform;
         this.meshDrawer = meshDrawer;

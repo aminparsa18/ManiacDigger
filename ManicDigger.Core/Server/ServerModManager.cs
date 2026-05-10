@@ -241,28 +241,14 @@ public class ServerModManager(IGameExitService gameExit, IBlockRegistry blockReg
         }
     }
 
-    public void RegisterOptionBool(string optionname, bool default_) => modoptions[optionname] = default_;
-
-    private readonly Dictionary<string, object> modoptions = [];
-
     public int GetChunkSize() => GameConstants.ServerChunkSize;
-
-    public object GetOption(string optionname) => modoptions[optionname];
 
     public int Seed => saveGameService.Seed;
 
     public void SetDefaultSounds(SoundSet defaultSounds) => this.defaultSounds = defaultSounds;
     private SoundSet defaultSounds;
 
-    public byte[] GetGlobalData(string name)
-    {
-        if (saveGameService.ModData.TryGetValue(name, out byte[]? value))
-        {
-            return value;
-        }
-
-        return null;
-    }
+    public byte[] GetGlobalData(string name) => saveGameService.ModData.TryGetValue(name, out byte[]? value) ? value : null;
 
     public void SetGlobalData(string name, byte[] value) => saveGameService.ModData[name] = value;
 
@@ -278,18 +264,11 @@ public class ServerModManager(IGameExitService gameExit, IBlockRegistry blockReg
 
     public void RequireMod(string modname) => required.Add(modname);
 
-    public void SetGlobalDataNotSaved(string name, object value) => notsaved[name] = value;
+    public void SetGlobalDataNotSaved(string name, object value) => _notsaved[name] = value;
 
-    public object GetGlobalDataNotSaved(string name)
-    {
-        if (!notsaved.TryGetValue(name, out object? value))
-        {
-            return null;
-        }
+    public object GetGlobalDataNotSaved(string name) => !_notsaved.TryGetValue(name, out object? value) ? null : value;
 
-        return value;
-    }
-    private readonly Dictionary<string, object> notsaved = [];
+    private readonly Dictionary<string, object> _notsaved = [];
 
     public void SendMessageToAll(string message) => _server.SendMessageToAll(message);
 
@@ -298,31 +277,12 @@ public class ServerModManager(IGameExitService gameExit, IBlockRegistry blockReg
     public void AddToStartInventory(string blocktype, int amount) => _blockRegistry.StartInventoryAmount[GetBlockId(blocktype)] = amount;
 
     public long GetCurrentTick() => saveGameService.SimulationCurrentFrame;
-    public long SetCurrentTick(int tick) => saveGameService.SimulationCurrentFrame = tick;
 
-    public void SetDaysPerYear(int days)
-    {
-        if (days > 0)
-        {
-            _server.GetTimer().DaysPerYear = days;
-        }
-        else
-        {
-            throw new ArgumentOutOfRangeException("The number of days per year must be greater than 0!");
-        }
-    }
+    public void SetDaysPerYear(int days) => _server.GetTimer().DaysPerYear = days > 0
+        ? days 
+        : throw new ArgumentOutOfRangeException("The number of days per year must be greater than 0!");
 
     public int GetDaysPerYear() => _server.GetTimer().DaysPerYear;
-
-    public int GetHour() => _server.GetTimer().Hour;
-
-    public double GetTotalHours() => _server.GetTimer().HourTotal;
-
-    public int GetDay() => _server.GetTimer().Day;
-
-    public double GetTotalDays() => _server.GetTimer().DaysTotal;
-
-    public int GetYear() => _server.GetTimer().Year;
 
     public int GetSeason() => _server.GetTimer().Season;
 
@@ -341,9 +301,7 @@ public class ServerModManager(IGameExitService gameExit, IBlockRegistry blockReg
         int nSpeed = _server.GetTimer().SpeedOfTime;
         double nSeconds = nSecondsPerDay / nSpeed;
 
-        double nHours = TimeSpan.FromSeconds(nSeconds).TotalHours;
-
-        return nHours;
+        return TimeSpan.FromSeconds(nSeconds).TotalHours;
     }
 
     public void SetGameDayRealHours(double hours)
@@ -354,8 +312,6 @@ public class ServerModManager(IGameExitService gameExit, IBlockRegistry blockReg
 
         _server.GetTimer().SpeedOfTime = (int)(nSecondsPerDay / nSecondsGiven);
     }
-
-    public void EnableShadows(bool value) => _server.EnableShadows = value;
 
     public float GetPlayerPositionX(int player) => (float)_serverClientService.GetClient(player).PositionMul32GlX / 32;
 
@@ -386,8 +342,6 @@ public class ServerModManager(IGameExitService gameExit, IBlockRegistry blockReg
     public int GetPlayerHeading(int player) => _serverClientService.GetClient(player).PositionHeading;
 
     public int GetPlayerPitch(int player) => _serverClientService.GetClient(player).PositionPitch;
-
-    public int GetPlayerStance(int player) => _serverClientService.GetClient(player).Stance;
 
     public void SetPlayerOrientation(int player, int heading, int pitch, int stance)
     {
@@ -469,7 +423,9 @@ public class ServerModManager(IGameExitService gameExit, IBlockRegistry blockReg
         _serverClientService.Clients[player].Texture = texture;
         _server.PlayerEntitySetDirty(player);
     }
+
     public void RenderHint(RenderHint hint) => _server.RenderHint = hint;
+
     public void EnableFreemove(int player, bool enable) => _server.SendFreemoveState(player, enable);
 
     public int GetPlayerHealth(int player)
@@ -493,49 +449,10 @@ public class ServerModManager(IGameExitService gameExit, IBlockRegistry blockReg
         _playerStatusService.NotifyPlayerStats(player);
     }
 
-    public int GetPlayerOxygen(int player)
-    {
-        string name = GetPlayerName(player);
-        return _playerStatusService.GetPlayerStats(name).CurrentOxygen;
-    }
-
-    public int GetPlayerMaxOxygen(int player)
-    {
-        string name = GetPlayerName(player);
-        return _playerStatusService.GetPlayerStats(name).MaxOxygen;
-    }
-
-    public void SetPlayerOxygen(int player, int oxygen, int maxoxygen)
-    {
-        string name = GetPlayerName(player);
-        _playerStatusService.GetPlayerStats(name).CurrentOxygen = oxygen;
-        _playerStatusService.GetPlayerStats(name).MaxOxygen = maxoxygen;
-        _serverClientService.Clients[player].IsPlayerStatsDirty = true;
-        _playerStatusService.NotifyPlayerStats(player);
-    }
-
     public float[] GetDefaultSpawnPosition(int player)
     {
         Vector3i pos = _server.GetPlayerSpawnPositionMul32(player);
         return [(float)pos.X / 32, (float)pos.Z / 32, (float)pos.Y / 32];
-    }
-
-    public int[] GetDefaultSpawnPosition() => [_server.DefaultPlayerSpawn.X, _server.DefaultPlayerSpawn.Y, _server.DefaultPlayerSpawn.Z];
-
-    public void SetDefaultSpawnPosition(int x, int y, int z)
-    {
-        if (IsValidPos(x, y, z))
-        {
-            // Will fail for numbers it cannot parse. Should not happen due to previous check.
-            _serverClientService.ServerClient.DefaultSpawn.Coords = string.Format("{0},{1},{2}", x, y, z);
-            _server.DefaultPlayerSpawn = new Vector3i(x, y, z);
-            // Mark ServerClient as dirty for saving
-            _serverClientService.ServerClientNeedsSaving = true;
-        }
-        else
-        {
-            Console.WriteLine("[Mod API] Invalid default spawn position given!");
-        }
     }
 
     public string ServerName => _config.Name;
@@ -648,8 +565,6 @@ public class ServerModManager(IGameExitService gameExit, IBlockRegistry blockReg
 
     public void SetPlayerSpectator(int player, bool isSpectator) => _serverClientService.Clients[player].IsSpectator = isSpectator;
 
-    public bool IsPlayerSpectator(int player) => _serverClientService.Clients[player].IsSpectator;
-
     public BlockType GetBlockType(int block) => _blockRegistry.BlockTypes[block];
 
     public void NotifyAmmo(int player, Dictionary<int, int> totalAmmo) => _server.SendAmmo(player, totalAmmo);
@@ -672,54 +587,9 @@ public class ServerModManager(IGameExitService gameExit, IBlockRegistry blockReg
 
     public void SetWorldDatabaseReadOnly(bool readOnly) => _chunkDb.ReadOnly = readOnly;
 
-    public string[] ModPaths => [.. _server.ModPaths];
-
     public void SendExplosion(int player, float x, float y, float z, bool relativeposition, float range, float time) => _server.SendExplosion(player, x, y, z, relativeposition, range, time);
-
-    public void DisconnectPlayer(int player) => _server.KillPlayer(player);
-
-    public void DisconnectPlayer(int player, string message)
-    {
-        _serverPacketService.SendPacket(player, ServerPackets.DisconnectPlayer(message));
-        _server.KillPlayer(player);
-    }
 
     public string GetGroupColor(int player) => _server.GetGroupColor(player);
 
     public string GetGroupName(int player) => _server.GetGroupName(player);
-
-    public void InstallHttpModule(string name, Func<string> description, IHttpModule module) => _server.InstallHttpModule(name, description, module);
-
-    public int MaxPlayers => _config.MaxClients;
-
-    public ServerRoster GetServerClient() => _serverClientService.ServerClient;
-
-    public long TotalReceivedBytes => _server.TotalReceivedBytes;
-
-    public long TotalSentBytes => _serverPacketService.TotalSentBytes;
-
-    public void SetPlayerNameColor(int player, string color)
-    {
-        if (color.Equals("&0") || color.Equals("&1") || color.Equals("&2") || color.Equals("&3") ||
-            color.Equals("&4") || color.Equals("&5") || color.Equals("&6") || color.Equals("&7") ||
-            color.Equals("&8") || color.Equals("&9") || color.Equals("&a") || color.Equals("&b") ||
-            color.Equals("&c") || color.Equals("&d") || color.Equals("&e") || color.Equals("&f"))
-        {
-            _serverClientService.Clients[player].DisplayColor = color;
-            _server.PlayerEntitySetDirty(player);
-        }
-    }
-
-    public int AutoRestartInterval => _config.AutoRestartCycle;
-
-    public void SendPlayerRedirect(int player, string ip, int port) => _server.SendServerRedirect(player, ip, port);
-
-    public bool IsShuttingDown => gameExit.Exit;
-
-    #region Deprecated methods
-    public double GetCurrentYearTotal() => _server.GetTimer().Year;
-    public double GetCurrentHourTotal() => _server.GetTimer().Hour;
-    public double GetGameYearRealHours() => GetGameDayRealHours() * GetDaysPerYear();
-    public void SetGameYearRealHours(double hours) => throw new NotImplementedException("SetGameYearRealHours is no longer supported!");
-    #endregion
 }

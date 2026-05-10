@@ -7,14 +7,14 @@ using System.Text;
 /// </summary>
 public class ModDrawPlayers : ModBase
 {
-    private readonly IGameService _gameService;
+    private readonly IGameWindowService _gameService;
     private readonly IVoxelMap _voxelMap;
     private readonly IFrustumCulling _frustumCulling;
     private readonly IMeshDrawer _meshDrawer;
     private readonly IOpenGlService _openGlService;
     private readonly ILightManager _lightManager;
 
-    public ModDrawPlayers(IGameService platform, IVoxelMap voxelMap, IFrustumCulling frustumCulling,
+    public ModDrawPlayers(IGameWindowService platform, IVoxelMap voxelMap, IFrustumCulling frustumCulling,
         IMeshDrawer meshDrawer, IOpenGlService openGlService, ILightManager lightManager, IGame game) : base(game)
     {
         this._gameService = platform;

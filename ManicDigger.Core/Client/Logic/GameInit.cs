@@ -12,7 +12,7 @@ public partial class Game : IGame
     // Platform & core subsystems
     // -------------------------------------------------------------------------
 
-    private readonly IGameService gameService;
+    private readonly IGameWindowService gameService;
     private readonly IOpenGlService openGlService;
     private readonly ILightManager _lightManager;
     private readonly ISinglePlayerService singlePlayerService;
@@ -334,7 +334,7 @@ public partial class Game : IGame
     // Constructor
     // -------------------------------------------------------------------------
 
-    public Game(IGameService platform, IOpenGlService platformOpenGl, ISinglePlayerService singlePlayerService, ITerrainChunkTesselator terrainChunkTesselator,
+    public Game(IGameWindowService platform, IOpenGlService platformOpenGl, ISinglePlayerService singlePlayerService, ITerrainChunkTesselator terrainChunkTesselator,
         IModRegistry modRegistry, IVoxelMap voxelMap, IAudioService audioService, ICameraService cameraService, IFrustumCulling frustumCulling,
         IMeshDrawer meshDrawer, IBlockRegistry blockTypeRegistry, IAssetManager assetManager, IGameLogger gameLogger, ILightManager lightManager,
        IBlockChangeNotifier blockChangeNotifier)

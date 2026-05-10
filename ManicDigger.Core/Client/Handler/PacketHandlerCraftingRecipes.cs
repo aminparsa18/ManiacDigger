@@ -1,4 +1,4 @@
-﻿public class PacketHandlerCraftingRecipes(IGameService gameService, IGame game) : ClientPacketHandler(gameService, game)
+﻿public class PacketHandlerCraftingRecipes(IGameWindowService gameService, IGame game) : ClientPacketHandler(gameService, game)
 {
     internal ModGuiCrafting mod;
 

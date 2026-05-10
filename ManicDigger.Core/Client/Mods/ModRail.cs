@@ -62,7 +62,7 @@ public class ModRail : ModBase
     /// <summary>Index (0–3) of the last rail clack sound played, cycled round-robin.</summary>
     private int _lastRailSoundIndex;
 
-    private readonly IGameService platform;
+    private readonly IGameWindowService platform;
 
     /// <summary>Returns the height of the minecart seat above the rail block origin.</summary>
     internal float MinecartHeight() => 1f / 2;
@@ -70,7 +70,7 @@ public class ModRail : ModBase
     private readonly IVoxelMap _voxelMap;
     private readonly IBlockRegistry _blockTypeRegistry;
 
-    public ModRail(IGameService platform, IVoxelMap voxelMap, IBlockRegistry blockTypeRegistry, IGame game) : base(game)
+    public ModRail(IGameWindowService platform, IVoxelMap voxelMap, IBlockRegistry blockTypeRegistry, IGame game) : base(game)
     {
         this.platform = platform;
         _voxelMap = voxelMap;

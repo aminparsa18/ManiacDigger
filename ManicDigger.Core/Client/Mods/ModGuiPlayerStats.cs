@@ -11,9 +11,9 @@ public class ModGuiPlayerStats : ModBase
     private static readonly int Red = ColorUtils.ColorFromArgb(255, 255, 0, 0);
     private static readonly int Blue = ColorUtils.ColorFromArgb(255, 0, 0, 255);
 
-    private readonly IGameService _gameService;
+    private readonly IGameWindowService _gameService;
 
-    public ModGuiPlayerStats(IGameService platform, IGame game) : base(game)
+    public ModGuiPlayerStats(IGameWindowService platform, IGame game) : base(game)
     {
         this._gameService = platform;
     }

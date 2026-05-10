@@ -20,7 +20,6 @@ public interface IServer
     Dictionary<string, Inventory> Inventory { get; set; }
     bool IsSinglePlayer { get; }
     NetServer[] MainSockets { get; set; }
-    List<string> ModPaths { get; set; }
     List<Action> OnLoad { get; set; }
     List<Action> OnSave { get; set; }
     int Port { get; set; }
@@ -51,9 +50,7 @@ public interface IServer
     void DeleteChunk(int x, int y, int z);
     void DeleteChunks(List<Vector3i> chunkPositions);
     void DespawnEntity(ServerEntityId id);
-    void Dispose();
     Vector3i DontSpawnPlayerInWater(Vector3i initialSpawn);
-    void DropItem(ref InventoryItem item, Vector3i pos);
     void Exit();
     int GetBlock(int x, int y, int z);
     ushort[] GetChunk(int x, int y, int z);

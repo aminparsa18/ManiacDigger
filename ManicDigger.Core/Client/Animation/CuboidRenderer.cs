@@ -81,7 +81,7 @@ public static class CuboidRenderer
     /// <summary>
     /// Uploads and submits a <see cref="GeometryModel"/> buffer for a cuboid,
     /// disabling face culling during the draw call so all faces are visible.
-    /// Since cuboid geometry is rebuilt every draw call, <see cref="IGameService.UpdateModel"/>
+    /// Since cuboid geometry is rebuilt every draw call, <see cref="IGameWindowService.UpdateModel"/>
     /// is used to sync the CPU buffers to the GPU before drawing.
     /// </summary>
     /// <param name="game">The game instance used for GL draw calls.</param>

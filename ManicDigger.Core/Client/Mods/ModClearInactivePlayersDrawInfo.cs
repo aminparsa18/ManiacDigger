@@ -6,10 +6,10 @@ public class ModClearInactivePlayersDrawInfo : ModBase
     private const float InactiveThresholdSeconds = 2f;
 
     private readonly IGame _game;
-    private readonly IGameService _platform;
+    private readonly IGameWindowService _platform;
     private readonly ISinglePlayerService _singlePlayerService;
 
-    public ModClearInactivePlayersDrawInfo(IGameService platform, IGame game, ISinglePlayerService singlePlayerService) : base(game)
+    public ModClearInactivePlayersDrawInfo(IGameWindowService platform, IGame game, ISinglePlayerService singlePlayerService) : base(game)
     {
         _platform = platform;
         _game = game;

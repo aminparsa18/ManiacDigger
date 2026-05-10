@@ -1,5 +1,5 @@
 ﻿using ManicDigger.ClientNative;
-using OpenTK.Graphics.OpenGL4;
+using OpenTK.Graphics.ES30;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Common.Input;
@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
-public partial class GameService : IGameService
+public partial class GameWindowService : IGameWindowService
 {
     #region Misc
 
@@ -19,7 +19,7 @@ public partial class GameService : IGameService
     private readonly CrashReporter _crashReporter;
     private readonly IDisplayService _displayService;
 
-    public GameService(IGameExitService gameExit, IDisplayService displayService, GameWindowNative gameWindowNative, CrashReporter crashReporter)
+    public GameWindowService(IGameExitService gameExit, IDisplayService displayService, GameWindowNative gameWindowNative, CrashReporter crashReporter)
     {
         _gameExit = gameExit;
         _displayService = displayService;

@@ -35,7 +35,7 @@ public class ScreenManager : IScreenManager
 
     /// <summary>The active platform abstraction (windowing, GL, input, etc.).</summary>
     private readonly IScreenFactory _screenFactory;
-    private readonly IGameService _gameService;
+    private readonly IGameWindowService _gameService;
     private readonly IOpenGlService _platformOpenGl;
     private readonly IAssetManager _assetManager;
     private readonly ILanguageService _lang;
@@ -61,7 +61,7 @@ public class ScreenManager : IScreenManager
     // Constructor
     // -------------------------------------------------------------------------
 
-    public ScreenManager(IScreenFactory screenFactory, IGameService platform, IOpenGlService platformOpenGl,
+    public ScreenManager(IScreenFactory screenFactory, IGameWindowService platform, IOpenGlService platformOpenGl,
         IAssetManager assetManager, ILanguageService languageService)
     {
         _screenFactory = screenFactory;
