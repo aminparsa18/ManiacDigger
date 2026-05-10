@@ -1,4 +1,6 @@
 ﻿using ManicDigger.Extensions;
+using ManicDigger.Maui.Services;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 
 namespace ManicDigger.Maui;
 
@@ -9,6 +11,7 @@ public static class MauiProgram
         MauiAppBuilder builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
+            .UseSkiaSharp()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -20,6 +23,10 @@ public static class MauiProgram
 
         builder.Services.AddClientMods();
         builder.Services.AddServerMods();
+
+        builder.Services.AddSingleton<MauiGameWindowService>();
+        builder.Services.AddSingleton<IGameWindowService>(sp =>
+            sp.GetRequiredService<MauiGameWindowService>());
 
         builder.Services.AddScreens();
 

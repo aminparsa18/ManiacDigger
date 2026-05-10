@@ -3,12 +3,22 @@
     x:Class="ManicDigger.Maui.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:ManicDigger.Maui"
+    xmlns:local="clr-namespace:ManicDigger.Maui.Views"
     Title="ManicDigger.Maui">
 
     <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+        Title="Menu"
+        ContentTemplate="{DataTemplate local:MainMenuView}"
+        Route="MainMenuView" />
+
+    <ShellContent
+         Title="SinglePlayer"
+         ContentTemplate="{DataTemplate local:SinglePlayerView}"
+         Route="SinglePlayerView" />
+
+    <ShellContent
+         Title="Home"
+         ContentTemplate="{DataTemplate local:GameView}"
+         Route="GameView" />
 
 </Shell>

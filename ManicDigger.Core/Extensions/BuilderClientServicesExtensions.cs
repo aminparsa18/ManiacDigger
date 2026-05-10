@@ -7,10 +7,10 @@ public static class BuilderClientServicesExtensions
 {
     public static IServiceCollection AddClientServices(this IServiceCollection services)
     {
-        services.AddSingleton<GameWindowNative>();
+        //services.AddSingleton<GameWindowNative>();
 
         services.AddSingleton<IGameExitService, GameExitService>();
-        services.AddSingleton<IGameWindowService, GameWindowService>();
+      //  services.AddSingleton<IGameWindowService, GameWindowService>();
         services.AddSingleton<ICameraService, CameraService>();
         services.AddSingleton<IAudioService, AudioService>();
         services.AddSingleton<IPreferences, Preferences>();

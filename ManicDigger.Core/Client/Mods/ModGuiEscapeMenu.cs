@@ -899,10 +899,10 @@ public class KeyHelp
 
 public class DisplayResolutionCi
 {
-    internal int Width;
-    internal int Height;
-    internal int BitsPerPixel;
-    internal float RefreshRate;
+    public int Width { get; set; }
+    public int Height { get; set; }
+    public int BitsPerPixel { get; set; }
+    public float RefreshRate { get; set; }
     public int GetWidth() => Width;
     public void SetWidth(int value) => Width = value;
     public int GetHeight() => Height;
