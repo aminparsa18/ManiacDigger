@@ -4,6 +4,20 @@ using OpenTK.Graphics.ES30;
 using OpenTK.Mathematics;
 using SkiaSharp.Views.Maui;
 using System.Runtime.InteropServices;
+using System.Reflection;
+using PointerEventArgs = Microsoft.Maui.Controls.PointerEventArgs;
+
+using SkiaSharp.Views.Maui.Handlers;
+using Microsoft.Maui.Platform;
+using SkiaSharp.Views.Maui.Controls;
+
+
+
+#if WINDOWS
+using Windows.UI.Core;
+using Microsoft.UI.Input;
+using Microsoft.UI.Xaml;
+#endif
 
 namespace ManicDigger.Maui.Views;
 
@@ -17,6 +31,7 @@ public partial class GameView : ContentPage
     private readonly ISinglePlayerService _singlePlayerService;
     private readonly ISaveGameService _saveGameService;
     private readonly IOpenGlService _openGlService;
+    private readonly IGameLogger _gameLogger;
     private readonly IGameWindowService _gameWindowService;
     private readonly IAssetManager _assetManager;
     private readonly IDummyNetwork _dummyNetwork;
@@ -43,9 +58,10 @@ public partial class GameView : ContentPage
         _saveGameService = saveGameService;
         _assetManager = assetManager;
         _game = game;
+        _gameLogger = gameLogger;
         _singlePlayerService = singlePlayerService;
         _workerHost = workerHost;
-        _dummyNetwork = dummyNetwork; 
+        _dummyNetwork = dummyNetwork;
         _serverSystemBootstraper = serverSystemBootstraper;
     }
 
@@ -70,16 +86,16 @@ public partial class GameView : ContentPage
 
         GlView.Focus();
         ((MauiGameWindowService)_gameWindowService).Attach(GlView);
-#if WINDOWS
-        ((MauiGameWindowService)_gameWindowService).CaptureMouse(GlView.Handler?.MauiContext);
-#endif
+
         _gameWindowService.AddOnNewFrame(Draw);
-       // _gameWindowService.AddOnMouseEvent(HandleMouseDown, HandleMouseUp, HandleMouseMove, HandleMouseWheel);
+        // _gameWindowService.AddOnMouseEvent(HandleMouseDown, HandleMouseUp, HandleMouseMove, HandleMouseWheel);
 
         _gameWindowService.Start();
 
-        _game.IsSinglePlayer = true;
+       // ((MauiGameWindowService)_gameWindowService).CaptureMouse();
 
+        _game.IsSinglePlayer = true;
+        
         Connect();
     }
 
@@ -124,6 +140,7 @@ public partial class GameView : ContentPage
         base.OnDisappearing();
         _gameLoopTimer?.Stop();
         _gameLoopTimer = null;
+        ((MauiGameWindowService)_gameWindowService).ReleaseMouse();
     }
 
     private void GlView_PaintSurface(object sender, SKPaintGLSurfaceEventArgs e)
@@ -172,7 +189,7 @@ public partial class GameView : ContentPage
         if (_game.IsReconnecting)
         {
             _game.Dispose();
-           // restart game
+            // restart game
             return;
         }
 
@@ -187,13 +204,13 @@ public partial class GameView : ContentPage
 
     }
 
-    private float _lastPointerX;
-    private float _lastPointerY;
+    private bool _firstMove = true;
+    private float _lastX;
+    private float _lastY;
 
     private void PointerGestureRecognizer_PointerMoved(object sender, PointerEventArgs e)
     {
-        if (!_gameWindowService.Focused())
-            return;
+        if (!_gameWindowService.Focused()) return;
 
         Point? pos = e.GetPosition(GlView);
         if (pos == null) return;
@@ -201,19 +218,22 @@ public partial class GameView : ContentPage
         float density = (float)DeviceDisplay.MainDisplayInfo.Density;
         float x = (float)pos.Value.X * density;
         float y = (float)pos.Value.Y * density;
-        float dx = x - _lastPointerX;
-        float dy = y - _lastPointerY;
-        _lastPointerX = x;
-        _lastPointerY = y;
 
-        // Pass 1 — real event sets absolute cursor position
-        var real = new MouseEventArgs();
-        real.SetX((int)x);
-        real.SetY((int)y);
-        real.SetEmulated(false);
-        _game.MouseMove(real);
+        if (_firstMove)
+        {
+            // Pretend mouse started from current position — zero delta
+            _lastX = x;
+            _lastY = y;
+            _firstMove = false;
+            ((MauiGameWindowService)_gameWindowService).RecenterCursor();
+            return;
+        }
 
-        // Pass 2 — emulated event accumulates delta for camera rotation
+        float dx = x - _lastX;
+        float dy = y - _lastY;
+        _lastX = x;
+        _lastY = y;
+
         var emulated = new MouseEventArgs();
         emulated.SetX((int)x);
         emulated.SetY((int)y);
@@ -221,5 +241,10 @@ public partial class GameView : ContentPage
         emulated.SetMovementY((int)dy);
         emulated.SetEmulated(true);
         _game.MouseMove(emulated);
+
+        ((MauiGameWindowService)_gameWindowService).RecenterCursor();
+        _lastX = GlView.CanvasSize.Width / 2f;
+        _lastY = GlView.CanvasSize.Height / 2f;
     }
+
 }

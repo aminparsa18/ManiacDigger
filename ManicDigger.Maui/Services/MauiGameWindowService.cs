@@ -265,14 +265,14 @@ public sealed partial class MauiGameWindowService : IGameWindowService
 
     public void MouseCursorSetVisible(bool value)
     {
-      //  _mouseCursorVisible = value;
-//#if WINDOWS
-//        MainThread.BeginInvokeOnMainThread(() =>
-//        {
-//            CoreWindow obj = CoreWindow.GetForCurrentThread();
-//            obj.PointerCursor = value ? new CoreCursor(CoreCursorType.Arrow, 0) : null;
-//        });
-//#endif
+        _mouseCursorVisible = value;
+        if (_mouseCursorVisible)
+        {
+        }
+        else
+        {
+            //CaptureMouse();
+        }
     }
 
     public void RequestMousePointerLock() { MouseCursorSetVisible(false); _mousePointerLocked = true; }

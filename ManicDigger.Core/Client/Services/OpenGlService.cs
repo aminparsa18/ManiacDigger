@@ -156,8 +156,6 @@ public sealed class OpenGlService : IOpenGlService
         {
             GL.Uniform1(_uUseTexture, texture != 0 ? 1 : 0);
         }
-        _logger.Client.Debug(
-        $"[BindTexture2d] texture={texture} uUseTexture={(texture != 0 ? 1 : 0)} error={GL.GetError()}");
     }
 
     /// <inheritdoc/>
