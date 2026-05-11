@@ -5,11 +5,19 @@
              xmlns:cmp="clr-namespace:ManicDigger.Maui.Views.Components"
              xmlns:skia="clr-namespace:SkiaSharp.Views.Maui.Controls;assembly=SkiaSharp.Views.Maui.Controls">
 
-        <skia:SKGLView x:Name="GlView"
+    <skia:SKGLView x:Name="GlView"
                         HorizontalOptions="Fill"
                         VerticalOptions="Fill"
                         PaintSurface="GlView_PaintSurface"
-                        WidthRequest="1280"
-                        HeightRequest="768"/>
+                        WidthRequest="1920"
+                        HeightRequest="1080">
+        <skia:SKGLView.GestureRecognizers>
+
+            <!-- Mouse move / hover (works on Windows, desktop pointer) -->
+            <PointerGestureRecognizer
+            PointerMoved="PointerGestureRecognizer_PointerMoved" />
+
+        </skia:SKGLView.GestureRecognizers>
+    </skia:SKGLView>
 
 </ContentPage>

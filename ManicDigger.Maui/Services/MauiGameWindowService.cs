@@ -6,12 +6,13 @@
 // Attach(GameSKGLView) is called from GameView.OnAppearing.
 // Detach() is called from GameView.OnDisappearing.
 
-using ManicDigger.Maui.Views.Components;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using System.Diagnostics;
 using System.Drawing;
 using System.Text.RegularExpressions;
+using SkiaSharp.Views.Maui.Controls;
+
 
 #if WINDOWS
 using ManicDigger.Maui.Platforms.Windows;
@@ -32,7 +33,7 @@ public sealed partial class MauiGameWindowService : IGameWindowService
 
     // ── Late-bound view ───────────────────────────────────────────────────────
 
-    private GameSKGLView? _view;
+    private SKGLView? _view;
 
     // ── Timing ────────────────────────────────────────────────────────────────
 
@@ -66,17 +67,18 @@ public sealed partial class MauiGameWindowService : IGameWindowService
 
     // ── View lifecycle ────────────────────────────────────────────────────────
 
+    private bool _isFocused = false;
     /// <summary>
     /// Called from GameView.OnAppearing once the SKGLView is in the visual tree.
     /// SkiaSharp has already created the EGL/ANGLE context at this point.
     /// </summary>
-    public void Attach(GameSKGLView view)
+    public void Attach(SKGLView view)
     {
         _view = view;
         view.EnableTouchEvents = true;
         view.Touch += OnSkiaTouch;
+        _isFocused = true;
         _initialised = false;
-        view.StartLoop();
     }
 
     /// <summary>
@@ -85,7 +87,6 @@ public sealed partial class MauiGameWindowService : IGameWindowService
     public void Detach()
     {
         if (_view is null) return;
-        _view.StopLoop();
         _view.Touch -= OnSkiaTouch;
         _view = null;
     }
@@ -260,18 +261,18 @@ public sealed partial class MauiGameWindowService : IGameWindowService
 
     public bool IsMousePointerLocked() => _mousePointerLocked;
     public bool MouseCursorIsVisible() => _mouseCursorVisible;
-    public bool Focused() => _view?.IsFocused ?? false;
+    public bool Focused() => _isFocused;
 
     public void MouseCursorSetVisible(bool value)
     {
-        _mouseCursorVisible = value;
-#if WINDOWS
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            CoreWindow.GetForCurrentThread()!.PointerCursor = value
-                ? new CoreCursor(CoreCursorType.Arrow, 0) : null;
-        });
-#endif
+      //  _mouseCursorVisible = value;
+//#if WINDOWS
+//        MainThread.BeginInvokeOnMainThread(() =>
+//        {
+//            CoreWindow obj = CoreWindow.GetForCurrentThread();
+//            obj.PointerCursor = value ? new CoreCursor(CoreCursorType.Arrow, 0) : null;
+//        });
+//#endif
     }
 
     public void RequestMousePointerLock() { MouseCursorSetVisible(false); _mousePointerLocked = true; }

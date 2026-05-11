@@ -701,11 +701,11 @@ public partial class Server : IServer, IDropItem, IDisposable
                 return;
         }
 
-        if (_config.ServerMonitor && !serverMonitor.CheckPacket(clientid, packet))
-        {
-            _gameLogger.Server.Information("Server monitor rejected packet");
-            return;
-        }
+        //if (_config.ServerMonitor && !serverMonitor?.CheckPacket(clientid, packet))
+        //{
+        //    _gameLogger.Server.Information("Server monitor rejected packet");
+        //    return;
+        //}
 
         int realPlayers = 0;
         switch (packet.Id)

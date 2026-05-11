@@ -2,6 +2,7 @@
 using OpenTK.Mathematics;
 using System.Drawing.Imaging;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using PixelFormat = OpenTK.Graphics.ES30.PixelFormat;
 using Vector3 = OpenTK.Mathematics.Vector3;
 using Vector4 = OpenTK.Mathematics.Vector4;
@@ -40,6 +41,13 @@ public sealed class OpenGlService : IOpenGlService
     private Vector3 _ambientLight = Vector3.One;
     private Vector4 _fogColor = Vector4.One;
     private float _fogDensity = 0.003f;
+
+    private readonly IGameLogger _logger;
+
+    public OpenGlService(IGameLogger gameLogger)
+    {
+        _logger = gameLogger;
+    }
 
     // ── Viewport and clear ────────────────────────────────────────────────────
 
@@ -148,6 +156,8 @@ public sealed class OpenGlService : IOpenGlService
         {
             GL.Uniform1(_uUseTexture, texture != 0 ? 1 : 0);
         }
+        _logger.Client.Debug(
+        $"[BindTexture2d] texture={texture} uUseTexture={(texture != 0 ? 1 : 0)} error={GL.GetError()}");
     }
 
     /// <inheritdoc/>
@@ -461,15 +471,28 @@ public sealed class OpenGlService : IOpenGlService
 
         // ── 4. Upload base level ──────────────────────────────────────────────────
         BitmapData bmpData = bmp.LockBits(
-            new Rectangle(0, 0, bmp.Width, bmp.Height),
-            ImageLockMode.ReadOnly,
-            System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+             new Rectangle(0, 0, bmp.Width, bmp.Height),
+             ImageLockMode.ReadOnly,
+             System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+        // GDI+ gives us BGRA on Windows — ES3 only guarantees RGBA.
+        // Swap B↔R in a temporary buffer before upload.
+        int byteCount = bmpData.Width * bmpData.Height * 4;
+        byte[] pixels = new byte[byteCount];
+        Marshal.Copy(bmpData.Scan0, pixels, 0, byteCount);
+        bmp.UnlockBits(bmpData);   // data is on the GPU — safe to unlock
+
+        for (int i = 0; i < byteCount; i += 4)
+        {
+            // BGRA → RGBA: swap index 0 (B) with index 2 (R)
+            (pixels[i], pixels[i + 2]) = (pixels[i + 2], pixels[i]);
+        }
 
         GL.TexImage2D(TextureTarget2d.Texture2D, 0, TextureComponentCount.Rgba,
-            bmpData.Width, bmpData.Height, 0,
-            PixelFormat.Bgra, PixelType.UnsignedByte, bmpData.Scan0);
-
-        bmp.UnlockBits(bmpData);   // data is on the GPU — safe to unlock
+            bmp.Width, bmp.Height, 0,
+            PixelFormat.Rgba,          // ← was Bgra
+            PixelType.UnsignedByte,
+            pixels);
 
         // ── 5. Generate mipmaps from the uploaded GPU texture ─────────────────────
         if (EnableMipmaps)
