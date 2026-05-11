@@ -569,7 +569,7 @@ public interface IGame : IDisposable
     void OnTouchStart(TouchEventArgs e);
     void OnTouchMove(TouchEventArgs e);
     void OnTouchEnd(TouchEventArgs e);
-    void MouseWheelChanged(MouseWheelEventArgs e);
+    void MouseWheelChanged(float delta);
     void MouseDown(MouseEventArgs args);
     void MouseMove(MouseEventArgs e);
     void MouseUp(MouseEventArgs e);

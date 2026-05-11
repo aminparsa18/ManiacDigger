@@ -4,12 +4,12 @@ using OpenTK.Graphics.ES30;
 using OpenTK.Mathematics;
 using SkiaSharp.Views.Maui;
 using System.Runtime.InteropServices;
-using System.Reflection;
-using PointerEventArgs = Microsoft.Maui.Controls.PointerEventArgs;
+using Application = Microsoft.Maui.Controls.Application;
+using Microsoft.UI.Xaml.Input;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
-using SkiaSharp.Views.Maui.Handlers;
-using Microsoft.Maui.Platform;
-using SkiaSharp.Views.Maui.Controls;
+
+
 
 
 
@@ -65,13 +65,62 @@ public partial class GameView : ContentPage
         _serverSystemBootstraper = serverSystemBootstraper;
     }
 
+    protected override void OnHandlerChanged()
+    {
+        base.OnHandlerChanged();
+#if WINDOWS
+        AttachWindowKeyEvents();
+#endif
+    }
+
+#if WINDOWS
+    void AttachWindowKeyEvents()
+    {
+        var mauiWindow = Application.Current?.Windows.FirstOrDefault();
+        var nativeWindow = mauiWindow?.Handler?.PlatformView
+                           as Microsoft.UI.Xaml.Window;
+
+        if (nativeWindow?.Content is UIElement root)
+        {
+            root.AddHandler(
+                UIElement.KeyDownEvent,
+                new KeyEventHandler((s, args) =>
+                {
+                    var keyEvent = WinKeyMapper.ToKeyEventArgs(args);
+                    _game.KeyDown(keyEvent);
+                    args.Handled = keyEvent.Handled;
+                }),
+                handledEventsToo: true
+            );
+
+            root.AddHandler(
+                UIElement.KeyUpEvent,
+                new KeyEventHandler((s, args) =>
+                {
+                    var keyEvent = WinKeyMapper.ToKeyEventArgs(args);
+                    _game.KeyUp(keyEvent);
+                    args.Handled = keyEvent.Handled;
+                }),
+                handledEventsToo: true
+            );
+        }
+    }
+#endif
+
     protected override void OnAppearing()
     {
         base.OnAppearing();
 
         _gameLoopTimer = Dispatcher.CreateTimer();
         _gameLoopTimer.Interval = TimeSpan.FromMilliseconds(16); // ~60 fps
-        _gameLoopTimer.Tick += (_, _) => GlView.InvalidateSurface();
+        _gameLoopTimer.Tick += (_, _) =>
+        {
+            GlView.InvalidateSurface();
+#if WINDOWS
+            if (_gameWindowService.Focused())
+                ((MauiGameWindowService)_gameWindowService).RecenterCursor();
+#endif
+        };
         _gameLoopTimer.Start();
 
         string extension = _singlePlayerService.SinglePlayerServerAvailable ? "mddbs" : "mdss";
@@ -92,11 +141,79 @@ public partial class GameView : ContentPage
 
         _gameWindowService.Start();
 
-       // ((MauiGameWindowService)_gameWindowService).CaptureMouse();
+#if WINDOWS
+       GlView.HandlerChanged += AttachKeyEvents;
+
+        _gameWindowService.RequestMousePointerLock();
+
+        IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(
+            Application.Current.Windows[0].Handler.PlatformView
+            as Microsoft.UI.Xaml.Window);
+
+        var svc = (MauiGameWindowService)_gameWindowService;
+        svc.StartRawInput(hwnd);
+        svc.RawMouseDelta += OnRawMouseDelta;
+#endif
 
         _game.IsSinglePlayer = true;
-        
+
         Connect();
+    }
+
+    void AttachKeyEvents(object? sender, EventArgs e)
+    {
+#if WINDOWS
+        if (GlView.Handler?.PlatformView is UIElement el)
+        {
+            // Must set these BEFORE trying to focus
+            if (el is Microsoft.UI.Xaml.Controls.Control control)
+            {
+                control.IsTabStop = true;
+                control.AllowFocusOnInteraction = true;
+            }
+
+            el.Tapped += (s, _) => el.Focus(FocusState.Pointer);  // focus on tap
+            el.Focus(FocusState.Programmatic);                     // focus immediately
+
+            el.AddHandler(UIElement.KeyDownEvent,new KeyEventHandler((s, args) =>
+                {
+                    var keyEvent = WinKeyMapper.ToKeyEventArgs(args);
+                    _game.KeyDown(keyEvent);
+                    _game.KeyPress(keyEvent);
+                }), handledEventsToo: true);
+
+            el.AddHandler(UIElement.KeyUpEvent,new KeyEventHandler((s, args) =>
+                {
+                   var keyEvent = WinKeyMapper.ToKeyEventArgs(args);
+                   _game.KeyUp(keyEvent);
+                }), handledEventsToo: true);
+
+            el.AddHandler(UIElement.PointerPressedEvent,
+           new PointerEventHandler((s, args) =>
+           {
+               var pt = args.GetCurrentPoint(el);
+               var kir = WinMouseMapper.ToMouseEventArgs(pt);
+               _game.MouseDown(WinMouseMapper.ToMouseEventArgs(pt));
+           }),
+           handledEventsToo: true);
+
+            el.AddHandler(UIElement.PointerReleasedEvent,
+                new PointerEventHandler((s, args) =>
+                {
+                    var pt = args.GetCurrentPoint(el);
+                    _game.MouseUp(WinMouseMapper.ToMouseEventArgs(pt));
+                }),
+                handledEventsToo: true);
+
+            el.AddHandler(UIElement.PointerWheelChangedEvent,
+                new PointerEventHandler((s, args) =>
+                {
+                    var pt = args.GetCurrentPoint(el);
+                    _game.MouseWheelChanged(WinMouseMapper.ToMouseWheelEventArgs(pt));
+                }),
+                handledEventsToo: true);
+        }
+#endif
     }
 
     private static string GetDefaultSavePath(string extension)
@@ -140,7 +257,27 @@ public partial class GameView : ContentPage
         base.OnDisappearing();
         _gameLoopTimer?.Stop();
         _gameLoopTimer = null;
-        ((MauiGameWindowService)_gameWindowService).ReleaseMouse();
+
+#if WINDOWS
+        _gameWindowService.ExitMousePointerLock();
+
+        IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(
+            Application.Current.Windows[0].Handler.PlatformView
+            as Microsoft.UI.Xaml.Window);
+
+        var svc = (MauiGameWindowService)_gameWindowService;
+        svc.RawMouseDelta -= OnRawMouseDelta;
+        svc.StopRawInput(hwnd);
+#endif
+    }
+
+    private void OnRawMouseDelta(int dx, int dy)
+    {
+        var emulated = new MouseEventArgs();
+        emulated.        MovementX = dx;
+        emulated.        MovementY = dy;
+        emulated.        Emulated = true;
+        _game.MouseMove(emulated);
     }
 
     private void GlView_PaintSurface(object sender, SKPaintGLSurfaceEventArgs e)
@@ -204,47 +341,47 @@ public partial class GameView : ContentPage
 
     }
 
-    private bool _firstMove = true;
-    private float _lastX;
-    private float _lastY;
+}
 
-    private void PointerGestureRecognizer_PointerMoved(object sender, PointerEventArgs e)
+#if WINDOWS
+public static class WinMouseMapper
+{
+    public static MouseEventArgs ToMouseEventArgs(PointerPoint point)
     {
-        if (!_gameWindowService.Focused()) return;
-
-        Point? pos = e.GetPosition(GlView);
-        if (pos == null) return;
-
-        float density = (float)DeviceDisplay.MainDisplayInfo.Density;
-        float x = (float)pos.Value.X * density;
-        float y = (float)pos.Value.Y * density;
-
-        if (_firstMove)
+        return new MouseEventArgs
         {
-            // Pretend mouse started from current position — zero delta
-            _lastX = x;
-            _lastY = y;
-            _firstMove = false;
-            ((MauiGameWindowService)_gameWindowService).RecenterCursor();
-            return;
-        }
-
-        float dx = x - _lastX;
-        float dy = y - _lastY;
-        _lastX = x;
-        _lastY = y;
-
-        var emulated = new MouseEventArgs();
-        emulated.SetX((int)x);
-        emulated.SetY((int)y);
-        emulated.SetMovementX((int)dx);
-        emulated.SetMovementY((int)dy);
-        emulated.SetEmulated(true);
-        _game.MouseMove(emulated);
-
-        ((MauiGameWindowService)_gameWindowService).RecenterCursor();
-        _lastX = GlView.CanvasSize.Width / 2f;
-        _lastY = GlView.CanvasSize.Height / 2f;
+            X = (int)point.Position.X,
+            Y = (int)point.Position.Y,
+            Button = MapButton(point.Properties)
+        };
     }
 
+    public static MouseEventArgs ToMouseMoveEventArgs(PointerPoint point)
+    {
+        return new MouseEventArgs
+        {
+            X = (int)point.Position.X,
+            Y = (int)point.Position.Y,
+            Button = MapButton(point.Properties)
+        };
+    }
+
+    public static float ToMouseWheelEventArgs(PointerPoint point)
+    {
+        var delta = point.Properties.MouseWheelDelta;
+        bool isHorizontal = point.Properties.IsHorizontalMouseWheel;
+
+        return isHorizontal ? 0f : delta / 120f;
+    }
+
+    private static int MapButton(PointerPointProperties props)
+    {
+        if (props.IsLeftButtonPressed) return (int)MouseButton.Left;
+        if (props.IsRightButtonPressed) return (int)MouseButton.Right;
+        if (props.IsMiddleButtonPressed) return (int)MouseButton.Middle;
+        if (props.IsXButton1Pressed) return (int)MouseButton.Button4;
+        if (props.IsXButton2Pressed) return (int)MouseButton.Button5;
+        return -1;
+    }
 }
+#endif

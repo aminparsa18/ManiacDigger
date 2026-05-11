@@ -146,7 +146,7 @@ public class ModGuiInventory : ModBase
             return;
         }
 
-        Point mouse = new(args.GetX(), args.GetY());
+        Point mouse = new(args.X, args.Y);
 
         // Material selector bar click.
         int? materialSlot = SelectedMaterialSelectorSlot(mouse);
@@ -158,7 +158,7 @@ public class ModGuiInventory : ModBase
                 Type = PacketInventoryPositionType.MaterialSelector,
                 MaterialId = Game.ActiveMaterial
             });
-            args.SetHandled(true);
+            args.            Handled = true;
             return;
         }
 
@@ -173,7 +173,7 @@ public class ModGuiInventory : ModBase
                 AreaY = cell.Value.Y + ScrollLine
             };
 
-            if (args.GetButton() == (int)MouseButton.Left)
+            if (args.Button == (int)MouseButton.Left)
             {
                 controller.InventoryClick(mainClick);
             }
@@ -192,7 +192,7 @@ public class ModGuiInventory : ModBase
 
             if (Game.GuiState == GameState.Inventory)
             {
-                args.SetHandled(true);
+                args.                Handled = true;
             }
 
             return;
@@ -208,7 +208,7 @@ public class ModGuiInventory : ModBase
                 WearPlace = wearPlace.Value,
                 ActiveMaterial = Game.ActiveMaterial
             });
-            args.SetHandled(true);
+            args.            Handled = true;
             return;
         }
 
@@ -217,7 +217,7 @@ public class ModGuiInventory : ModBase
         {
             ScrollUp();
             _scrollingUpTimeMs = platform.TimeMillisecondsFromStart;
-            args.SetHandled(true);
+            args.            Handled = true;
             return;
         }
 
@@ -226,7 +226,7 @@ public class ModGuiInventory : ModBase
         {
             ScrollDown();
             _scrollingDownTimeMs = platform.TimeMillisecondsFromStart;
-            args.SetHandled(true);
+            args.            Handled = true;
             return;
         }
 
@@ -237,10 +237,10 @@ public class ModGuiInventory : ModBase
     public override void OnTouchStart(TouchEventArgs e)
     {
         MouseEventArgs args = new();
-        args.SetX(e.GetX());
-        args.SetY(e.GetY());
+        args.X = (e.GetX());
+        args.        Y = e.GetY();
         OnMouseDown(args);
-        e.SetHandled(args.GetHandled());
+        e.SetHandled(args.Handled);
     }
 
     /// <inheritdoc/>
@@ -256,9 +256,9 @@ public class ModGuiInventory : ModBase
     }
 
     /// <inheritdoc/>
-    public override void OnMouseWheelChanged(MouseWheelEventArgs args)
+    public override void OnMouseWheelChanged(float args)
     {
-        float delta = args.OffsetY;
+        float delta = args;
         bool shiftHeld = Game.KeyboardState[Game.GetKey(Keys.LeftShift)];
 
         bool inNormalOrOutsideCells = Game.GuiState == GameState.Normal

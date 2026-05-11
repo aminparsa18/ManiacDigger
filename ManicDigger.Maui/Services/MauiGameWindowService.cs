@@ -95,23 +95,6 @@ public sealed partial class MauiGameWindowService : IGameWindowService
 
     private bool _initialised;
 
-    public void RaiseNewFrame(float dt)
-    {
-        if (!_initialised)
-        {
-#if WINDOWS
-            GL.LoadBindings(new AngleBindingsContext());
-#endif
-            _openGlService.InitShaders();
-            _openGlService.GlClearColorRgbaf(0, 0, 0, 1);
-            _openGlService.GlEnableDepthTest();
-            _initialised = true;
-        }
-
-        foreach (var h in _newFrameHandlers)
-            h(dt);
-    }
-
     // ── IGameWindowService — render loop ──────────────────────────────────────
 
     /// <summary>No-op — render loop is driven by SKGLView.InvalidateSurface().</summary>
@@ -132,7 +115,7 @@ public sealed partial class MauiGameWindowService : IGameWindowService
     public event Action<MouseEventArgs>? OnMouseDown;
     public event Action<MouseEventArgs>? OnMouseUp;
     public event Action<MouseEventArgs>? OnMouseMove;
-    public event Action<MouseWheelEventArgs>? OnMouseWheel;
+    public event Action<float>? OnMouseWheel;
     public event Action<TouchEventArgs>? OnTouchStart;
     public event Action<TouchEventArgs>? OnTouchMove;
     public event Action<TouchEventArgs>? OnTouchEnd;
@@ -155,7 +138,7 @@ public sealed partial class MauiGameWindowService : IGameWindowService
         Action<MouseEventArgs> onMouseDown,
         Action<MouseEventArgs> onMouseUp,
         Action<MouseEventArgs> onMouseMove,
-        Action<MouseWheelEventArgs> onMouseWheel)
+        Action<float> onMouseWheel)
     {
         OnMouseDown += onMouseDown;
         OnMouseUp += onMouseUp;
@@ -195,8 +178,8 @@ public sealed partial class MauiGameWindowService : IGameWindowService
                 else
                 {
                     var a = new MouseEventArgs();
-                    a.SetX((int)e.Location.X); a.SetY((int)e.Location.Y);
-                    a.SetButton(e.MouseButton == SkiaSharp.Views.Maui.SKMouseButton.Right ? 1 : 0);
+                    a.X = ((int)e.Location.X); a.Y = (int)e.Location.Y;
+                    a.                    Button = e.MouseButton == SkiaSharp.Views.Maui.SKMouseButton.Right ? 1 : 0;
                     OnMouseDown?.Invoke(a);
                 }
                 break;
@@ -211,7 +194,7 @@ public sealed partial class MauiGameWindowService : IGameWindowService
                 else
                 {
                     var a = new MouseEventArgs();
-                    a.SetX((int)e.Location.X); a.SetY((int)e.Location.Y);
+                    a.X = ((int)e.Location.X); a.Y = (int)e.Location.Y;
                     OnMouseUp?.Invoke(a);
                 }
                 break;
@@ -226,13 +209,13 @@ public sealed partial class MauiGameWindowService : IGameWindowService
                 else
                 {
                     var a = new MouseEventArgs();
-                    a.SetX((int)e.Location.X); a.SetY((int)e.Location.Y);
+                    a.X = ((int)e.Location.X); a.Y = (int)e.Location.Y;
                     OnMouseMove?.Invoke(a);
                 }
                 break;
 
             case SkiaSharp.Views.Maui.SKTouchAction.WheelChanged:
-                OnMouseWheel?.Invoke(new MouseWheelEventArgs(0, e.WheelDelta / 120f));
+                OnMouseWheel?.Invoke(e.WheelDelta / 120f);
                 break;
         }
     }
@@ -268,10 +251,26 @@ public sealed partial class MauiGameWindowService : IGameWindowService
         _mouseCursorVisible = value;
         if (_mouseCursorVisible)
         {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                // Restore ALL system cursors to Windows defaults in one call
+                SystemParametersInfo(SPI_SETCURSORS, 0, IntPtr.Zero, 0);
+                ClipCursor(IntPtr.Zero);
+            });
         }
         else
         {
-            //CaptureMouse();
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                // Create 1x1 invisible cursor
+                IntPtr invisible = CreateCursor(
+                    IntPtr.Zero, 0, 0, 1, 1,
+                    [0xFF], // AND mask — fully transparent
+                    [0x00]);// XOR mask — no pixels
+
+                // Replace the system arrow cursor globally
+                SetSystemCursor(invisible, OCR_NORMAL);
+            });
         }
     }
 

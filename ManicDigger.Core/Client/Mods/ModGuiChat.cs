@@ -138,8 +138,8 @@ public class ModGuiChat : ModBase
         float startX = dx * scale;
         float sizeX = ChatLineWidth * scale;
         float sizeY = ChatLineHeight * scale;
-        float mouseX = args.GetX();
-        float mouseY = args.GetY();
+        float mouseX = args.X;
+        float mouseY = args.Y;
 
         for (int i = 0; i < _visibleLineCount; i++)
         {

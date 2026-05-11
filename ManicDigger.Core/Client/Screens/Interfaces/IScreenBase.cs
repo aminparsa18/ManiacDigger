@@ -1,6 +1,4 @@
-﻿using OpenTK.Windowing.Common;
-
-public interface IScreenBase
+﻿public interface IScreenBase
 {
     void DrawScene(float dt);
     void DrawWidgets();
@@ -13,7 +11,7 @@ public interface IScreenBase
     void OnMouseDown(MouseEventArgs e);
     void OnMouseMove(MouseEventArgs e);
     void OnMouseUp(MouseEventArgs e);
-    void OnMouseWheel(MouseWheelEventArgs e);
+    void OnMouseWheel(float e);
     void OnTouchEnd(TouchEventArgs e);
     void OnTouchMove(TouchEventArgs e);
     void OnTouchStart(TouchEventArgs e);

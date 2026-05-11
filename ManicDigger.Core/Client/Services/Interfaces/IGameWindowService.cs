@@ -17,7 +17,7 @@ public interface IGameWindowService
         Action<MouseEventArgs> onMouseDown,
         Action<MouseEventArgs> onMouseUp,
         Action<MouseEventArgs> onMouseMove,
-        Action<MouseWheelEventArgs> onMouseWheel);
+        Action<float> onMouseWheel);
     void AddOnTouchEvent(Action<TouchEventArgs> onTouchStart,
         Action<TouchEventArgs> onTouchMove,
         Action<TouchEventArgs> onTouchEnd);

@@ -10,7 +10,7 @@ public partial class Game
 
     public void MouseDown(MouseEventArgs args)
     {
-        int btn = args.GetButton();
+        int btn = args.Button;
 
         if (btn == (int)MouseButton.Left)
         {
@@ -51,7 +51,7 @@ public partial class Game
 
     public void MouseUp(MouseEventArgs args)
     {
-        int btn = args.GetButton();
+        int btn = args.Button;
 
         if (btn == (int)MouseButton.Left)
         {
@@ -86,18 +86,18 @@ public partial class Game
 
     public void MouseMove(MouseEventArgs e)
     {
-        if (!e.GetEmulated() || e.GetForceUsage())
+        if (!e.Emulated || e.ForceUsage)
         {
             // Set position only for real MouseMove events.
-            MouseCurrentX = e.GetX();
-            MouseCurrentY = e.GetY();
+            MouseCurrentX = e.X;
+            MouseCurrentY = e.Y;
         }
 
-        if (e.GetEmulated() || e.GetForceUsage())
+        if (e.Emulated || e.ForceUsage)
         {
             // Accumulate delta only from emulated events (actual events negate previous ones).
-            mouseDeltaX += e.GetMovementX();
-            mouseDeltaY += e.GetMovementY();
+            mouseDeltaX += e.MovementX;
+            mouseDeltaY += e.MovementY;
         }
 
         for (int i = 0; i < ClientMods.Count; i++)
@@ -111,10 +111,8 @@ public partial class Game
         }
     }
 
-    public void MouseWheelChanged(MouseWheelEventArgs e)
+    public void MouseWheelChanged(float delta)
     {
-        float delta = e.OffsetY;
-
         if (KeyboardState[GetKey(Keys.LeftShift)])
         {
             if (CameraType == CameraType.Overhead)
@@ -135,7 +133,7 @@ public partial class Game
                 continue;
             }
 
-            ClientMods[i].OnMouseWheelChanged(e);
+            ClientMods[i].OnMouseWheelChanged(delta);
         }
     }
 

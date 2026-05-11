@@ -300,7 +300,7 @@ public partial class GameWindowService : IGameWindowService
     public event Action<MouseEventArgs> OnMouseDown;
     public event Action<MouseEventArgs> OnMouseUp;
     public event Action<MouseEventArgs> OnMouseMove;
-    public event Action<MouseWheelEventArgs> OnMouseWheel;
+    public event Action<float> OnMouseWheel;
 
     public void AddOnKeyEvent(
         Action<KeyEventArgs> onKeyDown,
@@ -321,7 +321,7 @@ public partial class GameWindowService : IGameWindowService
         Action<MouseEventArgs> onMouseDown,
         Action<MouseEventArgs> onMouseUp,
         Action<MouseEventArgs> onMouseMove,
-        Action<MouseWheelEventArgs> onMouseWheel)
+        Action<float> onMouseWheel)
     {
         OnMouseDown += onMouseDown;
         OnMouseUp += onMouseUp;
@@ -458,16 +458,16 @@ public partial class GameWindowService : IGameWindowService
         if (xdelta != 0 || ydelta != 0)
         {
             MouseEventArgs args = new();
-            args.SetX((int)mouse.Position.X);
-            args.SetY((int)mouse.Position.Y);
-            args.SetMovementX((int)xdelta);
-            args.SetMovementY((int)ydelta);
-            args.SetEmulated(true);
+            args.X = ((int)mouse.Position.X);
+            args.Y = (int)mouse.Position.Y;
+            args.MovementX = (int)xdelta;
+            args.MovementY = (int)ydelta;
+            args.Emulated = true;
             OnMouseMove?.Invoke(args);
         }
     }
 
-    private void Mouse_WheelChanged(MouseWheelEventArgs e) => OnMouseWheel?.Invoke(e);
+    private void Mouse_WheelChanged(MouseWheelEventArgs e) => OnMouseWheel?.Invoke(e.OffsetY);
 
     private void Mouse_ButtonDown(MouseButtonEventArgs e)
     {
@@ -483,9 +483,9 @@ public partial class GameWindowService : IGameWindowService
         else
         {
             MouseEventArgs args = new();
-            args.SetX((int)pos.X);
-            args.SetY((int)pos.Y);
-            args.SetButton((int)e.Button);
+            args.X = ((int)pos.X);
+            args.Y = (int)pos.Y;
+            args.Button = (int)e.Button;
             OnMouseDown?.Invoke(args);
         }
     }
@@ -504,9 +504,9 @@ public partial class GameWindowService : IGameWindowService
         else
         {
             MouseEventArgs args = new();
-            args.SetX((int)pos.X);
-            args.SetY((int)pos.Y);
-            args.SetButton((int)e.Button);
+            args.X = ((int)pos.X);
+            args.Y = (int)pos.Y;
+            args.Button = (int)e.Button;
             OnMouseUp?.Invoke(args);
         }
     }
@@ -526,11 +526,11 @@ public partial class GameWindowService : IGameWindowService
         {
             Console.WriteLine("Mouse path");
             MouseEventArgs args = new();
-            args.SetX((int)e.X);
-            args.SetY((int)e.Y);
-            args.SetMovementX((int)e.DeltaX);
-            args.SetMovementY((int)e.DeltaY);
-            args.SetEmulated(false);
+            args.X = ((int)e.X);
+            args.Y = (int)e.Y;
+            args.MovementX = (int)e.DeltaX;
+            args.MovementY = (int)e.DeltaY;
+            args.Emulated = false;
             OnMouseMove?.Invoke(args);
         }
     }

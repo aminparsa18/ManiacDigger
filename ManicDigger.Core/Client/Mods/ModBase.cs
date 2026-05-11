@@ -50,7 +50,7 @@ public abstract class ModBase(IGame game) : IModBase
     public virtual void OnMouseDown(MouseEventArgs args) { }
     public virtual void OnMouseUp(MouseEventArgs args) { }
     public virtual void OnMouseMove(MouseEventArgs args) { }
-    public virtual void OnMouseWheelChanged(MouseWheelEventArgs args) { }
+    public virtual void OnMouseWheelChanged(float args) { }
 
     public virtual void OnTouchStart(TouchEventArgs e) { }
     public virtual void OnTouchMove(TouchEventArgs e) { }

@@ -47,10 +47,10 @@ public class ModScreen : ModBase
     public override void OnTouchEnd(TouchEventArgs e) => MouseUp(e.GetX(), e.GetY());
 
     /// <inheritdoc/>
-    public override void OnMouseDown(MouseEventArgs args) => MouseDown(args.GetX(), args.GetY());
+    public override void OnMouseDown(MouseEventArgs args) => MouseDown(args.X, args.Y);
 
     /// <inheritdoc/>
-    public override void OnMouseUp(MouseEventArgs args) => MouseUp(args.GetX(), args.GetY());
+    public override void OnMouseUp(MouseEventArgs args) => MouseUp(args.X, args.Y);
 
     /// <inheritdoc/>
     public override void OnMouseMove(MouseEventArgs args) => MouseMove(args);
@@ -214,7 +214,7 @@ public class ModScreen : ModBase
     /// </summary>
     private void MouseMove(MouseEventArgs e)
     {
-        if (e.GetEmulated() && !e.GetForceUsage())
+        if (e.Emulated && !e.ForceUsage)
         {
             return;
         }
@@ -222,7 +222,7 @@ public class ModScreen : ModBase
         for (int i = 0; i < WidgetCount; i++)
         {
             MenuWidget w = widgets[i];
-            w?.Hover = VectorUtils.PointInRect(e.GetX(), e.GetY(), screenx + w.X, screeny + w.Y, w.Sizex, w.Sizey);
+            w?.Hover = VectorUtils.PointInRect(e.X, e.Y, screenx + w.X, screeny + w.Y, w.Sizex, w.Sizey);
         }
     }
 

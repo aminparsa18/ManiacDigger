@@ -1,6 +1,4 @@
-﻿using OpenTK.Windowing.Common;
-
-public interface IModBase : IDisposable
+﻿public interface IModBase : IDisposable
 {
     // Logic
     void OnUpdate(float dt);
@@ -19,7 +17,7 @@ public interface IModBase : IDisposable
     void OnMouseDown(MouseEventArgs args);
     void OnMouseUp(MouseEventArgs args);
     void OnMouseMove(MouseEventArgs args);
-    void OnMouseWheelChanged(MouseWheelEventArgs args);
+    void OnMouseWheelChanged(float args);
     void OnTouchStart(TouchEventArgs e);
     void OnTouchMove(TouchEventArgs e);
     void OnTouchEnd(TouchEventArgs e);

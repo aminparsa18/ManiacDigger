@@ -298,7 +298,7 @@ public class ScreenManager : IScreenManager
     public void HandleMouseMove(MouseEventArgs e) => screen.OnMouseMove(e);
 
     /// <summary>Forwards mouse-wheel events to the active screen.</summary>
-    public void HandleMouseWheel(MouseWheelEventArgs e)
+    public void HandleMouseWheel(float e)
         => screen.OnMouseWheel(e);
 
     /// <summary>Records the initiating touch contact and forwards to the active screen.</summary>

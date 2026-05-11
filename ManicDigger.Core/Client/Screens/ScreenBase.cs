@@ -67,15 +67,15 @@ public class ScreenBase(IGameWindowService gameService, IOpenGlService openGlSer
     public virtual void OnTouchStart(TouchEventArgs e) => MouseDown(e.GetX(), e.GetY());
     public virtual void OnTouchMove(TouchEventArgs e) { }
     public virtual void OnTouchEnd(TouchEventArgs e) => MouseUp(e.GetX(), e.GetY());
-    public virtual void OnMouseDown(MouseEventArgs e) => MouseDown(e.GetX(), e.GetY());
-    public virtual void OnMouseUp(MouseEventArgs e) => MouseUp(e.GetX(), e.GetY());
+    public virtual void OnMouseDown(MouseEventArgs e) => MouseDown(e.X, e.Y);
+    public virtual void OnMouseUp(MouseEventArgs e) => MouseUp(e.X, e.Y);
     public virtual void OnMouseMove(MouseEventArgs e) => MouseMove(e);
 
     /// <summary>Called when the hardware back button is pressed. Override to handle navigation.</summary>
     public virtual void OnBackPressed() { }
 
     /// <summary>Called when the mouse wheel is scrolled. Override to handle scrolling.</summary>
-    public virtual void OnMouseWheel(MouseWheelEventArgs e) { }
+    public virtual void OnMouseWheel(float e) { }
 
     /// <summary>Called when translations are reloaded. Override to refresh localised widget text.</summary>
     public virtual void LoadTranslations() { }
@@ -242,14 +242,14 @@ public class ScreenBase(IGameWindowService gameService, IOpenGlService openGlSer
     /// </summary>
     private void MouseMove(MouseEventArgs e)
     {
-        if (e.GetEmulated() && !e.GetForceUsage())
+        if (e.Emulated && !e.ForceUsage)
         {
             return;
         }
 
         foreach (MenuWidget w in Widgets)
         {
-            w.Hover = VectorUtils.PointInRect(e.GetX(), e.GetY(), w.X, w.Y, w.Sizex, w.Sizey);
+            w.Hover = VectorUtils.PointInRect(e.X, e.Y, w.X, w.Y, w.Sizex, w.Sizey);
         }
     }
 

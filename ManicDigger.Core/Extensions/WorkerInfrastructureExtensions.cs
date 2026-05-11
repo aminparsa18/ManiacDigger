@@ -54,7 +54,7 @@ public static class WorkerInfrastructureExtensions
         // Scale to ProcessorCount / 4: lighting is heavier per-chunk than
         // tessellation so it needs fewer workers to saturate the tessellation queue.
 
-        int lightingWorkerCount = Math.Max(1, Environment.ProcessorCount / 4);
+        int lightingWorkerCount = 4;// Math.Max(1, Environment.ProcessorCount / 4);
 
         services.AddSingleton(sp => new ChunkLightingDispatcher(
             sp.GetRequiredService<IChunkWorkQueue>(),

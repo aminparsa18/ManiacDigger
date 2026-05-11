@@ -417,15 +417,15 @@ public class MultiplayerScreen : ScreenBase, IScreenMultiplayer
     private const int serverButtonsCount = 1024;
 
     public override void OnBackPressed() => _menu.StartMainMenu();
-    public override void OnMouseWheel(MouseWheelEventArgs e)
+    public override void OnMouseWheel(float e)
     {
         //menu.p.MessageBoxShowError(menu.p.IntToString(e.GetDelta()), "Delta");
-        if (e.OffsetX < 0)
+        if (e < 0)
         {
             //Mouse wheel turned down
             PageUp();
         }
-        else if (e.OffsetX > 0)
+        else if (e > 0)
         {
             //Mouse wheel turned up
             PageDown();

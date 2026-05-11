@@ -1,7 +1,6 @@
 ﻿using ManicDigger.Worker;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTK.Windowing.Common;
-using static ManicDigger.Mods.ModNetworkProcess;
 
 /// <summary>
 /// Extends the base screen contract with the game-session initialisation
@@ -196,7 +195,7 @@ public class ScreenGame(IGameWindowService platform, IOpenGlService openGlServic
     public override void OnKeyDown(KeyEventArgs e) => game.KeyDown(e);
     public override void OnKeyUp(KeyEventArgs e) => game.KeyUp(e);
     public override void OnKeyPress(KeyPressEventArgs e) => game.KeyPress(e);
-    public override void OnMouseWheel(MouseWheelEventArgs e) => game.MouseWheelChanged(e);
+    public override void OnMouseWheel(float e) => game.MouseWheelChanged(e);
     public override void OnTouchStart(TouchEventArgs e) => game.OnTouchStart(e);
     public override void OnTouchMove(TouchEventArgs e) => game.OnTouchMove(e);
     public override void OnTouchEnd(TouchEventArgs e) => game.OnTouchEnd(e);
