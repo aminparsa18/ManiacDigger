@@ -1,14 +1,14 @@
-# Manic Digger — OpenTK 4 Migration 
+# Mein Kraft
 
 [![Screenshot](https://raw.githubusercontent.com/manicdigger/manicdigger-screenshots/master/9c1d22eac9aac5f36bf12a5fb5c8a856.png)](https://raw.githubusercontent.com/manicdigger/manicdigger-screenshots/master/9c1d22eac9aac5f36bf12a5fb5c8a856.png) [![Screenshot](https://raw.githubusercontent.com/manicdigger/manicdigger-screenshots/master/2014-12-25_22-38-53.png)](https://raw.githubusercontent.com/manicdigger/manicdigger-screenshots/master/2014-12-25_22-38-53.png)
 
-This project is based on the excellent work of the original [manicdigger/manicdigger](https://github.com/manicdigger/manicdigger) team — a multiplayer block-building voxel game inspired by Minecraft. All credit for the original game design, architecture, and content goes to them.
+This project is based on the excellent work of the original [manicdigger/manicdigger](https://github.com/manicdigger/manicdigger) team — a multiplayer block-building voxel game inspired by Minecraft.
 
 ---
 
-## What is Manic Digger?
+## So?!
 
-Manic Digger is a multiplayer voxel sandbox. The world is made up of 16×16×16 block
+It's is a multiplayer voxel sandbox. The world is made up of 16×16×16 block
 chunks. Players can build, dig, farm, trade, and play game modes (such as a team-based
 war mod) that are defined entirely by server-side mods.
 
@@ -30,7 +30,7 @@ For technical details on specific systems see the dedicated documentation:
 
 ---
 
-## What's Different in This Fork
+## What's Different in This one?
 
 The original project was built on old OpenTK, which is no longer maintained. This fork migrates the entire client to **OpenTK 4.x**, which is built on top of GLFW and supports modern platforms and runtimes.
 
@@ -191,21 +191,12 @@ Requires **.NET 10** and **Visual Studio 2022+** or the `dotnet` CLI.
 
 ```
 dotnet build
-dotnet run --project ManicDigger
+dotnet run --project MineKraft.Maui
 ```
 
 ---
 
 ## License
 
-Manic Digger is released into the public domain under the [Unlicense](COPYING.md).
+Mein Kraft is released into the public domain under the [Unlicense](COPYING.md).
 Third-party dependency licenses are listed in [`COPYING.md`](COPYING.md).
-
----
-
-## Original Project
-
-All game design, assets, server architecture, and mod API belong to the original Manic Digger project:
-https://github.com/manicdigger/manicdigger
-
-Please support and credit the original authors for their work.

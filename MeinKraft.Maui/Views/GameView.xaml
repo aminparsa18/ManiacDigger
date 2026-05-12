@@ -1,0 +1,305 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:skia="clr-namespace:SkiaSharp.Views.Maui.Controls;assembly=SkiaSharp.Views.Maui.Controls"
+             x:Class="MeinKraft.Maui.Views.GameView"
+             Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+
+            <Color x:Key="StoneEdgeTop">#aaaaaa</Color>
+            <Color x:Key="StoneEdgeBottom">#2a2a2a</Color>
+            <Color x:Key="GrassGreen">#5d9e29</Color>
+            <Color x:Key="TextWhite">#f0ece0</Color>
+            <Color x:Key="TextDim">#aaaaaa</Color>
+
+            <!-- Bevel frame — identical to other views -->
+            <Style x:Key="VoxelButtonBevel" TargetType="Border">
+                <Setter Property="StrokeThickness"   Value="0" />
+                <Setter Property="Padding"           Value="3" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="Shadow">
+                    <Setter.Value>
+                        <Shadow Brush="#000000" Offset="4,4" Radius="0" Opacity="0.85" />
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="{StaticResource StoneEdgeTop}"    Offset="0.0" />
+                            <GradientStop Color="{StaticResource StoneEdgeBottom}" Offset="1.0" />
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Standard stone button face -->
+            <Style x:Key="VoxelButton" TargetType="Button">
+                <Setter Property="FontFamily"        Value="PressStart2PRegular" />
+                <Setter Property="FontSize"          Value="9" />
+                <Setter Property="TextColor"         Value="{StaticResource TextWhite}" />
+                <Setter Property="WidthRequest"      Value="310" />
+                <Setter Property="HeightRequest"     Value="40" />
+                <Setter Property="CornerRadius"      Value="0" />
+                <Setter Property="BorderWidth"       Value="0" />
+                <Setter Property="Padding"           Value="0" />
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#9a9a9a" Offset="0.0"  />
+                            <GradientStop Color="#6b6b6b" Offset="0.45" />
+                            <GradientStop Color="#595959" Offset="0.55" />
+                            <GradientStop Color="#404040" Offset="1.0"  />
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Divider -->
+            <Style x:Key="Divider" TargetType="BoxView">
+                <Setter Property="HeightRequest"     Value="2" />
+                <Setter Property="WidthRequest"      Value="200" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="Transparent"                Offset="0.0" />
+                            <GradientStop Color="{StaticResource GrassGreen}" Offset="0.5" />
+                            <GradientStop Color="Transparent"                Offset="1.0" />
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <!--
+        Root Grid — two layers:
+          [0] SKGLView  — game render, always present
+          [1] OverlayRoot — pause/options UI, hidden until ESC pressed
+    -->
+    <Grid>
+
+        <!-- ── Layer 0: Game ─────────────────────────────────────────────── -->
+        <skia:SKGLView x:Name="GlView"
+                       HorizontalOptions="Fill"
+                       VerticalOptions="Fill"
+                       HasRenderLoop="False"
+                       PaintSurface="GlView_PaintSurface" />
+
+        <!-- ── Layer 1: Overlay ──────────────────────────────────────────── -->
+        <!--
+            IsVisible toggled by ShowPauseMenu() / HideOverlay().
+            InputTransparent=False is the default, so while visible the overlay
+            captures all pointer/touch input and the game below receives nothing.
+        -->
+        <Grid x:Name="OverlayRoot" IsVisible="False">
+
+            <!-- Dim backdrop — semi-transparent so the world is still readable -->
+            <BoxView HorizontalOptions="Fill" VerticalOptions="Fill">
+                <BoxView.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#88000000" Offset="0.0" />
+                        <GradientStop Color="#bb000000" Offset="1.0" />
+                    </LinearGradientBrush>
+                </BoxView.Background>
+            </BoxView>
+
+            <!-- ── Pause panel ─────────────────────────────────────────── -->
+            <VerticalStackLayout x:Name="PausePanel"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center"
+                                 Spacing="0">
+
+                <Label Text="PAUSED"
+                       FontFamily="PressStart2PRegular"
+                       FontSize="22"
+                       TextColor="{StaticResource TextWhite}"
+                       HorizontalOptions="Center"
+                       CharacterSpacing="6"
+                       Margin="0,0,0,4">
+                    <Label.Shadow>
+                        <Shadow Brush="#000000" Offset="3,3" Radius="0" Opacity="1" />
+                    </Label.Shadow>
+                </Label>
+
+                <BoxView Style="{StaticResource Divider}" Margin="0,12,0,20" />
+
+                <!-- Return to Game -->
+                <Border Style="{StaticResource VoxelButtonBevel}" Margin="0,0,0,8">
+                    <Button Style="{StaticResource VoxelButton}"
+                            Text="Return to Game"
+                            Clicked="OnReturnToGameClicked" />
+                </Border>
+
+                <!-- Options -->
+                <Border Style="{StaticResource VoxelButtonBevel}" Margin="0,0,0,8">
+                    <Button Style="{StaticResource VoxelButton}"
+                            Text="Options"
+                            Clicked="OnOptionsClicked" />
+                </Border>
+
+                <BoxView Style="{StaticResource Divider}" Margin="0,4,0,4" />
+
+                <!-- Exit to Main Menu — redstone bevel -->
+                <Border Margin="0,4,0,0"
+                        StrokeThickness="0"
+                        Padding="3"
+                        HorizontalOptions="Center">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#8a7070" Offset="0.0" />
+                            <GradientStop Color="#2a1a1a" Offset="1.0" />
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.Shadow>
+                        <Shadow Brush="#000000" Offset="4,4" Radius="0" Opacity="0.85" />
+                    </Border.Shadow>
+                    <Button Style="{StaticResource VoxelButton}"
+                            Text="Exit to Menu"
+                            Clicked="OnExitToMenuClicked">
+                        <Button.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#8a5050" Offset="0.0"  />
+                                <GradientStop Color="#5a2a2a" Offset="0.45" />
+                                <GradientStop Color="#4a1a1a" Offset="0.55" />
+                                <GradientStop Color="#301010" Offset="1.0"  />
+                            </LinearGradientBrush>
+                        </Button.Background>
+                    </Button>
+                </Border>
+
+            </VerticalStackLayout>
+
+            <!-- ── Options panel ──────────────────────────────────────── -->
+            <Grid x:Name="OptionsPanel"
+                  IsVisible="False"
+                  HorizontalOptions="Center"
+                  VerticalOptions="Center"
+                  RowDefinitions="Auto,Auto,Auto">
+
+                <!-- Title row -->
+                <VerticalStackLayout Grid.Row="0" Spacing="4" Margin="0,0,0,0">
+                    <Label Text="OPTIONS"
+                           FontFamily="PressStart2PRegular"
+                           FontSize="18"
+                           TextColor="{StaticResource GrassGreen}"
+                           HorizontalOptions="Center"
+                           CharacterSpacing="6">
+                        <Label.Shadow>
+                            <Shadow Brush="#000000" Offset="3,3" Radius="0" Opacity="1" />
+                        </Label.Shadow>
+                    </Label>
+                    <Label Text="graphics"
+                           FontFamily="PressStart2PRegular"
+                           FontSize="6"
+                           TextColor="{StaticResource TextDim}"
+                           HorizontalOptions="Center"
+                           CharacterSpacing="2" />
+                </VerticalStackLayout>
+
+                <BoxView Grid.Row="1" Style="{StaticResource Divider}" Margin="0,12,0,16" />
+
+                <!-- Options buttons — two-column grid to avoid a very tall list -->
+                <Grid Grid.Row="2" ColumnDefinitions="*,12,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+
+                    <!-- Column 0 -->
+                    <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource VoxelButtonBevel}" Margin="0,0,0,8">
+                        <Button x:Name="BtnSmoothShadows"
+                                Style="{StaticResource VoxelButton}"
+                                WidthRequest="220"
+                                Text="Smooth Shadows: ON"
+                                Clicked="OnSmoothShadowsClicked" />
+                    </Border>
+
+                    <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource VoxelButtonBevel}" Margin="0,0,0,8">
+                        <Button x:Name="BtnDarkenSides"
+                                Style="{StaticResource VoxelButton}"
+                                WidthRequest="220"
+                                Text="Darken Sides: ON"
+                                Clicked="OnDarkenSidesClicked" />
+                    </Border>
+
+                    <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource VoxelButtonBevel}" Margin="0,0,0,8">
+                        <Button x:Name="BtnViewDistance"
+                                Style="{StaticResource VoxelButton}"
+                                WidthRequest="220"
+                                Text="View Distance: 128"
+                                Clicked="OnViewDistanceClicked" />
+                    </Border>
+
+                    <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource VoxelButtonBevel}" Margin="0,0,0,8">
+                        <Button x:Name="BtnFramerate"
+                                Style="{StaticResource VoxelButton}"
+                                WidthRequest="220"
+                                Text="Framerate: 60"
+                                Clicked="OnFramerateClicked" />
+                    </Border>
+
+                    <Border Grid.Row="4" Grid.Column="0" Style="{StaticResource VoxelButtonBevel}">
+                        <Button x:Name="BtnResolution"
+                                Style="{StaticResource VoxelButton}"
+                                WidthRequest="220"
+                                Text="Resolution: 1920x1080"
+                                FontSize="7"
+                                Clicked="OnResolutionClicked" />
+                    </Border>
+
+                    <!-- Column 1 (spacer — defined in ColumnDefinitions) -->
+
+                    <!-- Column 2 -->
+                    <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource VoxelButtonBevel}" Margin="0,0,0,8">
+                        <Button x:Name="BtnFullscreen"
+                                Style="{StaticResource VoxelButton}"
+                                WidthRequest="220"
+                                Text="Fullscreen: OFF"
+                                Clicked="OnFullscreenClicked" />
+                    </Border>
+
+                    <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource VoxelButtonBevel}" Margin="0,0,0,8">
+                        <Button x:Name="BtnServerTextures"
+                                Style="{StaticResource VoxelButton}"
+                                WidthRequest="220"
+                                Text="Server Textures: ON"
+                                FontSize="7"
+                                Clicked="OnServerTexturesClicked" />
+                    </Border>
+
+                    <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource VoxelButtonBevel}" Margin="0,0,0,8">
+                        <Button x:Name="BtnFont"
+                                Style="{StaticResource VoxelButton}"
+                                WidthRequest="220"
+                                Text="Font: Default"
+                                Clicked="OnFontClicked" />
+                    </Border>
+
+                </Grid>
+
+                <!-- Back to menu button — full width below the grid -->
+                <Border Grid.Row="0"
+                        StrokeThickness="0"
+                        Padding="3"
+                        HorizontalOptions="Center"
+                        Margin="0,20,0,0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="{StaticResource StoneEdgeTop}"    Offset="0.0" />
+                            <GradientStop Color="{StaticResource StoneEdgeBottom}" Offset="1.0" />
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.Shadow>
+                        <Shadow Brush="#000000" Offset="4,4" Radius="0" Opacity="0.85" />
+                    </Border.Shadow>
+                    <Button Style="{StaticResource VoxelButton}"
+                            WidthRequest="460"
+                            Text="◀  Back to Menu"
+                            Clicked="OnOptionsBackClicked" />
+                </Border>
+
+            </Grid>
+
+        </Grid>
+    </Grid>
+</ContentPage>
