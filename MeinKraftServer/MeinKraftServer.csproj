@@ -81,7 +81,7 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ManicDigger.Core\MeinKraft.Core.csproj">
+    <ProjectReference Include="..\MeinKraft.Core\MeinKraft.Core.csproj">
       <Project>{08056549-3BE8-454C-A09A-67EDCDC81261}</Project>
       <Name>MeinKraft.Core</Name>
     </ProjectReference>

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.4.11605.240
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeinKraftServer", "MeinKrafterver\ManicDiggerServer.csproj", "{46D2CD51-9603-48B4-87D1-7377B5F1E51E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeinKraftServer", "MeinKraftServer\MeinKraftServer.csproj", "{46D2CD51-9603-48B4-87D1-7377B5F1E51E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeinKraft.Core", "MeinKraft.Core\MeinKraft.Core.csproj", "{08056549-3BE8-454C-A09A-67EDCDC81261}"
 EndProject

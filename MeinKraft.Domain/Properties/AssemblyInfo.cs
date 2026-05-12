@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Scripting API")]
+[assembly: AssemblyTitle("MeinKraft.Domain")]
 //[assembly: AssemblyDescription("")]
 //[assembly: AssemblyConfiguration("")]
 //[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Manic Digger")]
+[assembly: AssemblyProduct("Mein Kraft")]
 //[assembly: AssemblyCopyright("Copyright ©  2012")]
 //[assembly: AssemblyTrademark("")]
 //[assembly: AssemblyCulture("")]
