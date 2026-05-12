@@ -108,6 +108,12 @@ public interface IOpenGlService
     /// </summary>
     int LoadTextureFromBitmap(Bitmap bmp);
 
+    /// <summary>
+    /// Uploads a raw RGBA byte buffer directly to a GL texture, bypassing the
+    /// Bitmap path. SkiaSharp already produces RGBA — no channel swap needed.
+    /// </summary>
+    int LoadTextureRgba(byte[] rgba, int width, int height);
+
     // ── Model lifecycle ───────────────────────────────────────────────────────
 
     /// <summary>

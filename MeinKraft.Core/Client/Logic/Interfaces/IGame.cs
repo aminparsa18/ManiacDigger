@@ -70,7 +70,7 @@ public interface IGame : IDisposable
     void Draw2dBitmapFile(string filename, float x, float y, float w, float h);
 
     /// <summary>Renders a string using the given font at the given screen position.</summary>
-    void Draw2dText(string text, Font font, float x, float y, int? color, bool shadow);
+    void Draw2dText(string text, TextFont font, float x, float y, int? color, bool shadow);
 
     /// <summary>Renders a string using a point-size font.</summary>
     void Draw2dText1(string text, int x, int y, int fontsize, int? color, bool enabledepthtest);
@@ -154,7 +154,7 @@ public interface IGame : IDisposable
     string GetTextureNameById(int id);
 
     /// <summary>Loads a texture by name, or uploads <paramref name="bmp"/> if not yet cached.</summary>
-    int GetTextureOrLoad(string name, Bitmap bmp);
+    int GetTextureOrLoad(string name, byte[] rgba, int width, int height);
 
     /// <summary>Releases the GPU texture registered under <paramref name="name"/>.</summary>
     bool DeleteTexture(string name);
@@ -235,7 +235,7 @@ public interface IGame : IDisposable
     MapLoadingProgressEventArgs maploadingprogress { get; set; }
 
     /// <summary>Font used on the map-loading screen.</summary>
-    Font FontMapLoading { get; set; }
+    TextFont FontMapLoading { get; set; }
 
     /// <summary>Sets a block type and propagates lighting/mesh updates.</summary>
     void PlaceBlockAndRedraw(int x, int y, int z, int type);

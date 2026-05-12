@@ -29,13 +29,24 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Client\Screens\**" />
 	  <Compile Remove="Properties\**" />
+	  <EmbeddedResource Remove="Client\Screens\**" />
 	  <EmbeddedResource Remove="Properties\**" />
+	  <None Remove="Client\Screens\**" />
 	  <None Remove="Properties\**" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <Compile Remove="Server\Services\Server.Network.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="PressStart2P-Regular.ttf" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="PressStart2P-Regular.ttf" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -48,11 +59,11 @@
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.7" />
 		<PackageReference Include="NVorbis" Version="0.10.5" />
 		<PackageReference Include="OpenTK" Version="4.9.4" />
-		<PackageReference Include="OpenTK.Audio.OpenAL" Version="4.9.4" />
 		<PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
 		<PackageReference Include="Jint" Version="4.7.1" />
+		<PackageReference Include="SkiaSharp" Version="3.119.2" />
 		<PackageReference Include="TextCopy" Version="6.2.1" />
 		<PackageReference Include="ppy.SDL2-CS" Version="1.0.82" />
 		<PackageReference Include="System.Drawing.Common" Version="10.0.7" />
@@ -71,9 +82,5 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\MeinKraft.Domain\MeinKraft.Domain.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Client\Screens\" />
 	</ItemGroup>
 </Project>

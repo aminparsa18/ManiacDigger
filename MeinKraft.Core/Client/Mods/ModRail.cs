@@ -501,7 +501,7 @@ public class ModRail : ModBase
     internal void RailSound()
     {
         float soundRate = Math.Min(currentvehiclespeed, 10f);
-        Game.AudioPlayLoop("railnoise.wav", railriding && soundRate > 0.1f, false);
+        Game.AudioPlayLoop("railnoise.ogg", railriding && soundRate > 0.1f, false);
 
         if (!railriding || soundRate <= 0)
         {
@@ -511,7 +511,7 @@ public class ModRail : ModBase
         if ((platform.TimeMillisecondsFromStart - _lastRailSoundTimeMs) > 1000 / soundRate)
         {
             _lastRailSoundIndex = (_lastRailSoundIndex + 1) % 4;
-            Game.PlayAudio(string.Format("rail{0}.wav", _lastRailSoundIndex.ToString()));
+            Game.PlayAudio(string.Format("rail{0}.ogg", _lastRailSoundIndex.ToString()));
             _lastRailSoundTimeMs = platform.TimeMillisecondsFromStart;
         }
     }

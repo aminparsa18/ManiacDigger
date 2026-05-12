@@ -9,7 +9,7 @@ public static class BuilderSharedServicesExtensions
         services.AddSingleton<IVoxelMap, VoxelMap>();
         services.AddSingleton<ISinglePlayerService, SinglePlayerService>();
         services.AddSingleton<IDummyNetwork, DummyNetwork>();
-        services.AddSingleton<IAssetManager, AssetManager>();
+      //  services.AddSingleton<IAssetManager, AssetManager>();
         services.AddSingleton<ILanguageService, LanguageService>();
         services.AddSingleton<IBlockRegistry, BlockRegistry>();
         services.AddSingleton<ICompression, CompressionGzip>();

@@ -47,5 +47,5 @@
     public int Color { get; set; }
     public string Id { get; set; }
     public bool Isbutton { get; set; }
-    public Font Font { get; set; }
+    public TextFont Font { get; set; }
 }

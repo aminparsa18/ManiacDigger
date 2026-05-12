@@ -8,7 +8,6 @@ public class ModDrawText : ModBase
     private const float TextScale = 0.005f;
     private const float TextDrawDistance = 20f;
 
-    private static readonly Font Font = new("Arial", 14, FontStyle.Regular);
     private readonly IMeshDrawer meshDrawer;
 
     public ModDrawText(IMeshDrawer meshDrawer, IGame game) : base(game)
@@ -54,7 +53,7 @@ public class ModDrawText : ModBase
         meshDrawer.GLRotate(180, 1, 0, 0);
         meshDrawer.GLRotate(float.RadiansToDegrees(e.Position.RotY), 0, 1, 0);
         meshDrawer.GLScale(TextScale, TextScale, TextScale);
-        Game.Draw2dText(p.Text, Font, -Game.TextSizeWidth(p.Text, 14) / 2, 0, ColorUtils.ColorFromArgb(255, 255, 255, 255), true);
+        Game.Draw2dText(p.Text, GameFonts.Default, -Game.TextSizeWidth(p.Text, 14) / 2, 0, ColorUtils.ColorFromArgb(255, 255, 255, 255), true);
         meshDrawer.GLPopMatrix();
     }
 }

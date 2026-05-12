@@ -94,8 +94,8 @@ public class ModGuiMapLoading : ModBase
 
     private void DrawCentered(string text, int y)
     {
-        TextRenderer.TextSize(text, FontSize, out int textWidth, out _);
-        Game.Draw2dText(text, Game.FontMapLoading, Game.Xcenter(textWidth), y, null, false);
+        var (textWidth, _) = GameTypeface.Measure(text, FontSize);
+        Game.Draw2dText(text, GameFonts.Default, Game.Xcenter(textWidth), y, null, false);
     }
 
     private void DrawBackground(int width, int height)

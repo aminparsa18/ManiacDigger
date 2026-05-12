@@ -12,7 +12,7 @@ public partial class Game
     {
         GuiState = GameState.MapLoading;
         maploadingprogress = new MapLoadingProgressEventArgs();
-        FontMapLoading = new Font("Arial", 14, FontStyle.Regular);
+        FontMapLoading = GameFonts.Default;
         SetFreeMouse(true);
     }
 
@@ -262,14 +262,14 @@ public partial class Game
     /// <summary>Returns the rendered width of <paramref name="s"/> at the given point size.</summary>
     public int TextSizeWidth(string s, int size)
     {
-        TextRenderer.TextSize(s, size, out int width, out _);
+        var (width, _) = GameTypeface.Measure(s, size);
         return width;
     }
 
     /// <summary>Returns the rendered height of <paramref name="s"/> at the given point size.</summary>
     public int TextSizeHeight(string s, int size)
     {
-        TextRenderer.TextSize(s, size, out _, out int height);
+        var (_, height) = GameTypeface.Measure(s, size);
         return height;
     }
 

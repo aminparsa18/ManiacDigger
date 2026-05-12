@@ -73,8 +73,7 @@ public class ModDrawPlayerNames : ModBase
             Game.Draw2dTexture(Game.GetOrCreateWhiteTexture(), -25, -10, 50 * p.Health, 10, null, 0, ColorUtils.ColorFromArgb(255, 255, 0, 0), false);
         }
 
-        Font font = new("Arial", 14);
-        Game.Draw2dText(p.Name, font, -Game.TextSizeWidth(p.Name, 14) / 2, 0, ColorUtils.ColorFromArgb(255, 255, 255, 255), true);
+        Game.Draw2dText(p.Name, GameFonts.Default, -Game.TextSizeWidth(p.Name, 14) / 2, 0, ColorUtils.ColorFromArgb(255, 255, 255, 255), true);
 
         meshDrawer.GLPopMatrix();
     }

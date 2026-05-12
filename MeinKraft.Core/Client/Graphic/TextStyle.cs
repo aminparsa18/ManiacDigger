@@ -16,7 +16,9 @@ public class TextStyle
     public string FontFamily { get; set; }
 
     /// <summary>Font style flags (e.g. bold, italic). Interpretation is platform-defined.</summary>
-    public FontStyle FontStyle { get; set; }
+    public bool Bold { get; set; }
+
+    public bool Italic { get; set; }
 
     /// <summary>
     /// Returns <see langword="true"/> if all fields of this instance equal those of <paramref name="other"/>.
@@ -27,8 +29,9 @@ public class TextStyle
         && FontSize == other.FontSize
         && Color == other.Color
         && FontFamily == other.FontFamily
-        && FontStyle == other.FontStyle;
+        && Bold == other.Bold
+        && Italic == other.Italic;
 
     public override int GetHashCode()
-        => HashCode.Combine(Text, Color, FontSize, FontFamily, FontStyle);
+        => HashCode.Combine(Text, Color, FontSize, FontFamily, Bold, Italic);
 }

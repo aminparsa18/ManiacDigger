@@ -29,9 +29,6 @@ public partial class Game : IGame
     // -------------------------------------------------------------------------
     // Rendering / textures
     // -------------------------------------------------------------------------
-
-    internal TextRenderer textRenderer;
-
     
     public Dictionary<int, int> TextureIdForInventory { get; set; }
 
@@ -72,7 +69,7 @@ public partial class Game : IGame
     public int ReceivedMapLength { get; set; }
     public bool ShouldRedrawAllBlocks { get; set; }
     public MapLoadingProgressEventArgs maploadingprogress { get; set; }
-    public Font FontMapLoading { get; set; }
+    public TextFont FontMapLoading { get; set; }
 
     // -------------------------------------------------------------------------
     // Player — identity & position

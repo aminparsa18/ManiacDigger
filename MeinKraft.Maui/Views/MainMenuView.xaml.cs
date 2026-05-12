@@ -1,5 +1,3 @@
-using MeinKraft.Maui.Services;
-
 namespace MeinKraft.Maui.Views;
 
 public partial class MainMenuView : ContentPage
@@ -7,8 +5,10 @@ public partial class MainMenuView : ContentPage
 	public MainMenuView(IGameWindowService gameWindowService)
 	{
 		InitializeComponent();
-        ((MauiGameWindowService)gameWindowService).ReleaseCursor();
-	}
+#if WINDOWS
+        gameWindowService.ReleaseCursor();
+#endif
+    }
 
     private async void OnSinglePlayerClicked(object sender, EventArgs e) => await Shell.Current.GoToAsync("//SinglePlayerView");
 

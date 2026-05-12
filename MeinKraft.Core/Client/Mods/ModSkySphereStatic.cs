@@ -67,9 +67,8 @@ public class ModSkySphereStatic : ModBase
 
     private int LoadTexture(string filename)
     {
-        Bitmap bmp = PixelBuffer.BitmapFromPng(Game.GetAssetFile(filename), Game.GetAssetFileLength(filename));
-        int texture = _openGlService.LoadTextureFromBitmap(bmp);
-        bmp.Dispose();
-        return texture;
+        byte[] data = Game.GetAssetFile(filename);
+        var (rgba, w, h) = PixelBuffer.RgbaFromPng(data, data.Length);
+        return _openGlService.LoadTextureRgba(rgba, w, h);
     }
 }

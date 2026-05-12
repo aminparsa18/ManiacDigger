@@ -105,10 +105,7 @@ public class ClientPacketHandlerDialog : ClientPacketHandler
 
             if (a.Font != null)
             {
-                b.Font = new Font(
-                    game.ValidFont(a.Font.FamilyName),
-                    EncodingHelper.DecodeFixedPoint((int)a.Font.Size),
-                    (FontStyle)a.Font.FontStyle);
+                b.Font = GameFonts.Default;
             }
 
             b.Image = a.Image switch

@@ -7,7 +7,6 @@ public class ModScreenshot : ModBase
     private const int FlashFontSize = 50;
     private const string ScreenshotText = "&0Screenshot";
 
-    private static readonly Font FlashFont = new(new FontFamily("Arial"), FlashFontSize);
     private static readonly int White = ColorUtils.ColorFromArgb(255, 255, 255, 255);
 
     private bool takeScreenshot;
@@ -50,7 +49,7 @@ public class ModScreenshot : ModBase
     internal void DrawScreenshotFlash()
     {
         Game.Draw2dTexture(Game.GetOrCreateWhiteTexture(), 0, 0, platform.CanvasWidth, platform.CanvasHeight, null, 0, White, false);
-        TextRenderer.TextSize(ScreenshotText, FlashFontSize, out int textWidth, out int textHeight);
-        Game.Draw2dText(ScreenshotText, FlashFont, Game.Xcenter(textWidth), Game.Ycenter(textHeight), null, false);
+        var (textWidth, textHeight) = GameTypeface.Measure(ScreenshotText, FlashFontSize);
+        Game.Draw2dText(ScreenshotText, GameFonts.Large, Game.Xcenter(textWidth), Game.Ycenter(textHeight), null, false);
     }
 }

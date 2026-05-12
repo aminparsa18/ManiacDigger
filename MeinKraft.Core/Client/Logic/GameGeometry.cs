@@ -58,7 +58,7 @@ public partial class Game
     /// object on every <see cref="Draw2dText1"/> call.
     /// Fix #6: fonts are disposed and the cache is cleared when fonts are rebuilt.
     /// </summary>
-    private readonly Dictionary<float, Font> _fontCache = new();
+    private readonly Dictionary<float, TextFont> _fontCache = new();
 
     // ── Block geometry ────────────────────────────────────────────────────────
 
@@ -485,9 +485,9 @@ public partial class Game
     /// </summary>
     public void Draw2dText1(string text, int x, int y, int fontsize, int? color, bool enabledepthtest)
     {
-        if (!_fontCache.TryGetValue(fontsize, out Font font))
+        if (!_fontCache.TryGetValue(fontsize, out TextFont font))
         {
-            font = new Font("Arial", fontsize, FontStyle.Regular);
+            font = GameFonts.Default;
             _fontCache[fontsize] = font;
         }
 
@@ -495,24 +495,10 @@ public partial class Game
     }
 
     /// <summary>
-    /// Fix #6: disposes all cached fonts and clears the cache.
-    /// Call when font settings change (e.g. window resize or settings update).
-    /// </summary>
-    public void ClearFontCache()
-    {
-        foreach (Font f in _fontCache.Values)
-        {
-            f.Dispose();
-        }
-
-        _fontCache.Clear();
-    }
-
-    /// <summary>
     /// Draws <paramref name="text"/> to the screen using a cached texture.
     /// here — it runs once per frame in <see cref="Draw2d"/> instead.
     /// </summary>
-    public void Draw2dText(string text, Font font, float x, float y, int? color, bool enabledepthtest)
+    public void Draw2dText(string text, TextFont font, float x, float y, int? color, bool enabledepthtest)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -525,8 +511,9 @@ public partial class Game
             Text = text,
             Color = color.Value,
             FontSize = font.Size,
-            FontFamily = font.FontFamily.Name,
-            FontStyle = font.Style,
+            FontFamily = font.Family,
+            Bold = font.Bold,
+            Italic = font.Italic,
         };
 
         if (!CachedTextTextures.TryGetValue(t, out CachedTexture cached))

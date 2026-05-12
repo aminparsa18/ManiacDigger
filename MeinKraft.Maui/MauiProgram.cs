@@ -1,5 +1,6 @@
 ﻿using MeinKraft.Extensions;
 using MeinKraft.Maui.Services;
+using Plugin.Maui.Audio;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 
 namespace MeinKraft.Maui;
@@ -12,6 +13,7 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .UseSkiaSharp()
+            .AddAudio()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("PressStart2P-Regular.ttf", "PressStart2PRegular");
@@ -22,6 +24,9 @@ public static class MauiProgram
 
         builder.Services.AddClientMods();
         builder.Services.AddServerMods();
+
+        builder.Services.AddSingleton<IAssetManager, AssetManager>();
+        builder.Services.AddSingleton<IAudioService, AudioService>();
 
         builder.Services.AddSingleton<MauiGameWindowService>();
         builder.Services.AddSingleton<IGameWindowService>(sp =>

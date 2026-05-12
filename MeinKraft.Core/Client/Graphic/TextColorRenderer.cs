@@ -1,84 +1,81 @@
-﻿using System.Text;
+﻿using SkiaSharp;
+using System.Runtime.InteropServices;
+using System.Text;
 
-/// <summary>Renders multi-colored text into a single power-of-two <see cref="Bitmap"/>.</summary>
+/// <summary>Renders multi-colored text into a single RGBA buffer using SkiaSharp.</summary>
 public class TextColorRenderer
 {
 
     /// <summary>
-    /// Renders a <see cref="TextStyle"/> value (which may contain inline color codes) into a
-    /// <see cref="Bitmap"/> sized to the next power of two in each dimension.
-    /// Each color segment is rendered separately and composited into a single atlas.
+    /// Renders a <see cref="TextStyle"/> (which may contain inline &amp;X color codes) into
+    /// a power-of-two RGBA pixel buffer ready for GL upload.
     /// </summary>
-    /// <param name="t">The text and style parameters to render.</param>
-    /// <returns>
-    /// A <see cref="Bitmap"/> containing the rendered text, with transparent pixels where
-    /// no glyph was drawn.
-    /// </returns>
-    public static Bitmap CreateTextTexture(TextStyle t)
+    public static (byte[] Rgba, int Width, int Height) CreateTextTexture(TextStyle t)
     {
         TextPart[] parts = DecodeColors(t.Text, t.Color);
 
+        // ── Measure pass ──────────────────────────────────────────────────────
         float totalWidth = 0;
-        float totalHeight = 0;
-        int[] sizesX = new int[parts.Length];
-        int[] sizesY = new int[parts.Length];
+        float maxHeight = 0;
+        float[] partWidths = new float[parts.Length];
 
-        for (int i = 0; i < parts.Length; i++)
+        // Use a throwaway paint just for measurement — color doesn't matter here.
+        using (SKFont measure = MakeFont(t.FontSize))
         {
-            TextRenderer.TextSize(parts[i].text, t.FontSize, out int outWidth, out int outHeight);
-            sizesX[i] = outWidth;
-            sizesY[i] = outHeight;
-            totalWidth += outWidth;
-            totalHeight = Math.Max(totalHeight, outHeight);
+            maxHeight = measure.Spacing;
+            for (int i = 0; i < parts.Length; i++)
+            {
+                measure.MeasureText(parts[i].text, out SKRect b);
+                partWidths[i] = b.Width + 2; // small per-segment padding
+                totalWidth += partWidths[i];
+            }
         }
 
-        int size2X = NextPowerOfTwo((int)totalWidth + 1);
-        int size2Y = NextPowerOfTwo((int)totalHeight + 1);
-        PixelBuffer atlas = PixelBuffer.Create(size2X, size2Y);
+        int w = NextPowerOfTwo(Math.Max(1, (int)MathF.Ceiling(totalWidth) + 2));
+        int h = NextPowerOfTwo(Math.Max(1, (int)MathF.Ceiling(maxHeight) + 2));
 
-        float currentWidth = 0;
+        // ── Draw pass ─────────────────────────────────────────────────────────
+        SKImageInfo info = new(w, h, SKColorType.Rgba8888, SKAlphaType.Premul);
+        using SKSurface surface = SKSurface.Create(info);
+        surface.Canvas.Clear(SKColors.Transparent);
+
+        float curX = 0;
         for (int i = 0; i < parts.Length; i++)
         {
-            int sizeX = sizesX[i];
-            int sizeY = sizesY[i];
-            if (sizeX == 0 || sizeY == 0)
+            if (string.IsNullOrEmpty(parts[i].text))
             {
                 continue;
             }
 
-            TextStyle partText = new()
-            {
-                Text = parts[i].text,
-                Color = parts[i].color,
-                FontSize = t.FontSize,
-                FontStyle = t.FontStyle,
-                FontFamily = t.FontFamily
-            };
+            using SKPaint paint = MakePaint((uint)parts[i].color);
+            using SKFont font = MakeFont(t.FontSize);
+            font.MeasureText(parts[i].text, out SKRect bounds, paint);
 
-            PixelBuffer part = PixelBuffer.FromBitmap(TextRenderer.MakeTextTexture(partText));
-
-            for (int y = 0; y < part.Height; y++)
-            {
-                for (int x = 0; x < part.Width; x++)
-                {
-                    if (x + currentWidth >= size2X || y >= size2Y)
-                    {
-                        continue;
-                    }
-
-                    int c = part.GetPixel(x, y);
-                    if (ColorUtils.ColorA(c) > 0)
-                    {
-                        atlas.SetPixel((int)currentWidth + x, y, c);
-                    }
-                }
-            }
-
-            currentWidth += sizeX;
+            // DrawText origin is the baseline — offset by top of bounds to stay inside canvas.
+            surface.Canvas.DrawText(parts[i].text, curX - bounds.Left, -bounds.Top + 1, SKTextAlign.Center, font, paint);
+            curX += partWidths[i];
         }
 
-        return atlas.ToBitmap();
+        // ── Export ────────────────────────────────────────────────────────────
+        using var image = surface.Snapshot();
+        using var bmp = SKBitmap.FromImage(image);
+        byte[] rgba = new byte[w * h * 4];
+        Marshal.Copy(bmp.GetPixels(), rgba, 0, rgba.Length);
+        return (rgba, w, h);
     }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    private static SKPaint MakePaint(uint colorArgb) => new()
+    {
+        IsAntialias = false,                     // pixel font — no blur
+        Color = new SKColor(colorArgb),
+    };
+
+    private static SKFont MakeFont(float fontSize) => new()
+    {
+        Size = fontSize,
+        Typeface = GameTypeface.Instance,     // single shared SKTypeface
+    };
 
     /// <summary>
     /// Splits <paramref name="s"/> into colored segments by parsing inline color codes of the

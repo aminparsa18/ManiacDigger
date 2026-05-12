@@ -3,6 +3,7 @@ using OpenTK.Mathematics;
 using System.Drawing.Imaging;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using Buffer = System.Buffer;
 using PixelFormat = OpenTK.Graphics.ES30.PixelFormat;
 using Vector3 = OpenTK.Mathematics.Vector3;
 using Vector4 = OpenTK.Mathematics.Vector4;
@@ -509,6 +510,73 @@ public sealed class OpenGlService : IOpenGlService
 
         GL.BindTexture(TextureTarget.Texture2D, 0);   // leave no texture bound
 
+        return id;
+    }
+
+    /// <inheritdoc/>
+    public int LoadTextureRgba(byte[] rgba, int width, int height)
+        => LoadTextureFromBytes(rgba, width, height, linearMag: false);
+
+    private int LoadTextureFromBytes(byte[] pixels, int width, int height, bool linearMag)
+    {
+        // ── 1. Ensure power-of-two dimensions ────────────────────────────────────
+        bool needsResize = !AllowNonPowerOfTwo &&
+                           !(BitOperations.IsPow2((uint)width) &&
+                             BitOperations.IsPow2((uint)height));
+
+        if (needsResize)
+        {
+            int w2 = (int)BitOperations.RoundUpToPowerOf2((uint)width);
+            int h2 = (int)BitOperations.RoundUpToPowerOf2((uint)height);
+
+            // Blit into a zeroed (transparent) power-of-two buffer.
+            byte[] padded = new byte[w2 * h2 * 4];
+            for (int row = 0; row < height; row++)
+                Buffer.BlockCopy(pixels, row * width * 4,
+                                 padded, row * w2 * 4,
+                                 width * 4);
+
+            pixels = padded;
+            width = w2;
+            height = h2;
+        }
+
+        // ── 2-6. Identical to LoadTexture from here on ───────────────────────────
+        int id = GL.GenTexture();
+        GL.BindTexture(TextureTarget.Texture2D, id);
+
+        if (!EnableMipmaps)
+        {
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
+                (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
+                (int)TextureMagFilter.Nearest);
+        }
+        else
+        {
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
+                (int)TextureMinFilter.NearestMipmapLinear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
+                linearMag ? (int)TextureMagFilter.Linear : (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, 4);
+        }
+
+        GL.TexImage2D(TextureTarget2d.Texture2D, 0, TextureComponentCount.Rgba,
+            width, height, 0,
+            PixelFormat.Rgba,
+            PixelType.UnsignedByte,
+            pixels);
+
+        if (EnableMipmaps)
+            GL.GenerateMipmap(TextureTarget.Texture2D);
+
+        if (EnableTransparency)
+        {
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+        }
+
+        GL.BindTexture(TextureTarget.Texture2D, 0);
         return id;
     }
 }

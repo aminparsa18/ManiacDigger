@@ -22,9 +22,8 @@ public partial class Game
         if (whitetexture == -1)
         {
             PixelBuffer buf = PixelBuffer.Create(1, 1);
-            buf.SetPixel(0, 0, ColorUtils.ColorFromArgb(255, 255, 255, 255));
-            using Bitmap bmp = buf.ToBitmap();
-            whitetexture = openGlService.LoadTextureFromBitmap(bmp);
+            buf.SetPixel(0, 0, 255, 255, 255, 255);
+            whitetexture = openGlService.LoadTextureRgba(buf.Rgba, 1, 1);
         }
 
         return whitetexture;
@@ -66,12 +65,12 @@ public partial class Game
     /// </summary>
     private CachedTexture MakeTextTexture(TextStyle t)
     {
-        using Bitmap bmp = TextColorRenderer.CreateTextTexture(t);
+        var (rgba, w, h) = TextColorRenderer.CreateTextTexture(t);
         return new CachedTexture
         {
-            SizeX = bmp.Width,
-            SizeY = bmp.Height,
-            TextureId = openGlService.LoadTextureFromBitmap(bmp),
+            SizeX = w,
+            SizeY = h,
+            TextureId = openGlService.LoadTextureRgba(rgba, w, h),
         };
     }
 
@@ -85,8 +84,8 @@ public partial class Game
     {
         if (!textures.TryGetValue(p, out int id))
         {
-            using Bitmap bmp = PixelBuffer.BitmapFromPng(GetAssetFile(p), GetAssetFileLength(p));
-            id = openGlService.LoadTextureFromBitmap(bmp);
+            var (rgba, w, h) = PixelBuffer.RgbaFromPng(GetAssetFile(p), GetAssetFileLength(p));
+            id = openGlService.LoadTextureRgba(rgba, w, h);
             textures[p] = id;
         }
 
@@ -101,13 +100,13 @@ public partial class Game
 
     /// <summary>
     /// Returns the cached GPU texture for <paramref name="name"/>,
-    /// uploading <paramref name="bmp"/> on first access.
+    /// uploading the RGBA pixel data on first access.
     /// </summary>
-    public int GetTextureOrLoad(string name, Bitmap bmp)
+    public int GetTextureOrLoad(string name, byte[] rgba, int width, int height)
     {
         if (!textures.TryGetValue(name, out int id))
         {
-            id = openGlService.LoadTextureFromBitmap(bmp);
+            id = openGlService.LoadTextureRgba(rgba, width, height);
             textures[name] = id;
         }
 
@@ -135,24 +134,23 @@ public partial class Game
     /// <summary>
     /// Uploads <paramref name="atlas2d"/> as the main terrain texture and splits
     /// it into 1-D atlas strips for indexed lookup by the tessellator.
-    /// calling it twice.
     /// </summary>
-    private void UseTerrainTextureAtlas2d(Bitmap atlas2d, int atlas2dWidth)
+    private void UseTerrainTextureAtlas2d(PixelBuffer atlas2d, int atlas2dWidth)
     {
-        TerrainTexture = openGlService.LoadTextureFromBitmap(atlas2d);
+        TerrainTexture = openGlService.LoadTextureRgba(atlas2d.Rgba, atlas2d.Width, atlas2d.Height);
 
         int atlas1dHeight = Atlas1dheight();
         int texturesPerAtlas = atlas1dHeight / (atlas2dWidth / GameConstants.MAX_BLOCKTYPES_SQRT);
 
         TerrainChunkTesselator.OnAtlasReady(texturesPerAtlas);
 
-        Bitmap[] atlases1d = PixelBuffer.Atlas2dInto1d(atlas2d, GameConstants.MAX_BLOCKTYPES_SQRT, atlas1dHeight);
+        var atlases1d = PixelBuffer.Atlas2dInto1d(atlas2d, GameConstants.MAX_BLOCKTYPES_SQRT, atlas1dHeight);
 
         TerrainChunkTesselator.TerrainTextures1d = new int[atlases1d.Length];
         for (int i = 0; i < atlases1d.Length; i++)
         {
-            TerrainChunkTesselator.TerrainTextures1d[i] = openGlService.LoadTextureFromBitmap(atlases1d[i]);
-            atlases1d[i].Dispose();
+            var (rgba, w, h) = atlases1d[i];
+            TerrainChunkTesselator.TerrainTextures1d[i] = openGlService.LoadTextureRgba(rgba, w, h);
         }
     }
 
@@ -166,48 +164,41 @@ public partial class Game
     /// <param name="textureIdsCount">Number of valid entries to process.</param>
     public void UseTerrainTextures(string[] textureIds, int textureIdsCount)
     {
-        const int tilesize = 32; // TODO: support tile sizes other than 32×32.
+        const int tilesize = 32;
 
-        PixelBuffer atlas2d = PixelBuffer.Create(tilesize * GameConstants.MAX_BLOCKTYPES_SQRT, tilesize * GameConstants.MAX_BLOCKTYPES_SQRT);
+        PixelBuffer atlas2d = PixelBuffer.Create(
+            tilesize * GameConstants.MAX_BLOCKTYPES_SQRT,
+            tilesize * GameConstants.MAX_BLOCKTYPES_SQRT);
 
         byte[] unknownPng = GetAssetFile("Unknown.png");
 
         for (int i = 0; i < textureIdsCount; i++)
         {
-            if (textureIds[i] == null)
-            {
-                continue;
-            }
+            if (textureIds[i] == null) continue;
 
             byte[] fileData = GetAssetFile(string.Concat(textureIds[i], ".png")) ?? unknownPng;
-            if (fileData == null)
-            {
-                continue;
-            }
+            if (fileData == null) continue;
 
-            using Bitmap bmp = PixelBuffer.BitmapFromPng(fileData, fileData.Length);
+            var (rgba, w, h) = PixelBuffer.RgbaFromPng(fileData, fileData.Length);
 
-            if (bmp.Width != tilesize || bmp.Height != tilesize)
+            if (w != tilesize || h != tilesize)
             {
                 Console.WriteLine(
-                    $"[Terrain] Skipping '{textureIds[i]}': expected {tilesize}×{tilesize}, got {bmp.Width}×{bmp.Height}.");
+                    $"[Terrain] Skipping '{textureIds[i]}': expected {tilesize}×{tilesize}, got {w}×{h}.");
                 continue;
             }
-
-            PixelBuffer tile = PixelBuffer.FromBitmap(bmp);
 
             int destX = i % GameConstants.MAX_BLOCKTYPES_SQRT * tilesize;
             int destY = i / GameConstants.MAX_BLOCKTYPES_SQRT * tilesize;
 
             for (int row = 0; row < tilesize; row++)
             {
-                tile.Argb
-                    .AsSpan(row * tilesize, tilesize)
-                    .CopyTo(atlas2d.Argb.AsSpan(((destY + row) * atlas2d.Width) + destX, tilesize));
+                rgba.AsSpan(row * tilesize * 4, tilesize * 4)
+                    .CopyTo(atlas2d.Rgba.AsSpan(
+                        ((destY + row) * atlas2d.Width + destX) * 4, tilesize * 4));
             }
         }
 
-        using Bitmap bitmap = atlas2d.ToBitmap();
-        UseTerrainTextureAtlas2d(bitmap, atlas2d.Width);
+        UseTerrainTextureAtlas2d(atlas2d, atlas2d.Width);
     }
 }

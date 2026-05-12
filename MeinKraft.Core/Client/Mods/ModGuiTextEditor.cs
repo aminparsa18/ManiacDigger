@@ -13,7 +13,6 @@ public class ModGuiTextEditor : ModScreen
     private const int CharCursor = 95; // '_'
     private const int CharSpace = 32;
 
-    private static readonly Font Font = new("Courier New", 12);
     private static readonly int BackgroundColor = ColorUtils.ColorFromArgb(255, 100, 100, 100);
 
     private readonly int[][] buffer = new int[MaxLines][];
@@ -40,7 +39,7 @@ public class ModGuiTextEditor : ModScreen
 
         for (int i = 0; i < MaxLines; i++)
         {
-            Game.Draw2dText(LineToString(buffer[i]), Font, StartX, StartY + (CharSize * i), null, false);
+            Game.Draw2dText(LineToString(buffer[i]), GameFonts.Default, StartX, StartY + (CharSize * i), null, false);
         }
 
         // Draw cursor on current line
@@ -48,7 +47,7 @@ public class ModGuiTextEditor : ModScreen
         Array.Fill(spaces, CharSpace);
         spaces[cursorColumn] = CharCursor;
         string cursorRow = EncodingHelper.CharArrayToString(spaces, cursorColumn + 1);
-        Game.Draw2dText(cursorRow, Font, StartX, StartY + (cursorLine * CharSize), null, false);
+        Game.Draw2dText(cursorRow, GameFonts.Default, StartX, StartY + (cursorLine * CharSize), null, false);
     }
 
     public override void OnKeyDown(KeyEventArgs e)

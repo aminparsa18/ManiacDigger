@@ -135,15 +135,11 @@ public class ModLoadPlayerTextures : ModBase
         }
 
         // Download finished — decode and upload.
-        Bitmap bmp = PixelBuffer.BitmapFromPng(
+        var (rgba, w, h) = PixelBuffer.RgbaFromPng(
             e.DrawModel.SkinDownloadResponse.Value,
             e.DrawModel.SkinDownloadResponse.Value.Length);
 
-        if (bmp != null)
-        {
-            e.DrawModel.CurrentTexture = Game.GetTextureOrLoad(e.DrawName.Name, bmp);
-            bmp.Dispose();
-        }
+        e.DrawModel.CurrentTexture = Game.GetTextureOrLoad(e.DrawName.Name, rgba, w, h);
 
         return true;
     }
@@ -154,29 +150,22 @@ public class ModLoadPlayerTextures : ModBase
     /// Always sets <c>CurrentTexture</c> and returns <see langword="true"/>.
     /// </summary>
     private bool TryLoadFileSkin(Entity e)
+{
+    if (e.DrawModel.Texture_ == null)
     {
-        if (e.DrawModel.Texture_ == null)
-        {
-            e.DrawModel.CurrentTexture = Game.GetTexture("mineplayer.png");
-            return true;
-        }
-
-        byte[] file = Game.GetAssetFile(e.DrawModel.Texture_);
-        if (file == null)
-        {
-            e.DrawModel.CurrentTexture = 0;
-            return true;
-        }
-
-        Bitmap bmp = PixelBuffer.BitmapFromPng(file, file.Length);
-        if (bmp == null)
-        {
-            e.DrawModel.CurrentTexture = 0;
-            return true;
-        }
-
-        e.DrawModel.CurrentTexture = Game.GetTextureOrLoad(e.DrawModel.Texture_, bmp);
-        bmp.Dispose();
+        e.DrawModel.CurrentTexture = Game.GetTexture("mineplayer.png");
         return true;
     }
+
+    byte[] file = Game.GetAssetFile(e.DrawModel.Texture_);
+    if (file == null)
+    {
+        e.DrawModel.CurrentTexture = 0;
+        return true;
+    }
+
+    var (rgba, w, h) = PixelBuffer.RgbaFromPng(file, file.Length);
+    e.DrawModel.CurrentTexture = Game.GetTextureOrLoad(e.DrawModel.Texture_, rgba, w, h);
+    return true;
+}
 }

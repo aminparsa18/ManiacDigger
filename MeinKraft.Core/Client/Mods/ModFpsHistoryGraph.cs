@@ -7,7 +7,6 @@
 public class ModFpsHistoryGraph : ModBase
 {
     private const int MaxCount = 300;
-    private const int ChatFontSize = 11;
     private const int GraphHeight = 80;
     private const int GraphPosX = 25;
     private const int PerLine = 2;
@@ -140,7 +139,7 @@ public class ModFpsHistoryGraph : ModBase
 
         if (drawFpsText)
         {
-            Game.Draw2dText(fpsText, new Font("Arial", ChatFontSize), 20, 20, null, false);
+            Game.Draw2dText(fpsText, GameFonts.Default, 20, 20, null, false);
         }
 
         meshDrawer.PerspectiveMode();
@@ -187,6 +186,6 @@ public class ModFpsHistoryGraph : ModBase
         float y = posy - (GraphHeight * (60f / fps));
 
         _game.Draw2dTexture(whiteTexture, GraphPosX, (int)y, MaxCount, 1, -1, GameConstants.MAX_BLOCKTYPES_SQRT, color, false);
-        _game.Draw2dText(fps.ToString(), new Font("Arial", 6), GraphPosX, y, null, false);
+        _game.Draw2dText(fps.ToString(), GameFonts.Default, GraphPosX, y, null, false);
     }
 }

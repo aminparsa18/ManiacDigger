@@ -582,5 +582,7 @@ public partial class GameWindowService : IGameWindowService
         }
     }
 
+    public void ReleaseCursor() => throw new NotImplementedException();
+
     #endregion
 }

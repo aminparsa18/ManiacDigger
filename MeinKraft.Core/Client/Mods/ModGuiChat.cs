@@ -82,10 +82,10 @@ public class ModGuiChat : ModBase
     private float _currentScaledFontSize;
 
     /// <summary>Cached bold font used for normal chat lines. Rebuilt only when the scaled size changes.</summary>
-    private Font _boldFont;
+    private TextFont _boldFont;
 
     /// <summary>Cached italic font used for clickable link lines. Rebuilt only when the scaled size changes.</summary>
-    private Font _italicFont;
+    private TextFont _italicFont;
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -106,8 +106,8 @@ public class ModGuiChat : ModBase
         // Build initial fonts at unscaled size; they will be rebuilt on the
         // first frame once Game.Scale() is known.
         _currentScaledFontSize = DefaultChatFontSize;
-        _boldFont = new Font("Arial", _currentScaledFontSize, FontStyle.Bold);
-        _italicFont = new Font("Arial", _currentScaledFontSize, FontStyle.Italic);
+        _boldFont = GameFonts.Large;
+        _italicFont = GameFonts.Default;
     }
 
     // -------------------------------------------------------------------------
@@ -342,15 +342,15 @@ public class ModGuiChat : ModBase
         if (scaledFontSize != _currentScaledFontSize)
         {
             _currentScaledFontSize = scaledFontSize;
-            _boldFont = new Font("Arial", scaledFontSize, FontStyle.Bold);
-            _italicFont = new Font("Arial", scaledFontSize, FontStyle.Italic);
+            _boldFont = GameFonts.Large;
+            _italicFont = GameFonts.Default;
         }
 
         float baseX = ChatMarginX * scale;
 
         for (int i = 0; i < _visibleLineCount; i++)
         {
-            Font lineFont = _visibleLines[i].Clickable ? _italicFont : _boldFont;
+            var lineFont = _visibleLines[i].Clickable ? _italicFont : _boldFont;
             float y = (ChatBaseY + (i * ChatLineSpacing)) * scale;
             Game.Draw2dText(_visibleLines[i].Text, lineFont, baseX, y, null, false);
         }
@@ -372,8 +372,8 @@ public class ModGuiChat : ModBase
         if (scaledSize != _currentScaledFontSize)
         {
             _currentScaledFontSize = scaledSize;
-            _boldFont = new Font("Arial", scaledSize, FontStyle.Bold);
-            _italicFont = new Font("Arial", scaledSize, FontStyle.Italic);
+            _boldFont = GameFonts.Default;
+            _italicFont = GameFonts.Default;
         }
 
         string prefix = game.IsTeamchat ? "To team: " : "";

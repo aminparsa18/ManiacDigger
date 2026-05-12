@@ -14,8 +14,8 @@ public class ModSkySphereAnimated : ModBase
     private readonly IMeshDrawer meshDrawer;
     private readonly ILightManager _lightManager;
     private GeometryModel skyModel;
-    private int[] skyPixels;
-    private int[] glowPixels;
+    private byte[] skyPixels;
+    private byte[] glowPixels;
     private bool started;
 
     public ModSkySphereAnimated(IOpenGlService platform, IMeshDrawer meshDrawer, ILightManager lightManager, IGame game) : base(game)
@@ -50,17 +50,15 @@ public class ModSkySphereAnimated : ModBase
     }
 
     /// <summary>
-    /// Loads a PNG asset into a flat ARGB pixel array.
+    /// Loads a PNG asset into a flat RGBA pixel array.
     /// </summary>
-    /// <param name="game">Used to access the platform and asset file system.</param>
     /// <param name="filename">Asset filename including extension (e.g. <c>"terrain.png"</c>).</param>
-    /// <param name="pixels">Receives the loaded ARGB pixel data.</param>
-    private void LoadPixels(string filename, ref int[] pixels)
+    /// <param name="pixels">Receives the loaded RGBA pixel data.</param>
+    private void LoadPixels(string filename, ref byte[] pixels)
     {
-        Bitmap bmp = PixelBuffer.BitmapFromPng(Game.GetAssetFile(filename), Game.GetAssetFileLength(filename));
-        PixelBuffer buffer = PixelBuffer.FromBitmap(bmp);
-        bmp.Dispose();
-        pixels = buffer.Argb;
+        byte[] data = Game.GetAssetFile(filename);
+        var (rgba, _, _) = PixelBuffer.RgbaFromPng(data, data.Length);
+        pixels = rgba;
     }
 
     public void Draw(float fov)
@@ -84,7 +82,7 @@ public class ModSkySphereAnimated : ModBase
 
     public static GeometryModel GetSphereModelData2(GeometryModel data,
         float radius, float height, int segments, int rings,
-        int[] skyPixels, int[] glowPixels,
+        byte[] skyPixels, byte[] glowPixels,
         float sunX, float sunY, float sunZ)
     {
         if (data == null)
@@ -191,7 +189,7 @@ public class ModSkySphereAnimated : ModBase
         return indices;
     }
 
-    private static int Texture2d(int[] pixelsArgb, float x, float y)
+    private static int Texture2d(byte[] pixelsArgb, float x, float y)
     {
         int px = PositiveMod((int)(x * (TextureSize - 1)), TextureSize - 1);
         int py = PositiveMod((int)(y * (TextureSize - 1)), TextureSize - 1);

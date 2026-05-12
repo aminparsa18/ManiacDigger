@@ -3,6 +3,8 @@ using MeinKraft.Worker;
 using OpenTK.Graphics.ES30;
 using SkiaSharp.Views.Maui;
 using System.Runtime.InteropServices;
+using OpenTK;
+
 
 #if WINDOWS
 using Application = Microsoft.Maui.Controls.Application;
@@ -29,6 +31,7 @@ public partial class GameView : ContentPage
     private readonly WorkerHost _workerHost;
     private readonly ServerSystemBootstraper _serverSystemBootstraper;
 
+#if WINDOWS
     [DllImport("libEGL.dll")]
     private static extern IntPtr eglGetProcAddress(string procName);
 
@@ -36,6 +39,26 @@ public partial class GameView : ContentPage
     {
         public IntPtr GetProcAddress(string procName) => eglGetProcAddress(procName);
     }
+
+#elif ANDROID
+    public class AndroidBindingsContext : IBindingsContext
+    {
+        private readonly IntPtr _libHandle;
+
+        public AndroidBindingsContext()
+        {
+            _libHandle = NativeLibrary.Load("libGLESv2.so");
+        }
+
+        public IntPtr GetProcAddress(string procName)
+        {
+            if (NativeLibrary.TryGetExport(_libHandle, procName, out IntPtr ptr))
+                return ptr;
+
+            return IntPtr.Zero;
+        }
+    }
+#endif
 
     public GameView(IOpenGlService openGlService, IGameWindowService gameWindowService, IAssetManager assetManager,
         IGame game, ISinglePlayerService singlePlayerService, IDummyNetwork dummyNetwork, ITerrainChunkTesselator terrainChunkTesselator,
@@ -68,7 +91,7 @@ public partial class GameView : ContentPage
     {
         base.OnHandlerChanged();
         AttachWindowKeyEvents();
-        ((MauiGameWindowService)_gameWindowService).CaptureCursor();
+       // ((MauiGameWindowService)_gameWindowService).CaptureCursor();
     }
 
     public void AttachWindowKeyEvents()
@@ -84,19 +107,24 @@ public partial class GameView : ContentPage
                 new KeyEventHandler((s, args) =>
                 {
                     var keyEvent = WinKeyMapper.ToKeyEventArgs(args);
-                    if (keyEvent.KeyChar == (int)Keys.Escape && _game.GuiState == GameState.Normal)
+                    if (keyEvent.KeyChar == (int)Keys.Escape && _game.GuiState == GameState.Normal && !OverlayMenu.IsVisible)
                     {
                         ((MauiGameWindowService)_gameWindowService).ReleaseCursor();
                         ShowPauseMenu();
                         _game.GuiState = GameState.EscapeMenu;
                     }
-                    if (keyEvent.KeyChar == (int)Keys.Escape && _game.GuiState == GameState.Inventory)
+                    else if (keyEvent.KeyChar == (int)Keys.Escape && _game.GuiState == GameState.Inventory)
                     {
                         ((MauiGameWindowService)_gameWindowService).CaptureCursor();
                     }
                     else if (keyEvent.KeyChar == (int)Keys.B && _game.GuiState == GameState.Normal)
                     {
                         ((MauiGameWindowService)_gameWindowService).ReleaseCursor();
+                    }
+                    else if (keyEvent.KeyChar == (int)Keys.Escape && OverlayMenu.IsVisible)
+                    {
+                        HideOverlay();
+                        ((MauiGameWindowService)_gameWindowService).CaptureCursor();
                     }
                     _game.KeyDown(keyEvent);
                     _game.KeyPress(keyEvent);
@@ -246,7 +274,11 @@ public partial class GameView : ContentPage
     {
         if (!_glInitialized)
         {
+#if WINDOWS
             GL.LoadBindings(new AngleBindingsContext());
+#elif ANDROID
+            GL.LoadBindings(new AndroidBindingsContext());
+#endif
             InitGL();
             _glInitialized = true;
             _game.Start();

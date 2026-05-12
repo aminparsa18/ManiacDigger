@@ -1,5 +1,6 @@
 ﻿using MeinKraft;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using SkiaSharp;
 using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 /// <summary>
@@ -418,7 +419,7 @@ public class ModGuiInventory : ModBase
             if (item.BlockCount > 1)
             {
                 Game.Draw2dText(item.BlockCount.ToString(),
-                    new Font("Arial", 8),
+                    GameFonts.Default,
                     screenposX, screenposY, null, false);
             }
         }
@@ -437,9 +438,15 @@ public class ModGuiInventory : ModBase
         int sizex = InventoryService.ItemSizeX(item);
         int sizey = InventoryService.ItemSizeY(item);
 
-        TextRenderer.TextSize(inventoryService.ItemInfo(item), 11.5f, out int tw, out int th);
-        tw += 6;
-        th += 4;
+        using var paint = new SKPaint
+        {
+            TextSize = 11.5f,
+            Typeface = GameTypeface.Instance,
+        };
+        SKRect bounds = default;
+        paint.MeasureText(inventoryService.ItemInfo(item), ref bounds);
+        int tw = (int)MathF.Ceiling(bounds.Width) + 6;
+        int th = (int)MathF.Ceiling(bounds.Height) + 4;
 
         int w = tw + (CellDrawSize * sizex);
         int h = th < (CellDrawSize * sizey) + 4 ? (CellDrawSize * sizey) + 4 : th;
@@ -452,7 +459,7 @@ public class ModGuiInventory : ModBase
         Game.Draw2dTexture(Game.GetOrCreateWhiteTexture(), screenposX - w + 2, screenposY - h + 2, w - 4, h - 4, null, 0, ColorUtils.ColorFromArgb(255, 105, 105, 105), false);
 
         Game.Draw2dText(inventoryService.ItemInfo(item),
-            new Font("Arial", 10),
+            GameFonts.Default,
             screenposX - tw + 4, screenposY - h + 2, null, false);
 
         DrawItem(screenposX - w + 2, screenposY - h + 2, new InventoryItem { BlockId = item.BlockId }, 0, 0);
