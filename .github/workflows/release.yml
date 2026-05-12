@@ -28,7 +28,8 @@ jobs:
           $version = "${{ github.ref_name }}".TrimStart('v')
           dotnet publish MeinKraft.Maui/MeinKraft.Maui.csproj `
             -c Release -f net10.0-windows10.0.19041.0 -r win-x64 --self-contained true `
-            /p:Version=$version
+            /p:Version=$version `
+            /p:TargetFrameworks=net10.0-windows10.0.19041.0
 
       - name: Zip output
         run: |
