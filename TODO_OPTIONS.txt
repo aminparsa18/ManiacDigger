@@ -50,35 +50,6 @@
         {
             options.UseServerTextures = !options.UseServerTextures;
         }
-
-        if (b == graphicsReturnToOptionsMenu)
-        {
-            UseFullscreen();
-            UseResolution();
-            SetEscapeMenuState(EscapeMenuState.Options);
-        }
-    }
-
-    private void OtherSet()
-    {
-        LanguageService language = Game.Language;
-
-        otherSoundOption = new Button
-        {
-            Text = string.Format(language.SoundOption(), Game.AudioEnabled ? language.On() : language.Off())
-        };
-        otherAutoJumpOption = new Button
-        {
-            Text = string.Format(language.AutoJumpOption(), Game.AutoJumpEnabled ? language.On() : language.Off())
-        };
-        otherLanguageSetting = new Button
-        {
-            Text = string.Format(language.ClientLanguageOption(), language.GetUsedLanguage())
-        };
-        otherReturnToOptionsMenu = new Button
-        {
-            Text = language.ReturnToOptionsMenu()
-        };
     }
 
     private void OtherHandleClick(Button b)
@@ -91,17 +62,6 @@
         if (b == otherAutoJumpOption)
         {
             Game.AutoJumpEnabled = !Game.AutoJumpEnabled;
-        }
-
-        if (b == otherLanguageSetting)
-        {
-            //Switch language based on available languages
-            Game.Language.NextLanguage();
-        }
-
-        if (b == otherReturnToOptionsMenu)
-        {
-            SetEscapeMenuState(EscapeMenuState.Options);
         }
     }
 

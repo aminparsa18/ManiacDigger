@@ -3,6 +3,8 @@ using MeinKraft.Worker;
 using OpenTK.Graphics.ES30;
 using SkiaSharp.Views.Maui;
 using System.Runtime.InteropServices;
+using OpenTK.Windowing.Common;
+
 
 #if WINDOWS
 using Application = Microsoft.Maui.Controls.Application;
@@ -50,6 +52,12 @@ public partial class GameView : ContentPage
         _workerHost = workerHost;
         _dummyNetwork = dummyNetwork;
         _serverSystemBootstraper = serverSystemBootstraper;
+
+        // Wire up overlay events. OverlayMenuView owns its internal navigation
+        // (Pause ↔ Options); GameView only handles the two exit points that
+        // require cursor and game-state changes.
+        OverlayMenu.ReturnToGameRequested += (_, _) => HideOverlay();
+        OverlayMenu.ExitToMenuRequested += OnExitToMenuRequested;
     }
 
 #if WINDOWS
@@ -73,7 +81,7 @@ public partial class GameView : ContentPage
                 new KeyEventHandler((s, args) =>
                 {
                     var keyEvent = WinKeyMapper.ToKeyEventArgs(args);
-                    if(keyEvent.KeyChar == (int)Keys.Escape && _game.GuiState == GameState.Normal)
+                    if (keyEvent.KeyChar == (int)Keys.Escape && _game.GuiState == GameState.Normal)
                     {
                         ((MauiGameWindowService)_gameWindowService).ReleaseCursor();
                         ShowPauseMenu();
@@ -113,7 +121,7 @@ public partial class GameView : ContentPage
             }
 
             root.Tapped += (s, _) => root.Focus(FocusState.Pointer);  // focus on tap
-            root.Focus(FocusState.Programmatic);                     // focus immediately
+            root.Focus(FocusState.Programmatic);                       // focus immediately
 
             root.AddHandler(UIElement.PointerPressedEvent,
                 new PointerEventHandler((s, args) =>
@@ -225,24 +233,11 @@ public partial class GameView : ContentPage
             as Microsoft.UI.Xaml.Window);
 
         var svc = (MauiGameWindowService)_gameWindowService;
-        svc.RawMouseDelta -= OnRawMouseDelta;
+        // Lines 228-245 from original (StopRawInput + RawMouseDelta unsubscribe) unchanged:
         svc.StopRawInput(hwnd);
+        svc.RawMouseDelta -= OnRawMouseDelta;
 #endif
-        ((MauiGameWindowService)_gameWindowService).Detach();
     }
-
-#if WINDOWS
-    private void OnRawMouseDelta(int dx, int dy)
-    {
-        var emulated = new MouseEventArgs
-        {
-            MovementX = dx,
-            MovementY = dy,
-            Emulated = true
-        };
-        _game.MouseMove(emulated);
-    }
-#endif
 
     private void GlView_PaintSurface(object sender, SKPaintGLSurfaceEventArgs e)
     {
@@ -299,49 +294,38 @@ public partial class GameView : ContentPage
     }
 
     // =========================================================================
-    // Overlay — public API (call from your ESC key handler or mod)
+    // Overlay — public API
     // =========================================================================
 
     /// <summary>
-    /// Shows the pause menu overlay and stops the game loop from stealing input.
-    /// Call this when the player presses ESC.
+    /// Shows the pause menu overlay and releases the mouse lock so the cursor
+    /// is usable in the overlay. Call when the player presses ESC.
     /// </summary>
     public void ShowPauseMenu()
     {
-        PausePanel.IsVisible = true;
-        OptionsPanel.IsVisible = false;
-        OverlayRoot.IsVisible = true;
-
-        // Release the mouse lock so the cursor is usable in the overlay.
+        OverlayMenu.ShowPauseMenu();   // reset to Pause panel (not Options)
+        OverlayMenu.IsVisible = true;
         _gameWindowService.ExitMousePointerLock();
     }
 
     /// <summary>
     /// Hides the overlay entirely and restores input to the game.
+    /// Called by the ReturnToGameRequested event handler.
     /// </summary>
     private void HideOverlay()
     {
-        OverlayRoot.IsVisible = false;
+        OverlayMenu.IsVisible = false;
 #if WINDOWS
         ((MauiGameWindowService)_gameWindowService).CaptureCursor();
 #endif
         _game.GuiState = GameState.Normal;
     }
 
-    // =========================================================================
-    // Pause panel handlers
-    // =========================================================================
-
-    private void OnReturnToGameClicked(object sender, EventArgs e)
-        => HideOverlay();
-
-    private void OnOptionsClicked(object sender, EventArgs e)
-    {
-        PausePanel.IsVisible = false;
-        OptionsPanel.IsVisible = true;
-    }
-
-    private async void OnExitToMenuClicked(object sender, EventArgs e)
+    /// <summary>
+    /// Handler for OverlayMenuView.ExitToMenuRequested.
+    /// Hides the overlay, releases the cursor, and navigates to the main menu.
+    /// </summary>
+    private async void OnExitToMenuRequested(object? sender, EventArgs e)
     {
         HideOverlay();
 #if WINDOWS
@@ -350,70 +334,18 @@ public partial class GameView : ContentPage
         await Shell.Current.GoToAsync("//MainMenuView");
     }
 
-    // =========================================================================
-    // Options panel — navigation
-    // =========================================================================
-
-    /// <summary>Back button inside the Options panel — returns to Pause panel.</summary>
-    private void OnOptionsBackClicked(object sender, EventArgs e)
+#if WINDOWS
+    private void OnRawMouseDelta(int dx, int dy)
     {
-        OptionsPanel.IsVisible = false;
-        PausePanel.IsVisible = true;
+        var emulated = new MouseEventArgs
+        {
+            MovementX = dx,
+            MovementY = dy,
+            Emulated = true
+        };
+        _game.MouseMove(emulated);
     }
-
-    // =========================================================================
-    // Options panel — button stubs
-    // Wire these up to your existing options logic.
-    // Each handler receives the Button so you can update its Text after toggling.
-    // =========================================================================
-
-    private void OnSmoothShadowsClicked(object sender, EventArgs e)
-    {
-        // TODO: toggle _game.Config3d.SmoothShadows
-        // BtnSmoothShadows.Text = $"Smooth Shadows: {(on ? "ON" : "OFF")}";
-    }
-
-    private void OnDarkenSidesClicked(object sender, EventArgs e)
-    {
-        // TODO: toggle _game.Config3d.DarkenSides
-        // BtnDarkenSides.Text = $"Darken Sides: {(on ? "ON" : "OFF")}";
-    }
-
-    private void OnViewDistanceClicked(object sender, EventArgs e)
-    {
-        // TODO: cycle _game.Config3d.ViewDistance through preset values
-        // BtnViewDistance.Text = $"View Distance: {value}";
-    }
-
-    private void OnFramerateClicked(object sender, EventArgs e)
-    {
-        // TODO: cycle target framerate
-        // BtnFramerate.Text = $"Framerate: {value}";
-    }
-
-    private void OnResolutionClicked(object sender, EventArgs e)
-    {
-        // TODO: cycle resolution presets
-        // BtnResolution.Text = $"Resolution: {w}x{h}";
-    }
-
-    private void OnFullscreenClicked(object sender, EventArgs e)
-    {
-        // TODO: toggle fullscreen
-        // BtnFullscreen.Text = $"Fullscreen: {(on ? "ON" : "OFF")}";
-    }
-
-    private void OnServerTexturesClicked(object sender, EventArgs e)
-    {
-        // TODO: toggle server textures
-        // BtnServerTextures.Text = $"Server Textures: {(on ? "ON" : "OFF")}";
-    }
-
-    private void OnFontClicked(object sender, EventArgs e)
-    {
-        // TODO: cycle font options
-        // BtnFont.Text = $"Font: {name}";
-    }
+#endif
 }
 
 #if WINDOWS
