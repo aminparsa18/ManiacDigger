@@ -26,18 +26,18 @@ jobs:
       - name: Publish
         run: |
           $version = "${{ github.ref_name }}".TrimStart('v')  # strips the 'v' from v1.0.1
-          dotnet publish ManicDigger.Maui/ManicDigger.Maui.csproj `
+          dotnet publish MineKraft.Maui/MineKraft.Maui.csproj `
             -c Release -f net10.0-windows10.0.19041.0 -r win-x64 --self-contained true`
             /p:Version=$version
 
       - name: Zip output
         run: |
           Compress-Archive `
-            -Path "ManicDigger.Maui/bin/Release/net10.0-windows10.0.19041.0/win-x64/publish/*" `
-            -DestinationPath "ManicDigger-${{ github.ref_name }}-win-x64.zip"
+            -Path "MineKraft.Maui/bin/Release/net10.0-windows10.0.19041.0/win-x64/publish/*" `
+            -DestinationPath "MineKraft-${{ github.ref_name }}-win-x64.zip"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ManicDigger-${{ github.ref_name }}-win-x64.zip
+          files: MineKraft-${{ github.ref_name }}-win-x64.zip
           generate_release_notes: true  # auto-generates notes from commits since last tag
