@@ -1,4 +1,5 @@
 ﻿using MeinKraft;
+using MeinKraft.Server;
 using MeinKraft.Worker;
 
 public static class WorkerServerExtensions
@@ -13,26 +14,21 @@ public static class WorkerServerExtensions
     /// </code>
     /// </summary>
     public static IServiceCollection AddServerWorkerInfrastructure(
-        this IServiceCollection services,
-        TimeSpan simulationTickInterval = default)
+        this IServiceCollection services)
     {
-        // ── Simulation loop ───────────────────────────────────────────────────
+        // Session manager and port allocator are singleton — they live for the 
+        // lifetime of the web app and track all active sessions
+        services.AddSingleton<IGameSessionManager, GameSessionManager>();
+        services.AddSingleton<PortAllocator>();
 
-        services.AddSingleton(sp => new SimulationLoop(
-            sp.GetRequiredService<ISimulationStep>(),
-            sp.GetRequiredService<ILogger<SimulationLoop>>(),
-            simulationTickInterval));
+        services.AddScoped<ISessionConfig, SessionConfig>();
+        services.AddScoped<ServerWorkerHost>();
+        services.AddScoped<SimulationLoop>();
+        services.AddScoped<ServerLifetime>();
+        services.AddScoped<ISimulationStep, ServerSimulationStep>();
+        services.AddScoped<ServerGameService>();
+        services.AddScoped<PeriodicTaskScheduler>();
 
-        // ── Periodic scheduler ────────────────────────────────────────────────
-
-        services.AddSingleton<PeriodicTaskScheduler>();
-
-        // ── WorkerHost — started manually from Connect() ──────────────────────
-
-        services.AddSingleton<ServerWorkerHost>();
-
-        services.AddSingleton<ServerLifetime>();
-        services.AddSingleton<ISimulationStep, ServerSimulationStep>();
         services.AddScheduledTask<ServerAutoRestartTask>();
         services.AddScheduledTask<SaveGameTask>();
         services.AddScheduledTask<SeasonBroadcastTask>();
@@ -43,7 +39,7 @@ public static class WorkerServerExtensions
     public static IServiceCollection AddScheduledTask<T>(this IServiceCollection services)
     where T : class, IScheduledTask
     {
-        services.AddSingleton<IScheduledTask, T>();
+        services.AddScoped<IScheduledTask, T>();
         return services;
     }
 }

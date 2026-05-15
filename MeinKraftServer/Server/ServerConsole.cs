@@ -15,12 +15,7 @@ public class ServerConsole
     {
         //while (!Exit.Exit) //TODO: review this after fully separated server
         {
-            if (server.IsSinglePlayer)
-            {
-                Thread.Sleep(1000);
-            }
-            else
-            {
+          
                 string input = Console.ReadLine();
                 if (string.IsNullOrEmpty(input))
                 {
@@ -29,7 +24,7 @@ public class ServerConsole
 
                 input = input.Trim();
                 server.ReceiveServerConsole(input);
-            }
+            //}
         }
     }
 

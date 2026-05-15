@@ -1075,7 +1075,7 @@ public partial class ServerGameService
         _config.WelcomeMessage = welcomeMessage;
         SendMessageToAll(string.Format(_languageService.Get("Server_CommandWelcomeChanged"), GameConstants.colorSuccess, _serverClientService.GetClient(sourceClientId).ColoredPlayername(GameConstants.colorSuccess), welcomeMessage));
         ServerEventLog(string.Format("{0} changes welcome message to {1}.", _serverClientService.GetClient(sourceClientId).PlayerName, welcomeMessage));
-        _config.ConfigNeedsSaving = true;
+      //  _config.ConfigNeedsSaving = true;
         return true;
     }
 
@@ -1099,7 +1099,7 @@ public partial class ServerGameService
                 if (option.Equals("on"))
                 {
                     _config.BuildLogging = true;
-                    _config.ConfigNeedsSaving = true;
+                  //  _config.ConfigNeedsSaving = true;
                     _serverPacketService.SendMessage(sourceClientId, string.Format("{0}Build logging enabled.", GameConstants.colorSuccess));
                     ServerEventLog(string.Format("{0} enables build logging.", _serverClientService.GetClient(sourceClientId).PlayerName));
                     return true;
@@ -1108,7 +1108,7 @@ public partial class ServerGameService
                 if (option.Equals("off"))
                 {
                     _config.BuildLogging = false;
-                    _config.ConfigNeedsSaving = true;
+                  //  _config.ConfigNeedsSaving = true;
                     _serverPacketService.SendMessage(sourceClientId, string.Format("{0}Build logging disabled.", GameConstants.colorSuccess));
                     ServerEventLog(string.Format("{0} disables build logging.", _serverClientService.GetClient(sourceClientId).PlayerName));
                     return true;
@@ -1120,7 +1120,7 @@ public partial class ServerGameService
                 if (option.Equals("on"))
                 {
                     _config.ServerEventLogging = true;
-                    _config.ConfigNeedsSaving = true;
+                  //  _config.ConfigNeedsSaving = true;
                     _serverPacketService.SendMessage(sourceClientId, string.Format("{0}Server event logging enabled.", GameConstants.colorSuccess));
                     ServerEventLog(string.Format("{0} enables server event logging.", _serverClientService.GetClient(sourceClientId).PlayerName));
                     return true;
@@ -1130,7 +1130,7 @@ public partial class ServerGameService
                 {
                     ServerEventLog(string.Format("{0} disables server event logging.", _serverClientService.GetClient(sourceClientId).PlayerName));
                     _config.ServerEventLogging = false;
-                    _config.ConfigNeedsSaving = true;
+                   // _config.ConfigNeedsSaving = true;
                     _serverPacketService.SendMessage(sourceClientId, string.Format("{0}Server event logging disabled.", GameConstants.colorSuccess));
                     return true;
                 }
@@ -1141,7 +1141,7 @@ public partial class ServerGameService
                 if (option.Equals("on"))
                 {
                     _config.ChatLogging = true;
-                    _config.ConfigNeedsSaving = true;
+                 //   _config.ConfigNeedsSaving = true;
                     _serverPacketService.SendMessage(sourceClientId, string.Format("{0}Chat logging enabled.", GameConstants.colorSuccess));
                     ServerEventLog(string.Format("{0} enables chat logging.", _serverClientService.GetClient(sourceClientId).PlayerName));
                     return true;
@@ -1150,7 +1150,7 @@ public partial class ServerGameService
                 if (option.Equals("off"))
                 {
                     _config.ChatLogging = false;
-                    _config.ConfigNeedsSaving = true;
+                 //   _config.ConfigNeedsSaving = true;
                     _serverPacketService.SendMessage(sourceClientId, string.Format("{0}Chat logging disabled.", GameConstants.colorSuccess));
                     ServerEventLog(string.Format("{0} disables chat logging.", _serverClientService.GetClient(sourceClientId).PlayerName));
                     return true;
@@ -1568,7 +1568,7 @@ public partial class ServerGameService
         }
 
         _config.Monsters = option.Equals("off") ? false : true;
-        _config.ConfigNeedsSaving = true;
+      //  _config.ConfigNeedsSaving = true;
         if (!_config.Monsters)
         {
             foreach (KeyValuePair<int, ServerPlayer> k in _serverClientService.Clients)
@@ -1622,7 +1622,7 @@ public partial class ServerGameService
         }
 
         _config.Areas.Add(newArea);
-        _config.ConfigNeedsSaving = true;
+      //  _config.ConfigNeedsSaving = true;
         _serverPacketService.SendMessage(sourceClientId, string.Format(_languageService.Get("Server_CommandAreaAddSuccess"), GameConstants.colorSuccess, newArea.ToString()));
         ServerEventLog(string.Format("{0} adds area: {1}.", _serverClientService.GetClient(sourceClientId), newArea.ToString()));
         return true;
@@ -1644,7 +1644,7 @@ public partial class ServerGameService
         }
 
         _config.Areas.Remove(targetArea);
-        _config.ConfigNeedsSaving = true;
+      //  _config.ConfigNeedsSaving = true;
         _serverPacketService.SendMessage(sourceClientId, string.Format(_languageService.Get("Server_CommandAreaDeleteSuccess"), GameConstants.colorSuccess));
         ServerEventLog(string.Format("{0} deletes area: {1}.", _serverClientService.GetClient(sourceClientId).PlayerName, id));
         return true;

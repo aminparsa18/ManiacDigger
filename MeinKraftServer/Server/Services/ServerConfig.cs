@@ -5,197 +5,53 @@
 /// then call <see cref="CopyFrom"/> to apply a freshly deserialised config
 /// without replacing the registered singleton reference.
 /// </summary>
-public class ServerConfig : IServerConfig
+public class ServerConfig
 {
-    /// <inheritdoc/>
-    public int Format { get; set; }
-
-    /// <inheritdoc/>
-    public string Name { get; set; }
-
-    /// <inheritdoc/>
-    public string Motd { get; set; }
-
-    /// <inheritdoc/>
-    public string WelcomeMessage { get; set; }
-
-    /// <inheritdoc/>
-    public int Port { get; set; }
-
-    /// <inheritdoc/>
-    public int MaxClients { get; set; }
-
-    /// <inheritdoc/>
-    public int AutoRestartCycle { get; set; }
-
-    /// <inheritdoc/>
-    public bool ServerMonitor { get; set; }
-
-    /// <inheritdoc/>
-    public int ClientConnectionTimeout { get; set; }
-
-    /// <inheritdoc/>
-    public int ClientPlayingTimeout { get; set; }
-
-    /// <inheritdoc/>
+    public string Name { get; set; } = "MeinKraft server";
+    public string Motd { get; set; } = "MOTD";
+    public string WelcomeMessage { get; set; } = "Welcome to my MeinKraft server!";
+    public int Port { get; set; } = 25565;
+    public int MaxClients { get; set; } = 16;
+    public int AutoRestartCycle { get; set; } = 6;
+    public bool ServerMonitor { get; set; } = true;
+    public int ClientConnectionTimeout { get; set; } = 600;
+    public int ClientPlayingTimeout { get; set; } = 60;
     public bool BuildLogging { get; set; }
-
-    /// <inheritdoc/>
     public bool ServerEventLogging { get; set; }
-
-    /// <inheritdoc/>
     public bool ChatLogging { get; set; }
-
-    /// <inheritdoc/>
     public bool AllowScripting { get; set; }
-
-    /// <inheritdoc/>
-    public string Key { get; set; }
-
-    /// <inheritdoc/>
-    public bool IsCreative { get; set; }
-
-    /// <inheritdoc/>
-    public bool Public { get; set; }
-
-    /// <inheritdoc/>
-    public string Password { get; set; }
-
-    /// <inheritdoc/>
-    public bool AllowGuests { get; set; }
-
-    /// <inheritdoc/>
+    public string Key { get; set; } = Guid.NewGuid().ToString();
+    public bool IsCreative { get; set; } = true;
+    public bool Public { get; set; } = true;
+    public string? Password { get; set; }
+    public bool AllowGuests { get; set; } = true;
     public bool Monsters { get; set; }
-
-    /// <inheritdoc/>
-    public int MapSizeX { get; set; }
-
-    /// <inheritdoc/>
-    public int MapSizeY { get; set; }
-
-    /// <inheritdoc/>
-    public int MapSizeZ { get; set; }
-
-    /// <inheritdoc/>
-    public List<AreaConfig> Areas { get; set; }
-
-    /// <inheritdoc/>
+    public int MapSizeX { get; set; } = 9984;
+    public int MapSizeY { get; set; } = 9984;
+    public int MapSizeZ { get; set; } = 128;
+    public List<AreaConfig> Areas { get; set; } = [];
     public int Seed { get; set; }
-
-    /// <inheritdoc/>
-    public bool RandomSeed { get; set; }
-
-    /// <inheritdoc/>
+    public bool RandomSeed { get; set; } = true;
     public bool EnableHTTPServer { get; set; }
-
-    /// <inheritdoc/>
     public bool AllowSpectatorUse { get; set; }
-
-    /// <inheritdoc/>
     public bool AllowSpectatorBuild { get; set; }
+    public string ServerLanguage { get; set; } = "en";
+    public int PlayerDrawDistance { get; set; } = 128;
+    public bool EnablePlayerPushing { get; set; } = true;
 
-    /// <inheritdoc/>
-    public string ServerLanguage { get; set; }
-
-    /// <inheritdoc/>
-    public int PlayerDrawDistance { get; set; }
-
-    /// <inheritdoc/>
-    public bool EnablePlayerPushing { get; set; }
-
-    /// <inheritdoc/>
-    public bool ConfigNeedsSaving { get; set; }
-
-    /// <inheritdoc/>
     public bool IsPasswordProtected() => !string.IsNullOrEmpty(Password);
 
-    /// <inheritdoc/>
     public bool CanUserBuild(ServerPlayer client, int x, int y, int z)
     {
-        // TODO: replace with a spatial tree for O(log n) area lookup.
         foreach (AreaConfig area in Areas)
         {
             if (area.IsInCoords(x, y, z) && area.CanUserBuild(client))
+            {
                 return true;
+            }
         }
 
         return false;
-    }
-
-    /// <summary>
-    /// Initialises a new <see cref="ServerConfig"/> with safe out-of-the-box
-    /// defaults suitable for a typical public creative server.
-    /// </summary>
-    public ServerConfig()
-    {
-        Format = 1;
-        Name = "Manic Digger server";
-        Motd = "MOTD";
-        WelcomeMessage = "Welcome to my Manic Digger server!";
-        Port = 25565;
-        MaxClients = 16;
-        ServerMonitor = true;
-        ClientConnectionTimeout = 600;
-        ClientPlayingTimeout = 60;
-        BuildLogging = false;
-        ServerEventLogging = false;
-        ChatLogging = false;
-        AllowScripting = false;
-        Key = Guid.NewGuid().ToString();
-        IsCreative = true;
-        Public = true;
-        AllowGuests = true;
-        Monsters = false;
-        MapSizeX = 9984;
-        MapSizeY = 9984;
-        MapSizeZ = 128;
-        Areas = [];
-        AutoRestartCycle = 6;
-        Seed = 0;
-        RandomSeed = true;
-        EnableHTTPServer = false;
-        AllowSpectatorUse = false;
-        AllowSpectatorBuild = false;
-        ServerLanguage = "en";
-        PlayerDrawDistance = 128;
-        EnablePlayerPushing = true;
-    }
-
-    /// <inheritdoc/>
-    public void CopyFrom(ServerConfig source)
-    {
-        Format = source.Format;
-        Name = source.Name;
-        Motd = source.Motd;
-        WelcomeMessage = source.WelcomeMessage;
-        Port = source.Port;
-        MaxClients = source.MaxClients;
-        AutoRestartCycle = source.AutoRestartCycle;
-        ServerMonitor = source.ServerMonitor;
-        ClientConnectionTimeout = source.ClientConnectionTimeout;
-        ClientPlayingTimeout = source.ClientPlayingTimeout;
-        BuildLogging = source.BuildLogging;
-        ServerEventLogging = source.ServerEventLogging;
-        ChatLogging = source.ChatLogging;
-        AllowScripting = source.AllowScripting;
-        Key = source.Key;
-        IsCreative = source.IsCreative;
-        Public = source.Public;
-        Password = source.Password;
-        AllowGuests = source.AllowGuests;
-        Monsters = source.Monsters;
-        MapSizeX = source.MapSizeX;
-        MapSizeY = source.MapSizeY;
-        MapSizeZ = source.MapSizeZ;
-        Areas = source.Areas;
-        Seed = source.Seed;
-        RandomSeed = source.RandomSeed;
-        EnableHTTPServer = source.EnableHTTPServer;
-        AllowSpectatorUse = source.AllowSpectatorUse;
-        AllowSpectatorBuild = source.AllowSpectatorBuild;
-        ServerLanguage = source.ServerLanguage;
-        PlayerDrawDistance = source.PlayerDrawDistance;
-        EnablePlayerPushing = source.EnablePlayerPushing;
     }
 }
 

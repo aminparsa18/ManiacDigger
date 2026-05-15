@@ -188,21 +188,21 @@ public partial class Game
         }
 
         InventoryItem item = Inventory.RightHand[ActiveMaterial];
-        if (item != null && item.InventoryItemType == InventoryItemType.Block)
-        {
-            float itemSpeed = _blockRegistry.BlockTypes[item.BlockId].WalkSpeedWhenUsed;
-            if (itemSpeed != 0)
-            {
-                speed *= itemSpeed;
-            }
+        if (!_blockRegistry.BlockTypes.TryGetValue(item.BlockId, out var blockType))
+            return Basemovespeed; // block types not yet received, use default
 
-            if (IronSights)
+        float itemSpeed = blockType.WalkSpeedWhenUsed;
+        if (itemSpeed != 0)
+        {
+            speed *= itemSpeed;
+        }
+
+        if (IronSights)
+        {
+            float ironSpeed = _blockRegistry.BlockTypes[item.BlockId].IronSightsMoveSpeed;
+            if (ironSpeed != 0)
             {
-                float ironSpeed = _blockRegistry.BlockTypes[item.BlockId].IronSightsMoveSpeed;
-                if (ironSpeed != 0)
-                {
-                    speed *= ironSpeed;
-                }
+                speed *= ironSpeed;
             }
         }
 

@@ -30,6 +30,9 @@
     public static string gamepathsaves = Path.Combine(GetStorePath(), "Saves");
     public static string gamepathbackup = Path.Combine(GetStorePath(), "Backup");
 
+    public static string WorldSavePath(string playerId, string worldName)
+        => Path.Combine(gamepathsaves, playerId, worldName + FileConstatns.DbFileExtension);
+
     public static bool IsValidName(string s)
     {
         if (s.Length is < 1 or > 32)

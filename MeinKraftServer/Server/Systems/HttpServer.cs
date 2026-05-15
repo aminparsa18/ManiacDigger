@@ -1,4 +1,5 @@
 ﻿using MeinKraft;
+using Microsoft.Extensions.Options;
 using System.Net;
 using System.Text;
 
@@ -7,18 +8,19 @@ public class ServerSystemHttpServer : ServerSystem
     private HttpListener _listener;
     private CancellationTokenSource _cts;
     private readonly ILanguageService _languageService;
-    private readonly IServerConfig _config;
+    private readonly ServerConfig _config;
     private readonly ServerGameService server;
-    public ServerSystemHttpServer(ServerGameService server, IModEvents modEvents, ILanguageService languageService, IServerConfig config) : base(modEvents)
+    public ServerSystemHttpServer(ServerGameService server, IModEvents modEvents, ILanguageService languageService,
+        IOptions<ServerConfig> options) : base(modEvents)
     {
         this.server = server;
         _languageService = languageService;
-        _config = config;
+        _config = options.Value;
     }
 
     protected override void Initialize()
     {
-        if (!_config.EnableHTTPServer || server.IsSinglePlayer)
+        if (!_config.EnableHTTPServer)
         {
             return;
         }

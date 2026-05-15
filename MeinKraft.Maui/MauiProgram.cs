@@ -25,6 +25,11 @@ public static class MauiProgram
 
         builder.Services.AddWorkerInfrastructure();
 
+        string serverUrl = "https://localhost:8275";
+        string? apiKey = Microsoft.Maui.Storage.Preferences.Get("api_key", null); // null until user registers
+
+        builder.Services.AddApiServices(serverUrl, apiKey);
+
         builder.Services.AddSingleton<MauiGameWindowService>();
         builder.Services.AddSingleton<IGameWindowService>(sp =>
             sp.GetRequiredService<MauiGameWindowService>());

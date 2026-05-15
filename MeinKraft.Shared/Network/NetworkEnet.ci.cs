@@ -136,7 +136,7 @@ public sealed class EnetNetClient : NetClient
 
     public override NetConnection Connect(string ip, int port)
     {
-        EnetPeer peer = _platform.EnetHostConnect(_host!, ip, port, channelCount: 1234, data: 200);
+        EnetPeer peer = _platform.EnetHostConnect(_host!, ip, port, channelCount: 2, data: 0);
         _connection = new EnetNetConnection(_platform, peer);
         _connecting = true;
         return _connection;

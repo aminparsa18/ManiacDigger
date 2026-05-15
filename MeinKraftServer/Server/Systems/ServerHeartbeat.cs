@@ -1,4 +1,5 @@
 ﻿using MeinKraft;
+using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
 
 /// <summary>
@@ -17,13 +18,14 @@ public class ServerSystemHeartbeat : ServerSystem
     private readonly ServerHeartbeat heartbeat = new();
     private readonly ILanguageService _languageService;
     private readonly IClientRegistry _serverClientService;
-    private readonly IServerConfig _config;
+    private readonly ServerConfig _config;
 
-    public ServerSystemHeartbeat(IModEvents modEvents, ILanguageService languageService, IClientRegistry serverClientService, IServerConfig config) : base(modEvents)
+    public ServerSystemHeartbeat(IModEvents modEvents, ILanguageService languageService, IClientRegistry serverClientService,
+        IOptions<ServerConfig> options) : base(modEvents)
     {
         _languageService = languageService;
         _serverClientService = serverClientService;
-        _config = config;
+        _config = options.Value;
         // Pre-fill the timer so the first heartbeat fires on the first tick
         elapsed = HeartbeatInterval;
     }

@@ -1,17 +1,19 @@
-﻿namespace MeinKraft.Worker;
+﻿using Microsoft.Extensions.Options;
+
+namespace MeinKraft.Worker;
 
 public sealed class ServerAutoRestartTask : IScheduledTask
 {
     public TimeSpan Interval => TimeSpan.FromMinutes(10); // check every 10 min, no need to check every second
 
-    private readonly ServerGameService _server;
-    private readonly IServerConfig _config;
+    private readonly IServer _server;
+    private readonly ServerConfig _config;
     private readonly DateTimeOffset _startedAt;
 
-    public ServerAutoRestartTask(ServerGameService server, IServerConfig config)
+    public ServerAutoRestartTask(IServer server, IOptions<ServerConfig> options)
     {
         _server = server;
-        _config = config;
+        _config = options.Value;
         _startedAt = DateTimeOffset.UtcNow;
     }
 

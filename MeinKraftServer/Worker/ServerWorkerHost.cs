@@ -4,7 +4,7 @@
 /// Manages the lifetime of all background workers for a single game session.
 /// Call StartAsync from Connect(), StopAsync on exit.
 /// </summary>
-public sealed class ServerWorkerHost : IAsyncDisposable
+public sealed class ServerWorkerHost : IAsyncDisposable, IServerWorkerHost
 {
     private readonly SimulationLoop _simulationLoop;
     private readonly PeriodicTaskScheduler _periodicScheduler;
@@ -14,11 +14,13 @@ public sealed class ServerWorkerHost : IAsyncDisposable
     private Task? _allWorkers;
     private bool _started;
 
-    public ServerWorkerHost(PeriodicTaskScheduler periodicScheduler, ServerLifetime lifetime, IGameLogger logger)
+    public ServerWorkerHost(PeriodicTaskScheduler periodicScheduler, ServerLifetime lifetime, SimulationLoop simulationLoop,
+        IGameLogger logger)
     {
         _periodicScheduler = periodicScheduler;
         _lifetime = lifetime;
         _logger = logger;
+        _simulationLoop = simulationLoop;
     }
 
     public async Task StartAsync()
@@ -33,7 +35,7 @@ public sealed class ServerWorkerHost : IAsyncDisposable
         CancellationToken ct = _lifetime.Token;
 
         _logger.Client.Information("WorkerHost: starting workers");
- 
+
         await _simulationLoop.StartAsync(ct);
         await _periodicScheduler.StartAsync(ct);
 

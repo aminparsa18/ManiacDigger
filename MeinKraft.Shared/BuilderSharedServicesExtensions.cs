@@ -14,7 +14,7 @@ public static class BuilderSharedServicesExtensions
 
         services.AddGameLogging(
                    minimumLevel: Serilog.Events.LogEventLevel.Debug,
-                   enableConsole: false);
+                   enableConsole: true);
 
         services.AddSingleton<CrashReporter>();
 

@@ -1,17 +1,13 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace MeinKraft.Worker;
+﻿namespace MeinKraft.Worker;
 
 public sealed class SeasonBroadcastTask : IScheduledTask
 {
     public TimeSpan Interval => TimeSpan.FromMinutes(1);
 
-    private readonly ServerGameService _server;
+    private readonly IServer _server;
     private int _lastQuarterHour = -1;
 
-    public SeasonBroadcastTask(ServerGameService server) => _server = server;
+    public SeasonBroadcastTask(IServer server) => _server = server;
 
     public Task ExecuteAsync(CancellationToken ct)
     {

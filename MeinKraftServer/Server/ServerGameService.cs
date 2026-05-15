@@ -1,5 +1,6 @@
 using MeinKraft;
 using MemoryPack;
+using Microsoft.Extensions.Options;
 using OpenTK.Mathematics;
 using System.Diagnostics;
 using System.Drawing;
@@ -18,22 +19,24 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
     private readonly IChunkDbCompressed _chunkDb;
     private readonly IServerMapStorage _serverMapStorage;
     private readonly ILanguageService _languageService;
-    private readonly IServerConfig _config;
+    private readonly ServerConfig _config;
     private readonly ISaveGameService _saveGameService;
     private readonly IPlayerStatusService _playerStatusService;
     private readonly IClientRegistry _serverClientService;
     private readonly IServerPacketService _serverPacketService;
+    private readonly ISessionConfig _sessionConfig;
     private readonly IGameLogger _gameLogger;
 
     public List<ServerSystem> Systems { get; set; }
 
-    public ServerGameService(IBlockRegistry blockRegistry, IChunkDbCompressed chunkDb, ILanguageService languageService,
-    IAssetManager assetManager, IModEvents modEvents,ICompression compression, IServerMapStorage serverMapStorage, IServerPacketService serverPacketService,
-    IServerConfig config, ISaveGameService saveGameService, IPlayerStatusService playerStatusService, IClientRegistry serverClientService, IGameLogger gameLogger)
+    public ServerGameService(IBlockRegistry blockRegistry, IChunkDbCompressed chunkDb, ILanguageService languageService, ISessionConfig sessionConfig,
+    IAssetManager assetManager, IModEvents modEvents, ICompression compression, IServerMapStorage serverMapStorage, IServerPacketService serverPacketService,
+    IOptions<ServerConfig> options, ISaveGameService saveGameService, IPlayerStatusService playerStatusService, IClientRegistry serverClientService,
+    IGameLogger gameLogger)
     {
         _blockRegistry = blockRegistry;
         _assetManager = assetManager;
-        _config = config;
+        _config = options.Value;
         _networkCompression = compression;
         _modEvents = modEvents;
         _chunkDb = chunkDb;
@@ -44,6 +47,7 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
         _serverClientService = serverClientService;
         _serverPacketService = serverPacketService;
         _gameLogger = gameLogger;
+        _sessionConfig = sessionConfig;
 
         _languageService.LoadTranslations();
 
@@ -52,9 +56,6 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
 
     private CraftingTableTool _craftingTableTool;
     public NetServer[] MainSockets { get; set; }
-
-    private bool _localConnectionsOnly;
-    private readonly int _singlePlayerPort = 25570;
 
     public bool EnableShadows { get; set; } = true;
 
@@ -68,7 +69,7 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
         //Do server stuff
         ProcessMain();
     }
-   
+
     private readonly GameTimer _gameTimer = new();
 
     public void ProcessMain()
@@ -177,21 +178,20 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
 
         //Initialize game components
         _craftingTableTool = new CraftingTableTool() { d_Map = _serverMapStorage, d_Data = _blockRegistry };
-        _localConnectionsOnly = true;
         _dataItems = new GameDataItemsBlocks() { d_Data = _blockRegistry };
-        if (MainSockets == null)
+        if (MainSockets.Length != 0 && MainSockets.All(x => x == null))
         {
             MainSockets = new NetServer[3];
             MainSockets[0] = new EnetNetServer(new NetworkService());
-            if (MainSockets[1] == null)
-            {
-                MainSockets[1] = new WebSocketNetServer();
-            }
+            //if (MainSockets[1] == null)
+            //{
+            //    MainSockets[1] = new WebSocketNetServer();
+            //}
 
-            if (MainSockets[2] == null)
-            {
-                MainSockets[2] = new TcpNetServer();
-            }
+            //if (MainSockets[2] == null)
+            //{
+            //    MainSockets[2] = new TcpNetServer();
+            //}
         }
 
         AllPrivileges.AddRange(Privilege.All());
@@ -203,19 +203,9 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
         }
 
         _gameLogger.Server.Information(_languageService.ServerLoadingSavegame());
-        if (!File.Exists(_saveGameService.GetSaveFilename()))
-        {
-            _gameLogger.Server.Information(_languageService.ServerCreatingSavegame());
-        }
 
+        Start(_sessionConfig.Port);
         _saveGameService.Load();
-        _gameLogger.Server.Information(_languageService.ServerLoadedSavegame() + _saveGameService.GetSaveFilename());
-        if (_localConnectionsOnly)
-        {
-            _config.Port = _singlePlayerPort;
-        }
-
-        Start(_config.Port);
 
         // server monitor
         if (_config.ServerMonitor)
@@ -338,7 +328,7 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
     public List<Action> OnLoad { get; set; } = [];
     public List<Action> OnSave { get; set; } = [];
     public Dictionary<string, Inventory> Inventory { get; set; } = new(StringComparer.InvariantCultureIgnoreCase);
-    
+
     public void Dispose()
     {
         if (!disposed)
@@ -2220,11 +2210,11 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
         byte[] hash = MD5.HashData(Encoding.UTF8.GetBytes(input));
         return Convert.ToHexString(hash).ToLower();
     }
-    
+
     public Dictionary<string, bool> Disabledprivileges { get; set; } = [];
     public Dictionary<string, bool> ExtraPrivileges { get; set; } = [];
 
-    
+
     public MeinKraft.Group? DefaultGroupGuest { get; set; }
     public MeinKraft.Group DefaultGroupRegistered { get; set; }
     public Vector3i DefaultPlayerSpawn { get; set; }
@@ -2357,8 +2347,6 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
     public void SetLightLevels(float[] lightLevels) => lightlevels = lightLevels;
 
     public List<CraftingRecipe> CraftingRecipes { get; set; } = [];
-
-    public bool IsSinglePlayer => MainSockets[0].GetType() == typeof(DummyNetServer);
 
     public void SendDialog(int player, string id, Dialog dialog)
     {

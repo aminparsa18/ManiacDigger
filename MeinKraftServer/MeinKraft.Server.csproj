@@ -19,7 +19,7 @@
 		<Copyright>Copyright © 2026 Amin Parsa</Copyright>
 	</PropertyGroup>
 	<ItemGroup>
-	  <PackageReference Include="Jint" Version="4.9.0" />
+	  <PackageReference Include="Jint" Version="4.9.1" />
 	  <PackageReference Include="System.Drawing.Common" Version="10.0.8" />
 	</ItemGroup>
 	<ItemGroup>

@@ -9,7 +9,6 @@ public class ServerSystemBootstraper
     public ServerSystemBootstraper(
         ServerGameService server,
         ServerSystemLoadFirst loadFirst,
-        ServerSystemLoadConfig loadConfig,
         ServerSystemHeartbeat heartbeat,
         ServerSystemHttpServer httpServer,
         ServerSystemUnloadUnusedChunks unloadChunks,
@@ -27,7 +26,6 @@ public class ServerSystemBootstraper
         Systems =
         [
             loadFirst,
-            loadConfig,
             heartbeat,
             httpServer,
             unloadChunks,

@@ -1,5 +1,6 @@
 ﻿using MeinKraft;
 using MemoryPack;
+using Microsoft.Extensions.Options;
 using OpenTK.Mathematics;
 
 /// <summary>
@@ -13,9 +14,10 @@ public class SaveGameService : ISaveGameService
 
     private readonly IChunkDbCompressed _chunkDb;
     private readonly IServerMapStorage _serverMapStorage;
-    private readonly IServerConfig _config;
-    private readonly ILanguageService _languageService;
+    private readonly ServerConfig _config;
+    private readonly ISessionConfig _sessionConfig;
     private readonly GameTimer _gameTimer;
+    private readonly IGameLogger _gameLogger;
 
     // Needed by LoadDatabase to reset per-client chunk visibility after a world switch.
     public Dictionary<int, ServerPlayer> Clients { get; set; } = [];
@@ -46,32 +48,20 @@ public class SaveGameService : ISaveGameService
     public SaveGameService(
         IChunkDbCompressed chunkDb, 
         IServerMapStorage serverMapStorage,
-        IServerConfig config,
-        ILanguageService languageService,
+        IOptions<ServerConfig> options,
+        ISessionConfig sessionConfig,
+        IGameLogger gameLogger,
         GameTimer gameTimer)
     {
         _chunkDb = chunkDb;
         _serverMapStorage = serverMapStorage;
-        _config = config;
-        _languageService = languageService;
+        _config = options.Value;
+        _gameLogger = gameLogger;
+        _sessionConfig = sessionConfig;
         _gameTimer = gameTimer;
     }
 
     // ── ISaveGameService ──────────────────────────────────────────────────────
-
-    /// <inheritdoc/>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when called a second time — session must be initialised exactly once.
-    /// </exception>
-    public void InitialiseSession(SaveTarget target)
-    {
-        if (_target.HasValue)
-            throw new InvalidOperationException(
-                "SaveGameService: session is already initialised. " +
-                "InitialiseSession must be called exactly once per session.");
-
-        _target = target;
-    }
 
     /// <inheritdoc/>
     public byte[] Save()
@@ -101,6 +91,8 @@ public class SaveGameService : ISaveGameService
     /// <inheritdoc/>
     public void SaveGlobalData() => _chunkDb.SetGlobalData(Save());
 
+   
+
     /// <inheritdoc/>
     public void Load()
     {
@@ -109,7 +101,8 @@ public class SaveGameService : ISaveGameService
 
         if (globalData == null)
         {
-            // No save file yet — initialise a fresh world.
+            // First load of this world — sentinel file exists (created by POST
+            // /api/worlds) but no chunk data written yet.
             Seed = _config.RandomSeed
                 ? new Random().Next()
                 : _config.Seed;
@@ -117,10 +110,9 @@ public class SaveGameService : ISaveGameService
             _chunkDb.SetGlobalData(Save());
             return;
         }
-
+        
         MeinKraftSave save = MemoryPackSerializer.Deserialize<MeinKraftSave>(globalData);
-
-        Seed = save.Seed;
+        Seed = save.Seed; ;
         _serverMapStorage.Reset(
             _serverMapStorage.MapSizeX,
             _serverMapStorage.MapSizeY,
@@ -163,11 +155,6 @@ public class SaveGameService : ISaveGameService
     public bool LoadDatabase(string filename)
     {
         SaveAll();
-
-        if (filename != ResolvedPath)
-        {
-            // TODO: handle switching to a different save file
-        }
 
         _chunkDb.InnerChunkDb.ClearTemporaryChunks();
         _serverMapStorage.Clear();
@@ -261,23 +248,6 @@ public class SaveGameService : ISaveGameService
 
     // ── Private helpers ───────────────────────────────────────────────────────
 
-    private const string SaveFilenameWithoutExtension = "default";
-
-    /// <inheritdoc/>
-    public string GetSaveFilename() => ResolvedPath;
-
-    /// <summary>
-    /// The fully-resolved path to the active save file.
-    /// Throws if <see cref="InitialiseSession"/> has not been called.
-    /// </summary>
-    private string ResolvedPath => _target.HasValue
-        ? _target.Value.Resolve(DefaultSavePath)
-        : throw new InvalidOperationException(
-            "SaveGameService: no session is active. Call InitialiseSession before Load or Save.");
-
-    private static string DefaultSavePath =>
-        Path.Combine(GameStorePath.gamepathsaves, SaveFilenameWithoutExtension + FileConstatns.DbFileExtension);
-
     /// <summary>
     /// Flushes all chunks that have been modified since the last save to the
     /// chunk database, batching writes in groups of 200 to avoid large
@@ -316,4 +286,7 @@ public class SaveGameService : ISaveGameService
         // Flush any remaining chunks below the batch threshold.
         _chunkDb.SetChunks(toSave);
     }
+
+    private string ResolvedPath
+   => GameStorePath.WorldSavePath(_sessionConfig.SavePath, _sessionConfig.WorldName);
 }

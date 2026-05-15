@@ -28,6 +28,10 @@
 		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+		<DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
+	</PropertyGroup>
+
 	<ItemGroup>
 	  <Compile Remove="Client\Screens\**" />
 	  <Compile Remove="Properties\**" />
@@ -47,22 +51,25 @@
 
 	<ItemGroup>
 		<PackageReference Include="MessagePipe" Version="1.8.1" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.7" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.8" />
 		<PackageReference Include="ENet-CSharp" Version="2.4.8" />
 		<PackageReference Include="MemoryPack" Version="1.21.4" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.3.0" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.7" />
-		<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.7" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.6.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.8" />
 		<PackageReference Include="NVorbis" Version="0.10.5" />
 		<PackageReference Include="OpenTK" Version="4.9.4" />
+		<PackageReference Include="Polly.Extensions.Http" Version="3.0.0" />
 		<PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-		<PackageReference Include="Jint" Version="4.7.1" />
+		<PackageReference Include="Jint" Version="4.9.1" />
 		<PackageReference Include="SkiaSharp" Version="3.119.2" />
 		<PackageReference Include="TextCopy" Version="6.2.1" />
 		<PackageReference Include="ppy.SDL2-CS" Version="1.0.82" />
-		<PackageReference Include="System.Drawing.Common" Version="10.0.7" />
+		<PackageReference Include="System.Drawing.Common" Version="10.0.8" />
 		<PackageReference Include="WebSocketSharp-netstandard" Version="1.0.1" />
 	</ItemGroup>
 

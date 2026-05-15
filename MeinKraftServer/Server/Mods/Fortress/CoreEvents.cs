@@ -97,7 +97,7 @@ public class CoreEvents : IMod
         if (!args.Command.Equals("setmodel", StringComparison.InvariantCultureIgnoreCase))
             return;
 
-        if (!(m.PlayerHasPrivilege(args.Player, "setmodel") || m.IsSinglePlayer()))
+        if (!m.PlayerHasPrivilege(args.Player, "setmodel"))
         {
             m.SendMessage(args.Player, GameConstants.colorError + "No setmodel privilege");
             args.Handled = true;

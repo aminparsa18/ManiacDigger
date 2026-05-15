@@ -6,7 +6,7 @@ public partial class MainMenuView : ContentPage
 	{
 		InitializeComponent();
 #if WINDOWS
-        gameWindowService.ReleaseCursor();
+       // gameWindowService.ReleaseCursor();
 #endif
     }
 

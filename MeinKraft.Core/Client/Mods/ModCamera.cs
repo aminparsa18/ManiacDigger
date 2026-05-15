@@ -66,6 +66,9 @@ public class ModCamera : ModBase
 
     public override void OnFrame(float deltaTime)
     {
+        if (!Game.Spawned) // already tracks whether server has finished setup
+            return;
+
         UpdateSprintFov();
     }
 

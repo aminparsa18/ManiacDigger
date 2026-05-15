@@ -32,7 +32,11 @@ public class NetworkService : INetworkService
             (uint)incomingBandwidth, (uint)outgoingBandwidth);
     }
 
-    public void EnetHostInitializeServer(EnetHost host, int port, int peerLimit) => ((EnetHostWrapper)host).Host.Create(port, peerLimit);
+    public void EnetHostInitializeServer(EnetHost host, int port, int peerLimit)
+    {
+        Address address = new() { Port = (ushort)port };
+        ((EnetHostWrapper)host).Host.Create(address, peerLimit, channelLimit: 0);
+    }
 
     public EnetEvent? EnetHostService(EnetHost host, int timeout)
     {

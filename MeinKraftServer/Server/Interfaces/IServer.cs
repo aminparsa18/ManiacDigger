@@ -4,6 +4,7 @@ using static MeinKraft.ServerPacketService;
 
 public interface IServer
 {
+    public List<ServerSystem> Systems { get; set; }
     double InvertedChunkSize { get; set; }
     List<string> AllPrivileges { get; set; }
     int ChunkDrawDistance { get; }
@@ -18,7 +19,6 @@ public interface IServer
     string GameMode { get; set; }
     List<ActiveHttpModule> HttpModules { get; set; }
     Dictionary<string, Inventory> Inventory { get; set; }
-    bool IsSinglePlayer { get; }
     NetServer[] MainSockets { get; set; }
     List<Action> OnLoad { get; set; }
     List<Action> OnSave { get; set; }

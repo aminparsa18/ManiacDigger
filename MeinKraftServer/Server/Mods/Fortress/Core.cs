@@ -12,14 +12,7 @@ public class Core : IMod
         m.RenderHint(RenderHint.Fast);
 
         //Different serverside view distance if singleplayer
-        if (m.IsSinglePlayer())
-        {
-            m.SetPlayerAreaSize(1024);
-        }
-        else
-        {
-            m.SetPlayerAreaSize(256);
-        }
+        m.SetPlayerAreaSize(1024);
 
         //Set up server time
         m.SetGameDayRealHours(1);

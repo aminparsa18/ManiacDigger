@@ -174,7 +174,7 @@ public partial class GameView : ContentPage
     }
 #endif
 
-    protected override async void OnAppearing()
+    protected override void OnAppearing()
     {
         base.OnAppearing();
 
@@ -210,15 +210,32 @@ public partial class GameView : ContentPage
 #endif
         _game.IsSinglePlayer = true;
 
-        await Connect();
+        _ = Connect().ContinueWith(t =>
+        {
+            if (t.IsFaulted)
+                MainThread.BeginInvokeOnMainThread(() =>
+                    throw t.Exception!.InnerException!);
+        });
     }
 
     private async Task Connect()
     {
-        _game.NetClient = new EnetNetClient(_gameWindowService.NetworkService);
+        int port = Microsoft.Maui.Storage.Preferences.Get("session_port", 0);
+        string username = Microsoft.Maui.Storage.Preferences.Get("username", "Player");
+        string apiKey = Microsoft.Maui.Storage.Preferences.Get("api_key", string.Empty);
+
+        _game.NetClient = new EnetNetClient(new NetworkService());
         _game.NetClient.Start();
-        _game.NetClient.Connect("", 52005);
-        _game.ConnectData = new();
+        _game.NetClient.Connect("127.0.0.1", port);
+        _game.ConnectData = new ConnectionData
+        {
+            Ip = "127.0.0.1",
+            Port = port,
+            Username = username,
+            Auth = apiKey,
+            ServerPassword = string.Empty,
+            IsServerPasswordProtected = false,
+        };
     }
 
     protected override void OnDisappearing()
@@ -243,6 +260,7 @@ public partial class GameView : ContentPage
 
     private void GlView_PaintSurface(object sender, SKPaintGLSurfaceEventArgs e)
     {
+        try { 
         if (!_glInitialized)
         {
 #if WINDOWS
@@ -261,6 +279,16 @@ public partial class GameView : ContentPage
         _lastFrame = now;
 
         Draw(dt);
+        }
+        catch (Exception ex)
+        {
+            // Replace with your actual logger
+            System.Diagnostics.Debug.WriteLine($"[FATAL] PaintSurface crashed: {ex}");
+            File.AppendAllText(
+                Path.Combine(FileSystem.CacheDirectory, "crash.txt"),
+                $"{DateTime.UtcNow}: {ex}\n");
+            throw; // re-throw so you still see it's fatal
+        }
     }
 
     private void InitGL()

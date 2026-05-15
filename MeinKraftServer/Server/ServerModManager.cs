@@ -1,18 +1,19 @@
-﻿using OpenTK.Mathematics;
+﻿using Microsoft.Extensions.Options;
+using OpenTK.Mathematics;
 using System.Drawing;
 using System.Runtime.InteropServices;
 
 namespace MeinKraft;
 
 public class ServerModManager(IBlockRegistry blockRegistry, IChunkDbCompressed chunkDb,
-    IServerMapStorage serverMapStorage, ILanguageService languageService, IServerConfig config, IServerPacketService serverPacketService,
+    IServerMapStorage serverMapStorage, ILanguageService languageService, IOptions<ServerConfig> options, IServerPacketService serverPacketService,
     ServerGameService server, ISaveGameService saveGameService, IClientRegistry serverClientService, IPlayerStatusService playerStatusService) : IServerModManager
 {
     private readonly IBlockRegistry _blockRegistry = blockRegistry;
     private readonly IChunkDbCompressed _chunkDb = chunkDb;
     private readonly IServerMapStorage _serverMapStorage = serverMapStorage;
     private readonly ILanguageService _languageService = languageService;
-    private readonly IServerConfig _config = config;
+    private readonly ServerConfig _config = options.Value;
     private readonly IClientRegistry _serverClientService = serverClientService;
     private readonly IPlayerStatusService _playerStatusService = playerStatusService;
     private readonly IServerPacketService _serverPacketService = serverPacketService;
@@ -381,8 +382,6 @@ public class ServerModManager(IBlockRegistry blockRegistry, IChunkDbCompressed c
         _server.DrawDistance = size / 2;
     }
 
-    public bool IsSinglePlayer() => _server.IsSinglePlayer;
-
     public void AddPermissionArea(int x1, int y1, int z1, int x2, int y2, int z2, int permissionLevel)
     {
         AreaConfig area = new()
@@ -391,7 +390,7 @@ public class ServerModManager(IBlockRegistry blockRegistry, IChunkDbCompressed c
             Coords = string.Format("{0},{1},{2},{3},{4},{5}", x1, y1, z1, x2, y2, z2)
         };
         _config.Areas.Add(area);
-        _config.ConfigNeedsSaving = true;
+      //  _config.ConfigNeedsSaving = true;
     }
 
     public void RemovePermissionArea(int x1, int y1, int z1, int x2, int y2, int z2)
@@ -402,7 +401,7 @@ public class ServerModManager(IBlockRegistry blockRegistry, IChunkDbCompressed c
             if (_config.Areas[i].Coords == coords)
             {
                 _config.Areas.RemoveAt(i);
-                _config.ConfigNeedsSaving = true;
+               // _config.ConfigNeedsSaving = true;
             }
         }
     }

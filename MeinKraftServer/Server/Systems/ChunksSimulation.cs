@@ -1,4 +1,5 @@
 ﻿using MeinKraft;
+using Microsoft.Extensions.Options;
 using OpenTK.Mathematics;
 
 public class ServerSystemChunksSimulation : ServerSystem
@@ -6,16 +7,16 @@ public class ServerSystemChunksSimulation : ServerSystem
     private Random _rnd;
     private IBlockRegistry _blockRegistry;
     private readonly IServerMapStorage _serverMapStorage;
-    private readonly IServerConfig _config;
+    private readonly ServerConfig _config;
     private readonly ISaveGameService _saveGameService;
     private readonly IClientRegistry _serverClientService;
 
     public ServerSystemChunksSimulation(IBlockRegistry blockRegistry, IServerMapStorage serverMapStorage, IModEvents modEvents,
-        IServerConfig config, ISaveGameService saveGameService, IClientRegistry serverClientService) : base(modEvents)
+        IOptions<ServerConfig> options, ISaveGameService saveGameService, IClientRegistry serverClientService) : base(modEvents)
     {
         _blockRegistry = blockRegistry;
         _serverMapStorage = serverMapStorage;
-        _config = config;
+        _config = options.Value;
         _saveGameService = saveGameService;
         _serverClientService = serverClientService;
     }

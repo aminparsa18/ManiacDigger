@@ -11,18 +11,6 @@ public interface ISaveGameService
     Dictionary<string, byte[]> ModData { get; set; }
 
     /// <summary>
-    /// Returns the fully-resolved path to the active save file.
-    /// Replaces <c>Server.GetSaveFilename()</c> and <c>Server.SaveFilenameOverride</c>.
-    /// </summary>
-    string GetSaveFilename();
-
-    /// <summary>
-    /// Sets the active save target for this session. Must be called exactly once,
-    /// before any call to <see cref="Load"/> or <see cref="Save"/>.
-    /// </summary>
-    void InitialiseSession(SaveTarget target);
-
-    /// <summary>
     /// Creates a backup of the current database at the given name inside the
     /// backup folder. Returns <c>false</c> and logs a warning if the name fails
     /// validation.

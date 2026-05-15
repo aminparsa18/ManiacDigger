@@ -13,14 +13,7 @@ public class CoreWar : IMod
         m.RenderHint(RenderHint.Nice);
 
         //Different serverside view distance if singleplayer
-        if (m.IsSinglePlayer())
-        {
-            m.SetPlayerAreaSize(512);
-        }
-        else
-        {
-            m.SetPlayerAreaSize(256);
-        }
+        m.SetPlayerAreaSize(512);
 
         //Set up server time
         m.SetGameDayRealHours(1);

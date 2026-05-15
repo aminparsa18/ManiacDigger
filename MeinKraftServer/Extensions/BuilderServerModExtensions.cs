@@ -25,8 +25,8 @@ public static class BuilderServerModExtensions
         services.AddScoped<IMod, VandalFinder>();
         services.AddScoped<IMod, VegetationGrowth>();
 
-        services.AddSingleton<IServerModManager, ServerModManager>();
-        services.AddSingleton<IModEvents, ModEvents>();
+        services.AddScoped<IServerModManager, ServerModManager>();
+        services.AddScoped<IModEvents, ModEvents>();
 
         return services;
     }

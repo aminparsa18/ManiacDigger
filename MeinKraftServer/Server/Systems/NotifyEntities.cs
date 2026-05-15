@@ -1,4 +1,5 @@
 ﻿using MeinKraft;
+using Microsoft.Extensions.Options;
 using OpenTK.Mathematics;
 
 /// <summary>
@@ -21,14 +22,14 @@ public class ServerSystemNotifyEntities : ServerSystem
 
     private readonly IServerMapStorage _serverMapStorage;
     private readonly IServerPacketService _serverPacketService;
-    private readonly IServerConfig _config;
+    private readonly ServerConfig _config;
     private readonly IClientRegistry _serverClientService;
 
-    public ServerSystemNotifyEntities(IModEvents modEvents, IServerMapStorage serverMapStorage, IServerConfig config,
+    public ServerSystemNotifyEntities(IModEvents modEvents, IServerMapStorage serverMapStorage, IOptions<ServerConfig> options,
         IClientRegistry serverClientService, IServerPacketService serverPacketService) : base(modEvents)
     {
         _serverMapStorage = serverMapStorage;
-        _config = config;
+        _config = options.Value;
         _serverClientService = serverClientService;
         _serverPacketService = serverPacketService;
     }

@@ -2,36 +2,42 @@
 
 public static class BuilderServerServicesExtensions
 {
-    public static IServiceCollection AddServerServices(this IServiceCollection services)
+    public static IServiceCollection AddServerServices(this IServiceCollection services,
+                                                    IConfiguration configuration)
     {
-        services.AddSingleton<ServerGameService>();
-        services.AddSingleton<GameTimer>();
+        services.AddSingleton<IAssetManager, ServerAssetManager>();
 
-        services.AddSingleton<IServerMapStorage, ServerMapStorage>();
-        services.AddSingleton<IServerConfig, ServerConfig>();
-        services.AddSingleton<IPlayerStatusService, PlayerStatusService>();
-        services.AddSingleton<IClientRegistry, ClientRegistry>();
-        services.AddSingleton<IServerPacketService, ServerPacketService>();
-        services.AddSingleton<ISaveGameService, SaveGameService>();
+        // ── Per-session — one instance per game world ─────────────────────────
+        services.AddScoped<ServerGameService>();
+        services.AddScoped<IServer, ServerGameService>(); // if IServer resolves the same instance
+        services.AddScoped<GameTimer>();
 
-        services.AddSingleton<IChunkDbCompressed, ChunkDbCompressed>();
-        services.AddSingleton<IChunkDbRegion, ChunkDbRegion>();
+        services.AddScoped<IServerMapStorage, ServerMapStorage>();
+       
+        services.AddScoped<IPlayerStatusService, PlayerStatusService>();
+        services.AddScoped<IClientRegistry, ClientRegistry>();
+        services.AddScoped<IServerPacketService, ServerPacketService>();
+        services.AddScoped<ISaveGameService, SaveGameService>();
 
-        services.AddSingleton<ServerSystemLoadFirst>();
-        services.AddSingleton<ServerSystemLoadConfig>();
-        services.AddSingleton<ServerSystemHeartbeat>();
-        services.AddSingleton<ServerSystemHttpServer>();
-        services.AddSingleton<ServerSystemUnloadUnusedChunks>();
-        services.AddSingleton<ServerSystemNotifyMap>();
-        services.AddSingleton<ServerSystemNotifyPing>();
-        services.AddSingleton<ServerSystemChunksSimulation>();
-        services.AddSingleton<ServerSystemBanList>();
-        services.AddSingleton<ServerSystemModLoader>();
-        services.AddSingleton<ServerSystemLoadServerClient>();
-        services.AddSingleton<ServerSystemNotifyEntities>();
-        services.AddSingleton<ServerSystemLoadLast>();
+        services.AddScoped<IChunkDbCompressed, ChunkDbCompressed>();
+        services.AddScoped<IChunkDbRegion, ChunkDbRegion>();
 
-        services.AddSingleton<ServerSystemBootstraper>();
+        services.AddScoped<ServerSystemLoadFirst>();
+        services.AddScoped<ServerSystemHeartbeat>();
+        services.AddScoped<ServerSystemHttpServer>();
+        services.AddScoped<ServerSystemUnloadUnusedChunks>();
+        services.AddScoped<ServerSystemNotifyMap>();
+        services.AddScoped<ServerSystemNotifyPing>();
+        services.AddScoped<ServerSystemChunksSimulation>();
+        services.AddScoped<ServerSystemBanList>();
+        services.AddScoped<ServerSystemModLoader>();
+        services.AddScoped<ServerSystemLoadServerClient>();
+        services.AddScoped<ServerSystemNotifyEntities>();
+        services.AddScoped<ServerSystemLoadLast>();
+
+        services.AddScoped<ServerSystemBootstraper>();
+
+        services.Configure<ServerConfig>(configuration.GetSection("ServerConfig"));
 
         return services;
     }

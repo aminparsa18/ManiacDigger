@@ -2,15 +2,18 @@
 
 public sealed class ServerSimulationStep : ISimulationStep
 {
-    private readonly ServerGameService _server;
+    private readonly IServer _server;
     private readonly ServerLifetime _lifetime;
+    private bool _isConfigLoaded;
 
     public ServerSimulationStep(
-        ServerGameService server,
-        ServerLifetime lifetime)
+        IServer server,
+        ServerLifetime lifetime,
+        ServerSystemBootstraper serverSystemBootstraper)
     {
         _server = server;
         _lifetime = lifetime;
+        _server.Systems = serverSystemBootstraper.Systems;
     }
 
     public void Tick(float dt)
@@ -31,6 +34,12 @@ public sealed class ServerSimulationStep : ISimulationStep
         //    _singlePlayerService.SinglePlayerServerExit = false;
         //    return;
         //}
+
+        if (!_isConfigLoaded)
+        {
+            _isConfigLoaded = true;
+            _server.OnConfigLoaded();
+        }
 
         _server.Process(dt);
     }
