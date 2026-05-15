@@ -27,6 +27,7 @@ public partial class GameView : ContentPage
     private readonly IOpenGlService _openGlService;
     private readonly IGameWindowService _gameWindowService;
     private readonly IAssetManager _assetManager;
+    private readonly ClientWorkerHost _workerHost;
 
 #if WINDOWS
     [DllImport("libEGL.dll")]
@@ -58,13 +59,14 @@ public partial class GameView : ContentPage
 #endif
 
     public GameView(IOpenGlService openGlService, IGameWindowService gameWindowService, IAssetManager assetManager,
-        IGame game, ITerrainChunkTesselator terrainChunkTesselator)
+        IGame game, ITerrainChunkTesselator terrainChunkTesselator, ClientWorkerHost workerHost)
     {
         InitializeComponent();
         _openGlService = openGlService;
         _gameWindowService = gameWindowService;
         _assetManager = assetManager;
         _game = game;
+        _workerHost = workerHost;
 
         // Inject game services into the overlay so it can apply options directly.
         // Must happen after InitializeComponent() so OverlayMenu is already created.
@@ -220,6 +222,11 @@ public partial class GameView : ContentPage
 
     private async Task Connect()
     {
+        // Start simulation loop + chunk workers + periodic tasks.
+        // WorkerHost sets SinglePlayerServerLoaded = true once everything is live.
+        // Fire-and-forget is fine — startup is fast, socket is already wired above.
+        _ = _workerHost.StartAsync();
+
         int port = Microsoft.Maui.Storage.Preferences.Get("session_port", 0);
         string username = Microsoft.Maui.Storage.Preferences.Get("username", "Player");
         string apiKey = Microsoft.Maui.Storage.Preferences.Get("api_key", string.Empty);

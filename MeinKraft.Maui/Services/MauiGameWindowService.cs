@@ -436,34 +436,34 @@ public sealed partial class MauiGameWindowService : IGameWindowService
 
     public void TrapCursorInCenter()
     {
-        if (!_mousePointerLocked)
-        {
-            return;
-        }
+        //if (!_mousePointerLocked)
+        //{
+        //    return;
+        //}
 
-        IntPtr hwnd = GetMauiHwnd();
-        if (hwnd == IntPtr.Zero)
-        {
-            return;
-        }
+        //IntPtr hwnd = GetMauiHwnd();
+        //if (hwnd == IntPtr.Zero)
+        //{
+        //    return;
+        //}
 
-        GetWindowRect(hwnd, out RECT rect);
-        SetCursorPos((rect.Left + rect.Right) / 2, (rect.Top + rect.Bottom) / 2);
+        //GetWindowRect(hwnd, out RECT rect);
+        //SetCursorPos((rect.Left + rect.Right) / 2, (rect.Top + rect.Bottom) / 2);
     }
 
     public void CaptureCursor()
     {
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            // Create 1x1 invisible cursor
-            IntPtr invisible = CreateCursor(
-                IntPtr.Zero, 0, 0, 1, 1,
-                [0xFF], // AND mask — fully transparent
-                [0x00]);// XOR mask — no pixels
+        //MainThread.BeginInvokeOnMainThread(() =>
+        //{
+        //    // Create 1x1 invisible cursor
+        //    IntPtr invisible = CreateCursor(
+        //        IntPtr.Zero, 0, 0, 1, 1,
+        //        [0xFF], // AND mask — fully transparent
+        //        [0x00]);// XOR mask — no pixels
 
-            // Replace the system arrow cursor globally
-            SetSystemCursor(invisible, OCR_NORMAL);
-        });
+        //    // Replace the system arrow cursor globally
+        //    SetSystemCursor(invisible, OCR_NORMAL);
+        //});
     }
 
     public void ReleaseCursor()

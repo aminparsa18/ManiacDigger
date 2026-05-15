@@ -1,5 +1,4 @@
 ﻿using MeinKraft.Worker;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace MeinKraft.Extensions;
 
@@ -61,10 +60,12 @@ public static class WorkerClientExtensions
             sp.GetRequiredService<ChunkLightingDispatcher>(),
             sp.GetRequiredService<IGameLogger>(),
             lightingWorkerCount,
-            channelCapacity: lightingWorkerCount * 2));
+            channelCapacity: 512));
 
         services.AddSingleton<ILightingWorkQueue>(sp =>
             sp.GetRequiredService<ChunkLightingPool>());
+
+        services.AddSingleton<ClientWorkerHost>();
 
         return services;
     }

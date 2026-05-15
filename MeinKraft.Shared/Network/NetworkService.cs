@@ -22,20 +22,25 @@ public class NetworkService : INetworkService
 
     public void EnetHostInitialize(EnetHost host, IpEndpoint? address, int peerLimit, int channelLimit, int incomingBandwidth, int outgoingBandwidth)
     {
-        // Client hosts always pass null address.
-        if (address != null)
-        {
-            throw new ArgumentException("Client ENet host must have a null address.");
-        }
-
-        ((EnetHostWrapper)host).Host.Create(peerLimit, channelLimit,
-            (uint)incomingBandwidth, (uint)outgoingBandwidth);
+        ((EnetHostWrapper)host).Host.Create(
+            null,
+            peerLimit,
+            channelLimit,
+            (uint)incomingBandwidth,
+            (uint)outgoingBandwidth,
+            4 * 1024 * 1024);
     }
 
     public void EnetHostInitializeServer(EnetHost host, int port, int peerLimit)
     {
         Address address = new() { Port = (ushort)port };
-        ((EnetHostWrapper)host).Host.Create(address, peerLimit, channelLimit: 0);
+        ((EnetHostWrapper)host).Host.Create(
+            address,
+            peerLimit,
+            0,
+            0u,
+            0u,
+            4 * 1024 * 1024);
     }
 
     public EnetEvent? EnetHostService(EnetHost host, int timeout)
