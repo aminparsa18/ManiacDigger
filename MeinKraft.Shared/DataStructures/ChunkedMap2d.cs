@@ -67,7 +67,9 @@ public class ChunkedMap2d<T>
     public ChunkedMap2d(int mapSizeX, int mapSizeY, int chunkSize = 16)
     {
         if (chunkSize <= 0 || !BitOperations.IsPow2(chunkSize))
+        {
             throw new ArgumentException("chunkSize must be a positive power of two.", nameof(chunkSize));
+        }
 
         _chunkSize = chunkSize;
         _chunkSizeBits = BitOperations.TrailingZeroCount((uint)chunkSize);
@@ -111,7 +113,9 @@ public class ChunkedMap2d<T>
     {
         int ci = ChunkIndex(x, y);
         if (_chunks[ci] is not null)
+        {
             return _chunks[ci]!;
+        }
 
         T[] rented = ArrayPool<T>.Shared.Rent(_chunkArea);
         // Rented arrays are not zeroed — initialise so unwritten reads return default(T).
@@ -129,7 +133,11 @@ public class ChunkedMap2d<T>
     public void ClearChunk(int x, int y)
     {
         int ci = ChunkIndex(x, y);
-        if (_chunks[ci] is null) return;
+        if (_chunks[ci] is null)
+        {
+            return;
+        }
+
         ArrayPool<T>.Shared.Return(_chunks[ci]!);
         _chunks[ci] = null;
     }
@@ -144,8 +152,15 @@ public class ChunkedMap2d<T>
     {
         // Return all live buffers before dropping the array
         if (_chunks is not null)
+        {
             foreach (T[]? chunk in _chunks)
-                if (chunk is not null) ArrayPool<T>.Shared.Return(chunk);
+            {
+                if (chunk is not null)
+                {
+                    ArrayPool<T>.Shared.Return(chunk);
+                }
+            }
+        }
 
         _chunkGridWidth = mapSizeX >> _chunkSizeBits;
         int n = _chunkGridWidth * (mapSizeY >> _chunkSizeBits);
@@ -159,12 +174,12 @@ public class ChunkedMap2d<T>
     /// Inlined bit-shift arithmetic — no helper call overhead on the hot path.
     /// </summary>
     private int ChunkIndex(int x, int y)
-        => (y >> _chunkSizeBits) * _chunkGridWidth + (x >> _chunkSizeBits);
+        => ((y >> _chunkSizeBits) * _chunkGridWidth) + (x >> _chunkSizeBits);
 
     /// <summary>
     /// Flat index within a chunk for block (<paramref name="x"/>, <paramref name="y"/>).
     /// Bitmask replaces modulo — equivalent for non-negative inputs.
     /// </summary>
     private int BlockIndex(int x, int y)
-        => (y & _chunkSizeMask) * _chunkSize + (x & _chunkSizeMask);
+        => ((y & _chunkSizeMask) * _chunkSize) + (x & _chunkSizeMask);
 }

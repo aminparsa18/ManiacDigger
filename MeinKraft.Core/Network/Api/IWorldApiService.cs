@@ -29,7 +29,7 @@ public sealed class WorldApiService : IWorldApiService
     public async Task<WorldInfo?> CreateAsync(string worldName)
     {
         var result = await _http.PostAsJsonAsync("/api/worlds", new CreateWorldRequest(worldName));
-        //result.EnsureSuccessStatusCode();
+        result.EnsureSuccessStatusCode();
         var ss = await result.Content.ReadAsStringAsync();
         return await result.Content.ReadFromJsonAsync<WorldInfo>();
     }

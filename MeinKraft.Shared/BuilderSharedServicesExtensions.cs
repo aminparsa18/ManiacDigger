@@ -6,18 +6,18 @@ public static class BuilderSharedServicesExtensions
 {
     public static IServiceCollection AddSharedServices(this IServiceCollection services)
     {
-        services.AddSingleton<IVoxelMap, VoxelMap>();
-        services.AddSingleton<ILanguageService, LanguageService>();
-        services.AddSingleton<IBlockRegistry, BlockRegistry>();
-        services.AddSingleton<ICompression, CompressionGzip>();
+        _ = services.AddSingleton<IVoxelMap, VoxelMap>();
+        _ = services.AddSingleton<ILanguageService, LanguageService>();
+        _ = services.AddSingleton<IBlockRegistry, BlockRegistry>();
+        _ = services.AddSingleton<ICompression, CompressionGzip>();
 
-        services.AddGameLogging(
+        _ = services.AddGameLogging(
                    minimumLevel: Serilog.Events.LogEventLevel.Debug,
                    enableConsole: true);
 
-        services.AddSingleton<CrashReporter>();
+        _ = services.AddSingleton<CrashReporter>();
 
-        services.AddMessagePipe();
+        _ = services.AddMessagePipe();
 
         return services;
     }

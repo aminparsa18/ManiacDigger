@@ -93,7 +93,7 @@ public static class Intersection
         // Use tmin for external hits, tmax when origin is inside the box (tmin < 0).
         // Hit point uses dir, not invDir — invDir is only valid for the slab test itself.
         float t = tmin < 0f ? tmax : tmin;
-        coord = origin + t * dir;
+        coord = origin + (t * dir);
         return true;
     }
 
@@ -134,7 +134,6 @@ public static class Intersection
         return true;
     }
 
-
     /// intersects the axis-aligned box defined by <paramref name="b1"/> and <paramref name="b2"/>,
     /// returning the intersection point in <paramref name="hit"/>.
     /// </summary>
@@ -170,7 +169,7 @@ public static class Intersection
         }
 
         float t = tmin < 0f ? tmax : tmin;
-        hit = l1 + t * dir;
+        hit = l1 + (t * dir);
         return true;
     }
 

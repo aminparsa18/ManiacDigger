@@ -42,12 +42,9 @@
     private static int VersionToInt(string version)
     {
         const int max = 1_000_000_000;
-        if (!IsVersionDate(version))
-        {
-            return max;
-        }
-
-        return DateTime.TryParseExact(
+        return !IsVersionDate(version)
+            ? max
+            : DateTime.TryParseExact(
             version[..10],
             "yyyy.MM.dd",
             null,

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace MeinKraft.Worker;
+﻿namespace MeinKraft.Worker;
 
 /// <summary>
 /// A single recurring task. Implement this for any work that should run on a

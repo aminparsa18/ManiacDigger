@@ -5,15 +5,8 @@
 
     public static bool ReadBool(string str)
     {
-        if (str == null)
-        {
-            return false;
-        }
-        else
-        {
-            return str != "0"
+        return str != null && str != "0"
                 && (!str.Equals(bool.FalseString, StringComparison.InvariantCultureIgnoreCase));
-        }
     }
 
     public static bool IsValidTypingChar(int c_)

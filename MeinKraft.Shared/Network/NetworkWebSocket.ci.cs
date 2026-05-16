@@ -59,7 +59,7 @@ public sealed class WebSocketNetClient : NetClient
 
     public override NetIncomingMessage? ReadMessage()
     {
-        _inbox.Reader.TryRead(out NetIncomingMessage? msg);
+        _ = _inbox.Reader.TryRead(out NetIncomingMessage? msg);
         return msg;
     }
 
@@ -101,8 +101,6 @@ public sealed class WebSocketClientConnection : NetConnection
 // ---------------------------------------------------------------------------
 // Server
 // ---------------------------------------------------------------------------
-
-
 
 // ---------------------------------------------------------------------------
 // Server-side session (one instance per connected client, created by websocket-sharp)

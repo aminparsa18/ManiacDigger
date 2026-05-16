@@ -6,8 +6,8 @@
 /// </summary>
 public class CraftingTableTool
 {
-    public IMapStorage d_Map;
-    public IBlockRegistry d_Data;
+    public required IMapStorage d_Map;
+    public required IBlockRegistry d_Data;
 
     // ── Pre-allocated buffers ─────────────────────────────────────────────────
     // GetTable and GetOnTable are called together once per player interaction,
@@ -33,7 +33,7 @@ public class CraftingTableTool
     /// <see cref="Vector3i"/> implements <see cref="IEquatable{T}"/> in OpenTK,
     /// so it is safe to use directly as a <see cref="HashSet{T}"/> key.
     /// </summary>
-    private readonly HashSet<Vector3i> _visited = new();
+    private readonly HashSet<Vector3i> _visited = [];
 
     // ── Public API ────────────────────────────────────────────────────────────
 

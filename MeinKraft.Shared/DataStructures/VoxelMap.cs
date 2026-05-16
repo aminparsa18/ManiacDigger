@@ -2,7 +2,7 @@
 
 public class VoxelMap : IVoxelMap
 {
-    public Chunk[] Chunks { get; private set; }
+    public Chunk[]? Chunks { get; private set; }
 
     public int MapSizeX { get; set; }
     public int MapSizeY { get; set; }
@@ -11,15 +11,11 @@ public class VoxelMap : IVoxelMap
     // ── Cached chunk-grid dimensions ──────────────────────────────────────────
     // Computed once in Reset — eliminates repeated bit-shifts on every hot-path call.
 
-    private int _mapChunksX;
-    private int _mapChunksY;
-    private int _mapChunksZ;
+    public ChunkedMap2d<int>? Heightmap { get; set; }
 
-    public ChunkedMap2d<int> Heightmap { get; set; }
-
-    public int Mapsizexchunks => _mapChunksX;
-    public int Mapsizeychunks => _mapChunksY;
-    public int Mapsizezchunks => _mapChunksZ;
+    public int Mapsizexchunks { get; private set; }
+    public int Mapsizeychunks { get; private set; }
+    public int Mapsizezchunks { get; private set; }
 
     // ── Constants (local aliases to avoid repeated static lookups) ────────────
 
@@ -34,7 +30,7 @@ public class VoxelMap : IVoxelMap
     /// Inlined arithmetic — no helper call overhead on the hot path.
     /// </summary>
     public int ChunkFlatIndex(int cx, int cy, int cz)
-        => (cz * _mapChunksX * _mapChunksY) + (cy * _mapChunksX) + cx;
+        => (cz * Mapsizexchunks * Mapsizeychunks) + (cy * Mapsizexchunks) + cx;
 
     /// <summary>Flat index within a chunk for block-local coordinates.</summary>
     private static int BlockFlatIndex(int lx, int ly, int lz)
@@ -47,8 +43,7 @@ public class VoxelMap : IVoxelMap
     {
         int ci = ChunkFlatIndex(x >> CsBits, y >> CsBits, z >> CsBits);
         Chunk chunk = Chunks[ci];
-        if (chunk == null) return 0;
-        return chunk.GetBlock(BlockFlatIndex(x & CsMask, y & CsMask, z & CsMask));
+        return chunk == null ? 0 : chunk.GetBlock(BlockFlatIndex(x & CsMask, y & CsMask, z & CsMask));
     }
 
     /// <inheritdoc/>
@@ -68,7 +63,9 @@ public class VoxelMap : IVoxelMap
     public Chunk GetChunk(int x, int y, int z)
     {
         if (x < 0 || y < 0 || z < 0)
+        {
             Console.WriteLine($"[WARN] GetChunk negative input: ({x}, {y}, {z})");
+        }
 
         return GetChunkAt(x >> CsBits, y >> CsBits, z >> CsBits);
     }
@@ -79,7 +76,10 @@ public class VoxelMap : IVoxelMap
         int ci = ChunkFlatIndex(cx, cy, cz);
         Chunk chunk = Chunks[ci];
 
-        if (chunk != null) return chunk;
+        if (chunk != null)
+        {
+            return chunk;
+        }
 
         const int n = Cs * Cs * Cs;
         byte[] data = ArrayPool<byte>.Shared.Rent(n);
@@ -110,11 +110,11 @@ public class VoxelMap : IVoxelMap
         MapSizeY = sizey;
         MapSizeZ = sizez;
 
-        _mapChunksX = sizex >> CsBits;
-        _mapChunksY = sizey >> CsBits;
-        _mapChunksZ = sizez >> CsBits;
+        Mapsizexchunks = sizex >> CsBits;
+        Mapsizeychunks = sizey >> CsBits;
+        Mapsizezchunks = sizez >> CsBits;
 
-        Chunks = new Chunk[_mapChunksX * _mapChunksY * _mapChunksZ];
+        Chunks = new Chunk[Mapsizexchunks * Mapsizeychunks * Mapsizezchunks];
     }
 
     // ── Bulk map operations ───────────────────────────────────────────────────
@@ -122,7 +122,7 @@ public class VoxelMap : IVoxelMap
     /// <inheritdoc/>
     public void GetMapPortion(int[] outPortion, int x, int y, int z, int portionsizex, int portionsizey, int portionsizez)
     {
-        int totalChunks = _mapChunksX * _mapChunksY * _mapChunksZ;
+        int totalChunks = Mapsizexchunks * Mapsizeychunks * Mapsizezchunks;
 
         Array.Clear(outPortion, 0, portionsizex * portionsizey * portionsizez);
 
@@ -148,10 +148,16 @@ public class VoxelMap : IVoxelMap
                 for (int cx = startCX; cx <= endCX; cx++)
                 {
                     int ci = ChunkFlatIndex(cx, cy, cz);
-                    if ((uint)ci >= (uint)totalChunks) continue;
+                    if ((uint)ci >= (uint)totalChunks)
+                    {
+                        continue;
+                    }
 
                     Chunk chunk = Chunks[ci];
-                    if (chunk == null || !chunk.HasData()) { continue; }
+                    if (chunk == null || !chunk.HasData())
+                    {
+                        continue;
+                    }
 
                     int chunkGlobalX = cx << CsBits;
                     int blockX0 = Math.Max(x, chunkGlobalX);
@@ -195,8 +201,8 @@ public class VoxelMap : IVoxelMap
         // Collect chunks that need dirtying — deduplicated by flat map index.
         // Two sets: one for block-changed chunks, one for neighbor-only dirty.
         // Using HashSet avoids the ~6.5× redundant SetChunkDirty calls seen in profiling.
-        var blocksChanged = new HashSet<int>(chunksX * chunksY * chunksZ);
-        var neighborDirty = new HashSet<int>(chunksX * chunksY * chunksZ * 6);
+        HashSet<int> blocksChanged = new(chunksX * chunksY * chunksZ);
+        HashSet<int> neighborDirty = new(chunksX * chunksY * chunksZ * 6);
 
         for (int cx = 0; cx < chunksX; cx++)
         {
@@ -221,7 +227,7 @@ public class VoxelMap : IVoxelMap
                     int ccz = worldZ >> csBits;
 
                     // Mark the written chunk
-                    blocksChanged.Add(ChunkFlatIndex(ccx, ccy, ccz));
+                    _ = blocksChanged.Add(ChunkFlatIndex(ccx, ccy, ccz));
 
                     // Collect its 6 neighbors
                     CollectNeighbor(ccx - 1, ccy, ccz, neighborDirty);
@@ -236,11 +242,17 @@ public class VoxelMap : IVoxelMap
 
         // Single dirty pass — each chunk touched at most once.
         foreach (int ci in blocksChanged)
+        {
             SetChunkDirtyAt(ci, dirty: true, blocksChanged: true);
+        }
 
         foreach (int ci in neighborDirty)
+        {
             if (!blocksChanged.Contains(ci))
+            {
                 SetChunkDirtyAt(ci, dirty: true, blocksChanged: false);
+            }
+        }
     }
 
     // ── Dirty marking ─────────────────────────────────────────────────────────
@@ -248,7 +260,11 @@ public class VoxelMap : IVoxelMap
     /// <inheritdoc/>
     public void SetChunkDirty(int cx, int cy, int cz, bool dirty, bool blockschanged)
     {
-        if (!IsValidChunkPos(cx, cy, cz)) return;
+        if (!IsValidChunkPos(cx, cy, cz))
+        {
+            return;
+        }
+
         SetChunkDirtyAt(ChunkFlatIndex(cx, cy, cz), dirty, blockschanged);
     }
 
@@ -259,10 +275,17 @@ public class VoxelMap : IVoxelMap
     private void SetChunkDirtyAt(int ci, bool dirty, bool blocksChanged)
     {
         Chunk c = Chunks[ci];
-        if (c == null) return;
+        if (c == null)
+        {
+            return;
+        }
+
         c.Rendered ??= new RenderedChunk();
         c.Rendered.Dirty = dirty;
-        if (blocksChanged) c.BaseLightDirty = true;
+        if (blocksChanged)
+        {
+            c.BaseLightDirty = true;
+        }
     }
 
     /// <inheritdoc/>
@@ -295,7 +318,10 @@ public class VoxelMap : IVoxelMap
             (int px, int py, int pz) = offsets[i];
             if ((uint)px >= (uint)MapSizeX ||
                 (uint)py >= (uint)MapSizeY ||
-                (uint)pz >= (uint)MapSizeZ) continue;
+                (uint)pz >= (uint)MapSizeZ)
+            {
+                continue;
+            }
 
             SetChunkDirty(px >> CsBits, py >> CsBits, pz >> CsBits, true, true);
         }
@@ -311,24 +337,33 @@ public class VoxelMap : IVoxelMap
 
     /// <inheritdoc/>
     public bool IsValidChunkPos(int cx, int cy, int cz)
-        => (uint)cx < (uint)_mapChunksX &&
-           (uint)cy < (uint)_mapChunksY &&
-           (uint)cz < (uint)_mapChunksZ;
+        => (uint)cx < (uint)Mapsizexchunks &&
+           (uint)cy < (uint)Mapsizeychunks &&
+           (uint)cz < (uint)Mapsizezchunks;
 
     // ── Light ─────────────────────────────────────────────────────────────────
 
     /// <inheritdoc/>
     public int MaybeGetLight(int x, int y, int z)
     {
-        if (!IsValidPos(x, y, z)) return -1;
+        if (!IsValidPos(x, y, z))
+        {
+            return -1;
+        }
 
         int cx = x >> CsBits;
         int cy = y >> CsBits;
         int cz = z >> CsBits;
-        if (!IsValidChunkPos(cx, cy, cz)) return -1;
+        if (!IsValidChunkPos(cx, cy, cz))
+        {
+            return -1;
+        }
 
         Chunk c = Chunks[ChunkFlatIndex(cx, cy, cz)];
-        if (c?.Rendered?.Light == null) return -1;
+        if (c?.Rendered?.Light == null)
+        {
+            return -1;
+        }
 
         const int lightCS = Cs + 2;
         int lx = (x & CsMask) + 1;
@@ -356,7 +391,9 @@ public class VoxelMap : IVoxelMap
     private void CollectNeighbor(int cx, int cy, int cz, HashSet<int> set)
     {
         if (IsValidChunkPos(cx, cy, cz))
-            set.Add(ChunkFlatIndex(cx, cy, cz));
+        {
+            _ = set.Add(ChunkFlatIndex(cx, cy, cz));
+        }
     }
 
     /// <summary>
@@ -376,11 +413,13 @@ public class VoxelMap : IVoxelMap
 
             for (int y = 0; y < Cs; y++)
             {
-                int srcBase = ((srcZRow + (y + srcY)) * srcSizeX) + srcX;
+                int srcBase = ((srcZRow + y + srcY) * srcSizeX) + srcX;
                 int dstBase = dstZRow + (y << CsBits);
 
                 for (int x = 0; x < Cs; x++)
+                {
                     destination.SetBlock(dstBase + x, source[srcBase + x]);
+                }
             }
         }
     }

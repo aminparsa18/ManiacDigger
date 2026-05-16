@@ -212,7 +212,7 @@ public class BlockRegistry : IBlockRegistry
         BuildSound[id] = build;
         CloneSound[id] = clone;
 
-        SetSpecialBlockId(b, id);
+        _ = SetSpecialBlockId(b, id);
     }
 
     // ── Special block ID registration ─────────────────────────────────────────

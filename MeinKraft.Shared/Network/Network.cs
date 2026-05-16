@@ -7,7 +7,7 @@
 /// </summary>
 public class NetIncomingMessage
 {
-    public NetConnection SenderConnection { get; init; }
+    public required NetConnection SenderConnection { get; init; }
     public NetworkMessageType Type { get; init; } = NetworkMessageType.Data;
     public ReadOnlyMemory<byte> Payload { get; init; }
 }
@@ -40,7 +40,10 @@ public class IpEndpointDefault : IpEndpoint
 {
     private readonly string _address;
 
-    private IpEndpointDefault(string address) => _address = address;
+    private IpEndpointDefault(string address)
+    {
+        _address = address;
+    }
 
     public static IpEndpointDefault Create(string address) => new(address);
 

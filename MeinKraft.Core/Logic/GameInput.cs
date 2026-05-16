@@ -46,7 +46,7 @@ public partial class Game
             mouseDeltaY = 0;
         }
 
-        //InvalidVersionAllow();
+        InvalidVersionAllow();
     }
 
     public void MouseUp(MouseEventArgs args)
@@ -210,7 +210,7 @@ public partial class Game
 
     public void OnTouchStart(TouchEventArgs e)
     {
-       // InvalidVersionAllow();
+        InvalidVersionAllow();
         MouseCurrentX = e.GetX();
         MouseCurrentY = e.GetY();
         MouseLeftClick = true;
@@ -328,7 +328,7 @@ public partial class Game
         }
 
         KeyboardState[eKey.KeyChar] = true;
-        //InvalidVersionAllow();
+        InvalidVersionAllow();
 
         if (eKey.KeyChar == GetKey(Keys.LeftShift) || eKey.KeyChar == GetKey(Keys.RightShift))
         {

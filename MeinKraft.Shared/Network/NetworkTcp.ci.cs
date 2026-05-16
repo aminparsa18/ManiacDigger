@@ -38,17 +38,14 @@ public sealed class TcpNetClient : NetClient
 
     public override NetIncomingMessage? ReadMessage()
     {
-        if (_inbox.Reader.TryRead(out ReadOnlyMemory<byte> payload))
-        {
-            return new NetIncomingMessage
+        return _inbox.Reader.TryRead(out ReadOnlyMemory<byte> payload)
+            ? new NetIncomingMessage
             {
                 Type = NetworkMessageType.Data,
                 Payload = payload,
                 SenderConnection = _connection,
-            };
-        }
-
-        return null;
+            }
+            : null;
     }
 
     public override void SendMessage(ReadOnlyMemory<byte> payload, MyNetDeliveryMethod method)
@@ -115,7 +112,7 @@ public sealed class TcpNetConnection : NetConnection
         await Task.WhenAll(ReceiveLoopAsync(), SendLoopAsync());
 
         _tcp?.Close();
-        _inbox.TryComplete();
+        _ = _inbox.TryComplete();
     }
 
     private async Task ReceiveLoopAsync()

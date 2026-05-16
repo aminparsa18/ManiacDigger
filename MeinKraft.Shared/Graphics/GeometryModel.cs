@@ -39,9 +39,9 @@ public partial class GeometryModel
     {
         if (model.VerticesCount >= model.Xyz.Length / 3)
         {
-            var xyz = model.Xyz;
-            var uv = model.Uv;
-            var rgba = model.Rgba;
+            float[] xyz = model.Xyz;
+            float[] uv = model.Uv;
+            byte[] rgba = model.Rgba;
 
             Array.Resize(ref xyz, xyz.Length * 2);
             Array.Resize(ref uv, uv.Length * 2);
@@ -111,7 +111,7 @@ public partial class GeometryModel
     {
         if (model.IndicesCount >= model.Indices.Length)
         {
-            var indices = model.Indices;
+            int[] indices = model.Indices;
             Array.Resize(ref indices, indices.Length * 2);
             model.Indices = indices;
         }

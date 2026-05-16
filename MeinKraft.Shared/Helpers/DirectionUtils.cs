@@ -153,7 +153,7 @@
         for (int i = 0; i < directionsCount; i++)
         {
             VehicleDirection12 d = directions[i];
-            flags = flags | ToVehicleDirection12Flags(d);
+            flags |= ToVehicleDirection12Flags(d);
         }
 
         return flags;
@@ -166,7 +166,7 @@
     /// </summary>
     /// <param name="enter_at"></param>
     /// <returns></returns>
-    public static VehicleDirection12[] PossibleNewRails3(TileEnterDirection enter_at)
+    public static VehicleDirection12[]? PossibleNewRails3(TileEnterDirection enter_at)
     {
         VehicleDirection12[] ret = new VehicleDirection12[3];
         switch (enter_at)

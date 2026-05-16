@@ -285,7 +285,7 @@ public class ClientPackets
                 WidgetId = widgetId
             }
         };
-        p.DialogClick_.TextBoxValue = (textValues);
+        p.DialogClick_.TextBoxValue = textValues;
         return p;
     }
 
@@ -392,7 +392,6 @@ public class ClientPackets
     public static Packet_Client ServerQuery() => s_serverQueryPacket;
 
     public static float RadToAngle256(float value) => value / (2 * MathF.PI) * 255;
-
 
     public static Packet_Client UseEntity(int entityId)
     {

@@ -54,7 +54,7 @@ public static class LoggingSetup
         bool enableConsole = false)
     {
         string dir = Path.Combine(GameStorePath.GetStorePath(), "logs");
-        Directory.CreateDirectory(dir);
+        _ = Directory.CreateDirectory(dir);
 
         LoggerConfiguration cfg = new LoggerConfiguration()
             .MinimumLevel.Is(minimumLevel)
@@ -96,14 +96,14 @@ public static class LoggingSetup
 
         // Wire Serilog as the backend for Microsoft.Extensions.Logging.
         // Every ILogger<T> injected anywhere in the app now flows to Serilog.
-        services.AddLogging(builder =>
+        _ = services.AddLogging(builder =>
         {
-            builder.ClearProviders();
-            builder.AddSerilog(Log.Logger, dispose: true);
+            _ = builder.ClearProviders();
+            _ = builder.AddSerilog(Log.Logger, dispose: true);
         });
 
         // Register the game-specific channel wrapper.
-        services.AddSingleton<IGameLogger, GameLogger>();
+        _ = services.AddSingleton<IGameLogger, GameLogger>();
 
         return services;
     }

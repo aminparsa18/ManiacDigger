@@ -119,7 +119,9 @@ public sealed class CrashReporter
         _logger.LogCritical(exCrash, "Critical error — application is terminating");
 
         for (Exception? inner = exCrash?.InnerException; inner is not null; inner = inner.InnerException)
+        {
             _logger.LogCritical(inner, "Inner exception");
+        }
 
         // 2. Write a dedicated crash.log — overwrites each run, no rolling noise,
         //    always contains exactly the most recent failure.
@@ -137,7 +139,7 @@ public sealed class CrashReporter
         if (s_isConsole)
         {
             Console.WriteLine("Press any key to shut down...");
-            Console.ReadLine();
+            _ = Console.ReadLine();
         }
 
         Environment.Exit(1);
@@ -147,15 +149,22 @@ public sealed class CrashReporter
 
     private void RunOnCrashCallback()
     {
-        if (OnCrash is null) return;
+        if (OnCrash is null)
+        {
+            return;
+        }
 
         Task task = Task.Run(() => OnCrash());
 
         if (!task.Wait(OnCrashTimeoutMs))
+        {
             _logger.LogWarning("OnCrash() did not complete within {Timeout} ms — skipped", OnCrashTimeoutMs);
+        }
 
         if (task.IsFaulted)
+        {
             _logger.LogError(task.Exception, "OnCrash() threw an exception");
+        }
     }
 
     /// <summary>
@@ -179,7 +188,9 @@ public sealed class CrashReporter
             crashLogger.Fatal(ex, "Critical error — application is terminating");
 
             for (Exception? inner = ex?.InnerException; inner is not null; inner = inner.InnerException)
+            {
                 crashLogger.Fatal(inner, "Inner exception");
+            }
         }
         catch
         {
@@ -190,19 +201,21 @@ public sealed class CrashReporter
     private static string BuildSummary(Exception? ex, string? crashFilePath)
     {
         StringBuilder sb = new();
-        sb.AppendLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}  Critical Error");
+        _ = sb.AppendLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}  Critical Error");
 
         if (ex is not null)
-            sb.AppendLine(ex.Message);
+        {
+            _ = sb.AppendLine(ex.Message);
+        }
 
         if (crashFilePath is not null)
         {
-            sb.AppendLine();
-            sb.AppendLine($"Crash report written to:\n  {crashFilePath}");
+            _ = sb.AppendLine();
+            _ = sb.AppendLine($"Crash report written to:\n  {crashFilePath}");
         }
 
-        sb.AppendLine();
-        sb.AppendLine("Check the logs/ folder for the full crash report.");
+        _ = sb.AppendLine();
+        _ = sb.AppendLine("Check the logs/ folder for the full crash report.");
         return sb.ToString();
     }
 
@@ -219,6 +232,7 @@ public sealed class CrashReporter
                 SetCursorVisible?.Invoke(true);
                 Thread.Sleep(50);
             }
+
             ShowErrorDialog?.Invoke(message, "Critical Error");
         }
     }

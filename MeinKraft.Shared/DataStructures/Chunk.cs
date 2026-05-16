@@ -20,19 +20,19 @@ public class Chunk
     /// Expanded int storage, allocated on demand when a block value ≥ 255 is written.
     /// When non-null, <see cref="Data"/> is null (and has been returned to the pool).
     /// </summary>
-    private int[] dataInt;
+    private int[]? dataInt;
 
     // ── Backing stores ───────────────────────────────────────────────────────
     // Exactly one of data/dataInt is active at any time; the other is null.
 
     /// <summary>Compact byte storage used when all block values are below 255.</summary>
-    public byte[] Data { get; set; }
+    public byte[]? Data { get; set; }
 
     /// <summary>Per-block base light levels for this chunk.</summary>
-    public byte[] BaseLight { get; set; }
+    public byte[]? BaseLight { get; set; }
 
     /// <summary>The last rendered state of this chunk, used by the renderer.</summary>
-    public RenderedChunk Rendered { get; set; }
+    public RenderedChunk? Rendered { get; set; }
 
     // ── BaseLightDirty — atomic so multiple lighting workers never double-compute ──
 
@@ -123,9 +123,13 @@ public class Chunk
     public void SnapshotBaseLight(byte[] destination, int length, int chunkIndex = -1)
     {
         if (BaseLight != null)
+        {
             BaseLight.AsSpan(0, length).CopyTo(destination.AsSpan(0, length));
+        }
         else
+        {
             destination.AsSpan(0, length).Fill(0);
+        }
     }
 
     /// <summary>

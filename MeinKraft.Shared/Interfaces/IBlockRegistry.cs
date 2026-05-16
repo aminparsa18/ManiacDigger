@@ -3,7 +3,7 @@
 public interface IBlockRegistry
 {
     /// <summary>Block type definitions indexed by block type ID.</summary>
-    Dictionary<int, BlockType> BlockTypes { get; set; } 
+    Dictionary<int, BlockType> BlockTypes { get; set; }
 
     /// <summary>Pending block type definitions received from the server before map load.</summary>
     Dictionary<int, BlockType> NewBlockTypes { get; set; }

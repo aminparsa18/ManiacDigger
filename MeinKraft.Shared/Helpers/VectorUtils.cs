@@ -89,35 +89,9 @@ public class VectorUtils
         return (dx * dx) + (dy * dy) + (dz * dz);
     }
 
-    public static bool IsValidPos(IMapStorage map, int x, int y, int z)
-    {
-        if (x < 0 || y < 0 || z < 0)
-        {
-            return false;
-        }
+    public static bool IsValidPos(IMapStorage map, int x, int y, int z) => x >= 0 && y >= 0 && z >= 0 && x < map.MapSizeX && y < map.MapSizeY && z < map.MapSizeZ;
 
-        if (x >= map.MapSizeX || y >= map.MapSizeY || z >= map.MapSizeZ)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    public static bool IsValidPos(IMapStorage map, int x, int y)
-    {
-        if (x < 0 || y < 0)
-        {
-            return false;
-        }
-
-        if (x >= map.MapSizeX || y >= map.MapSizeY)
-        {
-            return false;
-        }
-
-        return true;
-    }
+    public static bool IsValidPos(IMapStorage map, int x, int y) => x >= 0 && y >= 0 && x < map.MapSizeX && y < map.MapSizeY;
 
     public static bool IsValidChunkPos(IMapStorage map, int cx, int cy, int cz, int chunksize)
     {
@@ -178,7 +152,7 @@ public class VectorUtils
         Matrix4.CreateRotationX(MathF.PI, out Matrix4 rotX);
         m = rotX * m;
 
-        meshDrawer.mvMatrix.Pop();
+        _ = meshDrawer.mvMatrix.Pop();
         meshDrawer.mvMatrix.Push(m);
         meshDrawer.GLLoadMatrix(m);
     }

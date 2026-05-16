@@ -22,7 +22,7 @@ public class NetworkService : INetworkService
     public EnetPeer EnetHostConnect(EnetHost host, string hostName, int port, int channelCount, int data)
     {
         Address address = new() { Port = (ushort)port };
-        address.SetHost(hostName);
+        _ = address.SetHost(hostName);
         Peer peer = ((EnetHostWrapper)host).Host.Connect(address, channelCount, (uint)data);
         return new EnetPeerWrapper(peer);
     }
@@ -68,7 +68,7 @@ public class NetworkService : INetworkService
     {
         ENet.Packet packet = default;
         packet.Create(payload.ToArray(), payload.Length, (PacketFlags)flags);
-        ((EnetPeerWrapper)peer).Peer.Send((byte)channelId, ref packet);
+        _ = ((EnetPeerWrapper)peer).Peer.Send((byte)channelId, ref packet);
 
         _unflushledPackets++;
         _gameLogger.Client.Debug($"[ENET-SEND] queued packet #{_unflushledPackets} unflushed");
@@ -100,14 +100,20 @@ public class NetworkService : INetworkService
 internal sealed class EnetHostWrapper : EnetHost
 {
     internal readonly Host Host;
-    internal EnetHostWrapper(Host host) => Host = host;
+    internal EnetHostWrapper(Host host)
+    {
+        Host = host;
+    }
 }
 
 /// <summary>Wraps ENet-CSharp's Peer struct.</summary>
 internal sealed class EnetPeerWrapper : EnetPeer
 {
     internal Peer Peer; // Not readonly — Peer is a struct, SetUserData must mutate it in place
-    internal EnetPeerWrapper(Peer peer) => Peer = peer;
+    internal EnetPeerWrapper(Peer peer)
+    {
+        Peer = peer;
+    }
 
     public override int UserData() => (int)Peer.Data;
     public override void SetUserData(int value) => Peer.Data = value;
@@ -122,7 +128,10 @@ internal sealed class EnetPeerWrapper : EnetPeer
 internal sealed class EnetEventWrapper : EnetEvent
 {
     private readonly Event _e;
-    internal EnetEventWrapper(Event e) => _e = e;
+    internal EnetEventWrapper(Event e)
+    {
+        _e = e;
+    }
 
     public override EnetEventType Type() => _e.Type switch
     {
@@ -142,7 +151,10 @@ internal sealed class EnetEventWrapper : EnetEvent
 internal sealed class EnetPacketWrapper : EnetPacket
 {
     private readonly ENet.Packet _p;
-    internal EnetPacketWrapper(ENet.Packet p) => _p = p;
+    internal EnetPacketWrapper(ENet.Packet p)
+    {
+        _p = p;
+    }
 
     public override int GetBytesCount() => _p.Length;
     public override byte[] GetBytes()

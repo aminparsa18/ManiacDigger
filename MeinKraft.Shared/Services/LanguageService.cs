@@ -39,7 +39,7 @@ public class LanguageService : ILanguageService
     /// </summary>
     public void LoadTranslations()
     {
-        if(strings.Count > 0)
+        if (strings.Count > 0)
         {
             // Already loaded — don't load again
             return;
@@ -145,8 +145,8 @@ public class LanguageService : ILanguageService
     /// <param name="translated">Localised string value.</param>
     private void Add(string language, string id, string translated)
     {
-        loadedLanguages.Add(language);
-        strings.TryAdd((language, id), translated);
+        _ = loadedLanguages.Add(language);
+        _ = strings.TryAdd((language, id), translated);
     }
 
     /// <summary>
@@ -158,7 +158,7 @@ public class LanguageService : ILanguageService
     /// <param name="translated">Replacement localised string.</param>
     public void Override(string language, string id, string translated)
     {
-        loadedLanguages.Add(language);
+        _ = loadedLanguages.Add(language);
         strings[(language, id)] = translated;
     }
 

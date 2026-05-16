@@ -39,7 +39,9 @@ public class Ping
     public bool Receive(int milliseconds)
     {
         if (IsReady)
+        {
             return false;
+        }
 
         RoundtripMilliseconds = milliseconds - _sentAtMilliseconds;
         IsReady = true;
