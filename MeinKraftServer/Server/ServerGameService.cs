@@ -185,7 +185,7 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
         {
             _gameLogger.Server.Debug($"main socket is empty so initalized by enet");
             MainSockets = new NetServer[3];
-            MainSockets[0] = new EnetNetServer(new NetworkService());
+            MainSockets[0] = new EnetNetServer(new NetworkService(_gameLogger));
         }
 
         AllPrivileges.AddRange(Privilege.All());

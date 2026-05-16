@@ -24,6 +24,7 @@ public partial class GameView : ContentPage
     private DateTime _lastFrame = DateTime.UtcNow;
 
     private readonly IGame _game;
+    private readonly IGameLogger _gameLogger;
     private readonly IOpenGlService _openGlService;
     private readonly IGameWindowService _gameWindowService;
     private readonly IAssetManager _assetManager;
@@ -59,13 +60,14 @@ public partial class GameView : ContentPage
 #endif
 
     public GameView(IOpenGlService openGlService, IGameWindowService gameWindowService, IAssetManager assetManager,
-        IGame game, ITerrainChunkTesselator terrainChunkTesselator, ClientWorkerHost workerHost)
+        IGameLogger gameLogger, IGame game, ITerrainChunkTesselator terrainChunkTesselator, ClientWorkerHost workerHost)
     {
         InitializeComponent();
         _openGlService = openGlService;
         _gameWindowService = gameWindowService;
         _assetManager = assetManager;
         _game = game;
+        _gameLogger = gameLogger;
         _workerHost = workerHost;
 
         // Inject game services into the overlay so it can apply options directly.
@@ -231,7 +233,7 @@ public partial class GameView : ContentPage
         string username = Microsoft.Maui.Storage.Preferences.Get("username", "Player");
         string apiKey = Microsoft.Maui.Storage.Preferences.Get("api_key", string.Empty);
 
-        _game.NetClient = new EnetNetClient(new NetworkService());
+        _game.NetClient = new EnetNetClient(new NetworkService(_gameLogger));
         _game.ConnectData = new ConnectionData
         {
             Ip = "127.0.0.1",

@@ -2,6 +2,13 @@
 
 public class NetworkService : INetworkService
 {
+    private readonly IGameLogger _gameLogger;
+
+    public NetworkService(IGameLogger gameLogger)
+    {
+        _gameLogger = gameLogger;
+    }
+
     public bool EnetAvailable() => true;
 
     public EnetHost EnetCreateHost() => new EnetHostWrapper(new Host());
@@ -45,15 +52,26 @@ public class NetworkService : INetworkService
 
     public EnetEvent? EnetHostService(EnetHost host, int timeout)
     {
+        if (_unflushledPackets > 0)
+        {
+            _gameLogger.Client.Debug($"[ENET-SERVICE] flushing — {_unflushledPackets} packets were queued since last service");
+            _unflushledPackets = 0;
+        }
+
         int ret = ((EnetHostWrapper)host).Host.Service(timeout, out Event e);
         return ret > 0 ? new EnetEventWrapper(e) : null;
     }
+
+    private int _unflushledPackets;
 
     public void EnetPeerSend(EnetPeer peer, int channelId, ReadOnlyMemory<byte> payload, int flags)
     {
         ENet.Packet packet = default;
         packet.Create(payload.ToArray(), payload.Length, (PacketFlags)flags);
         ((EnetPeerWrapper)peer).Peer.Send((byte)channelId, ref packet);
+
+        _unflushledPackets++;
+        _gameLogger.Client.Debug($"[ENET-SEND] queued packet #{_unflushledPackets} unflushed");
     }
 
     public bool TcpAvailable() => true;
