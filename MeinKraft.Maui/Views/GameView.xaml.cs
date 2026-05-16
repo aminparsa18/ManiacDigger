@@ -232,8 +232,8 @@ public partial class GameView : ContentPage
         string apiKey = Microsoft.Maui.Storage.Preferences.Get("api_key", string.Empty);
 
         _game.NetClient = new EnetNetClient(new NetworkService());
-        _game.NetClient.Start();
-        _game.NetClient.Connect("127.0.0.1", port);
+       // _game.NetClient.Start();
+      //  _game.NetClient.Connect("127.0.0.1", port);
         _game.ConnectData = new ConnectionData
         {
             Ip = "127.0.0.1",
