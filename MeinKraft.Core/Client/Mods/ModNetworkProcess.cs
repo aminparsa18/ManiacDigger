@@ -171,8 +171,6 @@ public class ModNetworkProcess : ModBase
         }
     }
 
-
-
     // a private Handle*() method to make this switch a clean dispatch table
     // and enable per-handler unit testing. Deferred to keep this diff focused.
     private void ProcessPacket(Packet_Server packet)
@@ -182,55 +180,32 @@ public class ModNetworkProcess : ModBase
         {
             case Packet_ServerIdEnum.ServerIdentification:
                 {
-                    string invalidversionstr = Game.Language.InvalidVersionConnectAnyway();
-                    Game.ServerGameVersion = packet.Identification.MdProtocolVersion;
-                    if (Game.ServerGameVersion != _platform.GetGameVersion())
-                    {
-                        Game.ChatLog("[GAME] Different game versions");
-                        string q = string.Format(invalidversionstr,
-                            _platform.GetGameVersion(), Game.ServerGameVersion);
-                        Game.InvalidVersionDrawMessage = q;
-                        Game.InvalidVersionPacketIdentification = packet;
-                    }
-                    else
-                    {
-                        Game.ProcessServerIdentification(packet);
-                    }
-
-                    Game.ReceivedMapLength = 0;
+                    ProcessIdentificationPacket(packet);
                     break;
                 }
 
-            case Packet_ServerIdEnum.Ping:
-                Game.SendPingReply();
-                Game.ServerInfo.ServerPing.Send(_platform.TimeMillisecondsFromStart);
+            case Packet_ServerIdEnum.FillAreaLimit:
+                Game.FillAreaLimit = Math.Min(packet.FillAreaLimit.Limit, 100000);
                 break;
 
-            case Packet_ServerIdEnum.PlayerPing:
-                Game.ServerInfo.ServerPing.Receive(_platform.TimeMillisecondsFromStart);
+            case Packet_ServerIdEnum.Freemove:
+                Game.AllowFreeMove = packet.Freemove.IsEnabled != 0;
+                if (!Game.AllowFreeMove)
+                {
+                    Game.Controls.FreeMove = false;
+                    Game.Controls.NoClip = false;
+                    Game.MoveSpeed = Game.Basemovespeed;
+                    Game.AddChatLine(Game.Language.MoveNormal());
+                }
+
                 break;
 
-            case Packet_ServerIdEnum.LevelInitialize:
-                Game.ChatLog("[GAME] Initialized map loading");
-                Game.ReceivedMapLength = 0;
-                Game.InvokeMapLoadingProgress(0, 0, Game.Language.Connecting());
-                break;
+            case Packet_ServerIdEnum.FiniteInventory:
+                if (packet.Inventory.Inventory != null)
+                {
+                    Game.UseInventory(packet.Inventory.Inventory);
+                }
 
-            case Packet_ServerIdEnum.LevelDataChunk:
-                Game.InvokeMapLoadingProgress(
-                    packet.LevelDataChunk.PercentComplete,
-                    Game.ReceivedMapLength,
-                    packet.LevelDataChunk.Status);
-                break;
-
-            case Packet_ServerIdEnum.LevelFinalize:
-                Game.ChatLog("[GAME] Finished map loading");
-                break;
-
-            case Packet_ServerIdEnum.SetBlock:
-                Game.PlaceBlockAndRedraw(
-                    packet.SetBlock.X, packet.SetBlock.Y, packet.SetBlock.Z,
-                    packet.SetBlock.BlockType);
                 break;
 
             case Packet_ServerIdEnum.FillArea:
@@ -258,20 +233,75 @@ public class ModNetworkProcess : ModBase
                     break;
                 }
 
-            case Packet_ServerIdEnum.FillAreaLimit:
-                Game.FillAreaLimit = Math.Min(packet.FillAreaLimit.Limit, 100000);
+            case Packet_ServerIdEnum.PlayerStats:
+                Game.PlayerStats = packet.PlayerStats;
                 break;
 
-            case Packet_ServerIdEnum.Freemove:
-                Game.AllowFreeMove = packet.Freemove.IsEnabled != 0;
-                if (!Game.AllowFreeMove)
+            case Packet_ServerIdEnum.Message:
+                Game.AddChatLine(packet.Message.Message);
+                _gameLogger.Client.Debug(packet.Message.Message);
+                break;
+
+            case Packet_ServerIdEnum.LevelInitialize:
+                _gameLogger.Client.Debug("[GAME] Initialized map loading");
+                Game.ReceivedMapLength = 0;
+                Game.InvokeMapLoadingProgress(0, 0, Game.Language.Connecting());
+                break;
+
+            case Packet_ServerIdEnum.LevelDataChunk:
+                Game.InvokeMapLoadingProgress(
+                    packet.LevelDataChunk.PercentComplete,
+                    Game.ReceivedMapLength,
+                    packet.LevelDataChunk.Status);
+                break;
+
+            case Packet_ServerIdEnum.BlockType:
+                blockTypeRegistry.NewBlockTypes[packet.BlockType.Id] = packet.BlockType.Blocktype;
+                break;
+
+            case Packet_ServerIdEnum.Translation:
+                Game.Language.Override(
+                    packet.Translation.Lang,
+                    packet.Translation.Id,
+                    packet.Translation.Translation);
+                break;
+
+            case Packet_ServerIdEnum.SunLevels:
+                _lightManager.NightLevels = packet.SunLevels.Sunlevels;
+                break;
+
+            case Packet_ServerIdEnum.LightLevels:
+                for (int i = 0; i < packet.LightLevels.Lightlevels.Length; i++)
                 {
-                    Game.Controls.FreeMove = false;
-                    Game.Controls.NoClip = false;
-                    Game.MoveSpeed = Game.Basemovespeed;
-                    Game.AddChatLine(Game.Language.MoveNormal());
+                    _lightManager.LightLevels[i] = EncodingHelper.DecodeFixedPoint(packet.LightLevels.Lightlevels[i]);
                 }
 
+                break;
+
+            case Packet_ServerIdEnum.LevelFinalize:
+                _gameLogger.Client.Debug("[GAME] Finished map loading");
+                break;
+
+            case Packet_ServerIdEnum.Season:
+                {
+                    ProcessSeasonPacket(packet);
+
+                    break;
+                }
+
+            case Packet_ServerIdEnum.Ping:
+                Game.SendPingReply();
+                Game.ServerInfo.ServerPing.Send(_platform.TimeMillisecondsFromStart);
+                break;
+
+            case Packet_ServerIdEnum.PlayerPing:
+                Game.ServerInfo.ServerPing.Receive(_platform.TimeMillisecondsFromStart);
+                break;
+
+            case Packet_ServerIdEnum.SetBlock:
+                Game.PlaceBlockAndRedraw(
+                    packet.SetBlock.X, packet.SetBlock.Y, packet.SetBlock.Z,
+                    packet.SetBlock.BlockType);
                 break;
 
             case Packet_ServerIdEnum.PlayerSpawnPosition:
@@ -287,13 +317,8 @@ public class ModNetworkProcess : ModBase
                     break;
                 }
 
-            case Packet_ServerIdEnum.Message:
-                Game.AddChatLine(packet.Message.Message);
-                Game.ChatLog(packet.Message.Message);
-                break;
-
             case Packet_ServerIdEnum.DisconnectPlayer:
-                Game.ChatLog($"[GAME] Disconnected by the server ({packet.DisconnectPlayer.DisconnectReason})");
+                _gameLogger.Client.Debug($"[GAME] Disconnected by the server ({packet.DisconnectPlayer.DisconnectReason})");
                 if (_platform.IsMousePointerLocked())
                 {
                     _platform.ExitMousePointerLock();
@@ -303,52 +328,6 @@ public class ModNetworkProcess : ModBase
                     packet.DisconnectPlayer.DisconnectReason, "Disconnected from server");
                 Game.ExitToMainMenu();
                 break;
-
-            case Packet_ServerIdEnum.PlayerStats:
-                Game.PlayerStats = packet.PlayerStats;
-                break;
-
-            case Packet_ServerIdEnum.FiniteInventory:
-                if (packet.Inventory.Inventory != null)
-                {
-                    Game.UseInventory(packet.Inventory.Inventory);
-                }
-
-                break;
-
-            case Packet_ServerIdEnum.Season:
-                {
-                    packet.Season.Hour -= 1;
-                    if (packet.Season.Hour < 0)
-                    {
-                        packet.Season.Hour = 12 * GameConstants.HourDetail;
-                    }
-
-                    if (_lightManager.NightLevels == null)
-                    {
-                        break;
-                    }
-
-                    if (packet.Season.Hour >= _lightManager.NightLevels.Length)
-                    {
-                        break;
-                    }
-
-                    int sunlight = _lightManager.NightLevels[packet.Season.Hour];
-                    _lightManager.SkySphereNight = sunlight < 8;
-                    //Game.SunMoonRenderer.day_length_in_seconds =
-                    //    60 * 60 * 24 / packet.Season.DayNightCycleSpeedup;
-                    //int hour = packet.Season.Hour / Game.HourDetail;
-                    //if (Game.SunMoonRenderer.GetHour() != hour)
-                    //    Game.SunMoonRenderer.SetHour(hour);
-                    if (_lightManager.Sunlight != sunlight)
-                    {
-                        _lightManager.Sunlight = sunlight;
-                        Game.RedrawAllBlocks();
-                    }
-
-                    break;
-                }
 
             case Packet_ServerIdEnum.BlobInitialize:
                 Game.BlobDownload = new MemoryStream();
@@ -388,29 +367,6 @@ public class ModNetworkProcess : ModBase
                      i < GameConstants.entityMonsterIdStart + GameConstants.entityMonsterIdCount; i++)
                 {
                     Game.Entities[i] = null;
-                }
-
-                break;
-
-            case Packet_ServerIdEnum.Translation:
-                Game.Language.Override(
-                    packet.Translation.Lang,
-                    packet.Translation.Id,
-                    packet.Translation.Translation);
-                break;
-
-            case Packet_ServerIdEnum.BlockType:
-                blockTypeRegistry.NewBlockTypes[packet.BlockType.Id] = packet.BlockType.Blocktype;
-                break;
-
-            case Packet_ServerIdEnum.SunLevels:
-                _lightManager.NightLevels = packet.SunLevels.Sunlevels;
-                break;
-
-            case Packet_ServerIdEnum.LightLevels:
-                for (int i = 0; i < packet.LightLevels.Lightlevels.Length; i++)
-                {
-                    _lightManager.LightLevels[i] = EncodingHelper.DecodeFixedPoint(packet.LightLevels.Lightlevels[i]);
                 }
 
                 break;
@@ -567,10 +523,62 @@ public class ModNetworkProcess : ModBase
                 }
 
             case Packet_ServerIdEnum.ServerRedirect:
-                Game.ChatLog("[GAME] Received server redirect");
+                _gameLogger.Client.Debug("[GAME] Received server redirect");
                 Game.SendLeave(PacketLeaveReason.Leave);
                 Game.ExitAndSwitchServer(packet.Redirect);
                 break;
+        }
+    }
+
+    private void ProcessIdentificationPacket(Packet_Server packet)
+    {
+        string invalidversionstr = Game.Language.InvalidVersionConnectAnyway();
+        Game.ServerGameVersion = packet.Identification.MdProtocolVersion;
+        if (Game.ServerGameVersion != _platform.GetGameVersion())
+        {
+            _gameLogger.Client.Debug("[GAME] Different game versions");
+            string q = string.Format(invalidversionstr,
+                _platform.GetGameVersion(), Game.ServerGameVersion);
+            Game.InvalidVersionDrawMessage = q;
+            Game.InvalidVersionPacketIdentification = packet;
+        }
+        else
+        {
+            Game.ProcessServerIdentification(packet);
+        }
+
+        Game.ReceivedMapLength = 0;
+    }
+
+    private void ProcessSeasonPacket(Packet_Server packet)
+    {
+        packet.Season.Hour -= 1;
+        if (packet.Season.Hour < 0)
+        {
+            packet.Season.Hour = 12 * GameConstants.HourDetail;
+        }
+
+        if (_lightManager.NightLevels == null)
+        {
+            return;
+        }
+
+        if (packet.Season.Hour >= _lightManager.NightLevels.Length)
+        {
+            return;
+        }
+
+        int sunlight = _lightManager.NightLevels[packet.Season.Hour];
+        _lightManager.SkySphereNight = sunlight < 8;
+        //Game.SunMoonRenderer.day_length_in_seconds =
+        //    60 * 60 * 24 / packet.Season.DayNightCycleSpeedup;
+        //int hour = packet.Season.Hour / Game.HourDetail;
+        //if (Game.SunMoonRenderer.GetHour() != hour)
+        //    Game.SunMoonRenderer.SetHour(hour);
+        if (_lightManager.Sunlight != sunlight)
+        {
+            _lightManager.Sunlight = sunlight;
+            Game.RedrawAllBlocks();
         }
     }
 
