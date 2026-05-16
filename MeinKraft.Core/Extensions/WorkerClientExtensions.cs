@@ -1,4 +1,5 @@
 ﻿using MeinKraft.Worker;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MeinKraft.Extensions;
 

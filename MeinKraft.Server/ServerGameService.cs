@@ -1992,7 +1992,6 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
 
     public long TotalReceivedBytes { get; set; }
 
-
     public int DrawDistance { get; set; } = 512;
 
     public double InvertedChunkSize { get; set; } = 1.0 / 32;
@@ -2180,7 +2179,6 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
 
     public Dictionary<string, bool> Disabledprivileges { get; set; } = [];
     public Dictionary<string, bool> ExtraPrivileges { get; set; } = [];
-
 
     public MeinKraft.Group? DefaultGroupGuest { get; set; }
     public MeinKraft.Group DefaultGroupRegistered { get; set; }
@@ -2487,11 +2485,6 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
         c.Entities[id] = e;
         c.DirtyForSaving = true;
     }
-}
-
-public interface ICurrentTime
-{
-    int GetSimulationCurrentFrame();
 }
 
 /// <summary>A timer paired with its callback, held in <see cref="ServerGameService.Timers"/>.</summary>

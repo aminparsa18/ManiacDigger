@@ -10,7 +10,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using SkiaSharp.Views.Maui.Controls;
-
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 #if WINDOWS
