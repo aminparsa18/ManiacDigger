@@ -412,12 +412,6 @@ public interface IServerModManager
     void NotifyAmmo(int player, Dictionary<int, int> dictionary);
 
     /// <summary>
-    /// Writes the given string into server chat log
-    /// </summary>
-    /// <param name="s">log message</param>
-    void LogChat(string s);
-
-    /// <summary>
     /// This allows all players to use the given privilege, no matter the normal configuration
     /// </summary>
     /// <param name="privilege">The privilege to grant</param>

@@ -47,7 +47,6 @@ public class ServerSystemModLoader(IEnumerable<IMod> mods, IModEvents modEvents,
         server.SendMessageToAll(string.Format(
             languageService.Get("Server_CommandRestartModsSuccess"),
             GameConstants.colorImportant, caller.ColoredPlayername(GameConstants.colorImportant)));
-        server.ServerEventLog($"{caller.PlayerName} restarts mods.");
 
         // restart mods if needed in an iteration
         return true;

@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace MeinKraft;
 
-public class ServerModManager(IBlockRegistry blockRegistry, IChunkDbCompressed chunkDb,
+public class ServerModManager(IBlockRegistry blockRegistry, IChunkDbCompressed chunkDb, IGameLogger gameLogger,
     IServerMapStorage serverMapStorage, ILanguageService languageService, IOptions<ServerConfig> options, IServerPacketService serverPacketService,
     ServerGameService server, ISaveGameService saveGameService, IClientRegistry serverClientService, IPlayerStatusService playerStatusService) : IServerModManager
 {
@@ -14,6 +14,7 @@ public class ServerModManager(IBlockRegistry blockRegistry, IChunkDbCompressed c
     private readonly IServerMapStorage _serverMapStorage = serverMapStorage;
     private readonly ILanguageService _languageService = languageService;
     private readonly ServerConfig _config = options.Value;
+    private readonly IGameLogger _gameLogger = gameLogger;
     private readonly IClientRegistry _serverClientService = serverClientService;
     private readonly IPlayerStatusService _playerStatusService = playerStatusService;
     private readonly IServerPacketService _serverPacketService = serverPacketService;
@@ -563,8 +564,6 @@ public class ServerModManager(IBlockRegistry blockRegistry, IChunkDbCompressed c
 
     public void NotifyAmmo(int player, Dictionary<int, int> totalAmmo) => _server.SendAmmo(player, totalAmmo);
 
-    public void LogChat(string s) => _server.ChatLog(s);
-
     public void EnableExtraPrivilegeToAll(string privilege, bool enable)
     {
         if (enable)
@@ -577,7 +576,7 @@ public class ServerModManager(IBlockRegistry blockRegistry, IChunkDbCompressed c
         }
     }
 
-    public void LogServerEvent(string serverEvent) => _server.ServerEventLog(serverEvent);
+    public void LogServerEvent(string serverEvent) => _gameLogger.Server.Debug(serverEvent);
 
     public void SetWorldDatabaseReadOnly(bool readOnly) => _chunkDb.ReadOnly = readOnly;
 

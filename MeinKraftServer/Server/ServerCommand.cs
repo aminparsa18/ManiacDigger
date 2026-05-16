@@ -3,22 +3,6 @@ using System.Drawing;
 
 public partial class ServerGameService
 {
-    public void ServerEventLog(string p)
-    {
-        if (!_config.ServerEventLogging)
-        {
-            return;
-        }
-
-        if (!Directory.Exists(_serverPathLogs))
-        {
-            Directory.CreateDirectory(_serverPathLogs);
-        }
-
-        string filename = Path.Combine(_serverPathLogs, "DiagLog.Write.txt");
-        File.AppendAllText(filename, string.Format("{0} {1}\n", DateTime.Now, p));
-    }
-
     public void CommandInterpreter(int sourceClientId, string command, string argument)
     {
         string[] ss;
@@ -540,7 +524,7 @@ public partial class ServerGameService
                 else
                 {
                     _serverPacketService.SendMessage(sourceClientId, string.Format(_languageService.Get("Server_CommandBackupCreated"), GameConstants.colorSuccess));
-                    ServerEventLog(string.Format("{0} backups database: {1}.", _serverClientService.GetClient(sourceClientId).PlayerName, argument));
+                    _gameLogger.Server.Information(string.Format("{0} backups database: {1}.", _serverClientService.GetClient(sourceClientId).PlayerName, argument));
                 }
 
                 break;
@@ -871,7 +855,7 @@ public partial class ServerGameService
 
             _serverClientService.ServerClientNeedsSaving = true;
             SendMessageToAll(string.Format(_languageService.Get("Server_CommandSetGroupTo"), GameConstants.colorSuccess, _serverClientService.GetClient(sourceClientId).ColoredPlayername(GameConstants.colorSuccess), targetClient.ColoredPlayername(GameConstants.colorSuccess), newGroup.GroupColorString() + newGroupName));
-            ServerEventLog(string.Format("{0} sets group of {1} to {2}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetClient.PlayerName, newGroupName));
+            _gameLogger.Server.Debug(string.Format("{0} sets group of {1} to {2}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetClient.PlayerName, newGroupName));
             targetClient.AssignGroup(newGroup);
             SendFreemoveState(targetClient.Id, targetClient.Privileges.Contains(Privilege.freemove));
             SetFillAreaLimit(targetClient.Id);
@@ -964,7 +948,7 @@ public partial class ServerGameService
 
         _serverClientService.ServerClientNeedsSaving = true;
         SendMessageToAll(string.Format(_languageService.Get("Server_CommandSetOfflineGroupTo"), GameConstants.colorSuccess, _serverClientService.GetClient(sourceClientId).ColoredPlayername(GameConstants.colorSuccess), target, newGroup.GroupColorString() + newGroupName));
-        ServerEventLog(string.Format("{0} sets group of {1} to {2} (offline).", _serverClientService.GetClient(sourceClientId).PlayerName, target, newGroupName));
+        _gameLogger.Server.Debug(string.Format("{0} sets group of {1} to {2} (offline).", _serverClientService.GetClient(sourceClientId).PlayerName, target, newGroupName));
         return true;
     }
 
@@ -1015,7 +999,7 @@ public partial class ServerGameService
             }
 
             _serverPacketService.SendMessage(sourceClientId, string.Format(_languageService.Get("Server_CommandRemoveSuccess"), GameConstants.colorSuccess, target));
-            ServerEventLog(string.Format("{0} removes client {1} from config.", _serverClientService.GetClient(sourceClientId).PlayerName, target));
+            _gameLogger.Server.Debug(string.Format("{0} removes client {1} from config.", _serverClientService.GetClient(sourceClientId).PlayerName, target));
             return true;
         }
 
@@ -1055,12 +1039,12 @@ public partial class ServerGameService
             SendFreemoveState(sourceClientId, _serverClientService.GetClient(sourceClientId).Privileges.Contains(Privilege.freemove));
             SendMessageToAll(string.Format(_languageService.Get("Server_CommandLoginSuccess"), GameConstants.colorSuccess, _serverClientService.GetClient(sourceClientId).ColoredPlayername(GameConstants.colorSuccess), targetGroupString));
             _serverPacketService.SendMessage(sourceClientId, _languageService.Get("Server_CommandLoginInfo"));
-            ServerEventLog(string.Format("{0} logs in group {1}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetGroupString));
+            _gameLogger.Server.Debug(string.Format("{0} logs in group {1}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetGroupString));
             return true;
         }
 
         _serverPacketService.SendMessage(sourceClientId, string.Format(_languageService.Get("Server_CommandLoginInvalidPassword"), GameConstants.colorError));
-        ServerEventLog(string.Format("{0} fails to log in (invalid password: {1}).", _serverClientService.GetClient(sourceClientId).PlayerName, password));
+        _gameLogger.Server.Debug(string.Format("{0} fails to log in (invalid password: {1}).", _serverClientService.GetClient(sourceClientId).PlayerName, password));
         return false;
     }
 
@@ -1074,7 +1058,7 @@ public partial class ServerGameService
 
         _config.WelcomeMessage = welcomeMessage;
         SendMessageToAll(string.Format(_languageService.Get("Server_CommandWelcomeChanged"), GameConstants.colorSuccess, _serverClientService.GetClient(sourceClientId).ColoredPlayername(GameConstants.colorSuccess), welcomeMessage));
-        ServerEventLog(string.Format("{0} changes welcome message to {1}.", _serverClientService.GetClient(sourceClientId).PlayerName, welcomeMessage));
+        _gameLogger.Server.Debug(string.Format("{0} changes welcome message to {1}.", _serverClientService.GetClient(sourceClientId).PlayerName, welcomeMessage));
       //  _config.ConfigNeedsSaving = true;
         return true;
     }
@@ -1101,7 +1085,7 @@ public partial class ServerGameService
                     _config.BuildLogging = true;
                   //  _config.ConfigNeedsSaving = true;
                     _serverPacketService.SendMessage(sourceClientId, string.Format("{0}Build logging enabled.", GameConstants.colorSuccess));
-                    ServerEventLog(string.Format("{0} enables build logging.", _serverClientService.GetClient(sourceClientId).PlayerName));
+                    _gameLogger.Server.Debug(string.Format("{0} enables build logging.", _serverClientService.GetClient(sourceClientId).PlayerName));
                     return true;
                 }
 
@@ -1110,7 +1094,7 @@ public partial class ServerGameService
                     _config.BuildLogging = false;
                   //  _config.ConfigNeedsSaving = true;
                     _serverPacketService.SendMessage(sourceClientId, string.Format("{0}Build logging disabled.", GameConstants.colorSuccess));
-                    ServerEventLog(string.Format("{0} disables build logging.", _serverClientService.GetClient(sourceClientId).PlayerName));
+                    _gameLogger.Server.Debug(string.Format("{0} disables build logging.", _serverClientService.GetClient(sourceClientId).PlayerName));
                     return true;
                 }
 
@@ -1122,13 +1106,13 @@ public partial class ServerGameService
                     _config.ServerEventLogging = true;
                   //  _config.ConfigNeedsSaving = true;
                     _serverPacketService.SendMessage(sourceClientId, string.Format("{0}Server event logging enabled.", GameConstants.colorSuccess));
-                    ServerEventLog(string.Format("{0} enables server event logging.", _serverClientService.GetClient(sourceClientId).PlayerName));
+                    _gameLogger.Server.Debug(string.Format("{0} enables server event logging.", _serverClientService.GetClient(sourceClientId).PlayerName));
                     return true;
                 }
 
                 if (option.Equals("off"))
                 {
-                    ServerEventLog(string.Format("{0} disables server event logging.", _serverClientService.GetClient(sourceClientId).PlayerName));
+                    _gameLogger.Server.Debug(string.Format("{0} disables server event logging.", _serverClientService.GetClient(sourceClientId).PlayerName));
                     _config.ServerEventLogging = false;
                    // _config.ConfigNeedsSaving = true;
                     _serverPacketService.SendMessage(sourceClientId, string.Format("{0}Server event logging disabled.", GameConstants.colorSuccess));
@@ -1143,7 +1127,7 @@ public partial class ServerGameService
                     _config.ChatLogging = true;
                  //   _config.ConfigNeedsSaving = true;
                     _serverPacketService.SendMessage(sourceClientId, string.Format("{0}Chat logging enabled.", GameConstants.colorSuccess));
-                    ServerEventLog(string.Format("{0} enables chat logging.", _serverClientService.GetClient(sourceClientId).PlayerName));
+                    _gameLogger.Server.Debug(string.Format("{0} enables chat logging.", _serverClientService.GetClient(sourceClientId).PlayerName));
                     return true;
                 }
 
@@ -1152,7 +1136,7 @@ public partial class ServerGameService
                     _config.ChatLogging = false;
                  //   _config.ConfigNeedsSaving = true;
                     _serverPacketService.SendMessage(sourceClientId, string.Format("{0}Chat logging disabled.", GameConstants.colorSuccess));
-                    ServerEventLog(string.Format("{0} disables chat logging.", _serverClientService.GetClient(sourceClientId).PlayerName));
+                    _gameLogger.Server.Debug(string.Format("{0} disables chat logging.", _serverClientService.GetClient(sourceClientId).PlayerName));
                     return true;
                 }
 
@@ -1207,7 +1191,7 @@ public partial class ServerGameService
             string targetNameColored = targetClient.ColoredPlayername(GameConstants.colorImportant);
             string sourceNameColored = _serverClientService.GetClient(sourceClientId).ColoredPlayername(GameConstants.colorImportant);
             SendMessageToAll(string.Format(_languageService.Get("Server_CommandKickMessage"), GameConstants.colorImportant, targetNameColored, sourceNameColored, reason));
-            ServerEventLog(string.Format("{0} kicks {1}.{2}", sourceName, targetName, reason));
+            _gameLogger.Server.Debug(string.Format("{0} kicks {1}.{2}", sourceName, targetName, reason));
             _serverPacketService.SendPacket(targetClientId, ServerPackets.DisconnectPlayer(string.Format(_languageService.Get("Server_CommandKickNotification"), reason)));
             KillPlayer(targetClientId);
             return true;
@@ -1419,7 +1403,7 @@ public partial class ServerGameService
             }
 
             _serverPacketService.SendMessage(sourceClientId, string.Format(_languageService.Get("Server_CommandGiveAll"), GameConstants.colorSuccess, targetName));
-            ServerEventLog(string.Format("{0} gives all to {1}.", sourcename, targetName));
+            _gameLogger.Server.Debug(string.Format("{0} gives all to {1}.", sourcename, targetName));
             return true;
         }
 
@@ -1522,7 +1506,7 @@ public partial class ServerGameService
             }
 
             _serverPacketService.SendMessage(sourceClientId, string.Format(_languageService.Get("Server_CommandGiveSuccess"), GameConstants.colorSuccess, amount, blockname, targetName));
-            ServerEventLog(string.Format("{0} gives {1} {2} to {3}.", sourcename, amount, blockname, targetName));
+            _gameLogger.Server.Debug(string.Format("{0} gives {1} {2} to {3}.", sourcename, amount, blockname, targetName));
             return true;
         }
 
@@ -1543,7 +1527,7 @@ public partial class ServerGameService
         {
             ResetPlayerInventory(targetClient);
             SendMessageToAll(string.Format(_languageService.Get("Server_CommandResetInventorySuccess"), GameConstants.colorImportant, _serverClientService.GetClient(sourceClientId).ColoredPlayername(GameConstants.colorImportant), targetClient.ColoredPlayername(GameConstants.colorImportant)));
-            ServerEventLog(string.Format("{0} resets inventory of {1}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetClient.PlayerName));
+            _gameLogger.Server.Debug(string.Format("{0} resets inventory of {1}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetClient.PlayerName));
             return true;
         }
         // Player is not online.
@@ -1551,7 +1535,7 @@ public partial class ServerGameService
         {
             Inventory.Remove(target);
             SendMessageToAll(string.Format(_languageService.Get("Server_CommandResetInventoryOfflineSuccess"), GameConstants.colorImportant, _serverClientService.GetClient(sourceClientId).ColoredPlayername(GameConstants.colorImportant), target));
-            ServerEventLog(string.Format("{0} resets inventory of {1} (offline).", _serverClientService.GetClient(sourceClientId).PlayerName, target));
+            _gameLogger.Server.Debug(string.Format("{0} resets inventory of {1} (offline).", _serverClientService.GetClient(sourceClientId).PlayerName, target));
             return true;
         }
 
@@ -1581,7 +1565,7 @@ public partial class ServerGameService
         }
 
         SendMessageToAll(string.Format(_languageService.Get("Server_CommandMonstersToggle"), _serverClientService.GetClient(sourceClientId).ColoredPlayername(GameConstants.colorSuccess), option));
-        ServerEventLog(string.Format("{0} turns monsters {1}.", _serverClientService.GetClient(sourceClientId).PlayerName, option));
+        _gameLogger.Server.Debug(string.Format("{0} turns monsters {1}.", _serverClientService.GetClient(sourceClientId).PlayerName, option));
         return true;
     }
 
@@ -1624,7 +1608,7 @@ public partial class ServerGameService
         _config.Areas.Add(newArea);
       //  _config.ConfigNeedsSaving = true;
         _serverPacketService.SendMessage(sourceClientId, string.Format(_languageService.Get("Server_CommandAreaAddSuccess"), GameConstants.colorSuccess, newArea.ToString()));
-        ServerEventLog(string.Format("{0} adds area: {1}.", _serverClientService.GetClient(sourceClientId), newArea.ToString()));
+        _gameLogger.Server.Debug(string.Format("{0} adds area: {1}.", _serverClientService.GetClient(sourceClientId), newArea.ToString()));
         return true;
     }
 
@@ -1646,7 +1630,7 @@ public partial class ServerGameService
         _config.Areas.Remove(targetArea);
       //  _config.ConfigNeedsSaving = true;
         _serverPacketService.SendMessage(sourceClientId, string.Format(_languageService.Get("Server_CommandAreaDeleteSuccess"), GameConstants.colorSuccess));
-        ServerEventLog(string.Format("{0} deletes area: {1}.", _serverClientService.GetClient(sourceClientId).PlayerName, id));
+        _gameLogger.Server.Debug(string.Format("{0} deletes area: {1}.", _serverClientService.GetClient(sourceClientId).PlayerName, id));
         return true;
     }
 
@@ -1658,7 +1642,7 @@ public partial class ServerGameService
             return false;
         }
 
-        ServerEventLog(string.Format("{0} announced: {1}.", _serverClientService.GetClient(sourceClientId).PlayerName, message));
+        _gameLogger.Server.Debug(string.Format("{0} announced: {1}.", _serverClientService.GetClient(sourceClientId).PlayerName, message));
         SendMessageToAll(string.Format(_languageService.Get("Server_CommandAnnouncementMessage"), GameConstants.colorError, message));
         return true;
     }
@@ -1745,7 +1729,7 @@ public partial class ServerGameService
                 }
 
                 _serverPacketService.SendMessage(sourceClientId, string.Format(_languageService.Get("Server_CommandSetSpawnDefaultSuccess"), GameConstants.colorSuccess, x, y, rZ));
-                ServerEventLog(string.Format("{0} sets default spawn to {1},{2}{3}.", _serverClientService.GetClient(sourceClientId).PlayerName, x, y, z == null ? "" : "," + z.Value));
+                _gameLogger.Server.Debug(string.Format("{0} sets default spawn to {1},{2}{3}.", _serverClientService.GetClient(sourceClientId).PlayerName, x, y, z == null ? "" : "," + z.Value));
                 return true;
             case "-group":
             case "-g":
@@ -1797,7 +1781,7 @@ public partial class ServerGameService
                 }
 
                 _serverPacketService.SendMessage(sourceClientId, string.Format(_languageService.Get("Server_CommandSetSpawnGroupSuccess"), GameConstants.colorSuccess, targetGroup.Name, x, y, rZ));
-                ServerEventLog(string.Format("{0} sets spawn of group {1} to {2},{3}{4}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetGroup.Name, x, y, z == null ? "" : "," + z.Value));
+                _gameLogger.Server.Debug(string.Format("{0} sets spawn of group {1} to {2},{3}{4}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetGroup.Name, x, y, z == null ? "" : "," + z.Value));
                 return true;
             case "-player":
             case "-p":
@@ -1837,7 +1821,7 @@ public partial class ServerGameService
                 }
 
                 _serverPacketService.SendMessage(sourceClientId, string.Format(_languageService.Get("Server_CommandSetSpawnPlayerSuccess"), GameConstants.colorSuccess, targetClientPlayername, x, y, rZ));
-                ServerEventLog(string.Format("{0} sets spawn of player {1} to {2},{3}{4}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetClientPlayername, x, y, z == null ? "" : "," + z.Value));
+                _gameLogger.Server.Debug(string.Format("{0} sets spawn of player {1} to {2},{3}{4}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetClientPlayername, x, y, z == null ? "" : "," + z.Value));
                 return true;
             default:
                 _serverPacketService.SendMessage(sourceClientId, _languageService.Get("Server_CommandInvalidType"));
@@ -1932,7 +1916,7 @@ public partial class ServerGameService
             }
 
             SendMessageToAll(string.Format(_languageService.Get("Server_CommandPrivilegeAddSuccess"), GameConstants.colorSuccess, targetClient.ColoredPlayername(GameConstants.colorSuccess), privilege.ToString()));
-            ServerEventLog(string.Format("{0} gives {1} privilege {2}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetClient.PlayerName, privilege.ToString()));
+            _gameLogger.Server.Debug(string.Format("{0} gives {1} privilege {2}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetClient.PlayerName, privilege.ToString()));
             return true;
         }
 
@@ -1963,7 +1947,7 @@ public partial class ServerGameService
             }
 
             SendMessageToAll(string.Format(_languageService.Get("Server_CommandPrivilegeRemoveSuccess"), GameConstants.colorImportant, targetClient.ColoredPlayername(GameConstants.colorImportant), privilege.ToString()));
-            ServerEventLog(string.Format("{0} removes {1} privilege {2}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetClient.PlayerName, privilege.ToString()));
+            _gameLogger.Server.Debug(string.Format("{0} removes {1} privilege {2}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetClient.PlayerName, privilege.ToString()));
             return true;
         }
 
@@ -1980,7 +1964,7 @@ public partial class ServerGameService
         }
 
         SendMessageToAll(string.Format(_languageService.Get("Server_CommandRestartSuccess"), GameConstants.colorImportant, _serverClientService.GetClient(sourceClientId).ColoredPlayername(GameConstants.colorImportant)));
-        ServerEventLog(string.Format("{0} restarts server.", _serverClientService.GetClient(sourceClientId).PlayerName));
+        _gameLogger.Server.Debug(string.Format("{0} restarts server.", _serverClientService.GetClient(sourceClientId).PlayerName));
         Restart();
         return true;
     }
@@ -1994,7 +1978,7 @@ public partial class ServerGameService
         }
 
         SendMessageToAll(string.Format(_languageService.Get("Server_CommandShutdownSuccess"), GameConstants.colorImportant, _serverClientService.GetClient(sourceClientId).ColoredPlayername(GameConstants.colorImportant)));
-        ServerEventLog(string.Format("{0} shuts down server.", _serverClientService.GetClient(sourceClientId).PlayerName));
+        _gameLogger.Server.Debug(string.Format("{0} shuts down server.", _serverClientService.GetClient(sourceClientId).PlayerName));
         Exit();
         return true;
     }
@@ -2095,7 +2079,7 @@ public partial class ServerGameService
             _serverClientService.Clients[targetClient.Id].PositionOverride = pos;
             _serverPacketService.SendMessage(targetClient.Id, string.Format(_languageService.Get("Server_CommandTeleportTargetMessage"), GameConstants.colorImportant, x, y, rZ, _serverClientService.GetClient(sourceClientId).ColoredPlayername(GameConstants.colorImportant)));
             _serverPacketService.SendMessage(sourceClientId, string.Format(_languageService.Get("Server_CommandTeleportSourceMessage"), GameConstants.colorSuccess, targetClient.ColoredPlayername(GameConstants.colorSuccess), x, y, rZ));
-            ServerEventLog(string.Format("{0} teleports {1} to {2} {3} {4}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetClient.PlayerName, x, y, rZ));
+            _gameLogger.Server.Debug(string.Format("{0} teleports {1} to {2} {3} {4}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetClient.PlayerName, x, y, rZ));
             return true;
         }
 
@@ -2149,7 +2133,7 @@ public partial class ServerGameService
                 }
 
                 _serverPacketService.SendMessage(sourceClientId, string.Format(_languageService.Get("Server_CommandFillLimitDefaultSuccess"), GameConstants.colorSuccess, maxFill));
-                ServerEventLog(string.Format("{0} sets default fill area limit to {1}.", _serverClientService.GetClient(sourceClientId).PlayerName, maxFill));
+                _gameLogger.Server.Debug(string.Format("{0} sets default fill area limit to {1}.", _serverClientService.GetClient(sourceClientId).PlayerName, maxFill));
                 return true;
             case "-group":
             case "-g":
@@ -2196,7 +2180,7 @@ public partial class ServerGameService
                 }
 
                 _serverPacketService.SendMessage(sourceClientId, string.Format(_languageService.Get("Server_CommandFillLimitGroupSuccess"), GameConstants.colorSuccess, targetGroup.Name, maxFill));
-                ServerEventLog(string.Format("{0} sets spawn of group {1} to {2}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetGroup.Name, maxFill));
+                _gameLogger.Server.Debug(string.Format("{0} sets spawn of group {1} to {2}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetGroup.Name, maxFill));
                 return true;
             case "-player":
             case "-p":
@@ -2231,7 +2215,7 @@ public partial class ServerGameService
                 }
 
                 _serverPacketService.SendMessage(sourceClientId, string.Format(_languageService.Get("Server_CommandFillLimitPlayerSuccess"), GameConstants.colorSuccess, targetClientPlayername, maxFill));
-                ServerEventLog(string.Format("{0} sets fill area limit of player {1} to {2}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetClientPlayername, maxFill));
+                _gameLogger.Server.Debug(string.Format("{0} sets fill area limit of player {1} to {2}.", _serverClientService.GetClient(sourceClientId).PlayerName, targetClientPlayername, maxFill));
                 return true;
             default:
                 _serverPacketService.SendMessage(sourceClientId, _languageService.Get("Server_CommandInvalidType"));

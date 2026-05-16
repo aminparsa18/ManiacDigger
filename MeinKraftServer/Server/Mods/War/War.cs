@@ -1186,7 +1186,6 @@ public class War : IMod
             }
         }
 
-        m.LogChat($"{senderColorString}{sender}&f: {s}");
         args.FinalMessage = null;
     }
 

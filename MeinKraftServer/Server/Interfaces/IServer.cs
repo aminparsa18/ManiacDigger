@@ -39,7 +39,6 @@ public interface IServer
     bool AreaDelete(int sourceClientId, int id);
     bool ChangeGroup(int sourceClientId, string target, string newGroupName);
     bool ChangeGroupOffline(int sourceClientId, string target, string newGroupName);
-    void ChatLog(string p);
     bool CheckBuildPrivileges(int player, int x, int y, int z, PacketBlockSetMode mode);
     bool ClearInterpreter(int sourceClientId);
     bool ClientSeenChunk(int clientid, int vx, int vy, int vz);
@@ -105,7 +104,6 @@ public interface IServer
     void SendPacketFollow(int player, int target, bool tpp);
     void SendServerRedirect(int clientid, string ip_, int port_);
     void SendSound(int clientid, string name, int x, int y, int z);
-    void ServerEventLog(string p);
     void ServerMessageToAll(string message, MessageType color);
     void SetBlock(int x, int y, int z, int blocktype);
     void SetBlockAndNotify(int x, int y, int z, int blocktype);

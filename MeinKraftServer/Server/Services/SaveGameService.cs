@@ -91,8 +91,6 @@ public class SaveGameService : ISaveGameService
     /// <inheritdoc/>
     public void SaveGlobalData() => _chunkDb.SetGlobalData(Save());
 
-   
-
     /// <inheritdoc/>
     public void Load()
     {
@@ -148,8 +146,8 @@ public class SaveGameService : ISaveGameService
     }
 
     /// <inheritdoc/>
-    public void DoSaveChunk(int x, int y, int z, ServerChunk chunk) =>
-        ChunkDbHelper.SetChunk(_chunkDb, x, y, z, MemoryPackSerializer.Serialize(chunk));
+    public void DoSaveChunk(int x, int y, int z, ServerChunk chunk)
+        => ChunkDbHelper.SetChunk(_chunkDb, x, y, z, MemoryPackSerializer.Serialize(chunk));
 
     /// <inheritdoc/>
     public bool LoadDatabase(string filename)

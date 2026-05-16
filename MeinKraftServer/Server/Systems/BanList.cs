@@ -9,14 +9,17 @@ public class ServerSystemBanList : ServerSystem
     private readonly ILanguageService _languageService;
     private readonly IClientRegistry _serverClientService;
     private readonly IServerPacketService _serverPacketService;
+    private readonly IGameLogger _gameLogger;
     private readonly ServerGameService server;
 
-    public ServerSystemBanList(ServerGameService server, IModEvents modEvents, ILanguageService languageService, IClientRegistry serverClientService, IServerPacketService serverPacketService) : base(modEvents)
+    public ServerSystemBanList(ServerGameService server, IModEvents modEvents, ILanguageService languageService, IClientRegistry serverClientService,
+        IServerPacketService serverPacketService, IGameLogger gameLogger) : base(modEvents)
     {   
         this.server = server;
         _languageService = languageService;
         _serverClientService = serverClientService;
         _serverPacketService = serverPacketService;
+        _gameLogger = gameLogger;
     }
 
     protected override void Initialize() => LoadBanlist();
@@ -60,7 +63,7 @@ public class ServerSystemBanList : ServerSystem
     private void LogAndKick(int clientId, string message)
     {
         Console.WriteLine(message);
-        server.ServerEventLog(message);
+       _gameLogger.Server.Debug(message);
         server.KillPlayer(clientId);
     }
 
@@ -239,7 +242,7 @@ public class ServerSystemBanList : ServerSystem
         BroadcastAndKick(sourceClientId, targetClientId,
             "Server_CommandBanMessage", "Server_CommandBanNotification",
             targetName, sourceName, target, reason);
-        server.ServerEventLog($"{sourceName} bans {targetName}.{reason}");
+        _gameLogger.Server.Debug($"{sourceName} bans {targetName}.{reason}");
         return true;
     }
 
@@ -283,7 +286,7 @@ public class ServerSystemBanList : ServerSystem
         BroadcastAndKick(sourceClientId, targetClientId,
             "Server_CommandIPBanMessage", "Server_CommandIPBanNotification",
             targetName, sourceName, target, reason);
-        server.ServerEventLog($"{sourceName} IP bans {targetName}.{reason}");
+        _gameLogger.Server.Debug($"{sourceName} IP bans {targetName}.{reason}");
         return true;
     }
 
@@ -329,7 +332,7 @@ public class ServerSystemBanList : ServerSystem
             _serverClientService.GetClient(sourceClientId).ColoredPlayername(GameConstants.colorImportant), duration, reason));
         _serverPacketService.SendPacket(targetClientId, ServerPackets.DisconnectPlayer(
             string.Format(_languageService.Get("Server_CommandTimeBanNotification"), duration, reason)));
-        server.ServerEventLog($"{sourceName} bans {targetName} for {duration} minutes.{reason}");
+        _gameLogger.Server.Debug($"{sourceName} bans {targetName} for {duration} minutes.{reason}");
         server.KillPlayer(targetClientId);
         return true;
     }
@@ -376,7 +379,7 @@ public class ServerSystemBanList : ServerSystem
             _serverClientService.GetClient(sourceClientId).ColoredPlayername(GameConstants.colorImportant), duration, reason));
         _serverPacketService.SendPacket(targetClientId, ServerPackets.DisconnectPlayer(
             string.Format(_languageService.Get("Server_CommandTimeIPBanNotification"), duration, reason)));
-        server.ServerEventLog($"{sourceName} IP bans {targetName} for {duration} minutes.{reason}");
+        _gameLogger.Server.Debug($"{sourceName} IP bans {targetName} for {duration} minutes.{reason}");
         server.KillPlayer(targetClientId);
         return true;
     }
@@ -428,7 +431,7 @@ public class ServerSystemBanList : ServerSystem
         SaveBanlist();
         server.SendMessageToAll(string.Format(_languageService.Get("Server_CommandBanOfflineMessage"),
             GameConstants.colorImportant, target, source.ColoredPlayername(GameConstants.colorImportant), reason));
-        server.ServerEventLog($"{source.PlayerName} bans {target}.{reason}");
+        _gameLogger.Server.Debug($"{source.PlayerName} bans {target}.{reason}");
         return true;
     }
 
@@ -450,7 +453,7 @@ public class ServerSystemBanList : ServerSystem
             else
             {
                 _serverPacketService.SendMessage(sourceClientId, string.Format(_languageService.Get("Server_CommandUnbanSuccess"), GameConstants.colorSuccess, target));
-                server.ServerEventLog($"{_serverClientService.GetClient(sourceClientId).PlayerName} unbans player {target}.");
+                _gameLogger.Server.Debug($"{_serverClientService.GetClient(sourceClientId).PlayerName} unbans player {target}.");
             }
 
             return true;
@@ -467,7 +470,7 @@ public class ServerSystemBanList : ServerSystem
             else
             {
                 _serverPacketService.SendMessage(sourceClientId, string.Format(_languageService.Get("Server_CommandUnbanIPSuccess"), GameConstants.colorSuccess, target));
-                server.ServerEventLog($"{_serverClientService.GetClient(sourceClientId).PlayerName} unbans IP {target}.");
+                _gameLogger.Server.Debug($"{_serverClientService.GetClient(sourceClientId).PlayerName} unbans IP {target}.");
             }
 
             return true;

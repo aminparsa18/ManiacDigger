@@ -104,6 +104,7 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
             }
         }
 
+        _gameLogger.Server.Debug($"{_serverClientService.Clients.Count} client socket is gonna update");
         foreach (KeyValuePair<int, ServerPlayer> k in _serverClientService.Clients)
         {
             k.Value.Socket.Update();
@@ -112,7 +113,7 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
         //Send updates to player
         foreach (KeyValuePair<int, ServerPlayer> k in _serverClientService.Clients)
         {
-            //k.Value.notifyMapTimer.Update(delegate { NotifyMapChunks(k.Key, 1); });
+           // k.Value.NotifyMapTimer.Update(delegate { NotifyMapChunks(k.Key, 1); });
             NotifyInventory(k.Key);
             _playerStatusService.NotifyPlayerStats(k.Key);
         }
@@ -134,12 +135,13 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
         if (lastServerTick > 500)
         {
             //Print an error if the value gets too big - TODO: Adjust
-            _gameLogger.Server.Information("Server process takes too long! Overloaded? ({0}ms)", lastServerTick);
+            _gameLogger.Server.Debug("Server process takes too long! Overloaded? ({0}ms)", lastServerTick);
         }
     }
 
     public void BroadcastSeason()
     {
+        _gameLogger.Server.Debug($"{_serverClientService.Clients.Count} clients notified Season");
         foreach (KeyValuePair<int, ServerPlayer> c in _serverClientService.Clients)
             NotifySeason(c.Key);
     }
@@ -181,6 +183,7 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
         _dataItems = new GameDataItemsBlocks() { d_Data = _blockRegistry };
         if (MainSockets.Length != 0 && MainSockets.All(x => x == null))
         {
+            _gameLogger.Server.Debug($"main socket is empty so initalized by enet");
             MainSockets = new NetServer[3];
             MainSockets[0] = new EnetNetServer(new NetworkService());
         }
@@ -195,7 +198,12 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
 
         _gameLogger.Server.Information(_languageService.ServerLoadingSavegame());
 
+        _gameLogger.Server.Debug($"socket starting on port {_sessionConfig.Port}");
+
         Start(_sessionConfig.Port);
+
+        _gameLogger.Server.Debug($"socket started on port {_sessionConfig.Port}");
+
         _saveGameService.Load();
 
         // server monitor
@@ -218,11 +226,11 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
 
         if (_config.AutoRestartCycle > 0)
         {
-            _gameLogger.Server.Information("AutoRestartInterval: {0}", _config.AutoRestartCycle);
+            _gameLogger.Server.Debug("AutoRestartInterval: {0}", _config.AutoRestartCycle);
         }
         else
         {
-            _gameLogger.Server.Information("AutoRestartInterval: DISABLED");
+            _gameLogger.Server.Debug("AutoRestartInterval: DISABLED");
         }
     }
 
@@ -247,10 +255,10 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
     public int Port { get; set; }
     public void Stop()
     {
-        _gameLogger.Server.Information("[SERVER] Doing last tick...");
+        _gameLogger.Server.Debug("[SERVER] Doing last tick...");
         ProcessMain();
         //Maybe inform mods about shutdown?
-        _gameLogger.Server.Information("[SERVER] Saving data...");
+        _gameLogger.Server.Debug("[SERVER] Saving data...");
         DateTime start = DateTime.UtcNow;
         _saveGameService.SaveGlobalData();
         _gameLogger.Server.Information(_languageService.ServerGameSaved(), DateTime.UtcNow - start);
@@ -296,24 +304,7 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
 
         // chat message
         SendMessageToAll(string.Format("{0}: {1}", _serverClientService.ServerConsoleClient.ColoredPlayername(colorNormal), message));
-        ChatLog(string.Format("{0}: {1}", _serverClientService.ServerConsoleClient.PlayerName, message));
-    }
-
-    private readonly string _serverPathLogs = Path.Combine(GameStorePath.GetStorePath(), "Logs");
-    public void ChatLog(string p)
-    {
-        if (!_config.ChatLogging)
-        {
-            return;
-        }
-
-        if (!Directory.Exists(_serverPathLogs))
-        {
-            Directory.CreateDirectory(_serverPathLogs);
-        }
-
-        string filename = Path.Combine(_serverPathLogs, "ChatLog.txt");
-        File.AppendAllText(filename, string.Format("{0} {1}\n", DateTime.Now, p));
+        _gameLogger.Server.Debug($"{_serverClientService.ServerConsoleClient.PlayerName}: {message}");
     }
 
     public List<Action> OnLoad { get; set; } = [];
@@ -376,6 +367,8 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
                     lastClientId = _serverClientService.GenerateClientId();
                     c.Id = lastClientId;
                     _serverClientService.Clients[lastClientId] = c;
+                    _gameLogger.Server.Debug("Client added.");
+
                 }
                 //clientid = c.Id;
                 c.NotifyMapTimer = new ServerTimer
@@ -398,7 +391,7 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
                 TryReadPacket(clientid, msg.Payload.ToArray());
                 break;
             case NetworkMessageType.Disconnect:
-                _gameLogger.Server.Information("Client disconnected.");
+                _gameLogger.Server.Debug("Client disconnected.");
                 KillPlayer(clientid);
                 break;
         }
@@ -884,7 +877,7 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
                         //Only log when building/destroying blocks. Prevents VandalFinder entries
                         if (packet.SetBlock.Mode != PacketBlockSetMode.UseWithTool)
                         {
-                            BuildLog(string.Format("{0} {1} {2} {3} {4} {5}", x, y, z, c.PlayerName, c.Socket.RemoteEndPoint().AddressToString(), _serverMapStorage.GetBlock(x, y, z)));
+                            _gameLogger.Server.Debug($"{x} {y} {z} {c.PlayerName} {c.Socket.RemoteEndPoint().AddressToString()} {_serverMapStorage.GetBlock(x, y, z)}");
                         }
                     }
                 }
@@ -922,10 +915,7 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
                     }
 
                     DoFillArea(clientid, packet.FillArea, blockCount);
-
-                    BuildLog(string.Format("{0} {1} {2} - {3} {4} {5} {6} {7} {8}", a.X, a.Y, a.Z, b.X, b.Y, b.Z,
-                        c.PlayerName, c.Socket.RemoteEndPoint().AddressToString(),
-                        _serverMapStorage.GetBlock(a.X, a.Y, a.Z)));
+                    _gameLogger.Server.Debug($"{a.X} {a.Y} {a.Z} - {b.X} {b.Y} {b.Z} {c.PlayerName} {c.Socket.RemoteEndPoint().AddressToString()} {_serverMapStorage.GetBlock(a.X, a.Y, a.Z)}");
                 }
 
                 break;
@@ -993,7 +983,8 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
                             }
 
                             SendMessageToAll(string.Format("{0}: {1}", _serverClientService.Clients[clientid].ColoredPlayername(colorNormal), message));
-                            ChatLog(string.Format("{0}: {1}", _serverClientService.Clients[clientid].PlayerName, message));
+                            _gameLogger.Server.Debug($"{_serverClientService.Clients[clientid].PlayerName}: {message}");
+
                         }
                         else
                         {
@@ -1225,22 +1216,6 @@ public partial class ServerGameService : IServer, IDropItem, IDisposable
                 _gameLogger.Server.Warning("Invalid packet: {0}, clientid:{1}", packet.Id, clientid);
                 break;
         }
-    }
-
-    private void BuildLog(string p)
-    {
-        if (!_config.BuildLogging)
-        {
-            return;
-        }
-
-        if (!Directory.Exists(_serverPathLogs))
-        {
-            Directory.CreateDirectory(_serverPathLogs);
-        }
-
-        string filename = Path.Combine(_serverPathLogs, "BuildLog.txt");
-        File.AppendAllText(filename, string.Format("{0} {1}\n", DateTime.Now, p));
     }
 
     public bool CheckBuildPrivileges(int player, int x, int y, int z, PacketBlockSetMode mode)
