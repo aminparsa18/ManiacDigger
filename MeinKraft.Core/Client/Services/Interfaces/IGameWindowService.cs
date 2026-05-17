@@ -64,7 +64,7 @@ public interface IGameWindowService
     string QueryStringValue(string key);
     void SetWindowCursor(int hotx, int hoty, int sizex, int sizey, byte[] imgdata, int imgdataLength);
 
-    void ReleaseCursor();
+  //  void ReleaseCursor();
     void RestoreWindowCursor();
 
     GameWindow Window { get; set; }

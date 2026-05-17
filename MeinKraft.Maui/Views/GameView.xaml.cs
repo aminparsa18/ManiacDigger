@@ -4,6 +4,8 @@ using OpenTK.Graphics.ES30;
 using SkiaSharp.Views.Maui;
 using System.Runtime.InteropServices;
 using OpenTK;
+using OpenTK.Platform.Windows;
+
 
 #if WINDOWS
 using Application = Microsoft.Maui.Controls.Application;
@@ -17,7 +19,7 @@ using Microsoft.UI;
 
 namespace MeinKraft.Maui.Views;
 
-public partial class GameView : ContentPage
+public partial class GameView : ContentPage, IDisposable
 {
     private bool _glInitialized = false;
     private IDispatcherTimer _gameLoopTimer;
@@ -92,6 +94,7 @@ public partial class GameView : ContentPage
     {
         base.OnHandlerChanged();
         AttachWindowKeyEvents();
+        ((MauiGameWindowService)_gameWindowService).CaptureCursor();
     }
 
     public void AttachWindowKeyEvents()
@@ -254,8 +257,9 @@ public partial class GameView : ContentPage
         base.OnDisappearing();
         _gameLoopTimer?.Stop();
         _gameLoopTimer = null;
-
 #if WINDOWS
+        ((MauiGameWindowService)_gameWindowService).ReleaseCursor();
+
         _gameWindowService.ExitMousePointerLock();
 
         IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(
@@ -407,6 +411,9 @@ public partial class GameView : ContentPage
         };
         _game.MouseMove(emulated);
     }
+
+    public void Dispose() => ((MauiGameWindowService)_gameWindowService).ReleaseCursor();
+
 #endif
 }
 
