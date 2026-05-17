@@ -16,6 +16,7 @@ public partial class GameView : ContentPage
     {
         base.OnHandlerChanged();
         AttachWindowKeyEvents();
+        ((MauiGameWindowService)_gameWindowService).CaptureCursor();
     }
 
     public void AttachWindowKeyEvents()
